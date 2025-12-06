@@ -271,7 +271,7 @@ MonoBehaviour:
   stickyNoteInfos: []
   categories:
   - name: Duration
-    collapsed: 0
+    collapsed: 1
   - name: Spawn
     collapsed: 1
   - name: Particle
