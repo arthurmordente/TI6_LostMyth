@@ -54,6 +54,7 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
 
         private void BackToLobby() {
             Debug.LogWarning("Voltando para o lobby");
+            _commandFactory.CreateCommandVoid<ResumeGameplayInputCommand>().Execute();
             _stateMachineService.SwitchState(_explorationStateFactory.Create(new ExplorationInitiatorEnterData(0)));
         }
         #endregion
