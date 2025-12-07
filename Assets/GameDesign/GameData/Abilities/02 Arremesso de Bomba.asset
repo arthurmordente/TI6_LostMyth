@@ -17,7 +17,6 @@ MonoBehaviour:
     esta habilidade ignore obst\xE1culos no caminho. Ao acertar um alvo a bomba explode
     causando dano."
   Icon: {fileID: 21300000, guid: 8f38694132451b14db361501e60cf8d8, type: 3}
-  _sfx: {fileID: 0}
   Damage: 0
   Cooldown: 0
   Cost: 0
@@ -45,7 +44,7 @@ MonoBehaviour:
     - rid: 7012276592317825428
       type: {class: ProjectileTargeting, ns: , asm: Assembly-CSharp}
       data:
-        ProjectilePrefab: {fileID: 1632181508370474111, guid: c7372b1f387e66846ab8d5a51d8b5d84, type: 3}
+        ProjectilePrefab: {fileID: 1632181508370474111, guid: 6cdb664021edb5c42b5ebdbf4517c28f, type: 3}
         hitMarker: {fileID: 0}
         maxPoints: 200
         increment: 0.025

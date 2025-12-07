@@ -366,6 +366,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: HOC_Arena_2
       objectReference: {fileID: 0}
+    - target: {fileID: 7765655851404814701, guid: c7372b1f387e66846ab8d5a51d8b5d84, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
