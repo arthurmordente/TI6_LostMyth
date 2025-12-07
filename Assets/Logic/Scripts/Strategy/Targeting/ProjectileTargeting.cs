@@ -34,6 +34,8 @@ public class ProjectileTargeting : TargetingStrategy {
             SetTrajectoryVisible(true);
             currentLaunchSpeed = _projectilePlotData.ProjectilePrefab.InitialSpeed;
         }
+        Caster.GetTransformCastPoint().rotation = Quaternion.identity;
+        Caster.GetReferenceTransform().rotation = Quaternion.identity;
         SubscriptionService.RegisterUpdatable(this);
     }
 
@@ -62,13 +64,15 @@ public class ProjectileTargeting : TargetingStrategy {
     }
 
     private void AimStraight(Vector3 targetPoint) {
-        Transform refTransform = Caster.GetReferenceTransform();
-        Vector3 lookAtPoint = new Vector3(targetPoint.x, refTransform.position.y, targetPoint.z);
-
-        Vector3 direction = lookAtPoint - refTransform.position;
-
-        if (direction != Vector3.zero) {
-            refTransform.rotation = Quaternion.LookRotation(direction);
+        Transform referenceTransform = Caster.GetReferenceTransform();
+        Vector3 casterOrigin = referenceTransform.position;
+        Vector3 lookTargetXZ = targetPoint;
+        Vector3 directionToTarget = lookTargetXZ - casterOrigin;
+        if (directionToTarget.sqrMagnitude > 0) {
+            directionToTarget.y = 0f;
+            Caster.GetReferenceTransform().rotation = Quaternion.LookRotation(directionToTarget);
+            directionToTarget.y = Caster.GetTransformCastPoint().rotation.y;
+            Caster.GetTransformCastPoint().rotation = Quaternion.LookRotation(directionToTarget);
         }
     }
 
