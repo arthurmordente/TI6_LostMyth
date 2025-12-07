@@ -15,12 +15,14 @@ public class CustomizeUIController : ICustomizeUIController {
         _customizationView.InitStartPoint(_abilityPointService.AllAbilities[0]);
         HideCustomize();
         _customizationView.RegisterCallbacks(OnDamagePlus, OnDamageMinus, OnCooldownPlus, OnCooldownMinus, OnCostPlus,
-            OnCostMinus, OnRangePlus, OnRangeMinus, OnAbility1Button, OnAbility2Button, OnAbility3Button, OnAbility4Button, OnAbility5Button);
+            OnCostMinus, OnRangePlus, OnRangeMinus, OnAbility1Button, OnAbility2Button, OnAbility3Button, OnAbility4Button, OnAbility5Button,
+            _abilityPointService.LoadStats, _abilityPointService.SaveStats, _abilityPointService.SaveStats);
         VerifyBalanceAndSetSigns();
     }
 
     public void ShowCustomize() {
         _customizationView.ShowCustomize();
+        OnAbility1Button();
     }
 
     public void HideCustomize() {
@@ -35,7 +37,7 @@ public class CustomizeUIController : ICustomizeUIController {
     }
 
     private void SetAllMinusSigns() {
-        if (_abilityPointService.CurrentBalance == 0) {
+        if (_abilityPointService.CurrentBalance >= _abilityPointService.AvailablePoints) {
             _customizationView.SetAllMinusSign(false);
             return;
         }
@@ -45,9 +47,9 @@ public class CustomizeUIController : ICustomizeUIController {
             if (_selectedAbility.GetModifierStatValue(AbilityStat.Cooldown) > 0) _customizationView.SetSignOnOff(AbilityStat.Cooldown, true, true);
             else _customizationView.SetSignOnOff(AbilityStat.Cooldown, true, false);
             if (_selectedAbility.GetModifierStatValue(AbilityStat.Cost) > 0) _customizationView.SetSignOnOff(AbilityStat.Cost, true, true);
-            else _customizationView.SetSignOnOff(AbilityStat.Cost, true, true);
+            else _customizationView.SetSignOnOff(AbilityStat.Cost, true, false);
             if (_selectedAbility.GetModifierStatValue(AbilityStat.Range) > 0) _customizationView.SetSignOnOff(AbilityStat.Range, true, true);
-            else _customizationView.SetSignOnOff(AbilityStat.Range, true, true);
+            else _customizationView.SetSignOnOff(AbilityStat.Range, true, false);
         }
     }
 

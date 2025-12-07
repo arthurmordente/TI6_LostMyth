@@ -26,25 +26,15 @@ MonoBehaviour:
   _baseCost: 2
   _baseCooldown: 1
   _baseRange: 9
-  Effects:
-  - rid: 7012276589014548555
   TargetingStrategy:
     rid: 7012276592317825428
-  PlotData: {fileID: 0}
+  PlotData: {fileID: 11400000, guid: 5e7df739d18ade54597904d2668231a9, type: 2}
   references:
     version: 2
     RefIds:
-    - rid: 7012276589014548555
-      type: {class: DamageEffect, ns: Assets.Logic.Scripts.GameDomain.Effects, asm: Assembly-CSharp}
-      data:
-        Name: 2
-        Description: 3
-        IsAutoCast: 0
-        amount: 10
     - rid: 7012276592317825428
       type: {class: ProjectileTargeting, ns: , asm: Assembly-CSharp}
       data:
-        ProjectilePrefab: {fileID: 1632181508370474111, guid: 6cdb664021edb5c42b5ebdbf4517c28f, type: 3}
         hitMarker: {fileID: 0}
         maxPoints: 200
         increment: 0.025
@@ -53,6 +43,3 @@ MonoBehaviour:
         GroundLayerMask:
           serializedVersion: 2
           m_Bits: 128
-        parabolicMaxHeight: 5
-        parabolicMaxRange: 200
-        parabolicMinRange: 1

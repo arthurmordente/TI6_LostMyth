@@ -21,12 +21,12 @@ public class AreaAbilityHitCommand : BaseCommand, ICommandVoid
 
     public void Execute()
     {
-        if (_commandData != null)
-        {
-            foreach (AbilityEffect effect in _commandData.AbilityData.Effects)
-            {
-                effect.Execute(_commandData.Caster, _commandData.Target);
-            }
-        }
+        //if (_commandData != null)
+        //{
+        //    foreach (AbilityEffect effect in _commandData.AbilityData.Effects)
+        //    {
+        //        effect.Execute(_commandData.Caster, _commandData.Target);
+        //    }
+        //}
     }
 }

@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3dffe030e5834e141b0ae77118889d4b, type: 3}
+  m_Name: BaseArch
+  m_EditorClassIdentifier: 
+  Name: 
+  Description: 
+  Icon: {fileID: 0}
+  ProjectilePrefab: {fileID: 1632181508370474111, guid: 6cdb664021edb5c42b5ebdbf4517c28f, type: 3}
+  ParabolicMaxHeight: 10
+  ParabolicMaxRange: 50
+  ParabolicMinRange: 3
+  _effects:
+  - rid: 4963371573358363085
+  references:
+    version: 2
+    RefIds:
+    - rid: 4963371573358363085
+      type: {class: DamageEffect, ns: Assets.Logic.Scripts.GameDomain.Effects, asm: Assembly-CSharp}
+      data:
+        Name: 
+        Description: 
+        IsAutoCast: 0
+        amount: 20

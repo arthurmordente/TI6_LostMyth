@@ -10,6 +10,8 @@ public class CustomizeUIView : MonoBehaviour {
     private VisualElement _skillContainer;
     private VisualElement _skillListContainer;
     private Button _customizeExitButton;
+    private Button _applyButton;
+    private Button _plotButton;
     private Button _ability1Slot;
     private Button _ability2Slot;
     private Button _ability3Slot;
@@ -28,6 +30,8 @@ public class CustomizeUIView : MonoBehaviour {
         VisualElement root = GetComponent<UIDocument>().rootVisualElement;
         _mainContainer = root.Q<VisualElement>("main-container");
         _customizeExitButton = root.Q<Button>("exit-customization-button");
+        _plotButton = root.Q<Button>("plot-btn");
+        _applyButton = root.Q<Button>("apply-btn");
         _skillContainer = root.Q<VisualElement>("skill-container");
         _skillListContainer = root.Q<VisualElement>("skill-list-container");
         _balanceLabel = root.Q<Label>("balance-txt");
@@ -65,8 +69,9 @@ public class CustomizeUIView : MonoBehaviour {
     public void RegisterCallbacks(Action OnDamagePlusPressed, Action OnDamageMinusPressed, Action OnCooldownPlusPressed,
         Action OnCooldownMinusPressed, Action OnCostPlusPressed, Action OnCostMinusPressed, Action OnRangePlusPressed,
         Action OnRangeMinusPressed, Action OnSetAbility1Pressed, Action OnSetAbility2Pressed, Action OnSetAbility3Pressed,
-        Action OnSetAbility4Pressed, Action OnSetAbility5Pressed) {
+        Action OnSetAbility4Pressed, Action OnSetAbility5Pressed, Action OnClickExit, Action OnPlotPressed, Action OnApplyPressed) {
         _customizeExitButton.clicked += HideCustomize;
+        _customizeExitButton.clicked += OnClickExit;
         _ability1Slot.clicked += OnSetAbility1Pressed;
         _ability2Slot.clicked += OnSetAbility2Pressed;
         _ability3Slot.clicked += OnSetAbility3Pressed;
@@ -80,6 +85,8 @@ public class CustomizeUIView : MonoBehaviour {
         _cooldownMinusButton.clicked += OnCooldownMinusPressed;
         _costMinusButton.clicked += OnCostMinusPressed;
         _rangeMinusButton.clicked += OnRangeMinusPressed;
+        _plotButton.clicked += OnPlotPressed;
+        _applyButton.clicked += OnApplyPressed;
     }
 
     #region UpdateButtonsAndText

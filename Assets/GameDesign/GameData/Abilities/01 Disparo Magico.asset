@@ -16,7 +16,6 @@ MonoBehaviour:
   Description: "Atira em linha reta com um alcance mediano, acertando o primeiro
     inimigo no caminho. Obst\xE1culos podem bloquear o disparo."
   Icon: {fileID: 21300000, guid: 86916411a156e0444b57b1e16bf23107, type: 3}
-  _sfx: {fileID: 0}
   Damage: 0
   Cooldown: 0
   Cost: 0
@@ -26,25 +25,15 @@ MonoBehaviour:
   _baseCost: 1
   _baseCooldown: 0
   _baseRange: 2
-  Effects:
-  - rid: 7012276589014548556
   TargetingStrategy:
     rid: 7012276748036342002
-  PlotData: {fileID: 0}
+  PlotData: {fileID: 11400000, guid: 243f47695faf39d44a0d508a9661f4e2, type: 2}
   references:
     version: 2
     RefIds:
-    - rid: 7012276589014548556
-      type: {class: DamageEffect, ns: Assets.Logic.Scripts.GameDomain.Effects, asm: Assembly-CSharp}
-      data:
-        Name: 2
-        Description: 2
-        IsAutoCast: 0
-        amount: 2
     - rid: 7012276748036342002
       type: {class: ProjectileTargeting, ns: , asm: Assembly-CSharp}
       data:
-        ProjectilePrefab: {fileID: 1632181508370474111, guid: 65021495294b78d4cbfc38911b1a3333, type: 3}
         hitMarker: {fileID: 0}
         maxPoints: 50
         increment: 0.025
@@ -53,6 +42,3 @@ MonoBehaviour:
         GroundLayerMask:
           serializedVersion: 2
           m_Bits: 128
-        parabolicMaxHeight: 10
-        parabolicMaxRange: 50
-        parabolicMinRange: 3

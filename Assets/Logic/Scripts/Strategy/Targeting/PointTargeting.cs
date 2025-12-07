@@ -3,14 +3,14 @@ using UnityEngine;
 
 public class PointTargeting : TargetingStrategy {
     public LayerMask GroundLayerMask;
-    [SerializeField] private AbilitySummon _objectToSummon;
-    [SerializeField] private int _duration;
-    [SerializeField] private int _healAmount;
     private Transform _previewTransform;
     public override void Initialize(AbilityData data, IEffectable caster) {
         base.Initialize(data, caster);
         SubscriptionService.RegisterUpdatable(this);
-        _previewTransform = Object.Instantiate(_objectToSummon.VisualRoot).transform;
+        PointPlotTwistData plotData = data.PlotData as PointPlotTwistData;
+        if (plotData != null && plotData.ObjectToSummon != null) {
+            _previewTransform = Object.Instantiate(plotData.ObjectToSummon.VisualRoot).transform;
+        }
     }
     public override void ManagedUpdate() {
         base.ManagedUpdate();
@@ -31,9 +31,10 @@ public class PointTargeting : TargetingStrategy {
 
     public override Vector3 LockAim(out IEffectable[] targets) {
         base.LockAim(out targets);
-        AbilitySummon summonObject = Object.Instantiate(_objectToSummon, _previewTransform.position, _previewTransform.rotation);
+        PointPlotTwistData plotData = Ability.PlotData as PointPlotTwistData;
+        AbilitySummon summonObject = Object.Instantiate(plotData.ObjectToSummon, _previewTransform.position, _previewTransform.rotation);
         CommandFactory.CreateCommandVoid<SummonSkillCommand>().SetData(new SummonSkillCommandData(summonObject)).Execute();
-        summonObject.SetUp(_duration, _healAmount, Caster);
+        summonObject.SetUp(plotData.Duration, plotData.HealAmount, Caster);
         return _previewTransform.position;
     }
 

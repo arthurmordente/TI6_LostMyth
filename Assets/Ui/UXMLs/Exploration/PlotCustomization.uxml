@@ -4,27 +4,27 @@
         <engine:VisualElement name="left-column-container" style="flex-grow: 1; height: 100%; width: 35%; padding-top: 2%; padding-right: 2%; padding-bottom: 2%; padding-left: 2%; justify-content: space-between;">
             <engine:Label text="PlotTwist" style="width: 100%; height: 15%; -unity-text-align: lower-center; font-size: 150%; -unity-font-definition: url(&quot;project://database/Assets/Ui/UI%20Fonts/Title.ttf?fileID=12800000&amp;guid=e8f8a8a2d6ddad14086f666da53e1f84&amp;type=3#Title&quot;); color: rgb(243, 235, 235);" />
             <engine:VisualElement style="flex-grow: 1; height: 83%; background-image: url(&quot;project://database/Assets/Ui/Images/ButtonsListBackground.png?fileID=2800000&amp;guid=bc6e36229f8a9eb45822fc6a45b3eb6d&amp;type=3#ButtonsListBackground&quot;); padding-left: 5%; padding-top: 3%; padding-right: 3%; padding-bottom: 3%;">
-                <engine:Button text="Guias" name="ability1-btn" class="simple-button">
+                <engine:Button text="Guias" name="ability1-btn" class="simple-button" style="-unity-font-definition: url(&quot;project://database/Assets/Ui/UI%20Fonts/Text-Regular.otf?fileID=12800000&amp;guid=605a2da8487491140930e30863d8fb04&amp;type=3#Text-Regular&quot;);">
                     <Bindings>
                         <engine:DataBinding property="text" data-source-path="Name" data-source="project://database/Assets/GameDesign/GameData/Abilities/01%20Disparo%20Magico.asset?fileID=11400000&amp;guid=4c82f2d9bc2cf09418a437c668996e07&amp;type=2#01 Disparo Magico" binding-mode="ToTarget" />
                     </Bindings>
                 </engine:Button>
-                <engine:Button text="Opções" name="ability2-btn" class="simple-button">
+                <engine:Button text="Opções" name="ability2-btn" class="simple-button" style="-unity-font-definition: url(&quot;project://database/Assets/Ui/UI%20Fonts/Text-Regular.otf?fileID=12800000&amp;guid=605a2da8487491140930e30863d8fb04&amp;type=3#Text-Regular&quot;);">
                     <Bindings>
                         <engine:DataBinding property="text" data-source-path="Name" data-source="project://database/Assets/GameDesign/GameData/Abilities/02%20Arremesso%20de%20Bomba.asset?fileID=11400000&amp;guid=d9d52de431f81e94c97467c811060a54&amp;type=2#02 Arremesso de Bomba" binding-mode="ToTarget" />
                     </Bindings>
                 </engine:Button>
-                <engine:Button text="Carregar" name="ability3-btn" class="simple-button">
+                <engine:Button text="Carregar" name="ability3-btn" class="simple-button" style="-unity-font-definition: url(&quot;project://database/Assets/Ui/UI%20Fonts/Text-Regular.otf?fileID=12800000&amp;guid=605a2da8487491140930e30863d8fb04&amp;type=3#Text-Regular&quot;);">
                     <Bindings>
                         <engine:DataBinding property="text" data-source-path="Name" data-source="project://database/Assets/GameDesign/GameData/Abilities/03%20Explosao%20Cristalina.asset?fileID=11400000&amp;guid=d774261d7df73ed4fa8f08149dc4b81f&amp;type=2#03 Explosao Cristalina" binding-mode="ToTarget" />
                     </Bindings>
                 </engine:Button>
-                <engine:Button text="Sair" name="ability4-btn" class="simple-button">
+                <engine:Button text="Sair" name="ability4-btn" class="simple-button" style="-unity-font-definition: url(&quot;project://database/Assets/Ui/UI%20Fonts/Text-Regular.otf?fileID=12800000&amp;guid=605a2da8487491140930e30863d8fb04&amp;type=3#Text-Regular&quot;);">
                     <Bindings>
                         <engine:DataBinding property="text" data-source-path="Name" data-source="project://database/Assets/GameDesign/GameData/Abilities/04%20Aura%20de%20Protecao.asset?fileID=11400000&amp;guid=72ba9ea640b863144836fdfdc9469bd6&amp;type=2#04 Aura de Protecao" binding-mode="ToTarget" />
                     </Bindings>
                 </engine:Button>
-                <engine:Button text="Menu Inicial" name="ability5-btn" class="simple-button">
+                <engine:Button text="Menu Inicial" name="ability5-btn" class="simple-button" style="-unity-font-definition: url(&quot;project://database/Assets/Ui/UI%20Fonts/Text-Regular.otf?fileID=12800000&amp;guid=605a2da8487491140930e30863d8fb04&amp;type=3#Text-Regular&quot;);">
                     <Bindings>
                         <engine:DataBinding property="text" data-source-path="Name" data-source="project://database/Assets/GameDesign/GameData/Abilities/05%20Teleporte.asset?fileID=11400000&amp;guid=f4ae99592295ab4438105fcbb1c1ae10&amp;type=2#05 Teleporte" binding-mode="ToTarget" />
                     </Bindings>

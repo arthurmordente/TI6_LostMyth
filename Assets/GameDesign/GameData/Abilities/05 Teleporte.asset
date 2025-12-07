@@ -16,7 +16,6 @@ MonoBehaviour:
   Description: "O jogador \xE9 teleportado imediatamente para o local desejado, desde
     que acess\xEDvel. Esta habilidade n\xE3o consome PM."
   Icon: {fileID: 21300000, guid: 8bfa69e9220d6b84c919b87c8803954e, type: 3}
-  _sfx: {fileID: 0}
   Damage: 0
   Cooldown: 0
   Cost: 0
@@ -26,25 +25,15 @@ MonoBehaviour:
   _baseCost: 2
   _baseCooldown: 3
   _baseRange: 10
-  Effects:
-  - rid: 5749217743242526796
   TargetingStrategy:
     rid: 7012276592317825439
-  PlotData: {fileID: 0}
+  PlotData: {fileID: 11400000, guid: c50cba9775510414d87f2f87e65fb366, type: 2}
   references:
     version: 2
     RefIds:
-    - rid: 5749217743242526796
-      type: {class: TeleportEffect, ns: , asm: Assembly-CSharp}
-      data:
-        Name: TpEffect
-        Description: Tp
-        IsAutoCast: 1
-        _destination: {x: -10.767301, y: 0, z: -3.2474854}
     - rid: 7012276592317825439
       type: {class: AoeTargeting, ns: , asm: Assembly-CSharp}
       data:
-        AoePrefab: {fileID: 5864932686153904597, guid: 8f80778aeed56a34db1c56cbfb2f76d4, type: 3}
         GroundLayerMask:
           serializedVersion: 2
           m_Bits: 128
