@@ -10,6 +10,7 @@ namespace Logic.Scripts.Turns {
         private readonly TurnStateService _turnStateService;
         private readonly ICommandFactory _commandFactory;
 		private readonly Logic.Scripts.GameDomain.MVC.Echo.ICloneUseLimiter _cloneUseLimiter;
+		private readonly Logic.Scripts.GameDomain.MVC.Boss.Laki.Chips.IChipService _chipService;
 
         private IBossActionService _bossActionService;
         private IEnviromentActionService _enviromentActionService;
@@ -26,12 +27,14 @@ namespace Logic.Scripts.Turns {
                         TurnStateService turnStateService,
             ICommandFactory commandFactory,
 			INaraController naraController,
-			Logic.Scripts.GameDomain.MVC.Echo.ICloneUseLimiter cloneUseLimiter) {
+			Logic.Scripts.GameDomain.MVC.Echo.ICloneUseLimiter cloneUseLimiter,
+			Logic.Scripts.GameDomain.MVC.Boss.Laki.Chips.IChipService chipService) {
             _actionPointsService = actionPointsService;
             _echoService = echoService;
             _turnStateService = turnStateService;
             _commandFactory = commandFactory;
 			_cloneUseLimiter = cloneUseLimiter;
+			_chipService = chipService;
         }
 
         public void Initialize(IBossActionService bossActionService,
@@ -71,6 +74,23 @@ namespace Logic.Scripts.Turns {
             _turnNumber += 1;
             _phase = TurnPhase.BossAct;
             _turnStateService.AdvanceTurn(_turnNumber, _phase);
+            try { _chipService?.Refresh(); UnityEngine.Debug.Log("[Laki][ChipsUI] Turn start -> Refresh chips"); } catch { }
+            if (Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.MinigameRuntimeService.IsActive) {
+                LogService.Log("[Laki] Minigame ativo - boss pausado (apenas resolução/arena)");
+                var sp = Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.MinigameRuntimeService.StatusProvider;
+                if (sp != null) LogService.Log("[Laki] " + sp.GetStatus());
+                Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.MinigameResult tfResult;
+                Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.IMinigameResolver tfResolver;
+                if (Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.MinigameRuntimeService.TryResolveAnyAtBossTurn(out tfResult, out tfResolver)) {
+                    UnityEngine.Debug.Log($"[Laki] Resolved at TurnFlow begin. PlayerWon={tfResult.PlayerWon} Chips: P+={tfResult.PlayerChipsDelta}, B+={tfResult.BossChipsDelta}");
+                    try {
+                        _chipService?.ApplyMinigameResult(tfResult);
+                        _chipService?.Refresh();
+                        UnityEngine.Debug.Log("[Laki][ChipsUI] TurnFlow applied result and refreshed UI via injected service");
+                    } catch { }
+                    try { tfResolver?.DestroyMinigameRoot(); } catch { }
+                }
+            }
             LogService.Log($"Turno {_turnNumber} - Fase: BossAct");
             _waitingBoss = true;
             await _bossActionService.ExecuteBossTurnAsync();

@@ -53,21 +53,31 @@ namespace Logic.Scripts.Turns
 			System.Collections.Generic.IReadOnlyList<IEnvironmentTurnActor> snapshot = _actorsRegistry != null ? _actorsRegistry.Snapshot() : null;
 			if (snapshot != null && snapshot.Count > 0)
             {
-				// Log dos atores enfileirados para este turno
+				// Reordena para executar DiamondActor primeiro
+				System.Collections.Generic.List<IEnvironmentTurnActor> ordered = new System.Collections.Generic.List<IEnvironmentTurnActor>(snapshot.Count);
+				for (int i = 0; i < snapshot.Count; i++) {
+					var a = snapshot[i];
+					if (a is Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Diamond.DiamondActor) ordered.Add(a);
+				}
+				for (int i = 0; i < snapshot.Count; i++) {
+					var a = snapshot[i];
+					if (!(a is Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Diamond.DiamondActor)) ordered.Add(a);
+				}
+
+				// Log dos atores enfileirados (já ordenados)
 				System.Text.StringBuilder namesBuilder = new System.Text.StringBuilder(256);
-				for (int i = 0; i < snapshot.Count; i++)
-				{
-					IEnvironmentTurnActor actor = snapshot[i];
+				for (int i = 0; i < ordered.Count; i++) {
+					IEnvironmentTurnActor actor = ordered[i];
 					string n = actor != null ? actor.GetType().Name : "null";
 					if (i > 0) namesBuilder.Append(", ");
 					namesBuilder.Append(n);
 				}
-				UnityEngine.Debug.Log($"[Environment] Actors queued this turn ({snapshot.Count}): {namesBuilder.ToString()}");
+				UnityEngine.Debug.Log($"[Environment] Actors queued this turn ({ordered.Count}): {namesBuilder.ToString()}");
 
 				System.Collections.Generic.List<IEnvironmentTurnActor> toRemove = new System.Collections.Generic.List<IEnvironmentTurnActor>();
-				for (int i = 0; i < snapshot.Count; i++)
+				for (int i = 0; i < ordered.Count; i++)
                 {
-					IEnvironmentTurnActor actor = snapshot[i];
+					IEnvironmentTurnActor actor = ordered[i];
 					if (actor == null) continue;
 					UnityEngine.Debug.Log($"[Environment] Execute actor: {actor.GetType().Name}");
 					await actor.ExecuteAsync();

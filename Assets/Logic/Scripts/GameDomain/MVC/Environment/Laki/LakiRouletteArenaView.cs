@@ -26,6 +26,8 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 		private readonly List<Color> _baseColors = new List<Color>(32);
 		private Material _matTemplate;
 
+		public int TileCount => _sectorCount * _radialBands;
+
 		private void Awake()
 		{
 			if (_sectorCount * _radialBands != 32)
@@ -207,6 +209,36 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 					else if (mat.HasProperty("_Color")) mat.color = c;
 				}
 			}
+		}
+
+		public Vector3 GetTileWorldCenter(int tileIndex)
+		{
+			if (tileIndex < 0) tileIndex = 0;
+			int max = _sectorCount * _radialBands;
+			if (max <= 0) return _centerWorld;
+			tileIndex = tileIndex % max;
+
+			float sectorAngle = 360f / _sectorCount;
+			float split = _innerRadius + _radialSplit01 * (_outerRadius - _innerRadius);
+			float halfGap = Mathf.Max(0f, _angularGapDeg) * 0.5f;
+
+			int sector = tileIndex / _radialBands;
+			int band = tileIndex % _radialBands;
+			float a0 = sector * sectorAngle + halfGap;
+			float a1 = (sector + 1) * sectorAngle - halfGap;
+			float amidDeg = 0.5f * (a0 + a1);
+			float amid = amidDeg * Mathf.Deg2Rad;
+
+			float r0 = band == 0 ? _innerRadius : split;
+			float r1 = band == 0 ? split : _outerRadius;
+			float rMin = Mathf.Min(r0, r1) + Mathf.Max(0f, _radialGap);
+			float rMax = Mathf.Max(r0, r1) - Mathf.Max(0f, _radialGap);
+			if (rMax <= rMin) rMax = rMin + 0.005f;
+			float rMid = 0.5f * (rMin + rMax);
+
+			float cx = _centerWorld.x + Mathf.Cos(amid) * rMid;
+			float cz = _centerWorld.z + Mathf.Sin(amid) * rMid;
+			return new Vector3(cx, _centerWorld.y, cz);
 		}
 	}
 }

@@ -16,7 +16,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
     {
         [SerializeReference] private List<AbilityEffect> _effects;
 
-        private enum AttackType { ProteanCones, FeatherLines, WingSlash, Orb, HookAwakening, SkySwords }
+        private enum AttackType { ProteanCones, FeatherLines, WingSlash, Orb, HookAwakening, SkySwords, Minigame }
         [SerializeField] private AttackType _attackType = AttackType.ProteanCones;
 
         [SerializeField] private int _displacementPriority = 0;
@@ -65,6 +65,8 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
         [Zenject.Inject(Optional = true)] private Logic.Scripts.GameDomain.MVC.Boss.Telegraph.ITelegraphMaterialProvider _telegraphProvider;
 
         private IAudioService _audio;
+        [Header("Laki Minigame")]
+        public GameObject _minigameRoundPrefab;
 
         public int GetDisplacementPriority() { return _displacementPriority; }
         public void SetDisplacementEnabled(bool enabled) { _displacementEnabled = enabled; }
@@ -87,6 +89,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
             }
             return false;
         }
+        public bool IsMinigameAttack() => _attackType == AttackType.Minigame;
         public void StripDisplacementForTelegraph()
         {
             if (_effects == null || _effects.Count == 0) return;
@@ -173,6 +176,17 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
                 {
                     _executing = true;
                     TrySpawnOrb();
+                    CleanupAndComplete();
+                }
+                return _executeTcs.Task;
+            }
+            if (_attackType == AttackType.Minigame)
+            {
+                if (_executeTcs == null) _executeTcs = new System.Threading.Tasks.TaskCompletionSource<bool>();
+                if (!_executing)
+                {
+                    _executing = true;
+                    TryStartMinigameRound();
                     CleanupAndComplete();
                 }
                 return _executeTcs.Task;
@@ -315,6 +329,77 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
                     break;
                 }
             }
+        }
+
+        private void TryStartMinigameRound()
+        {
+            GameObject prefab = _minigameRoundPrefab;
+            if (prefab == null)
+            {
+                var binder = GetComponent<Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.LakiMinigameAttackBinder>();
+                if (binder != null) prefab = binder.RoundPrefab;
+                if (prefab == null)
+                {
+                    Debug.LogWarning("[BossAttack][Minigame] Prefab is null (set _minigameRoundPrefab or add LakiMinigameAttackBinder)");
+                    return;
+                }
+            }
+            var go = Instantiate(prefab);
+            var round = go.GetComponent<Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.IMinigameRound>();
+            if (round == null)
+            {
+                Debug.LogWarning("[BossAttack][Minigame] Prefab missing IMinigameRound component");
+                Destroy(go);
+                return;
+            }
+            Logic.Scripts.Turns.TurnStateService turnSvc = null;
+            Logic.Scripts.Turns.IEnvironmentActorsRegistry envReg = null;
+            Assets.Logic.Scripts.GameDomain.Effects.EffectableRelay bossRelay = null;
+            Logic.Scripts.GameDomain.MVC.Environment.Laki.LakiRouletteArenaView arenaView = null;
+            Logic.Scripts.GameDomain.MVC.Nara.INaraController nara = null;
+            Logic.Scripts.GameDomain.MVC.Boss.IBossController bossCtrl = null;
+            Zenject.DiContainer sceneContainer = null;
+            try {
+                var sceneCtxs = Object.FindObjectsByType<Zenject.SceneContext>(FindObjectsSortMode.None);
+                for (int i = 0; i < sceneCtxs.Length; i++) {
+                    var sc = sceneCtxs[i];
+                    if (sc != null && sc.gameObject.scene == gameObject.scene) { sceneContainer = sc.Container; break; }
+                }
+            } catch { }
+            try { if (sceneContainer != null) turnSvc = sceneContainer.Resolve<Logic.Scripts.Turns.TurnStateService>(); } catch { }
+            try { if (sceneContainer != null) envReg = sceneContainer.Resolve<Logic.Scripts.Turns.IEnvironmentActorsRegistry>(); } catch { }
+            try
+            {
+                var bossView = GetComponentInParent<Logic.Scripts.GameDomain.MVC.Boss.BossView>();
+                bossRelay = bossView != null ? bossView.GetComponent<Assets.Logic.Scripts.GameDomain.Effects.EffectableRelay>() : null;
+            } catch { }
+            try { arenaView = FindFirstObjectByType<Logic.Scripts.GameDomain.MVC.Environment.Laki.LakiRouletteArenaView>(); } catch { }
+            try { if (sceneContainer != null) nara = sceneContainer.Resolve<Logic.Scripts.GameDomain.MVC.Nara.INaraController>(); } catch { }
+            try { if (sceneContainer != null) bossCtrl = sceneContainer.Resolve<Logic.Scripts.GameDomain.MVC.Boss.IBossController>(); } catch { }
+            // Pay chip cost from both sides before starting the minigame round (convert HP if needed)
+            try
+            {
+                var chipSvc = sceneContainer != null ? sceneContainer.Resolve<Logic.Scripts.GameDomain.MVC.Boss.Laki.Chips.IChipService>() : null;
+                if (chipSvc != null && round != null)
+                {
+                    try { chipSvc.OnBetPlaced?.Invoke(round.ChipCost, round.ChipCost); } catch { }
+                    if (nara != null)
+                    {
+                        int convertedPlayer;
+                        bool okP = chipSvc.TryPayPlayer(nara, round.ChipCost, out convertedPlayer);
+                        Debug.Log($"[Laki][Chips] Pay player cost={round.ChipCost} convertedHP={convertedPlayer} ok={okP}");
+                    }
+                    if (bossCtrl != null)
+                    {
+                        int convertedBoss;
+                        bool okB = chipSvc.TryPayBoss(bossCtrl, round.ChipCost, out convertedBoss);
+                        Debug.Log($"[Laki][Chips] Pay boss cost={round.ChipCost} convertedHP={convertedBoss} ok={okB}");
+                    }
+                    chipSvc.Refresh();
+                }
+            }
+            catch { }
+            _ = round.StartAsync(turnSvc, envReg, bossRelay, arenaView, nara, bossCtrl);
         }
 
         private Material ResolveTelegraphMaterial()

@@ -1,0 +1,96 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2614029188221685303
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 866112516515213340}
+  - component: {fileID: 2382607159073431541}
+  - component: {fileID: -6535900132628070142}
+  m_Layer: 0
+  m_Name: A
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &866112516515213340
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2614029188221685303}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1.0385714, y: 8.753398, z: -15.272062}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2382607159073431541
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2614029188221685303}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd88fb69c32f73948bbae5629112d0f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _effects: []
+  _attackType: 6
+  _displacementPriority: 0
+  _protean:
+    radius: 3
+    angleDeg: 60
+    sides: 36
+  _wingSlash:
+    radius: 4
+    angleDeg: 215
+    sides: 48
+  _feather:
+    featherCount: 3
+    axisMode: 2
+    width: 2
+    margin: 5
+    forceBase: 2
+    forcePerMeter: 0.4
+    forcePerDebuff: 0.5
+  _featherIsPull: 0
+  _orb:
+    prefab: {fileID: 0}
+    moveStepMeters: 6
+    growStepMeters: 6
+    initialRadius: 4
+    maxRadiusCap: 60
+    baseDamage: 10
+    initialHp: 50
+  _skySwords:
+    radius: 4.5
+    ringWidth: 0.3
+  _skySwordsIsPull: 0
+  _minigameRoundPrefab: {fileID: 0}
+  references:
+    version: 2
+    RefIds: []
+--- !u!114 &-6535900132628070142
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2614029188221685303}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 48030b58e7c248e4482b32b5f12ecdde, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _roundPrefab: {fileID: 854936198636273049, guid: 64d34e2ba7d7a1f4e855282644047669, type: 3}

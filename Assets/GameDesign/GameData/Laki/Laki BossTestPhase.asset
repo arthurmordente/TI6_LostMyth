@@ -13,15 +13,7 @@ MonoBehaviour:
   m_Name: Laki BossTestPhase
   m_EditorClassIdentifier: 
   _availableAttacks:
-  - {fileID: -7797698259084971289, guid: 33365d6a13b9a3b4d938f40f0697b1e7, type: 3}
-  - {fileID: -7797698259084971289, guid: c4a31e5408742194ca0ca3e3c2bd8daa, type: 3}
-  - {fileID: -7797698259084971289, guid: 734b914b8e060ad4dba898b6231a3e53, type: 3}
-  - {fileID: -7797698259084971289, guid: 81be49511951dd549a8da9ee7950fde1, type: 3}
-  - {fileID: -7797698259084971289, guid: e3ebe2321d4723346be2e3e8c2112696, type: 3}
-  - {fileID: -7797698259084971289, guid: 90683a701b66b50428ee05cfbebeaaa2, type: 3}
-  - {fileID: -7797698259084971289, guid: 040e6941640cde54d858dcd096fa46ee, type: 3}
-  - {fileID: -7797698259084971289, guid: b991501c847a0cd4db465576ae6d88f4, type: 3}
-  - {fileID: -7797698259084971289, guid: 738468fd4415b44408d5ad2868dbff5d, type: 3}
+  - {fileID: 2382607159073431541, guid: dc38b79479d8d7649af7b2552c4f5fa0, type: 3}
   _fallbackStepDistance: 1
   _stepDistance: 2
   _randomChangeDirectionSeconds: 1.5
@@ -29,31 +21,13 @@ MonoBehaviour:
   _turnPattern:
   - Mode: 3
     DistanceMultiplier: 0
-    AttackIndices: 05000000
-  - Mode: 3
-    DistanceMultiplier: 0
-    AttackIndices: 01000000
-  - Mode: 3
-    DistanceMultiplier: 0
-    AttackIndices: 02000000
-  - Mode: 3
-    DistanceMultiplier: 0
-    AttackIndices: 0300000005000000
-  - Mode: 3
-    DistanceMultiplier: 0
-    AttackIndices: 04000000
-  - Mode: 3
-    DistanceMultiplier: 0
-    AttackIndices: 0500000004000000
-  - Mode: 3
-    DistanceMultiplier: 0
-    AttackIndices: 03000000
+    AttackIndices: 
   - Mode: 3
     DistanceMultiplier: 0
     AttackIndices: 00000000
   - Mode: 3
     DistanceMultiplier: 0
-    AttackIndices: 0700000000000000
+    AttackIndices: 
   - Mode: 3
     DistanceMultiplier: 0
-    AttackIndices: 06000000
+    AttackIndices: 

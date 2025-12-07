@@ -214,8 +214,25 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
         }
 
         public async Task ExecuteTurnAsync() {
+            bool resolvedThisTurn = false;
+            bool pauseThisTurn = false;
+            // Tentativa de resolução de minigame no início do turno do boss
+            if (Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.MinigameRuntimeService.TryResolveAnyAtBossTurn(
+                out Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.MinigameResult mgResult,
+                out Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.IMinigameResolver mgResolver))
+            {
+                Debug.Log($"[Laki] Minigame resolved at Boss turn. PlayerWon={mgResult.PlayerWon} Chips: P+={mgResult.PlayerChipsDelta}, B+={mgResult.BossChipsDelta}");
+                try { mgResolver?.DestroyMinigameRoot(); } catch { }
+                resolvedThisTurn = true;
+            }
+            pauseThisTurn = Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.MinigameRuntimeService.ConsumePauseBossThisTurn();
+            if (Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.MinigameRuntimeService.IsActive || resolvedThisTurn || pauseThisTurn) {
+                Debug.Log("[Laki] Minigame active/resolved - boss attacks paused this turn");
+            }
             ResolvePendingCasts();
-            await ExecutePreparedActionAsync();
+            if (!Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.MinigameRuntimeService.IsActive && !resolvedThisTurn && !pauseThisTurn) {
+                await ExecutePreparedActionAsync();
+            }
             // After executing the previously prepared action, evaluate phase change for this turn
             bool didTransition = await EvaluateAndMaybeSwitchPhaseAsync();
             await MoveTurnAsync();
@@ -296,6 +313,11 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
         }
 
         private void PrepareNextAction() {
+            // Se há minigame ativo, não agendar novo ataque
+            if (Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.MinigameRuntimeService.IsActive) return;
+            // Se a última rodada de um minigame acabou de sinalizar resolução no turno da Laki,
+            // pulamos UMA preparação neste turno
+            if (Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.MinigameRuntimeService.ConsumeSkipOnBossTurn()) return;
             QueuePreparedAttackFromBehavior();
         }
 
@@ -357,12 +379,19 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
 					attackInstance.Setup(_arenaReference, this);
 				}
 				Debug.Log($"Boss attack instantiated: {attackInstance.name} | index={attackIndex}");
-				_pendingCasts.Add(new PendingCast { Attack = attackInstance, TurnsRemaining = 1 });
-				Debug.Log($"Boss prepared attack index: {attackIndex} (executes next turn)");
+				int delay = attackInstance != null && attackInstance.IsMinigameAttack() ? 0 : 1;
+				_pendingCasts.Add(new PendingCast { Attack = attackInstance, TurnsRemaining = delay });
+				if (delay == 0) Debug.Log($"[Laki] Minigame queued to execute this turn");
+				else Debug.Log($"Boss prepared attack index: {attackIndex} (executes next turn)");
 			}
         }
 
         private void ConfigureTurnMovement() {
+            if (Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.MinigameRuntimeService.IsActive) {
+                _turnMoveDistanceBudget = 0f;
+                Debug.Log("[Laki] Minigame active - boss movement disabled this turn");
+                return;
+            }
             var behavior = GetCurrentBehavior();
             if (behavior == null) return;
             BossBehaviorSO.BossTurnConfig[] pattern = behavior.TurnPattern;
