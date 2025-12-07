@@ -40,6 +40,7 @@ namespace Logic.Scripts.GameDomain.MVC.Abilitys {
             IPlotTwistData plotTwist = PlotData as IPlotTwistData;
             if (plotTwist != null) {
                 foreach (var effect in plotTwist.Effects) {
+                    effect.SetUp(aimPoint);
                     if (targets != null && targets.Length > 0) {
                         foreach (var target in targets) {
                             effect.Execute(this, caster, target);
