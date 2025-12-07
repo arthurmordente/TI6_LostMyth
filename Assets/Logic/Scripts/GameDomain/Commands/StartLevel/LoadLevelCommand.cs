@@ -47,12 +47,12 @@ public class LoadLevelCommand : BaseCommand, ICommandAsync {
         await CreateLevelScenario(levelNumber, cancellationTokenSource);
         NaraMovementController movementController = _naraMovementControllerFactory.Create(_levelsDataService.GetLevelData(levelNumber).ControllerType, _levelsDataService.GetLevelData(levelNumber).NaraLevelConfiguration);
         _naraController.CreateNara(movementController);
+        _naraController.Freeeze();
         // Set initial player position from LevelTurnData -> BossConfiguration (before InitEntryPointGamePlay runs)
         var levelTurnData = _levelsDataService.GetLevelData(levelNumber) as LevelTurnData;
         if (levelTurnData != null && levelTurnData.BossConfiguration != null) {
             _naraController.SetPosition(levelTurnData.BossConfiguration.InitialPlayerPosition);
         }
-        //To-Do nara impedir movimento ate terminar o Load
     }
     private async Awaitable CreateLevelScenario(int levelNumber, CancellationTokenSource cancellationTokenSource) {
         await _levelScenarioController.CreateLevelScenario(levelNumber, cancellationTokenSource);

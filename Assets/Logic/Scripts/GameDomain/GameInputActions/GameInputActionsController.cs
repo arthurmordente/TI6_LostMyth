@@ -27,6 +27,11 @@ namespace Logic.Scripts.GameDomain.GameInputActions {
             _gameInputActions.Exploration.Enable();
         }
 
+        public void EnableUIInputs() {
+            LogService.LogTopic("EnableUIInputs", LogTopicType.Inputs);
+            _gameInputActions.UI.Enable();
+        }
+
         public void DisableGameplayInputs() {
             LogService.LogTopic("EnableInputs", LogTopicType.Inputs);
             _gameInputActions.Player.Disable();

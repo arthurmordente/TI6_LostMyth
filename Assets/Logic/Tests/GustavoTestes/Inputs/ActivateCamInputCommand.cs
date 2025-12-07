@@ -1,5 +1,6 @@
 using Logic.Scripts.Core.Mvc.WorldCamera;
 using Logic.Scripts.Services.CommandFactory;
+using UnityEngine;
 
 public class ActivateCamInputCommand : BaseCommand, ICommandVoid {
     private IWorldCameraController _WorldCameraController;

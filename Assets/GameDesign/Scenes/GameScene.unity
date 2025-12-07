@@ -167,7 +167,7 @@ MonoBehaviour:
   m_PanelSettings: {fileID: 11400000, guid: 5a414314045d70440bd2c99d2972aa11, type: 2}
   m_ParentUI: {fileID: 0}
   sourceAsset: {fileID: 9197481963319205126, guid: 7dc3fabde3f536249a39ece5d085b9f6, type: 3}
-  m_SortingOrder: 1
+  m_SortingOrder: 50
   m_WorldSpaceSizeMode: 1
   m_WorldSpaceWidth: 1920
   m_WorldSpaceHeight: 1080
@@ -298,7 +298,7 @@ MonoBehaviour:
   m_PanelSettings: {fileID: 11400000, guid: 5a414314045d70440bd2c99d2972aa11, type: 2}
   m_ParentUI: {fileID: 0}
   sourceAsset: {fileID: 9197481963319205126, guid: d76852b569349384080a113c51aec3a0, type: 3}
-  m_SortingOrder: 1
+  m_SortingOrder: 50
   m_WorldSpaceSizeMode: 1
   m_WorldSpaceWidth: 1920
   m_WorldSpaceHeight: 1080
@@ -420,7 +420,7 @@ MonoBehaviour:
   m_PanelSettings: {fileID: 11400000, guid: 5a414314045d70440bd2c99d2972aa11, type: 2}
   m_ParentUI: {fileID: 0}
   sourceAsset: {fileID: 9197481963319205126, guid: 6aa4f01f285b4fb41a2fcedf4776620c, type: 3}
-  m_SortingOrder: 1
+  m_SortingOrder: 50
   m_WorldSpaceSizeMode: 1
   m_WorldSpaceWidth: 1920
   m_WorldSpaceHeight: 1080
@@ -499,7 +499,7 @@ MonoBehaviour:
   m_PanelSettings: {fileID: 11400000, guid: 5a414314045d70440bd2c99d2972aa11, type: 2}
   m_ParentUI: {fileID: 0}
   sourceAsset: {fileID: 9197481963319205126, guid: b3b3aa0ad3da76842bed376020999203, type: 3}
-  m_SortingOrder: 1
+  m_SortingOrder: 50
   m_WorldSpaceSizeMode: 1
   m_WorldSpaceWidth: 1920
   m_WorldSpaceHeight: 1080
@@ -551,7 +551,7 @@ MonoBehaviour:
   m_PanelSettings: {fileID: 11400000, guid: 5a414314045d70440bd2c99d2972aa11, type: 2}
   m_ParentUI: {fileID: 0}
   sourceAsset: {fileID: 9197481963319205126, guid: 5eb739373350da242a8c990152162df8, type: 3}
-  m_SortingOrder: 1
+  m_SortingOrder: 50
   m_WorldSpaceSizeMode: 1
   m_WorldSpaceWidth: 1920
   m_WorldSpaceHeight: 1080

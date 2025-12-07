@@ -12,11 +12,6 @@ public class RotateCamInputCommand : BaseCommand, ICommandVoid {
     }
 
     public void Execute() {
-        if (_WorldCameraController.IsRotateEnabled) {
-            Vector2 delta = Vector2.zero;
-            if (_gameInputActions.Player.enabled == true) delta = _gameInputActions.Player.RotateCam.ReadValue<Vector2>();
-            if (_gameInputActions.Exploration.enabled == true) delta = _gameInputActions.Exploration.RotateCam.ReadValue<Vector2>();
-            _WorldCameraController.SetMouseDelta(delta);
-        }
+        
     }
 }

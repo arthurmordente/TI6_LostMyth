@@ -4,6 +4,7 @@ using UnityEngine;
 namespace Logic.Scripts.GameDomain.GameInputActions {
     public interface IGameInputActionsController {
         void EnableGameplayInputs();
+        void EnableUIInputs();
         void EnableExplorationInputs();
         void DisableGameplayInputs();
         void DisableUIInputs();

@@ -1,10 +1,8 @@
 using Logic.Scripts.Services.UpdateService;
 using UnityEngine;
 
-namespace Logic.Scripts.Core.Mvc.WorldCamera
-{
-    public class WorldCameraController : IUpdatable, IWorldCameraController
-    {
+namespace Logic.Scripts.Core.Mvc.WorldCamera {
+    public class WorldCameraController : IUpdatable, IWorldCameraController {
         private readonly WorldCameraView _worldCameraView;
         private readonly IUpdateSubscriptionService _updateSubscriptionService;
         private bool _rotateEnabled;
@@ -14,49 +12,44 @@ namespace Logic.Scripts.Core.Mvc.WorldCamera
 
         public bool IsRotateEnabled => _rotateEnabled;
 
-        public WorldCameraController(WorldCameraView worldCameraView, GameInputActions gameInputActions, IUpdateSubscriptionService updateSubscriptionService)
-        {
+        public WorldCameraController(WorldCameraView worldCameraView, GameInputActions gameInputActions, IUpdateSubscriptionService updateSubscriptionService) {
             _worldCameraView = worldCameraView;
             _gameInputActions = gameInputActions;
             _updateSubscriptionService = updateSubscriptionService;
         }
 
-        public void UpdateAngles()
-        {
+        public void UpdateAngles() {
             if (!_rotateEnabled) return;
-            Vector2 delta = _gameInputActions.Player.RotateCam.ReadValue<Vector2>();
+            Vector2 delta = Vector2.zero;
+            if (_gameInputActions.Player.enabled == true) delta = _gameInputActions.Player.RotateCam.ReadValue<Vector2>();
+            if (_gameInputActions.Exploration.enabled == true) delta = _gameInputActions.Exploration.RotateCam.ReadValue<Vector2>();
             SetMouseDelta(delta);
             _worldCameraView.UpdateCameraRotation(_mouseDelta.x, Time.deltaTime);
         }
 
-        public void StartFollowTarget(Transform targetTransform)
-        {
+        public void StartFollowTarget(Transform targetTransform) {
             _target = targetTransform;
             _worldCameraView.SetNewTarget(_target);
             _updateSubscriptionService.RegisterUpdatable(this);
         }
 
-        public void StopFollowTarget()
-        {
+        public void StopFollowTarget() {
             _updateSubscriptionService.UnregisterUpdatable(this);
             _target = null;
         }
 
         public void UnlockCameraRotate() { _rotateEnabled = true; }
-        public void LockCameraRotate()   { _rotateEnabled = false; }
+        public void LockCameraRotate() { _rotateEnabled = false; }
 
-        public void ManagedUpdate()
-        {
+        public void ManagedUpdate() {
             UpdateAngles();
         }
 
-        public void SetMouseDelta(Vector2 delta)
-        {
+        public void SetMouseDelta(Vector2 delta) {
             _mouseDelta = delta;
         }
 
-        public void AdjustZoom(float delta)
-        {
+        public void AdjustZoom(float delta) {
             _worldCameraView.AdjustZoom(delta);
         }
     }

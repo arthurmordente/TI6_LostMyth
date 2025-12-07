@@ -18,5 +18,6 @@ public class ResumeGameplayInputCommand : BaseCommand, ICommandVoid {
         _gamePlayUiController.HidePauseScreen();
         _gameInputActionsController.RegisterGameplayInputListeners();
         _gameInputActionsController.UnregisterUIGameplayInputListeners();
+        _gameInputActionsController.DisableUIInputs();
     }
 }
