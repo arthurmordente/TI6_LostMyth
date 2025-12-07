@@ -2,6 +2,7 @@ using Logic.Scripts.GameDomain.MVC.Abilitys;
 using Logic.Scripts.GameDomain.MVC.Nara;
 using System;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public enum AimingMode {
     StraightAim,
@@ -33,6 +34,8 @@ public class ProjectileTargeting : TargetingStrategy {
             SetTrajectoryVisible(true);
             currentLaunchSpeed = _projectilePlotData.ProjectilePrefab.InitialSpeed;
         }
+        Caster.GetTransformCastPoint().rotation = Quaternion.identity;
+        Caster.GetReferenceTransform().rotation = Quaternion.identity;
         SubscriptionService.RegisterUpdatable(this);
     }
 
@@ -45,9 +48,6 @@ public class ProjectileTargeting : TargetingStrategy {
     }
 
     private void UpdateNaraViewRotation() {
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
-
         if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out RaycastHit hit, float.MaxValue, GroundLayerMask)) {
             if (Vector3.Distance(hit.point, Caster.GetReferenceTransform().position) > _projectilePlotData.ParabolicMinRange) {
                 switch (aimingMode) {
@@ -64,21 +64,16 @@ public class ProjectileTargeting : TargetingStrategy {
     }
 
     private void AimStraight(Vector3 targetPoint) {
-        Vector3 casterOrigin = Caster.GetReferenceTransform().position;
-        Vector3 startPos = Caster.GetTransformCastPoint().position;
-
-        float maxRange = Ability.GetRange();
-
-        Vector3 directionFromCasterXZ = new Vector3(targetPoint.x - casterOrigin.x, 0, targetPoint.z - casterOrigin.z);
-
-        float distanceXZ = directionFromCasterXZ.magnitude;
-
-        Vector3 finalAimDirection;
-        finalAimDirection = directionFromCasterXZ.normalized;
-
-        Vector3 lookPointCaster = finalAimDirection;
-        lookPointCaster.y = 0f;
-        Caster.GetReferenceTransform().LookAt(lookPointCaster);
+        Transform referenceTransform = Caster.GetReferenceTransform();
+        Vector3 casterOrigin = referenceTransform.position;
+        Vector3 lookTargetXZ = targetPoint;
+        Vector3 directionToTarget = lookTargetXZ - casterOrigin;
+        if (directionToTarget.sqrMagnitude > 0) {
+            directionToTarget.y = 0f;
+            Caster.GetReferenceTransform().rotation = Quaternion.LookRotation(directionToTarget);
+            directionToTarget.y = Caster.GetTransformCastPoint().rotation.y;
+            Caster.GetTransformCastPoint().rotation = Quaternion.LookRotation(directionToTarget);
+        }
     }
 
     private void AimParabolic(Vector3 targetPoint) {

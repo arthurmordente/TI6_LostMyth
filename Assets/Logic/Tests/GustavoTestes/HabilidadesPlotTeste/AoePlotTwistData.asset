@@ -9,24 +9,24 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0943a0a1447faad468fc545c4b9d6d5b, type: 3}
-  m_Name: BasePoint
+  m_Script: {fileID: 11500000, guid: 43a8440b1f740f746bb34bc84f7348d9, type: 3}
+  m_Name: AoePlotTwistData
   m_EditorClassIdentifier: 
-  Name: 
-  Description: 
+  Name: Teste
+  Description: a
   Icon: {fileID: 0}
-  ObjectToSummon: {fileID: 4876656314110998499, guid: 2707b628eece7bb47967d5647b1f8adc, type: 3}
-  Duration: 3
-  HealAmount: 15
+  AoePrefab: {fileID: 9022057012079785743, guid: 3c5919a7ff77b9046b7fab15f495f863, type: 3}
   _effects:
-  - rid: 4963371588303454953
+  - rid: 2036518907759296590
   references:
     version: 2
     RefIds:
-    - rid: 4963371588303454953
-      type: {class: SummonEffect, ns: , asm: Assembly-CSharp}
+    - rid: 2036518907759296590
+      type: {class: DashEffect, ns: , asm: Assembly-CSharp}
       data:
         Name: 
         Description: 
         IsAutoCast: 0
-        _spawnPoint: {x: 0, y: 0, z: 0}
+        _distance: 6
+        _stripWidth: 1
+        _y: 0.2

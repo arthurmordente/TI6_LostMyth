@@ -77,6 +77,7 @@ public class GuideUIView : MonoBehaviour {
                 _guideButtons.Add(guideButton);
                 _guidesListContainer.Add(guideButton);
             }
+            OnClickGuideButton(allGuides[0]);
         }
     }
 

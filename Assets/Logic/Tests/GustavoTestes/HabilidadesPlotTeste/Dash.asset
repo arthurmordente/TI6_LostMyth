@@ -10,34 +10,33 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2311a3bf99fe9c044b375d21b1d88fe5, type: 3}
-  m_Name: 05 Teleporte
+  m_Name: Dash
   m_EditorClassIdentifier: 
-  Name: Teleporte
-  Description: "O jogador \xE9 teleportado imediatamente para o local desejado, desde
-    que acess\xEDvel. Esta habilidade n\xE3o consome PM."
-  Icon: {fileID: 21300000, guid: 8bfa69e9220d6b84c919b87c8803954e, type: 3}
+  Name: 
+  Description: 
+  Icon: {fileID: 0}
   Damage: 0
   Cooldown: 0
   Cost: 0
   Range: 0
-  AnimatorAttackType: 5
-  _baseDamage: 1
-  _baseCost: 2
-  _baseCooldown: 3
-  _baseRange: 10
+  AnimatorAttackType: 0
+  _baseDamage: 0
+  _baseCost: 0
+  _baseCooldown: 0
+  _baseRange: 0
   TargetingStrategy:
-    rid: 7012276592317825439
-  PlotData: {fileID: 11400000, guid: c50cba9775510414d87f2f87e65fb366, type: 2}
+    rid: 2036518907759296587
+  PlotData: {fileID: 11400000, guid: 431e4d6bd005a7d4e9f16787a44dd639, type: 2}
   references:
     version: 2
     RefIds:
-    - rid: 7012276592317825439
+    - rid: 2036518907759296587
       type: {class: AoeTargeting, ns: , asm: Assembly-CSharp}
       data:
         GroundLayerMask:
           serializedVersion: 2
-          m_Bits: 128
+          m_Bits: 64
         HittableLayerMask:
           serializedVersion: 2
           m_Bits: 64
-        Radius: 1
+        Radius: 3

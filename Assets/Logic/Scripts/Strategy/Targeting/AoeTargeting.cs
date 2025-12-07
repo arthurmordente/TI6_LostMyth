@@ -16,6 +16,7 @@ public class AoeTargeting : TargetingStrategy {
         AoePlotTwistData plotData = data.PlotData as AoePlotTwistData;
         if (plotData != null && plotData.AoePrefab != null) {
             previewInstance = GameObject.Instantiate(plotData.AoePrefab, new Vector3(0f, 0.1f, 0f), Quaternion.identity);
+            previewInstance.transform.localScale = new Vector3(Radius, Radius, Radius);
         }
         SubscriptionService.RegisterUpdatable(this);
     }
@@ -28,6 +29,7 @@ public class AoeTargeting : TargetingStrategy {
     }
 
     private void Aim(RaycastHit hit) {
+        Debug.Log("Aiming AOE");
         if (previewInstance != null) {
             Vector3 casterOrigin = Caster.GetReferenceTransform().position;
             Vector3 startPos = Caster.GetTransformCastPoint().position;
