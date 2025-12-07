@@ -37,13 +37,14 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Orb
 				_rqAdd = layer.QueueAdd;
 			}
 			var matProvider = Logic.Scripts.GameDomain.MVC.Boss.Telegraph.TelegraphMaterialService.Provider;
-			Material baseMat = matProvider != null ? matProvider.GetMaterial(false, null) : new Material(Shader.Find("Sprites/Default"));
+			Material baseLine = matProvider != null ? matProvider.GetLineMaterial(false, null) : new Material(Shader.Find("Sprites/Default"));
+			Material baseMesh = matProvider != null ? matProvider.GetMeshMaterial(false, null) : new Material(Shader.Find("Sprites/Default"));
 
             _telegraphGO = new GameObject("OrbSpawnTelegraph");
             _telegraphGO.transform.SetParent(parentTransform, false);
 
             _line = _telegraphGO.AddComponent<LineRenderer>();
-			var lineMat = new Material(baseMat);
+			var lineMat = new Material(baseLine);
 			lineMat.renderQueue += _rqAdd;
 			_line.material = lineMat;
             _line.useWorldSpace = true;
@@ -53,7 +54,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Orb
 
             _meshFilter = _telegraphGO.AddComponent<MeshFilter>();
             _meshRenderer = _telegraphGO.AddComponent<MeshRenderer>();
-			var meshMat = new Material(baseMat);
+			var meshMat = new Material(baseMesh);
 			meshMat.renderQueue += _rqAdd;
 			_meshRenderer.material = meshMat;
             _mesh = new Mesh();
