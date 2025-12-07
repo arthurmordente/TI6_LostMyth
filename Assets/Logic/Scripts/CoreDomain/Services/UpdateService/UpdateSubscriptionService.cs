@@ -62,7 +62,7 @@ namespace Logic.Scripts.Services.UpdateService {
             else {
                 _updateObservers.Add(observer);
             }
-            // Debug.LogWarning("Observer Updatable Register: " + observer.ToString());
+            Debug.LogWarning("Observer Updatable Register: " + observer.ToString());
         }
 
         public void UnregisterUpdatable(IUpdatable observer) {
@@ -79,27 +79,27 @@ namespace Logic.Scripts.Services.UpdateService {
             else {
                 _updateObservers.Remove(observer);
             }
-            // Debug.LogWarning("Observer Updatable Unregister: " + observer.ToString());
+            Debug.LogWarning("Observer Updatable Unregister: " + observer.ToString());
         }
 
         public void RegisterLateUpdatable(ILateUpdatable observer) {
             _pendingAddLateUpdateObservers.Add(observer);
-            // Debug.LogWarning("Observer LateUpdatable Register: " + observer.ToString());
+            Debug.LogWarning("Observer LateUpdatable Register: " + observer.ToString());
         }
 
         public void UnregisterLateUpdatable(ILateUpdatable observer) {
             _pendingRemoveLateUpdateObservers.Add(observer);
-            // Debug.LogWarning("Observer LateUpdatable Unregister: " + observer.ToString());
+            Debug.LogWarning("Observer LateUpdatable Unregister: " + observer.ToString());
         }
 
         public void RegisterFixedUpdatable(IFixedUpdatable updatable) {
             _pendingAddFixedUpdateObservers.Add(updatable);
-            // Debug.LogWarning("Observer FixedUpdatable Register: " + updatable.ToString());
+            Debug.LogWarning("Observer FixedUpdatable Register: " + updatable.ToString());
         }
 
         public void UnregisterFixedUpdatable(IFixedUpdatable updatable) {
             _pendingRemoveFixedUpdateObservers.Add(updatable);
-            // Debug.LogWarning("Observer FixedUpdatable Unregister: " + updatable.ToString());
+            Debug.LogWarning("Observer FixedUpdatable Unregister: " + updatable.ToString());
         }
     }
 }

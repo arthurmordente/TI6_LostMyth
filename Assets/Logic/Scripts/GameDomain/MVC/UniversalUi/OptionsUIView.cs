@@ -5,7 +5,8 @@ public class OptionsUIView : MonoBehaviour {
     [SerializeField] private UIDocument _loadUIDocument;
     private VisualElement _root;
     private VisualElement _mainContainer;
-    private Button _closeButton;
+    private Button _closeSoundButton;
+    private Button _closeVideoButton;
     private Button _videoButton;
     private Button _soundButton;
     private VisualElement _videoContainer;
@@ -14,7 +15,8 @@ public class OptionsUIView : MonoBehaviour {
     public void InitEntryPoint() {
         _root = _loadUIDocument.rootVisualElement;
         _mainContainer = _root.Q<VisualElement>("main-container");
-        _closeButton = _root.Q<Button>("exit-options-button");
+        _closeSoundButton = _root.Q<Button>("exit-options-sound-button");
+        _closeVideoButton = _root.Q<Button>("exit-options-video-button");
         _videoButton = _root.Q<Button>("video-btn");
         _soundButton = _root.Q<Button>("sound-btn");
         _videoContainer = _root.Q<VisualElement>("video-container");
@@ -22,7 +24,8 @@ public class OptionsUIView : MonoBehaviour {
     }
 
     public void RegisterCallbacks() {
-        _closeButton.clicked += Hide;
+        _closeSoundButton.clicked += Hide;
+        _closeVideoButton.clicked += Hide;
         _videoButton.clicked += ShowVideoOptions;
         _soundButton.clicked += ShowAudioOptions;
     }

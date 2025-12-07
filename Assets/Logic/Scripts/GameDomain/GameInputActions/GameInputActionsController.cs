@@ -56,7 +56,7 @@ namespace Logic.Scripts.GameDomain.GameInputActions {
             _gameInputActions.Player.Move.started += OnMoveStarted;
             _gameInputActions.Player.Move.canceled += OnMoveCanceled;
             _gameInputActions.Player.PassTurn.started += OnPassTurnStarted;
-            _gameInputActions.Player.Pause.started += OnPauseStarted;
+            _gameInputActions.Player.Pause.started += OnPauseGameplayStarted;
             _gameInputActions.Player.ResetMovement.started += OnResetMovementStarted;
             _gameInputActions.Player.RotateCam.started += OnRotateCamStarted;
             _gameInputActions.Player.UseAbility1.started += OnUseAbility1Started;
@@ -78,7 +78,7 @@ namespace Logic.Scripts.GameDomain.GameInputActions {
             _gameInputActions.Player.Move.started -= OnMoveStarted;
             _gameInputActions.Player.Move.canceled -= OnMoveCanceled;
             _gameInputActions.Player.PassTurn.started -= OnPassTurnStarted;
-            _gameInputActions.Player.Pause.started -= OnPauseStarted;
+            _gameInputActions.Player.Pause.started -= OnPauseGameplayStarted;
             _gameInputActions.Player.ResetMovement.started -= OnResetMovementStarted;
             _gameInputActions.Player.RotateCam.started -= OnRotateCamStarted;
             _gameInputActions.Player.UseAbility1.started -= OnUseAbility1Started;
@@ -115,8 +115,8 @@ namespace Logic.Scripts.GameDomain.GameInputActions {
         private void OnResetMovementStarted(InputAction.CallbackContext obj) {
             _commandFactory.CreateCommandVoid<ResetTurnInputCommand>().Execute();
         }
-        private void OnPauseStarted(InputAction.CallbackContext obj) {
-            _commandFactory.CreateCommandVoid<PauseInputCommand>().Execute();
+        private void OnPauseGameplayStarted(InputAction.CallbackContext obj) {
+            _commandFactory.CreateCommandVoid<PauseGameplayInputCommand>().Execute();
         }
         private void OnPassTurnStarted(InputAction.CallbackContext obj) {
             _commandFactory.CreateCommandVoid<PassTurnInputCommand>().Execute();
@@ -136,8 +136,7 @@ namespace Logic.Scripts.GameDomain.GameInputActions {
         private void OnMoveCanceled(InputAction.CallbackContext context) { _commandFactory.CreateCommandVoid<StopMoveInputCommand>().Execute(); }
         private void OnActivateCamAndCancelAbilityCanceled(InputAction.CallbackContext context) { _commandFactory.CreateCommandVoid<DeactivateCamInputCommand>().Execute(); }
         #endregion
-        private void OnZoomPerformed(InputAction.CallbackContext context)
-        {
+        private void OnZoomPerformed(InputAction.CallbackContext context) {
             _commandFactory.CreateCommandVoid<ZoomInputCommand>().Execute();
         }
 
@@ -149,7 +148,7 @@ namespace Logic.Scripts.GameDomain.GameInputActions {
             _gameInputActions.Exploration.Interact.started += OnInteractStarted;
             _gameInputActions.Exploration.Move.started += OnMoveStarted;
             _gameInputActions.Exploration.Move.canceled += OnMoveCanceled;
-            _gameInputActions.Exploration.Pause.started += OnPauseStarted;
+            _gameInputActions.Exploration.Pause.started += OnPauseExplorationStarted;
             _gameInputActions.Exploration.RotateCam.started += OnRotateCamStarted;
             _gameInputActions.Exploration.Zoom.started += OnZoomPerformed;
         }
@@ -161,7 +160,7 @@ namespace Logic.Scripts.GameDomain.GameInputActions {
             _gameInputActions.Exploration.Interact.started -= OnInteractStarted;
             _gameInputActions.Exploration.Move.started -= OnMoveStarted;
             _gameInputActions.Exploration.Move.canceled -= OnMoveCanceled;
-            _gameInputActions.Exploration.Pause.started -= OnPauseStarted;
+            _gameInputActions.Exploration.Pause.started -= OnPauseExplorationStarted;
             _gameInputActions.Exploration.RotateCam.started -= OnRotateCamStarted;
             _gameInputActions.Exploration.Zoom.started -= OnZoomPerformed;
         }
@@ -176,6 +175,9 @@ namespace Logic.Scripts.GameDomain.GameInputActions {
 
         private void OnInteractStarted(InputAction.CallbackContext obj) {
             _commandFactory.CreateCommandVoid<InteractInputCommand>().Execute();
+        }
+        private void OnPauseExplorationStarted(InputAction.CallbackContext obj) {
+            _commandFactory.CreateCommandVoid<PauseExplorationInputCommand>().Execute();
         }
         #endregion
 

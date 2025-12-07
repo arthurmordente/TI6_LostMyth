@@ -13,7 +13,7 @@
             <engine:VisualElement name="sound-container" style="flex-grow: 1; flex-direction: column; background-image: url(&quot;project://database/Assets/Ui/Images/CleanBackground.png?fileID=2800000&amp;guid=6dcdf45004f567c4bb2bb3a8e1e23dcc&amp;type=3#CleanBackground&quot;); padding-top: 2%; padding-right: 2%; padding-bottom: 2%; padding-left: 2%; justify-content: center; align-items: center; width: 100%; height: 100%; display: flex;">
                 <engine:VisualElement name="header-container" style="flex-grow: 1; height: 15%; width: 100%; flex-direction: row;">
                     <engine:Label text="Som" name="title-label" style="height: 100%; width: 90%; -unity-font-definition: url(&quot;project://database/Assets/Ui/UI%20Fonts/SubTitle.ttf?fileID=12800000&amp;guid=b88dc2cdbf2798c4fa1b3984c567e570&amp;type=3#SubTitle&quot;); font-size: 100%; color: rgb(107, 15, 142); -unity-text-align: middle-left;" />
-                    <engine:Button name="exit-options-button" class="close-button" />
+                    <engine:Button name="exit-options-sound-button" class="close-button" />
                 </engine:VisualElement>
                 <engine:VisualElement name="body-container" style="flex-grow: 1; height: 70%; width: 100%; justify-content: center; padding-top: 2%;">
                     <engine:VisualElement name="slider-volume-container" class="Item-container" style="flex-grow: 0; height: 25%;">
@@ -36,7 +36,7 @@
             <engine:VisualElement name="video-container" style="flex-grow: 1; flex-direction: column; background-image: url(&quot;project://database/Assets/Ui/Images/CleanBackground.png?fileID=2800000&amp;guid=6dcdf45004f567c4bb2bb3a8e1e23dcc&amp;type=3#CleanBackground&quot;); padding-top: 2%; padding-right: 2%; padding-bottom: 2%; padding-left: 2%; justify-content: center; align-items: center; width: 100%; height: 100%; position: relative; display: none;">
                 <engine:VisualElement name="header-container" style="flex-grow: 1; height: 15%; width: 100%; flex-direction: row;">
                     <engine:Label text="Vídeo" name="title-label" style="height: 100%; width: 90%; -unity-font-definition: url(&quot;project://database/Assets/Ui/UI%20Fonts/SubTitle.ttf?fileID=12800000&amp;guid=b88dc2cdbf2798c4fa1b3984c567e570&amp;type=3#SubTitle&quot;); font-size: 100%; color: rgb(107, 15, 142); -unity-text-align: middle-left;" />
-                    <engine:Button name="exit-options-button" class="close-button" />
+                    <engine:Button name="exit-options-video-button" class="close-button" />
                 </engine:VisualElement>
                 <engine:VisualElement name="body-container" style="flex-grow: 1; height: 70%; width: 100%; justify-content: center; padding-top: 2%;">
                     <engine:VisualElement name="item-container" class="Item-container" style="flex-grow: 0; height: 25%;">

@@ -1,6 +1,6 @@
 <engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/Ui/Styles/LobbyMenuStyle.uss?fileID=7433441132597879392&amp;guid=8c15ef07de17af044bf70c45766414bf&amp;type=3#LobbyMenuStyle" />
-    <engine:VisualElement name="main-container" style="flex-grow: 1; align-self: auto; align-items: center; justify-content: center; background-image: url(&quot;project://database/Assets/Ui/Images/BlurBackground.png?fileID=2800000&amp;guid=3e44ed5141441a844b6db4c85916fa02&amp;type=3#BlurBackground&quot;); -unity-background-scale-mode: stretch-to-fill; background-size: 103% 105%;">
+    <engine:VisualElement name="main-container" class="close-container" style="flex-grow: 1; align-self: auto; align-items: center; justify-content: center; background-image: url(&quot;project://database/Assets/Ui/Images/BlurBackground.png?fileID=2800000&amp;guid=3e44ed5141441a844b6db4c85916fa02&amp;type=3#BlurBackground&quot;); -unity-background-scale-mode: stretch-to-fill; background-size: 103% 105%;">
         <engine:VisualElement name="header-container" style="flex-grow: 1; height: 20%;">
             <engine:Label text="Jogo em Pausa" style="width: 100%; height: 100%; -unity-text-align: middle-center; font-size: 150%; -unity-font-definition: url(&quot;project://database/Assets/Ui/UI%20Fonts/Title.ttf?fileID=12800000&amp;guid=e8f8a8a2d6ddad14086f666da53e1f84&amp;type=3#Title&quot;); color: rgb(243, 235, 235);" />
         </engine:VisualElement>
@@ -9,9 +9,9 @@
                 <engine:Button text="Guias" name="guide-btn" class="simple-button" />
                 <engine:Button text="Opções" name="options-btn" class="simple-button" />
                 <engine:Button text="Carregar" name="load-btn" class="simple-button" />
-                <engine:Button text="Menu Inicial" name="main-menu-btn" class="simple-button" />
-                <engine:Button text="Sair" name="exit-btn" class="simple-button" />
                 <engine:Button text="Trapaças" name="cheat-btn" class="simple-button" />
+                <engine:Button text="Voltar ao Jogo" name="return-btn" class="simple-button" />
+                <engine:Button text="Voltar a Livraria" name="lobby-btn" class="simple-button" />
             </engine:VisualElement>
         </engine:VisualElement>
     </engine:VisualElement>

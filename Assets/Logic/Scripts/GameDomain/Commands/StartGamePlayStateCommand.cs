@@ -26,7 +26,6 @@ namespace Logic.Scripts.GameDomain.Commands {
 
         public override void ResolveDependencies() {
             _audioService = _diContainer.Resolve<IAudioService>();
-            //_gamePlayAudioClipsScriptableObject = _diContainer.Resolve<GamePlayAudioClipsScriptableObject>();
             _gamePlayUiController = _diContainer.Resolve<IGamePlayUiController>();
             _naraController = _diContainer.Resolve<INaraController>();
             _commandFactory = _diContainer.Resolve<ICommandFactory>();
@@ -39,6 +38,7 @@ namespace Logic.Scripts.GameDomain.Commands {
             await _commandFactory.CreateCommandAsync<StartLevelCommand>().StartBoss().Execute(cancellationTokenSource);
             _naraController.InitEntryPointGamePlay(_gamePlayUiController);
             _audioService.PlayAudio(AudioClipType.BossTheme, AudioChannelType.Music, AudioPlayType.Loop);
+            _gamePlayUiController.InitEntryPoint();
         }
     }
 }
