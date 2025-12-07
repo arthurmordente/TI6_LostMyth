@@ -398,3 +398,48 @@
     padding-left: 0;
     min-width: 40px;
 }
+
+#slider-volume-container #unity-dragger {
+    background-color: rgb(76, 0, 109);
+    height: 50%;
+    border-top-left-radius: 25px;
+    border-top-right-radius: 25px;
+    border-bottom-right-radius: 25px;
+    border-bottom-left-radius: 25px;
+    width: 8%;
+    border-left-color: rgb(254, 238, 205);
+    border-right-color: rgb(254, 238, 205);
+    border-top-color: rgb(254, 238, 205);
+    border-bottom-color: rgb(254, 238, 205);
+    border-top-width: 3px;
+    border-right-width: 3px;
+    border-bottom-width: 3px;
+    border-left-width: 3px;
+}
+
+#slider-volume-container #unity-tracker {
+    background-color: rgb(76, 0, 109);
+    height: 30%;
+    border-top-left-radius: 25px;
+    border-top-right-radius: 25px;
+    border-bottom-right-radius: 25px;
+    border-bottom-left-radius: 25px;
+}
+
+#slider-volume-container #unity-checkmark {
+    width: 80%;
+    height: 80%;
+    background-color: rgba(0, 0, 0, 0);
+    border-left-color: rgb(76, 0, 109);
+    border-right-color: rgb(76, 0, 109);
+    border-top-color: rgb(76, 0, 109);
+    border-bottom-color: rgb(76, 0, 109);
+    border-top-width: 8px;
+    border-right-width: 8px;
+    border-bottom-width: 8px;
+    border-left-width: 8px;
+    border-top-left-radius: 22px;
+    border-top-right-radius: 22px;
+    border-bottom-right-radius: 22px;
+    border-bottom-left-radius: 22px;
+}

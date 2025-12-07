@@ -6,14 +6,9 @@ using UnityEngine.UIElements;
 public class CustomizeUIView : MonoBehaviour {
     private Label _balanceLabel;
 
-    private Label _damageLabel;
-    private Label _cooldownLabel;
-    private Label _costLabel;
-    private Label _rangeLabel;
-
     private VisualElement _mainContainer;
     private VisualElement _skillContainer;
-    private VisualElement _pointsContainer;
+    private VisualElement _skillListContainer;
     private Button _customizeExitButton;
     private Button _ability1Slot;
     private Button _ability2Slot;
@@ -31,16 +26,11 @@ public class CustomizeUIView : MonoBehaviour {
 
     public void InitStartPoint(AbilityData data) {
         VisualElement root = GetComponent<UIDocument>().rootVisualElement;
-        _mainContainer = root.Q<Button>("main-container");
+        _mainContainer = root.Q<VisualElement>("main-container");
         _customizeExitButton = root.Q<Button>("exit-customization-button");
         _skillContainer = root.Q<VisualElement>("skill-container");
-        _pointsContainer = root.Q<VisualElement>("point-slot-container");
+        _skillListContainer = root.Q<VisualElement>("skill-list-container");
         _balanceLabel = root.Q<Label>("balance-txt");
-
-        _damageLabel = root.Q<Label>("damage-txt");
-        _cooldownLabel = root.Q<Label>("cooldown-txt");
-        _costLabel = root.Q<Label>("cost-txt");
-        _rangeLabel = root.Q<Label>("range-txt");
 
         _ability1Slot = root.Q<Button>("ability-slot1-button");
         _ability2Slot = root.Q<Button>("ability-slot2-button");
@@ -60,7 +50,7 @@ public class CustomizeUIView : MonoBehaviour {
 
     public void SetAbility(AbilityData data) {
         _skillContainer.dataSource = data;
-        _pointsContainer.dataSource = data;
+        _skillListContainer.dataSource = data;
     }
     public void ShowCustomize() {
         _mainContainer.AddToClassList("open-container");
@@ -68,16 +58,15 @@ public class CustomizeUIView : MonoBehaviour {
     }
 
     public void HideCustomize() {
-        Debug.LogWarning("Chegou ate aqui");
         _mainContainer.AddToClassList("close-container");
         _mainContainer.RemoveFromClassList("open-container");
     }
 
-    public void RegisterCallbacks(Action OnCustomizeExitButtonPressed, Action OnDamagePlusPressed, Action OnDamageMinusPressed, Action OnCooldownPlusPressed,
+    public void RegisterCallbacks(Action OnDamagePlusPressed, Action OnDamageMinusPressed, Action OnCooldownPlusPressed,
         Action OnCooldownMinusPressed, Action OnCostPlusPressed, Action OnCostMinusPressed, Action OnRangePlusPressed,
         Action OnRangeMinusPressed, Action OnSetAbility1Pressed, Action OnSetAbility2Pressed, Action OnSetAbility3Pressed,
         Action OnSetAbility4Pressed, Action OnSetAbility5Pressed) {
-        _customizeExitButton.clicked += OnCustomizeExitButtonPressed;
+        _customizeExitButton.clicked += HideCustomize;
         _ability1Slot.clicked += OnSetAbility1Pressed;
         _ability2Slot.clicked += OnSetAbility2Pressed;
         _ability3Slot.clicked += OnSetAbility3Pressed;
@@ -124,27 +113,6 @@ public class CustomizeUIView : MonoBehaviour {
         else _costMinusButton.SetEnabled(false);
         if (data.GetModifierStatValue(AbilityStat.Range) > 1) _rangeMinusButton.SetEnabled(true);
         else _rangeMinusButton.SetEnabled(false);
-    }
-
-    public void SetUpText(AbilityStat type, int newValue) {
-        switch (type) {
-            case AbilityStat.Damage:
-                Debug.Log("Damage: " + newValue.ToString("00"));
-                _damageLabel.text = newValue.ToString("00");
-                break;
-            case AbilityStat.Cooldown:
-                Debug.Log("Cooldown: " + newValue.ToString("00"));
-                _cooldownLabel.text = newValue.ToString("00");
-                break;
-            case AbilityStat.Cost:
-                Debug.Log("Cost: " + newValue.ToString("00"));
-                _costLabel.text = newValue.ToString("00");
-                break;
-            case AbilityStat.Range:
-                Debug.Log("Range: " + newValue.ToString("00"));
-                _rangeLabel.text = newValue.ToString("00");
-                break;
-        }
     }
 
     public void SetAllMinusSign(bool newState) {

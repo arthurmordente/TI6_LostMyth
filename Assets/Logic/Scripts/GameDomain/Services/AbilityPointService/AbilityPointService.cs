@@ -5,20 +5,17 @@ using Logic.Scripts.GameDomain.MVC.Abilitys;
 
 public class AbilityPointService : IAbilityPointService {
 
-    public int advantagePoints;
-    public int maxDisadvantagePoints;
+    public int _availablePoints;
+    private int _currentBalance;
 
     public List<AbilityData> allTrackedAbilities;
-
-    private int currentBalance;
-    private int usedDisadvantagePoints;
     private AbilityPointData AbilityPointData;
 
+    public int CurrentBalance => _currentBalance;
+    public int AvailablePoints => _availablePoints;
+
     public List<AbilityData> AllAbilities => allTrackedAbilities;
-    public int CurrentBalance => currentBalance;
-    public int UsedDisadvantage => usedDisadvantagePoints;
-    public int MaxDisadvantage => maxDisadvantagePoints;
-    public int Advantage => advantagePoints;
+
 
     public AbilityPointService(List<AbilityData> abilities, AbilityPointData pointData) {
         allTrackedAbilities = abilities;
@@ -28,52 +25,22 @@ public class AbilityPointService : IAbilityPointService {
 
     public void RecomputeStats() {
         int totalPointsSpent = 0;
-        int totalPointsGained = 0;
 
         foreach (AbilityData ability in allTrackedAbilities) {
-            if (ability == null) continue;
+            if (ability == null) {
+                Debug.LogWarning("Ability data nulo");
+                continue;
+            }
             totalPointsSpent += ability.GetPointsSpent();
-            totalPointsGained += ability.GetPointsGained();
         }
 
-        usedDisadvantagePoints = totalPointsGained;
-
-        currentBalance = advantagePoints - totalPointsSpent + totalPointsGained;
-
-        if (currentBalance < 0) {
-            currentBalance = 0;
-        }
+        _currentBalance = _availablePoints - totalPointsSpent;
     }
 
     public bool TryIncreaseStat(AbilityData ability, AbilityStat stat) {
         int cost = 1;
-        if (currentBalance < cost) {
+        if (_currentBalance < cost) {
             return false;
-        }
-        if (stat == AbilityStat.Cooldown || stat == AbilityStat.Cost) {
-            int currentCooldownModifier = ability.GetModifierStatValue(stat);
-            int newModifier = currentCooldownModifier + 1;
-
-            int oldPointsGained = ability.GetPointsGained();
-
-            ability.SetModifierStatValue(stat, newModifier);
-
-            float newFinalValue = ability.GetCurrentStatValue(stat);
-            int newPointsGained = ability.GetPointsGained();
-            int disadvantageChange = newPointsGained - oldPointsGained;
-
-            if (newFinalValue < 1) {
-                ability.SetModifierStatValue(stat, currentCooldownModifier);
-                return false;
-            }
-
-            if (disadvantageChange > 0 && usedDisadvantagePoints + disadvantageChange > maxDisadvantagePoints) {
-                ability.SetModifierStatValue(stat, currentCooldownModifier);
-                return false;
-            }
-
-            RecomputeStats();
-            return true;
         }
 
         int currentModifier = ability.GetModifierStatValue(stat);
@@ -85,26 +52,15 @@ public class AbilityPointService : IAbilityPointService {
 
     public bool TryDecreaseStat(AbilityData ability, AbilityStat stat) {
         int currentModifier = ability.GetModifierStatValue(stat);
+        if ((currentModifier + ability.GetBaseStatValue(stat)) == ability.GetBaseStatValue(stat)) {
+            return false;
+        }
         int newModifier = currentModifier - 1;
 
-        int oldPointsGained = ability.GetPointsGained();
-
-        ability.SetModifierStatValue(stat, newModifier);
-
-        float newFinalValue = ability.GetCurrentStatValue(stat);
-        int newPointsGained = ability.GetPointsGained();
-        int disadvantageChange = newPointsGained - oldPointsGained;
-
-        if (newFinalValue < 1) {
-            ability.SetModifierStatValue(stat, currentModifier);
+        if (newModifier >= 0) {
+            ability.SetModifierStatValue(stat, newModifier);
             return false;
         }
-
-        if (disadvantageChange > 0 && usedDisadvantagePoints + disadvantageChange > maxDisadvantagePoints) {
-            ability.SetModifierStatValue(stat, currentModifier);
-            return false;
-        }
-
         RecomputeStats();
         return true;
     }
@@ -118,8 +74,7 @@ public class AbilityPointService : IAbilityPointService {
 
     #region TempSave
     public void SaveStats() {
-        PlayerPrefs.SetInt("AdvantagePoints", Advantage);
-        PlayerPrefs.SetInt("DisadvantagePoints", MaxDisadvantage);
+        PlayerPrefs.SetInt("Available", _availablePoints);
         foreach (AbilityData ability in allTrackedAbilities) {
             if (ability == null) continue;
             string abilityKey = ability.name;
@@ -134,8 +89,7 @@ public class AbilityPointService : IAbilityPointService {
     }
 
     public void LoadStats() {
-        advantagePoints = PlayerPrefs.GetInt("AdvantagePoints", AbilityPointData.StartAdvantagePoints);
-        maxDisadvantagePoints = PlayerPrefs.GetInt("DisadvantagePoints", AbilityPointData.StartDisadvantagePoints);
+        _availablePoints = PlayerPrefs.GetInt("Available", AbilityPointData.StartPoints);
         foreach (AbilityData ability in allTrackedAbilities) {
             if (ability == null) continue;
             string abilityKey = ability.name;

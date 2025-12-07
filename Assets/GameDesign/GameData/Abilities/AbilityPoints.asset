@@ -12,7 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 113a03ddc6af32d4a895bb48e943d522, type: 3}
   m_Name: AbilityPoints
   m_EditorClassIdentifier: 
-  StartAdvantagePoints: 5
-  StartDisadvantagePoints: 5
-  IncreaseAdvantagePoints: 0
-  IncreaseDisadvantagePoints: 0
+  StartPoints: 20
+  GainPerBossPoints: 6
