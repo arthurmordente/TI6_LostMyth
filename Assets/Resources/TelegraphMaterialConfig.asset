@@ -15,6 +15,6 @@ MonoBehaviour:
   NormalAreaMaterial: {fileID: 2100000, guid: 954868a6902822f449340fe4ad0baed1, type: 2}
   GrappleAreaMaterial: {fileID: 2100000, guid: dab0ad903237b8d4ca7c15dc0784b4dd, type: 2}
   KnockbackAreaMaterial: {fileID: 2100000, guid: eef6b270f338bc646b82cbb87937c8ca, type: 2}
-  NormalLineMaterial: {fileID: 2100000, guid: 73330bdadde0d3349ab30e1f890f3baf, type: 2}
-  GrappleLineMaterial: {fileID: 2100000, guid: ead1b7d9c9963e743b9e7c48eb8af197, type: 2}
-  KnockbackLineMaterial: {fileID: 2100000, guid: 8afe73fd99982c1489b75d83f8d3262e, type: 2}
+  NormalLineMaterial: {fileID: 2100000, guid: ed768c35c3e38604799476388cf8e511, type: 2}
+  GrappleLineMaterial: {fileID: 2100000, guid: ed12487613d6c6044a1b2759d47c43d0, type: 2}
+  KnockbackLineMaterial: {fileID: 2100000, guid: a9af3557615adfa45b551fad16e301f0, type: 2}
