@@ -664,7 +664,10 @@ MonoBehaviour:
   _cineCam: {fileID: 330585550}
   _target: {fileID: 0}
   _velocidade: 15
-  _orbital: {fileID: 0}
+  _minHeight: 5
+  _maxHeight: 14
+  _minRadius: 2.5
+  _maxRadius: 11.5
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0

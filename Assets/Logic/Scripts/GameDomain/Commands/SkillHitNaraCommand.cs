@@ -23,11 +23,11 @@ public class SkillHitNaraCommand : BaseCommand, ICommandVoid {
     }
 
     public void Execute() {
-        if (_commandData != null && _commandData.AbilityData != null) {
-            foreach (AbilityEffect effect in _commandData.AbilityData.Effects) {
-                effect.Execute(_commandData.Caster, _commandData.Target);
-            }
-        }
+        //if (_commandData != null && _commandData.AbilityData != null) {
+        //    foreach (AbilityEffect effect in _commandData.AbilityData.Effects) {
+        //        effect.Execute(_commandData.Caster, _commandData.Target);
+        //    }
+        //}
         //To-Do tocar som 
     }
 }

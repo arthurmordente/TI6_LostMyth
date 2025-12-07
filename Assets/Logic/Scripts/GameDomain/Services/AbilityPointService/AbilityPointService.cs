@@ -57,10 +57,7 @@ public class AbilityPointService : IAbilityPointService {
         }
         int newModifier = currentModifier - 1;
 
-        if (newModifier >= 0) {
-            ability.SetModifierStatValue(stat, newModifier);
-            return false;
-        }
+        ability.SetModifierStatValue(stat, newModifier);
         RecomputeStats();
         return true;
     }

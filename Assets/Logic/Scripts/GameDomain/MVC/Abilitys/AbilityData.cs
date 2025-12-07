@@ -1,5 +1,4 @@
 using Logic.Scripts.Services.UpdateService;
-using System.Collections.Generic;
 using UnityEngine;
 using System;
 using Logic.Scripts.Services.CommandFactory;
@@ -23,10 +22,10 @@ namespace Logic.Scripts.GameDomain.MVC.Abilitys {
         [SerializeField] private int _baseCooldown;
         [SerializeField] private int _baseRange;
 
-        [SerializeReference] public List<AbilityEffect> Effects;
         [SerializeReference] public TargetingStrategy TargetingStrategy;
 
-        public PlotTwistData PlotData;
+        [PlotTwistDataSelector]
+        public ScriptableObject PlotData;
 
         public void SetUp(IUpdateSubscriptionService updateSubscriptionService, ICommandFactory commandFactory) {
             TargetingStrategy.SetUp(updateSubscriptionService, commandFactory);
@@ -37,15 +36,17 @@ namespace Logic.Scripts.GameDomain.MVC.Abilitys {
         }
         public void Cast(IEffectable caster) {
             IEffectable[] targets;
-            Vector3 castPoint = TargetingStrategy.LockAim(out targets);
-            foreach (AbilityEffect effect in Effects) {
-                effect.SetUp(castPoint);
-                if (effect.IsAutoCast) {
-                    effect.Execute(this, caster);
-                }
-                else if (targets != null) {
-                    foreach (IEffectable target in targets) {
-                        effect.Execute(this, caster, target);
+            Vector3 aimPoint = TargetingStrategy.LockAim(out targets);
+            IPlotTwistData plotTwist = PlotData as IPlotTwistData;
+            if (plotTwist != null) {
+                foreach (var effect in plotTwist.Effects) {
+                    if (targets != null && targets.Length > 0) {
+                        foreach (var target in targets) {
+                            effect.Execute(this, caster, target);
+                        }
+                    }
+                    else {
+                        effect.Execute(this, caster);
                     }
                 }
             }

@@ -16,7 +16,6 @@ MonoBehaviour:
   Description: "Detona a \xE1rea selecionada, causando dano a todos os alvos dentro
     dela. Apesar do curto alcance esta habilidade consegue ignorar obst\xE1culos"
   Icon: {fileID: 21300000, guid: 7a695e4a333ec594fbcfb3964cf28bc5, type: 3}
-  _sfx: {fileID: 0}
   Damage: 0
   Cooldown: 0
   Cost: 0
@@ -26,25 +25,15 @@ MonoBehaviour:
   _baseCost: 4
   _baseCooldown: 3
   _baseRange: 5
-  Effects:
-  - rid: 7012276589014548557
   TargetingStrategy:
     rid: 7546693122258370636
-  PlotData: {fileID: 0}
+  PlotData: {fileID: 11400000, guid: 8d471063244f2924f9287ab2de18f376, type: 2}
   references:
     version: 2
     RefIds:
-    - rid: 7012276589014548557
-      type: {class: DamageEffect, ns: Assets.Logic.Scripts.GameDomain.Effects, asm: Assembly-CSharp}
-      data:
-        Name: 3
-        Description: 3
-        IsAutoCast: 0
-        amount: 15
     - rid: 7546693122258370636
       type: {class: AoeTargeting, ns: , asm: Assembly-CSharp}
       data:
-        AoePrefab: {fileID: 5864932686153904597, guid: 8f80778aeed56a34db1c56cbfb2f76d4, type: 3}
         GroundLayerMask:
           serializedVersion: 2
           m_Bits: 128

@@ -10,39 +10,30 @@ public enum AimingMode {
 
 [Serializable]
 public class ProjectileTargeting : TargetingStrategy {
-    public ProjectileController ProjectilePrefab;
     [HideInInspector] public Transform hitMarker;
     public int maxPoints = 50;
     public float increment = 0.025f;
     public float rayOverlap = 1.1f;
     private LineRenderer trajectoryLine;
-
-    [Header("Aiming Logic")]
     public AimingMode aimingMode = AimingMode.StraightAim;
     public LayerMask GroundLayerMask;
 
-    [Header("Parabolic Arc Settings")]
-    public float parabolicMaxHeight = 10f;
-    public float parabolicMaxRange = 50f;
-    public float parabolicMinRange = 3f;
-
     private float currentLaunchSpeed;
-
+    private ProjectilePlotTwistData _projectilePlotData;
 
     public override void Initialize(AbilityData data, IEffectable caster) {
         base.Initialize(data, caster);
-        if (ProjectilePrefab != null) {
+        _projectilePlotData = data.PlotData as ProjectilePlotTwistData;
+        if (_projectilePlotData != null && _projectilePlotData.ProjectilePrefab != null) {
             if (Caster is NaraController) {
                 NaraController controller = (NaraController)Caster;
                 trajectoryLine = controller.GetPointLineRenderer();
             }
             hitMarker = UnityEngine.Object.Instantiate(Caster.GetReferenceTargetPrefab()).transform;
             SetTrajectoryVisible(true);
-
-            currentLaunchSpeed = ProjectilePrefab.InitialSpeed;
-
-            SubscriptionService.RegisterUpdatable(this);
+            currentLaunchSpeed = _projectilePlotData.ProjectilePrefab.InitialSpeed;
         }
+        SubscriptionService.RegisterUpdatable(this);
     }
 
     public override void ManagedUpdate() {
@@ -58,7 +49,7 @@ public class ProjectileTargeting : TargetingStrategy {
         Cursor.visible = true;
 
         if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out RaycastHit hit, float.MaxValue, GroundLayerMask)) {
-            if (Vector3.Distance(hit.point, Caster.GetReferenceTransform().position) > parabolicMinRange) {
+            if (Vector3.Distance(hit.point, Caster.GetReferenceTransform().position) > _projectilePlotData.ParabolicMinRange) {
                 switch (aimingMode) {
                     case AimingMode.StraightAim:
                         AimStraight(hit.point);
@@ -85,10 +76,9 @@ public class ProjectileTargeting : TargetingStrategy {
         Vector3 finalAimDirection;
         finalAimDirection = directionFromCasterXZ.normalized;
 
-        currentLaunchSpeed = ProjectilePrefab.InitialSpeed;
         Vector3 lookPointCaster = finalAimDirection;
         lookPointCaster.y = 0f;
-        Caster.GetReferenceTransform().rotation = Quaternion.LookRotation(lookPointCaster.normalized);
+        Caster.GetReferenceTransform().LookAt(lookPointCaster);
     }
 
     private void AimParabolic(Vector3 targetPoint) {
@@ -111,10 +101,10 @@ public class ProjectileTargeting : TargetingStrategy {
         float deltaX = deltaXZ_vec.magnitude;
         float deltaY = clampedTargetPoint.y - startPos.y;
 
-        float distanceRatio = Mathf.Clamp01(deltaX / parabolicMaxRange);
+        float distanceRatio = Mathf.Clamp01(deltaX / _projectilePlotData.ParabolicMaxRange);
         float h;
-        if (Vector3.Distance(clampedTargetPoint, startPos) < parabolicMinRange) h = parabolicMaxHeight * distanceRatio;
-        else h = parabolicMaxHeight;
+        if (Vector3.Distance(clampedTargetPoint, startPos) < _projectilePlotData.ParabolicMinRange) h = _projectilePlotData.ParabolicMaxHeight * distanceRatio;
+        else h = _projectilePlotData.ParabolicMaxHeight;
         if (h < 0.1f) h = 0.1f;
 
         float Vy = Mathf.Sqrt(2 * g * h);
@@ -150,12 +140,17 @@ public class ProjectileTargeting : TargetingStrategy {
 
     public override Vector3 LockAim(out IEffectable[] targets) {
         base.LockAim(out targets);
-        Rigidbody thrownObject = UnityEngine.Object.Instantiate(ProjectilePrefab, Caster.GetTransformCastPoint().position, Quaternion.identity).GetComponent<Rigidbody>();
-        if (thrownObject.TryGetComponent<ProjectileController>(out ProjectileController controller)) {
-            controller.Initialize(Caster.GetTransformCastPoint(), Caster, Ability);
+        if (_projectilePlotData != null && _projectilePlotData.ProjectilePrefab != null) {
+            Rigidbody thrownObject = UnityEngine.Object.Instantiate(_projectilePlotData.ProjectilePrefab, Caster.GetTransformCastPoint().position, Quaternion.identity).GetComponent<Rigidbody>();
+            if (thrownObject.TryGetComponent<ProjectileController>(out ProjectileController controller)) {
+                controller.Initialize(Caster.GetTransformCastPoint(), Caster, Ability);
+            }
+            thrownObject.AddForce(Caster.GetTransformCastPoint().forward * currentLaunchSpeed, ForceMode.Impulse);
+            return Caster.GetTransformCastPoint().position;
         }
-        thrownObject.AddForce(Caster.GetTransformCastPoint().forward * currentLaunchSpeed, ForceMode.Impulse);
-        return Caster.GetTransformCastPoint().position;
+        else {
+            return Vector3.zero;
+        }
     }
 
     public override void Cancel() {
@@ -195,7 +190,7 @@ public class ProjectileTargeting : TargetingStrategy {
     #endregion
 
     public void PredictTrajectory() {
-        Vector3 velocity = Caster.GetTransformCastPoint().forward * (currentLaunchSpeed / ProjectilePrefab.GetRigidbody.mass);
+        Vector3 velocity = Caster.GetTransformCastPoint().forward * (currentLaunchSpeed / _projectilePlotData.ProjectilePrefab.GetRigidbody.mass);
         Vector3 position = Caster.GetTransformCastPoint().position;
         Vector3 nextPosition;
         float overlap;
@@ -203,7 +198,7 @@ public class ProjectileTargeting : TargetingStrategy {
         UpdateLineRender(maxPoints, (0, position));
         if (aimingMode == AimingMode.ParabolicArc) {
             for (int i = 1; i < maxPoints; i++) {
-                velocity = CalculateNewVelocity(velocity, ProjectilePrefab.GetRigidbody.linearDamping, increment);
+                velocity = CalculateNewVelocity(velocity, _projectilePlotData.ProjectilePrefab.GetRigidbody.linearDamping, increment);
                 nextPosition = position + velocity * increment;
 
                 overlap = Vector3.Distance(position, nextPosition) * rayOverlap;

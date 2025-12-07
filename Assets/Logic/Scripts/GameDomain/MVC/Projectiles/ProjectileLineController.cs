@@ -7,7 +7,8 @@ public class ProjectileLineController : ProjectileController {
 
     private void OnTriggerEnter(Collider other) {
         if (other.TryGetComponent<IEffectable>(out IEffectable target)) {
-            foreach (AbilityEffect effect in Data.Effects) {
+            IPlotTwistData plotData = Data.PlotData as IPlotTwistData;
+            foreach (AbilityEffect effect in plotData.Effects) {
                 effect.Execute(Data, Caster, target);
             }
         }

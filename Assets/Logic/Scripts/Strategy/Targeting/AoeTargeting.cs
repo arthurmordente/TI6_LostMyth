@@ -5,7 +5,6 @@ using UnityEngine;
 
 [Serializable]
 public class AoeTargeting : TargetingStrategy {
-    public GameObject AoePrefab;
     public LayerMask GroundLayerMask;
     public LayerMask HittableLayerMask;
     public float Radius;
@@ -14,8 +13,9 @@ public class AoeTargeting : TargetingStrategy {
 
     public override void Initialize(AbilityData data, IEffectable caster) {
         base.Initialize(data, caster);
-        if (AoePrefab != null) {
-            previewInstance = GameObject.Instantiate(AoePrefab, new Vector3(0f, 0.1f, 0f), Quaternion.identity);
+        AoePlotTwistData plotData = data.PlotData as AoePlotTwistData;
+        if (plotData != null && plotData.AoePrefab != null) {
+            previewInstance = GameObject.Instantiate(plotData.AoePrefab, new Vector3(0f, 0.1f, 0f), Quaternion.identity);
         }
         SubscriptionService.RegisterUpdatable(this);
     }
