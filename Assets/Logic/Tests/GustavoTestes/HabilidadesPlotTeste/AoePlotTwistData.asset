@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 43a8440b1f740f746bb34bc84f7348d9, type: 3}
+  m_Name: AoePlotTwistData
+  m_EditorClassIdentifier: 
+  Name: Teste
+  Description: a
+  Icon: {fileID: 0}
+  AoePrefab: {fileID: 9022057012079785743, guid: 3c5919a7ff77b9046b7fab15f495f863, type: 3}
+  _effects:
+  - rid: 2036518907759296590
+  references:
+    version: 2
+    RefIds:
+    - rid: 2036518907759296590
+      type: {class: DashEffect, ns: , asm: Assembly-CSharp}
+      data:
+        Name: 
+        Description: 
+        IsAutoCast: 0
+        _distance: 6
+        _stripWidth: 1
+        _y: 0.2
