@@ -45,7 +45,6 @@ namespace Logic.Scripts.GameDomain.GameInputActions {
             _gameInputActions.Exploration.Disable();
         }
 
-
         #region gameplayInput
         public void RegisterGameplayInputListeners() {
             LogService.LogTopic("Register Gameplay input listeners", LogTopicType.Inputs);
@@ -66,6 +65,7 @@ namespace Logic.Scripts.GameDomain.GameInputActions {
             _gameInputActions.Player.UseAbility4.started += UseAbility4Started;
             _gameInputActions.Player.UseAbility5.started += UseAbility5Started;
             _gameInputActions.Player.MouseClick.started += OnMouseClickStarted;
+            _gameInputActions.Player.Zoom.performed += OnZoomPerformed;
         }
 
         public void UnregisterGameplayInputListeners() {
@@ -88,6 +88,7 @@ namespace Logic.Scripts.GameDomain.GameInputActions {
             _gameInputActions.Player.UseAbility5.started -= UseAbility5Started;
 
             _gameInputActions.Player.MouseClick.started -= OnMouseClickStarted;
+            _gameInputActions.Player.Zoom.performed -= OnZoomPerformed;
         }
 
         private void OnMouseClickStarted(InputAction.CallbackContext context) {
@@ -135,6 +136,10 @@ namespace Logic.Scripts.GameDomain.GameInputActions {
         private void OnMoveCanceled(InputAction.CallbackContext context) { _commandFactory.CreateCommandVoid<StopMoveInputCommand>().Execute(); }
         private void OnActivateCamAndCancelAbilityCanceled(InputAction.CallbackContext context) { _commandFactory.CreateCommandVoid<DeactivateCamInputCommand>().Execute(); }
         #endregion
+        private void OnZoomPerformed(InputAction.CallbackContext context)
+        {
+            _commandFactory.CreateCommandVoid<ZoomInputCommand>().Execute();
+        }
 
         #region explorationInput
         public void RegisterExplorationInputListeners() {
@@ -146,6 +151,7 @@ namespace Logic.Scripts.GameDomain.GameInputActions {
             _gameInputActions.Exploration.Move.canceled += OnMoveCanceled;
             _gameInputActions.Exploration.Pause.started += OnPauseStarted;
             _gameInputActions.Exploration.RotateCam.started += OnRotateCamStarted;
+            _gameInputActions.Exploration.Zoom.started += OnZoomPerformed;
         }
 
         public void UnregisterExplorationInputListeners() {
@@ -157,6 +163,7 @@ namespace Logic.Scripts.GameDomain.GameInputActions {
             _gameInputActions.Exploration.Move.canceled -= OnMoveCanceled;
             _gameInputActions.Exploration.Pause.started -= OnPauseStarted;
             _gameInputActions.Exploration.RotateCam.started -= OnRotateCamStarted;
+            _gameInputActions.Exploration.Zoom.started -= OnZoomPerformed;
         }
 
         private void OnActivateCamStarted(InputAction.CallbackContext obj) {

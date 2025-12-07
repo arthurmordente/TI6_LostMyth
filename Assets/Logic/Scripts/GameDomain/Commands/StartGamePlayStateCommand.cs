@@ -38,6 +38,7 @@ namespace Logic.Scripts.GameDomain.Commands {
             _gameInputActionsController.RegisterGameplayInputListeners();
             await _commandFactory.CreateCommandAsync<StartLevelCommand>().StartBoss().Execute(cancellationTokenSource);
             _naraController.InitEntryPointGamePlay(_gamePlayUiController);
+            _audioService.PlayAudio(AudioClipType.BossTheme, AudioChannelType.Music, AudioPlayType.Loop);
         }
     }
 }

@@ -6,58 +6,61 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.UIElements;
 
 public class GuideUIView : MonoBehaviour {
-    public UIDocument uiDocument;
+    [SerializeField] private UIDocument _uiDocument;
+    private VisualElement _mainContainer;
+    private Button _closeButton;
 
-    [SerializeField] private string guideLabel = "Guides";
+    [SerializeField] private string _guideLabel = "Guides";
 
-    private VisualElement root;
-    private GuideSO currentGuide;
-    private int currentPageIndex = 0;
+    private VisualElement _root;
+    private GuideSO _currentGuide;
+    private int _currentPageIndex = 0;
 
-    private Label titleLabel;
-    private Label descriptionLabel;
-    private VisualElement pageImageContainer;
-    private VisualElement buttonsContainer;
-    private VisualElement pagesButtonContainer;
-    private VisualElement guidesListContainer;
-    private Button nextPageButton;
-    private Button previousPageButton;
+    private Label _titleLabel;
+    private Label _descriptionLabel;
+    private VisualElement _pageImageContainer;
+    private VisualElement _buttonsContainer;
+    private VisualElement _pagesButtonContainer;
+    private VisualElement _guidesListContainer;
+    private Button _nextPageButton;
+    private Button _previousPageButton;
 
-    private readonly List<Button> pageButtons = new List<Button>();
-    private readonly List<Button> guideButtons = new List<Button>();
-
-
-    private async void InitiPoint() {
-        root = uiDocument.rootVisualElement;
-
-        titleLabel = root.Q<Label>("title-label");
-        descriptionLabel = root.Q<Label>("description-label");
-        pageImageContainer = root.Q<VisualElement>("page-image-container");
-        buttonsContainer = root.Q<VisualElement>("buttons-container");
-        pagesButtonContainer = root.Q<VisualElement>("pages-button");
-        nextPageButton = root.Q<Button>("next-page-button");
-        previousPageButton = root.Q<Button>("previous-page-button");
-        VisualElement guidesListRoot = root.Q<VisualElement>("guide-list-scroll");
-        guidesListContainer = guidesListRoot.Q<VisualElement>("unity-content-container");
+    private readonly List<Button> _pageButtons = new List<Button>();
+    private readonly List<Button> _guideButtons = new List<Button>();
 
 
-        if (nextPageButton != null) {
-            nextPageButton.clickable.clicked += () => NavigatePage(1);
+    public async Awaitable InitiPoint() {
+        _root = _uiDocument.rootVisualElement;
+        _mainContainer = _root.Q<VisualElement>("main-container");
+        _closeButton = _root.Q<Button>("exit-options-button");
+        _titleLabel = _root.Q<Label>("title-label");
+        _descriptionLabel = _root.Q<Label>("description-label");
+        _pageImageContainer = _root.Q<VisualElement>("page-image-container");
+        _buttonsContainer = _root.Q<VisualElement>("buttons-container");
+        _pagesButtonContainer = _root.Q<VisualElement>("pages-button");
+        _nextPageButton = _root.Q<Button>("next-page-button");
+        _previousPageButton = _root.Q<Button>("previous-page-button");
+        VisualElement guidesListRoot = _root.Q<VisualElement>("guide-list-scroll");
+        _guidesListContainer = guidesListRoot.Q<VisualElement>("unity-content-container");
+
+
+        if (_nextPageButton != null) {
+            _nextPageButton.clickable.clicked += () => NavigatePage(1);
         }
 
-        if (previousPageButton != null) {
-            previousPageButton.clickable.clicked += () => NavigatePage(-1);
+        if (_previousPageButton != null) {
+            _previousPageButton.clickable.clicked += () => NavigatePage(-1);
         }
 
         await SetUp();
     }
 
-    public async Awaitable SetUp() {
+    private async Awaitable SetUp() {
 
-        guidesListContainer.Clear();
-        guideButtons.Clear();
+        _guidesListContainer.Clear();
+        _guideButtons.Clear();
 
-        AsyncOperationHandle<IList<GuideSO>> loadHandle = Addressables.LoadAssetsAsync<GuideSO>(guideLabel, null);
+        AsyncOperationHandle<IList<GuideSO>> loadHandle = Addressables.LoadAssetsAsync<GuideSO>(_guideLabel, null);
 
         await loadHandle.Task;
 
@@ -71,27 +74,42 @@ public class GuideUIView : MonoBehaviour {
 
                 guideButton.clickable.clicked += () => OnClickGuideButton(guide);
 
-                guideButtons.Add(guideButton);
-                guidesListContainer.Add(guideButton);
+                _guideButtons.Add(guideButton);
+                _guidesListContainer.Add(guideButton);
             }
         }
     }
 
-    public void OnClickGuideButton(GuideSO guide) {
-        currentGuide = guide;
-        currentPageIndex = 0;
+    public void RegisterCallbacks() {
+        _closeButton.clicked += Hide;
+    }
 
-        titleLabel.text = guide.guideTitle;
+    public void Show() {
+        _mainContainer.RemoveFromClassList("close-container");
+        _mainContainer.AddToClassList("open-container");
+        _root.BringToFront();
+    }
+
+    public void Hide() {
+        _mainContainer.AddToClassList("close-container");
+        _mainContainer.RemoveFromClassList("open-container");
+    }
+
+    public void OnClickGuideButton(GuideSO guide) {
+        _currentGuide = guide;
+        _currentPageIndex = 0;
+
+        _titleLabel.text = guide.guideTitle;
 
         if (guide.Pages.Count > 0) {
-            UpdatePage(guide.Pages[currentPageIndex]);
+            UpdatePage(guide.Pages[_currentPageIndex]);
         }
         else {
             UpdatePage(new Page { descriptionText = "Este guia está vazio.", pageSprite = null });
         }
 
         bool hasMultiplePages = guide.Pages.Count > 1;
-        buttonsContainer.style.display = hasMultiplePages ? DisplayStyle.Flex : DisplayStyle.None;
+        _buttonsContainer.style.display = hasMultiplePages ? DisplayStyle.Flex : DisplayStyle.None;
 
         ClearPageButtons();
 
@@ -102,71 +120,70 @@ public class GuideUIView : MonoBehaviour {
     }
 
     private void ClearPageButtons() {
-        foreach (var button in pageButtons) {
+        foreach (var button in _pageButtons) {
             button.RemoveFromHierarchy();
         }
-        pageButtons.Clear();
+        _pageButtons.Clear();
     }
 
     private void CreatePageButtons() {
-        for (int i = 0; i < currentGuide.Pages.Count; i++) {
+        for (int i = 0; i < _currentGuide.Pages.Count; i++) {
             Button pageButton = new Button();
-            //pageButton.text = (i + 1).ToString(); 
 
             pageButton.AddToClassList("page-non-selected-button");
 
             int index = i;
             pageButton.clickable.clicked += () => NavigateToPage(index);
 
-            pagesButtonContainer.Add(pageButton);
-            pageButtons.Add(pageButton);
+            _pagesButtonContainer.Add(pageButton);
+            _pageButtons.Add(pageButton);
         }
     }
 
     private void NavigatePage(int delta) {
-        NavigateToPage(currentPageIndex + delta);
+        NavigateToPage(_currentPageIndex + delta);
     }
 
     private void NavigateToPage(int index) {
-        if (currentGuide == null || index < 0 || index >= currentGuide.Pages.Count) {
+        if (_currentGuide == null || index < 0 || index >= _currentGuide.Pages.Count) {
             return;
         }
 
-        currentPageIndex = index;
-        UpdatePage(currentGuide.Pages[currentPageIndex]);
+        _currentPageIndex = index;
+        UpdatePage(_currentGuide.Pages[_currentPageIndex]);
 
         UpdateNavigationState();
     }
 
     private void UpdateNavigationState() {
-        if (currentGuide == null) return;
+        if (_currentGuide == null) return;
 
-        int totalPages = currentGuide.Pages.Count;
+        int totalPages = _currentGuide.Pages.Count;
 
-        nextPageButton.SetEnabled(currentPageIndex < totalPages - 1);
-        previousPageButton.SetEnabled(currentPageIndex > 0);
+        _nextPageButton.SetEnabled(_currentPageIndex < totalPages - 1);
+        _previousPageButton.SetEnabled(_currentPageIndex > 0);
 
-        for (int i = 0; i < pageButtons.Count; i++) {
-            if (i == currentPageIndex) {
-                pageButtons[i].RemoveFromClassList("page-non-selected-button");
-                pageButtons[i].AddToClassList("page-selected-button");
+        for (int i = 0; i < _pageButtons.Count; i++) {
+            if (i == _currentPageIndex) {
+                _pageButtons[i].RemoveFromClassList("page-non-selected-button");
+                _pageButtons[i].AddToClassList("page-selected-button");
             }
             else {
-                pageButtons[i].RemoveFromClassList("page-selected-button");
-                pageButtons[i].AddToClassList("page-non-selected-button");
+                _pageButtons[i].RemoveFromClassList("page-selected-button");
+                _pageButtons[i].AddToClassList("page-non-selected-button");
             }
         }
     }
 
     public void UpdatePage(Page page) {
-        descriptionLabel.text = page.descriptionText;
+        _descriptionLabel.text = page.descriptionText;
 
-        if (pageImageContainer != null) {
+        if (_pageImageContainer != null) {
             if (page.pageSprite != null) {
-                pageImageContainer.style.backgroundImage = new StyleBackground(page.pageSprite);
+                _pageImageContainer.style.backgroundImage = new StyleBackground(page.pageSprite);
             }
             else {
-                pageImageContainer.style.backgroundImage = new StyleBackground(StyleKeyword.None);
+                _pageImageContainer.style.backgroundImage = new StyleBackground(StyleKeyword.None);
             }
         }
     }

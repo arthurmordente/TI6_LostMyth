@@ -15,6 +15,11 @@ namespace Logic.Scripts.GameDomain.ZenjectInstallers {
         public AbilityPointData PointData;
 
         [SerializeField] private AudioClipsScriptableObject _gameplayAudioClips;
+        [SerializeField] private LoadUIView _loadView;
+        [SerializeField] private GuideUIView _guideView;
+        [SerializeField] private CheatsUIView _cheatsView;
+        [SerializeField] private CreditsUIView _creditsUIView;
+        [SerializeField] private OptionsUIView _optionsView;
 
         public override void InstallBindings() {
             Container.Bind<IGameInitiator>().To<GameInitiator.GameInitiator>().AsSingle().NonLazy();
@@ -23,6 +28,8 @@ namespace Logic.Scripts.GameDomain.ZenjectInstallers {
             Container.BindFactory<ExplorationInitiatorEnterData, ExplorationState, ExplorationState.Factory>();
             Container.BindInterfacesTo<LevelsDataService>().AsSingle().NonLazy();
             Container.BindFactory<LobbyInitiatorEnterData, LobbyState, LobbyState.Factory>().AsSingle().NonLazy();
+            Container.BindInterfacesTo<UniversalUIController>().AsSingle().WithArguments(_loadView, _guideView, 
+                _cheatsView, _creditsUIView, _optionsView).NonLazy();
 
             Container.Bind<IAudioService>()
                 .To<AudioService>()

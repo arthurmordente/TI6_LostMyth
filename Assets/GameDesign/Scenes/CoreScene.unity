@@ -953,7 +953,7 @@ PrefabInstance:
       objectReference: {fileID: 9197481963319205126, guid: c8381441fe3cf574da0d8f7faf945b93, type: 3}
     - target: {fileID: 7276388086967375265, guid: 60f0c5c190be30e43956524f545344df, type: 3}
       propertyPath: m_SortingOrder
-      value: 2
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 7276388086967375265, guid: 60f0c5c190be30e43956524f545344df, type: 3}
       propertyPath: m_PanelSettings

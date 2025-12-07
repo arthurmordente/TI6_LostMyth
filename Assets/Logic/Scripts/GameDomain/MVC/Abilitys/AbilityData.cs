@@ -10,7 +10,6 @@ namespace Logic.Scripts.GameDomain.MVC.Abilitys {
         public string Name;
         public string Description;
         public Sprite Icon;
-        [SerializeField] private AudioClip _sfx;
 
         [HideInInspector] public int Damage;
         [HideInInspector] public int Cooldown;
@@ -28,8 +27,6 @@ namespace Logic.Scripts.GameDomain.MVC.Abilitys {
         [SerializeReference] public TargetingStrategy TargetingStrategy;
 
         public PlotTwistData PlotData;
-        //To-Do Adicionar VFXController
-        //To-Do Tocar audioClip quando tivermos
 
         public void SetUp(IUpdateSubscriptionService updateSubscriptionService, ICommandFactory commandFactory) {
             TargetingStrategy.SetUp(updateSubscriptionService, commandFactory);
@@ -67,11 +64,11 @@ namespace Logic.Scripts.GameDomain.MVC.Abilitys {
         }
 
         public int GetCost() {
-            return _baseCost + Cost;
+            return Math.Max(1, (_baseCost - Cost));
         }
 
         public int GetCooldown() {
-            return _baseCooldown + Cooldown;
+            return Math.Max(1, (_baseCooldown - Cooldown));
         }
         #endregion
 
@@ -89,15 +86,6 @@ namespace Logic.Scripts.GameDomain.MVC.Abilitys {
             total += Math.Max(0, Cooldown);
             total += Math.Max(0, Cost);
             total += Math.Max(0, Range);
-            return total;
-        }
-
-        public int GetPointsGained() {
-            int total = 0;
-            total += Math.Max(0, -Damage);
-            total += Math.Max(0, -Cooldown);
-            total += Math.Max(0, -Cost);
-            total += Math.Max(0, -Range);
             return total;
         }
 

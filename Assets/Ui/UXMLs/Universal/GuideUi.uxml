@@ -1,26 +1,15 @@
 <engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/Ui/Styles/LobbyMenuStyle.uss?fileID=7433441132597879392&amp;guid=8c15ef07de17af044bf70c45766414bf&amp;type=3#LobbyMenuStyle" />
-    <engine:VisualElement name="main-container" style="flex-grow: 1; align-self: auto; align-items: center; justify-content: center; background-image: url(&quot;project://database/Assets/Ui/Images/DarkBackground.png?fileID=2800000&amp;guid=b4606be581164c5489be0b83576a836b&amp;type=3#DarkBackground&quot;); -unity-background-scale-mode: stretch-to-fill; flex-direction: row;">
+    <engine:VisualElement name="main-container" class="close-container" style="flex-grow: 1; align-self: auto; align-items: center; justify-content: center; background-image: url(&quot;project://database/Assets/Ui/Images/DarkBackground.png?fileID=2800000&amp;guid=b4606be581164c5489be0b83576a836b&amp;type=3#DarkBackground&quot;); -unity-background-scale-mode: stretch-to-fill; flex-direction: row;">
         <engine:VisualElement name="left-column-container" style="flex-grow: 1; height: 100%; width: 35%; padding-top: 2%; padding-right: 2%; padding-bottom: 2%; padding-left: 2%; justify-content: space-between;">
             <engine:Label text="Guias" style="width: 100%; height: 15%; -unity-text-align: middle-center; font-size: 150%; -unity-font-definition: url(&quot;project://database/Assets/Ui/UI%20Fonts/Title.ttf?fileID=12800000&amp;guid=e8f8a8a2d6ddad14086f666da53e1f84&amp;type=3#Title&quot;); color: rgb(243, 235, 235);" />
-            <engine:ScrollView name="guide-list-scroll" style="height: 83%; background-image: url(&quot;project://database/Assets/Ui/Images/ButtonsListBackground.png?fileID=2800000&amp;guid=bc6e36229f8a9eb45822fc6a45b3eb6d&amp;type=3#ButtonsListBackground&quot;);">
-                <engine:Button text="Guias" name="guide-btn" class="simple-button" />
-                <engine:Button text="Opções" name="options-btn" class="simple-button" />
-                <engine:Button text="Carregar" name="load-btn" class="simple-button" />
-                <engine:Button text="Menu Inicial" name="main-menu-btn" class="simple-button" />
-                <engine:Button text="Sair" name="exit-btn" class="simple-button" />
-                <engine:Button text="Trapaças" name="cheat-btn" class="simple-button" />
-                <engine:Button text="Trapaças" name="cheat-btn" class="simple-button" />
-                <engine:Button text="Trapaças" name="cheat-btn" class="simple-button" />
-                <engine:Button text="Trapaças" name="cheat-btn" class="simple-button" />
-                <engine:Button text="Trapaças" name="cheat-btn" class="simple-button" />
-            </engine:ScrollView>
+            <engine:ScrollView name="guide-list-scroll" style="height: 83%; background-image: url(&quot;project://database/Assets/Ui/Images/ButtonsListBackground.png?fileID=2800000&amp;guid=bc6e36229f8a9eb45822fc6a45b3eb6d&amp;type=3#ButtonsListBackground&quot;);" />
         </engine:VisualElement>
         <engine:VisualElement name="body-container" style="flex-grow: 1; height: 95%; width: 65%; align-items: center; justify-content: center; padding-top: 1%; padding-bottom: 1%; padding-right: 2%;">
             <engine:VisualElement style="flex-grow: 1; flex-direction: column; background-image: url(&quot;project://database/Assets/Ui/Images/CleanBackground.png?fileID=2800000&amp;guid=6dcdf45004f567c4bb2bb3a8e1e23dcc&amp;type=3#CleanBackground&quot;); padding-top: 2%; padding-right: 2%; padding-bottom: 2%; padding-left: 2%; justify-content: center; align-items: center; width: 100%; height: 100%;">
                 <engine:VisualElement name="header-container" style="flex-grow: 1; height: 15%; width: 100%; flex-direction: row;">
                     <engine:Label text="Title Guia Label" name="title-label" style="height: 100%; width: 90%; -unity-font-definition: url(&quot;project://database/Assets/Ui/UI%20Fonts/SubTitle.ttf?fileID=12800000&amp;guid=b88dc2cdbf2798c4fa1b3984c567e570&amp;type=3#SubTitle&quot;); font-size: 100%; color: rgb(107, 15, 142); -unity-text-align: middle-left;" />
-                    <engine:Button class="close-button" />
+                    <engine:Button name="exit-options-button" class="close-button" />
                 </engine:VisualElement>
                 <engine:VisualElement name="body-container" style="flex-grow: 1; height: 70%; width: 100%; justify-content: space-between; padding-top: 2%;">
                     <engine:VisualElement name="page-image-container" style="flex-grow: 1; height: 45%; -unity-background-scale-mode: scale-to-fit; background-image: url(&quot;project://database/Assets/Logic/Tests/VictorTeste/img_Comandos.png?fileID=2800000&amp;guid=7c220a7b39ec2cf4189976d50ec2e6d3&amp;type=3#img_Comandos&quot;);" />

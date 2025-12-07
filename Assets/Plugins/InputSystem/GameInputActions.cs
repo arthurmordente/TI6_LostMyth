@@ -234,6 +234,15 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Zoom"",
+                    ""type"": ""Value"",
+                    ""id"": ""1dd4bc9d-13c4-46fd-8d20-1fef45fb51dd"",
+                    ""expectedControlType"": ""Axis"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
                 }
             ],
             ""bindings"": [
@@ -500,6 +509,17 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
                     ""action"": ""UseAbility4"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""e403dd35-b0f5-412b-8c29-a80be638a7a7"",
+                    ""path"": ""<Mouse>/scroll/y"",
+                    ""interactions"": """",
+                    ""processors"": ""Invert"",
+                    ""groups"": """",
+                    ""action"": ""Zoom"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -560,6 +580,15 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Zoom"",
+                    ""type"": ""Value"",
+                    ""id"": ""966a1dc0-ff80-48a7-a08b-59fc9dfe1fdf"",
+                    ""expectedControlType"": ""Axis"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
                 }
             ],
             ""bindings"": [
@@ -661,6 +690,17 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
                     ""action"": ""Move"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""aeb3b867-4b37-402d-a85e-a48722818a9b"",
+                    ""path"": ""<Mouse>/scroll/y"",
+                    ""interactions"": """",
+                    ""processors"": ""Invert"",
+                    ""groups"": """",
+                    ""action"": ""Zoom"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 },
                 {
                     ""name"": """",
@@ -1317,6 +1357,7 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
         m_Player_ZoomingCam = m_Player.FindAction("ZoomingCam", throwIfNotFound: true);
         m_Player_ActivateCam = m_Player.FindAction("ActivateCam", throwIfNotFound: true);
         m_Player_MouseClick = m_Player.FindAction("MouseClick", throwIfNotFound: true);
+        m_Player_Zoom = m_Player.FindAction("Zoom", throwIfNotFound: true);
         // Exploration
         m_Exploration = asset.FindActionMap("Exploration", throwIfNotFound: true);
         m_Exploration_Move = m_Exploration.FindAction("Move", throwIfNotFound: true);
@@ -1325,6 +1366,7 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
         m_Exploration_RotateCam = m_Exploration.FindAction("RotateCam", throwIfNotFound: true);
         m_Exploration_ZoomingCam = m_Exploration.FindAction("ZoomingCam", throwIfNotFound: true);
         m_Exploration_ActivateCam = m_Exploration.FindAction("ActivateCam", throwIfNotFound: true);
+        m_Exploration_Zoom = m_Exploration.FindAction("Zoom", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -1435,6 +1477,7 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_ZoomingCam;
     private readonly InputAction m_Player_ActivateCam;
     private readonly InputAction m_Player_MouseClick;
+    private readonly InputAction m_Player_Zoom;
     /// <summary>
     /// Provides access to input actions defined in input action map "Player".
     /// </summary>
@@ -1511,6 +1554,10 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
         /// </summary>
         public InputAction @MouseClick => m_Wrapper.m_Player_MouseClick;
         /// <summary>
+        /// Provides access to the underlying input action "Player/Zoom".
+        /// </summary>
+        public InputAction @Zoom => m_Wrapper.m_Player_Zoom;
+        /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
         public InputActionMap Get() { return m_Wrapper.m_Player; }
@@ -1584,6 +1631,9 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
             @MouseClick.started += instance.OnMouseClick;
             @MouseClick.performed += instance.OnMouseClick;
             @MouseClick.canceled += instance.OnMouseClick;
+            @Zoom.started += instance.OnZoom;
+            @Zoom.performed += instance.OnZoom;
+            @Zoom.canceled += instance.OnZoom;
         }
 
         /// <summary>
@@ -1643,6 +1693,9 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
             @MouseClick.started -= instance.OnMouseClick;
             @MouseClick.performed -= instance.OnMouseClick;
             @MouseClick.canceled -= instance.OnMouseClick;
+            @Zoom.started -= instance.OnZoom;
+            @Zoom.performed -= instance.OnZoom;
+            @Zoom.canceled -= instance.OnZoom;
         }
 
         /// <summary>
@@ -1686,6 +1739,7 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Exploration_RotateCam;
     private readonly InputAction m_Exploration_ZoomingCam;
     private readonly InputAction m_Exploration_ActivateCam;
+    private readonly InputAction m_Exploration_Zoom;
     /// <summary>
     /// Provides access to input actions defined in input action map "Exploration".
     /// </summary>
@@ -1721,6 +1775,10 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Exploration/ActivateCam".
         /// </summary>
         public InputAction @ActivateCam => m_Wrapper.m_Exploration_ActivateCam;
+        /// <summary>
+        /// Provides access to the underlying input action "Exploration/Zoom".
+        /// </summary>
+        public InputAction @Zoom => m_Wrapper.m_Exploration_Zoom;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -1765,6 +1823,9 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
             @ActivateCam.started += instance.OnActivateCam;
             @ActivateCam.performed += instance.OnActivateCam;
             @ActivateCam.canceled += instance.OnActivateCam;
+            @Zoom.started += instance.OnZoom;
+            @Zoom.performed += instance.OnZoom;
+            @Zoom.canceled += instance.OnZoom;
         }
 
         /// <summary>
@@ -1794,6 +1855,9 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
             @ActivateCam.started -= instance.OnActivateCam;
             @ActivateCam.performed -= instance.OnActivateCam;
             @ActivateCam.canceled -= instance.OnActivateCam;
+            @Zoom.started -= instance.OnZoom;
+            @Zoom.performed -= instance.OnZoom;
+            @Zoom.canceled -= instance.OnZoom;
         }
 
         /// <summary>
@@ -2206,6 +2270,13 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnMouseClick(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Zoom" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnZoom(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "Exploration" which allows adding and removing callbacks.
@@ -2256,6 +2327,13 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnActivateCam(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Zoom" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnZoom(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "UI" which allows adding and removing callbacks.
