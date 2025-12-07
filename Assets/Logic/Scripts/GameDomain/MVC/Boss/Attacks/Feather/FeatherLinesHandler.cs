@@ -14,7 +14,7 @@ using Logic.Scripts.GameDomain.MVC.Boss.Telegraph;
 
 namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Feather
 {
-    public class FeatherLinesHandler : IBossAttackHandler, IUpdatable
+    public class FeatherLinesHandler : IBossAttackHandler, IUpdatable, Logic.Scripts.GameDomain.MVC.Boss.Attacks.Core.ITelegraphVisibility
     {
         private readonly FeatherLinesParams _params;
         private readonly IUpdateSubscriptionService _updateSvc;
@@ -238,7 +238,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Feather
 				_singleArrow.enabled = true;
 			}
 
-			UpdateTelegraphGeometryAtCenter(parentTransform.position);
+            UpdateTelegraphGeometryAtCenter(parentTransform.position);
 			// Apenas o ataque habilitado para deslocamento deve fixar eixo/posições globais
 			if (_telegraphDisplacementEnabled)
 			{
@@ -247,6 +247,9 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Feather
             EnsureAudio();
             _audio?.PlayAudio(AudioClipType.BossPrepAttack1SFX, AudioChannelType.Fx, AudioPlayType.OneShot);
             _updateSvc?.RegisterUpdatable(this);
+
+            // Start hidden; boss controller will reveal at mid prep
+            SetTelegraphVisible(false);
         }
 
         private bool ResolveInitialPushMode()
@@ -754,6 +757,20 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Feather
             }
 
             _views = null;
+        }
+
+        public void SetTelegraphVisible(bool visible)
+        {
+            if (_views != null)
+            {
+                for (int i = 0; i < _views.Length; i++)
+                {
+                    var v = _views[i];
+                    if (v?.Line != null) v.Line.enabled = visible;
+                    if (v?.MeshRenderer != null) v.MeshRenderer.enabled = visible;
+                }
+            }
+            if (_singleArrow != null) _singleArrow.enabled = visible;
         }
     }
 }

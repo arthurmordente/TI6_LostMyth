@@ -47,6 +47,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
         private BossPlan _currentPlan;
         private bool _isCasting;
         private int _remainingCastTurns;
+        private int _loopingAttackAnimId = -1;
         private struct PendingCast { public BossAttack Attack; public int TurnsRemaining; }
         private System.Collections.Generic.List<PendingCast> _pendingCasts;
         private bool _registeredFixed;
@@ -211,7 +212,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
             _audioService.PlayAudio(AudioClipType.BossMove1SFX, AudioChannelType.Fx, AudioPlayType.OneShot);
 
             // 3) Preparar ataque deste turno conforme padrão do behavior
-            QueuePreparedAttackFromBehavior();
+            _ = QueuePreparedAttackFromBehaviorAsync();
             _executedTurnsCount++;
         }
 
@@ -238,12 +239,27 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
             // After executing the previously prepared action, evaluate phase change for this turn
             bool didTransition = await EvaluateAndMaybeSwitchPhaseAsync();
             await MoveTurnAsync();
-            PrepareNextAction();
+            // Garante Idle pós movimento antes de preparar o próximo ataque
+            if (_bossView != null) {
+                await _bossView.WaitUntilIdleAsync(3f);
+            }
+            await PrepareNextActionAsync();
+            // Espera entrar no estado de AttackLoop do ataque preparado (para o próximo round) antes de encerrar o turno
+            if (_bossView != null) {
+                await _bossView.WaitUntilAttackLoopAsync(3f);
+            }
             _executedTurnsCount++;
         }
 
 		private async Task ExecutePreparedActionAsync() {
 			if (_pendingCasts == null || _pendingCasts.Count == 0) return;
+
+            // Fechar loop do ataque anterior e tocar finish no início do novo turno
+            if (_loopingAttackAnimId >= 0 && _bossView != null) {
+                _bossView.SetAttackLoop(false);
+                _bossView.PlayAttackFinish();
+                _loopingAttackAnimId = -1;
+            }
 
 			// Coleta todos os ataques devidos neste turno
 			System.Collections.Generic.List<BossAttack> toExecute = new System.Collections.Generic.List<BossAttack>();
@@ -276,21 +292,27 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
 				}
 			}
 
-			// Executa todos simultaneamente
+            // Executa todos simultaneamente (aplicação deve ocorrer quando a animação de finish toca, ou seja, logo após dispará-la acima)
 			System.Collections.Generic.List<System.Threading.Tasks.Task> tasks = new System.Collections.Generic.List<System.Threading.Tasks.Task>(toExecute.Count);
 			for (int k = 0; k < toExecute.Count; k++) {
 				try {
 					tasks.Add(toExecute[k].ExecuteAsync());
 				} catch (Exception) { }
 			}
-			try {
-				await System.Threading.Tasks.Task.WhenAll(tasks);
-			} catch (Exception) { }
+            try {
+                await System.Threading.Tasks.Task.WhenAll(tasks);
+            } catch (Exception) { }
+            // Após aplicar, aguarda o término do finish e retorno ao Idle via ResetState
+            if (_bossView != null) {
+                await _bossView.WaitUntilIdleAsync(4f);
+            }
+            // Não forçar Idle aqui; confiamos no Animator (finish -> reset -> idle)
 		}
 
         private async Task MoveTurnAsync() {
             ConfigureTurnMovement();
             if (_turnMoveDistanceBudget <= 0f) return;
+            if (_bossView != null) { _bossView.PlayMovePrep(); _bossView.SetMoving(true); }
             const float stopDistance = 1.2f;
             while (_turnMoveDistanceBudget > 0f) {
                 if (_moveMode == BossMoveMode.TowardPlayer) {
@@ -301,7 +323,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
                         float dist = delta.magnitude;
                         if (dist <= stopDistance) {
                             _turnMoveDistanceBudget = 0f;
-                            if (_bossView != null) _bossView.SetMoving(false);
+                            if (_bossView != null) { _bossView.SetMoving(false); _bossView.PlayMoveFinish(); }
                             break;
                         }
                     }
@@ -314,16 +336,16 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
             _bossView?.PlayPhaseTransition();
         }
 
-        private void PrepareNextAction() {
+        private async System.Threading.Tasks.Task PrepareNextActionAsync() {
             // Se há minigame ativo, não agendar novo ataque
             if (Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.MinigameRuntimeService.IsActive) return;
             // Se a última rodada de um minigame acabou de sinalizar resolução no turno da Laki,
             // pulamos UMA preparação neste turno
             if (Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.MinigameRuntimeService.ConsumeSkipOnBossTurn()) return;
-            QueuePreparedAttackFromBehavior();
+            await QueuePreparedAttackFromBehaviorAsync();
         }
 
-		private void QueuePreparedAttackFromBehavior() {
+		private async System.Threading.Tasks.Task QueuePreparedAttackFromBehaviorAsync() {
             var behavior = GetCurrentBehavior();
             if (behavior == null) return;
             BossBehaviorSO.BossTurnConfig[] pattern = behavior.TurnPattern;
@@ -386,6 +408,55 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
 				if (delay == 0) Debug.Log($"[Laki] Minigame queued to execute this turn");
 				else Debug.Log($"Boss prepared attack index: {attackIndex} (executes next turn)");
 			}
+
+            // Escolhe o PRIMEIRO da lista como primário para animar (independente do winner)
+            if (created.Count > 0 && _bossView != null) {
+                BossAttack primary = created[0].atk;
+                if (primary != null) {
+                    int animId = ResolveAnimationIdFor(primary);
+                    if (animId >= 0) {
+                        _bossView.PlayAttackPrep(animId);
+                        _bossView.SetAttackLoop(true);
+                        _loopingAttackAnimId = animId;
+                        // Exibir telegraph no MEIO do prep
+                        try {
+                            await _bossView.WaitUntilStateTagNormalizedAsync("AttackPrep", 0.5f, 2.5f);
+                            primary.TrySetTelegraphVisible(true);
+                        } catch { }
+                    }
+                }
+            }
+        }
+
+        private int ResolveAnimationIdFor(BossAttack attack)
+        {
+            if (attack == null) return -1;
+            string kind = attack.GetAttackTypeName();
+            // Map: Protean=0, Circle=1, FeatherLines=2, WingSlashLeft=3, WingSlashRight=4
+            if (string.Equals(kind, "ProteanCones", StringComparison.OrdinalIgnoreCase)) return 0;
+            if (string.Equals(kind, "Circle", StringComparison.OrdinalIgnoreCase)) return 1;
+            if (string.Equals(kind, "FeatherLines", StringComparison.OrdinalIgnoreCase)) return 2;
+            if (string.Equals(kind, "WingSlash", StringComparison.OrdinalIgnoreCase)) {
+                // Decide left/right relative to boss forward and player position
+                Vector3 player = Vector3.zero;
+                if (_arenaReference != null) {
+                    player = _arenaReference.RelativeArenaPositionToRealPosition(_arenaReference.GetPlayerArenaPosition());
+                } else {
+                    var nara = Object.FindFirstObjectByType<Nara.NaraView>(FindObjectsInactive.Exclude);
+                    if (nara != null) player = nara.transform.position;
+                }
+                if (_bossTransform != null) {
+                    Vector3 toPlayer = player - _bossTransform.position; toPlayer.y = 0f;
+                    Vector3 fwd = _bossTransform.forward; fwd.y = 0f;
+                    if (toPlayer.sqrMagnitude < 1e-6f || fwd.sqrMagnitude < 1e-6f) return 3; // default to Left
+                    toPlayer.Normalize(); fwd.Normalize();
+                    float crossY = Vector3.Cross(fwd, toPlayer).y;
+                    return (crossY >= 0f) ? 3 : 4;
+                }
+                return 3;
+            }
+            // Fallbacks for other attacks: prefer Circle (1) look
+            return 1;
         }
 
         private void ConfigureTurnMovement() {

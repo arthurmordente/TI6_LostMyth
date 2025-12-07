@@ -5,7 +5,7 @@ using Logic.Scripts.GameDomain.MVC.Abilitys;
 
 namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.SkySwords
 {
-	public sealed class SkySwordsHandler : IBossAttackHandler
+	public sealed class SkySwordsHandler : IBossAttackHandler, Logic.Scripts.GameDomain.MVC.Boss.Attacks.Core.ITelegraphVisibility
 	{
 		private readonly float _radius;
 		private readonly float _ringWidth;
@@ -129,6 +129,9 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.SkySwords
 					CurrentDisplacementEnabled = true;
 					CurrentCenterWorld = _centerWorld;
 				}
+
+			// Start hidden; boss controller will reveal at mid prep
+			SetTelegraphVisible(false);
 		}
 
 		public bool ComputeHits(ArenaPosReference arenaReference, Transform originTransform, IEffectable caster)
@@ -204,6 +207,13 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.SkySwords
 					_arrowUpdater = null;
 				}
 				CurrentDisplacementEnabled = false;
+		}
+
+		public void SetTelegraphVisible(bool visible)
+		{
+			if (_ring != null) _ring.enabled = visible;
+			if (_discRenderer != null) _discRenderer.enabled = visible;
+			if (_arrow != null) _arrow.enabled = visible && _telegraphDisplacementEnabled;
 		}
 
 		private void DrawCircle(Vector3 center, float radius, int segments)

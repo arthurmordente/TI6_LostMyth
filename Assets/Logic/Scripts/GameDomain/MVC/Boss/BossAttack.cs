@@ -16,7 +16,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
     {
         [SerializeReference] private List<AbilityEffect> _effects;
 
-        private enum AttackType { ProteanCones, FeatherLines, WingSlash, Orb, HookAwakening, SkySwords, Minigame }
+        private enum AttackType { ProteanCones, FeatherLines, WingSlash, Orb, HookAwakening, SkySwords, Minigame, Circle }
         [SerializeField] private AttackType _attackType = AttackType.ProteanCones;
 
         [SerializeField] private int _displacementPriority = 0;
@@ -52,9 +52,19 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
             public float ringWidth;
         }
 
+        [System.Serializable]
+        private struct CircleParams
+        {
+            public float radius;
+            public float ringWidth;
+        }
+
         [Header("Sky Swords")]
         [SerializeField] private SkySwordsParams _skySwords = new SkySwordsParams { radius = 4.5f, ringWidth = 0.3f };
         [SerializeField] private bool _skySwordsIsPull = false;
+
+        [Header("Circle AoE")]
+        [SerializeField] private CircleParams _circle = new CircleParams { radius = 3.5f, ringWidth = 0.25f };
 
         private ArenaPosReference _arena;
         private IEffectable _caster;
@@ -90,6 +100,13 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
             return false;
         }
         public bool IsMinigameAttack() => _attackType == AttackType.Minigame;
+        public int GetAnimationId() { return (int)_attackType; }
+        public object GetAttackTypeBoxed() { return _attackType; } // for external mapping without exposing enum type
+
+        public string GetAttackTypeName()
+        {
+            return _attackType.ToString();
+        }
         public void StripDisplacementForTelegraph()
         {
             if (_effects == null || _effects.Count == 0) return;
@@ -140,6 +157,8 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
                 }
             }
             _handler?.PrepareTelegraph(parentForTelegraph);
+            // Prepare hidden; controller reveals mid-prep if handler supports it
+            TrySetTelegraphVisible(false);
         }
 
         public void Execute()
@@ -297,6 +316,15 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
                     _handler = new ConeAttackHandler(_protean.radius, _protean.angleDeg, _protean.sides, yaws, lineBase ?? meshBase, meshBase);
                     break;
                 }
+                case AttackType.Circle:
+                {
+                    _handler = new Logic.Scripts.GameDomain.MVC.Boss.Attacks.Circle.CircleAttackHandler(
+                        _circle.radius,
+                        _circle.ringWidth,
+                        lineBase ?? meshBase,
+                        meshBase);
+                    break;
+                }
                 case AttackType.FeatherLines:
                 {
                     _handler = new FeatherLinesHandler(_feather, _featherIsPull, lineBase ?? meshBase, lineDisp ?? meshDisp, meshBase, meshDisp);
@@ -305,7 +333,30 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
                 case AttackType.WingSlash:
                 {
                     float angleAbs = Mathf.Abs(_wingSlash.angleDeg);
-                    float yawBase = (_wingSlash.angleDeg < 0f) ? 90f : -90f;
+                    // Escolhe o lado dinamicamente igual à animação (cross entre forward da Hokari e vetor até o player)
+                    float yawBase = -90f;
+                    try
+                    {
+                        Vector3 player = Vector3.zero;
+                        if (_arena != null)
+                            player = _arena.RelativeArenaPositionToRealPosition(_arena.GetPlayerArenaPosition());
+                        else
+                        {
+                            var naraView = Object.FindFirstObjectByType<Logic.Scripts.GameDomain.MVC.Nara.NaraView>(FindObjectsInactive.Exclude);
+                            if (naraView != null) player = naraView.transform.position;
+                        }
+                        var bossTr = GetComponentInParent<Logic.Scripts.GameDomain.MVC.Boss.BossView>()?.transform ?? transform;
+                        Vector3 toPlayer = player - bossTr.position; toPlayer.y = 0f;
+                        Vector3 fwd = bossTr.forward; fwd.y = 0f;
+                        if (toPlayer.sqrMagnitude > 1e-6f && fwd.sqrMagnitude > 1e-6f)
+                        {
+                            toPlayer.Normalize(); fwd.Normalize();
+                            float crossY = Vector3.Cross(fwd, toPlayer).y;
+                            // Inverte o sinal para alinhar o cone do telegraph com a animação observada
+                            yawBase = (crossY >= 0f) ? -90f : 90f;
+                        }
+                    }
+                    catch { yawBase = -90f; }
                     float[] yaws = new float[] { yawBase };
                     _handler = new ConeAttackHandler(_wingSlash.radius, angleAbs, _wingSlash.sides, yaws, lineBase ?? meshBase, meshBase);
                     break;
@@ -456,6 +507,14 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
                 return Logic.Scripts.GameDomain.MVC.Boss.Telegraph.TelegraphMaterialService.Provider
                     .GetMeshMaterial(displacementEnabled, _effects);
             return new Material(Shader.Find("Sprites/Default"));
+        }
+
+        public void TrySetTelegraphVisible(bool visible)
+        {
+            if (_handler is Logic.Scripts.GameDomain.MVC.Boss.Attacks.Core.ITelegraphVisibility tv)
+            {
+                tv.SetTelegraphVisible(visible);
+            }
         }
     }
 }

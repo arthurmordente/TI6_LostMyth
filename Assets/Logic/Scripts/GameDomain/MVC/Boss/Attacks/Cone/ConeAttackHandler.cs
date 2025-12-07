@@ -5,7 +5,7 @@ using Logic.Scripts.GameDomain.MVC.Abilitys;
 
 namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Cone
 {
-    public class ConeAttackHandler : IBossAttackHandler
+    public class ConeAttackHandler : IBossAttackHandler, Logic.Scripts.GameDomain.MVC.Boss.Attacks.Core.ITelegraphVisibility
     {
         private readonly float _radius;
         private readonly float _angleDeg;
@@ -105,6 +105,9 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Cone
 
                 _views[i] = v;
             }
+
+            // Start hidden; boss controller will reveal at mid prep
+            SetTelegraphVisible(false);
         }
 
         public bool ComputeHits(ArenaPosReference arenaReference, Transform originTransform, IEffectable caster)
@@ -163,6 +166,17 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Cone
 
 			var layering = Logic.Scripts.GameDomain.MVC.Boss.Telegraph.TelegraphLayeringLocator.Service;
 			if (layering != null && _layer.Id >= 0) layering.Unregister(_layer.Id);
+        }
+
+        public void SetTelegraphVisible(bool visible)
+        {
+            if (_views == null) return;
+            for (int i = 0; i < _views.Length; i++)
+            {
+                var v = _views[i];
+                if (v?.Line != null) v.Line.enabled = visible;
+                if (v?.MeshRenderer != null) v.MeshRenderer.enabled = visible;
+            }
         }
     }
 }

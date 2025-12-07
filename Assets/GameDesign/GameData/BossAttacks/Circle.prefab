@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 7008708713626683138}
   - component: {fileID: -7797698259084971289}
   m_Layer: 0
-  m_Name: WingSlash
+  m_Name: Circle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -45,16 +45,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _effects:
-  - rid: 2599984782535819375
-  _attackType: 2
+  - rid: 9037664587430232496
+  _attackType: 7
   _displacementPriority: 0
   _protean:
     radius: 6
     angleDeg: 45
     sides: 36
   _wingSlash:
-    radius: 6
-    angleDeg: -215
+    radius: 4
+    angleDeg: 215
     sides: 48
   _feather:
     featherCount: 8
@@ -66,7 +66,7 @@ MonoBehaviour:
     forcePerDebuff: 0.5
   _featherIsPull: 0
   _orb:
-    prefab: {fileID: 7907701672196164393, guid: b324b43eefa456c489d7c248777254b6, type: 3}
+    prefab: {fileID: 0}
     moveStepMeters: 6
     growStepMeters: 6
     initialRadius: 4
@@ -84,10 +84,10 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 2599984782535819375
+    - rid: 9037664587430232496
       type: {class: DamageEffect, ns: Assets.Logic.Scripts.GameDomain.Effects, asm: Assembly-CSharp}
       data:
         Name: 
         Description: 
         IsAutoCast: 0
-        amount: 15
+        amount: 5
