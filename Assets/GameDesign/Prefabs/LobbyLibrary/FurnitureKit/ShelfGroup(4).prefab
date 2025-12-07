@@ -14,7 +14,7 @@ GameObject:
   m_TagString: Folder
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &1085502072256020499
 Transform:
@@ -47,6 +47,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1085502072256020499}
     m_Modifications:
+    - target: {fileID: 684793074515426352, guid: adaf2981e7f27584abe3b7f59392ff49, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
     - target: {fileID: 3007950056994263356, guid: adaf2981e7f27584abe3b7f59392ff49, type: 3}
       propertyPath: m_LocalScale.x
       value: 3.8261106
@@ -58,6 +62,14 @@ PrefabInstance:
     - target: {fileID: 3415872944097385735, guid: adaf2981e7f27584abe3b7f59392ff49, type: 3}
       propertyPath: m_Name
       value: FKL_Shelf2 (3)
+      objectReference: {fileID: 0}
+    - target: {fileID: 4904046099053964312, guid: adaf2981e7f27584abe3b7f59392ff49, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
+    - target: {fileID: 6856423840416151611, guid: adaf2981e7f27584abe3b7f59392ff49, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
       objectReference: {fileID: 0}
     - target: {fileID: 7825291754617945722, guid: adaf2981e7f27584abe3b7f59392ff49, type: 3}
       propertyPath: m_LocalScale.x
@@ -111,6 +123,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8030623942768153717, guid: adaf2981e7f27584abe3b7f59392ff49, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -129,9 +145,21 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1085502072256020499}
     m_Modifications:
+    - target: {fileID: 869852101218498257, guid: 749c9822593a7264b80da9694e167774, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
+    - target: {fileID: 1817424725910757574, guid: 749c9822593a7264b80da9694e167774, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
     - target: {fileID: 3415872944097385735, guid: 749c9822593a7264b80da9694e167774, type: 3}
       propertyPath: m_Name
       value: FKL_Shelf3 (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 6104275755583140078, guid: 749c9822593a7264b80da9694e167774, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
       objectReference: {fileID: 0}
     - target: {fileID: 7825291754617945722, guid: 749c9822593a7264b80da9694e167774, type: 3}
       propertyPath: m_LocalScale.x
@@ -204,9 +232,21 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1085502072256020499}
     m_Modifications:
+    - target: {fileID: 869852101218498257, guid: 749c9822593a7264b80da9694e167774, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
+    - target: {fileID: 1817424725910757574, guid: 749c9822593a7264b80da9694e167774, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
     - target: {fileID: 3415872944097385735, guid: 749c9822593a7264b80da9694e167774, type: 3}
       propertyPath: m_Name
       value: FKL_Shelf3 (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 6104275755583140078, guid: 749c9822593a7264b80da9694e167774, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
       objectReference: {fileID: 0}
     - target: {fileID: 7825291754617945722, guid: 749c9822593a7264b80da9694e167774, type: 3}
       propertyPath: m_LocalScale.x
@@ -279,9 +319,21 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1085502072256020499}
     m_Modifications:
+    - target: {fileID: 869852101218498257, guid: 749c9822593a7264b80da9694e167774, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
+    - target: {fileID: 1817424725910757574, guid: 749c9822593a7264b80da9694e167774, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
     - target: {fileID: 3415872944097385735, guid: 749c9822593a7264b80da9694e167774, type: 3}
       propertyPath: m_Name
       value: FKL_Shelf3
+      objectReference: {fileID: 0}
+    - target: {fileID: 6104275755583140078, guid: 749c9822593a7264b80da9694e167774, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
       objectReference: {fileID: 0}
     - target: {fileID: 7825291754617945722, guid: 749c9822593a7264b80da9694e167774, type: 3}
       propertyPath: m_LocalScale.x
@@ -354,9 +406,21 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1085502072256020499}
     m_Modifications:
+    - target: {fileID: 684793074515426352, guid: adaf2981e7f27584abe3b7f59392ff49, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
     - target: {fileID: 3415872944097385735, guid: adaf2981e7f27584abe3b7f59392ff49, type: 3}
       propertyPath: m_Name
       value: FKL_Shelf2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4904046099053964312, guid: adaf2981e7f27584abe3b7f59392ff49, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
+    - target: {fileID: 6856423840416151611, guid: adaf2981e7f27584abe3b7f59392ff49, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
       objectReference: {fileID: 0}
     - target: {fileID: 7825291754617945722, guid: adaf2981e7f27584abe3b7f59392ff49, type: 3}
       propertyPath: m_LocalScale.x
@@ -429,9 +493,21 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1085502072256020499}
     m_Modifications:
+    - target: {fileID: 684793074515426352, guid: adaf2981e7f27584abe3b7f59392ff49, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
     - target: {fileID: 3415872944097385735, guid: adaf2981e7f27584abe3b7f59392ff49, type: 3}
       propertyPath: m_Name
       value: FKL_Shelf2 (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 4904046099053964312, guid: adaf2981e7f27584abe3b7f59392ff49, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
+    - target: {fileID: 6856423840416151611, guid: adaf2981e7f27584abe3b7f59392ff49, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
       objectReference: {fileID: 0}
     - target: {fileID: 7825291754617945722, guid: adaf2981e7f27584abe3b7f59392ff49, type: 3}
       propertyPath: m_LocalScale.x
@@ -504,6 +580,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1085502072256020499}
     m_Modifications:
+    - target: {fileID: 869852101218498257, guid: 749c9822593a7264b80da9694e167774, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
     - target: {fileID: 1394408549576549302, guid: 749c9822593a7264b80da9694e167774, type: 3}
       propertyPath: m_LocalScale.x
       value: 3.8594468
@@ -512,9 +592,21 @@ PrefabInstance:
       propertyPath: m_LocalPosition.x
       value: 4.61
       objectReference: {fileID: 0}
+    - target: {fileID: 1817424725910757574, guid: 749c9822593a7264b80da9694e167774, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
     - target: {fileID: 3415872944097385735, guid: 749c9822593a7264b80da9694e167774, type: 3}
       propertyPath: m_Name
       value: FKL_Shelf3 (3)
+      objectReference: {fileID: 0}
+    - target: {fileID: 4910622328096589406, guid: 749c9822593a7264b80da9694e167774, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
+    - target: {fileID: 6104275755583140078, guid: 749c9822593a7264b80da9694e167774, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
       objectReference: {fileID: 0}
     - target: {fileID: 7825291754617945722, guid: 749c9822593a7264b80da9694e167774, type: 3}
       propertyPath: m_LocalScale.x
@@ -586,9 +678,21 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1085502072256020499}
     m_Modifications:
+    - target: {fileID: 684793074515426352, guid: adaf2981e7f27584abe3b7f59392ff49, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
     - target: {fileID: 3415872944097385735, guid: adaf2981e7f27584abe3b7f59392ff49, type: 3}
       propertyPath: m_Name
       value: FKL_Shelf2 (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 4904046099053964312, guid: adaf2981e7f27584abe3b7f59392ff49, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
+    - target: {fileID: 6856423840416151611, guid: adaf2981e7f27584abe3b7f59392ff49, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
       objectReference: {fileID: 0}
     - target: {fileID: 7825291754617945722, guid: adaf2981e7f27584abe3b7f59392ff49, type: 3}
       propertyPath: m_LocalScale.x
