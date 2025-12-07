@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2311a3bf99fe9c044b375d21b1d88fe5, type: 3}
+  m_Name: Dash
+  m_EditorClassIdentifier: 
+  Name: 
+  Description: 
+  Icon: {fileID: 0}
+  Damage: 0
+  Cooldown: 0
+  Cost: 0
+  Range: 0
+  AnimatorAttackType: 0
+  _baseDamage: 0
+  _baseCost: 0
+  _baseCooldown: 0
+  _baseRange: 0
+  TargetingStrategy:
+    rid: 2036518907759296587
+  PlotData: {fileID: 11400000, guid: 431e4d6bd005a7d4e9f16787a44dd639, type: 2}
+  references:
+    version: 2
+    RefIds:
+    - rid: 2036518907759296587
+      type: {class: AoeTargeting, ns: , asm: Assembly-CSharp}
+      data:
+        GroundLayerMask:
+          serializedVersion: 2
+          m_Bits: 64
+        HittableLayerMask:
+          serializedVersion: 2
+          m_Bits: 64
+        Radius: 3
