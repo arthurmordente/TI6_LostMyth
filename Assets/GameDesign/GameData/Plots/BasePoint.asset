@@ -16,9 +16,17 @@ MonoBehaviour:
   Description: 
   Icon: {fileID: 0}
   ObjectToSummon: {fileID: 4876656314110998499, guid: 2707b628eece7bb47967d5647b1f8adc, type: 3}
-  Duration: 0
+  Duration: 3
   HealAmount: 15
-  _effects: []
+  _effects:
+  - rid: 4963371588303454953
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 4963371588303454953
+      type: {class: SummonEffect, ns: , asm: Assembly-CSharp}
+      data:
+        Name: 
+        Description: 
+        IsAutoCast: 0
+        _spawnPoint: {x: 0, y: 0, z: 0}
