@@ -84,11 +84,15 @@ namespace Logic.Scripts.Turns {
                 if (Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.MinigameRuntimeService.TryResolveAnyAtBossTurn(out tfResult, out tfResolver)) {
                     UnityEngine.Debug.Log($"[Laki] Resolved at TurnFlow begin. PlayerWon={tfResult.PlayerWon} Chips: P+={tfResult.PlayerChipsDelta}, B+={tfResult.BossChipsDelta}");
                     try {
+                        int pot = (tfResult.PlayerChipsDelta > 0 ? tfResult.PlayerChipsDelta : tfResult.BossChipsDelta);
+                        try { _chipService?.OnPotResolve?.Invoke(tfResult.PlayerWon, pot); } catch { }
+                        await System.Threading.Tasks.Task.Delay(2000);
                         _chipService?.ApplyMinigameResult(tfResult);
                         _chipService?.Refresh();
-                        UnityEngine.Debug.Log("[Laki][ChipsUI] TurnFlow applied result and refreshed UI via injected service");
+                        UnityEngine.Debug.Log("[Laki][ChipsUI] TurnFlow animated result (3s), applied, and refreshed UI");
                     } catch { }
                     try { tfResolver?.DestroyMinigameRoot(); } catch { }
+                    try { Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Dice.DiceUiRuntime.Reset(); } catch { }
                 }
             }
             LogService.Log($"Turno {_turnNumber} - Fase: BossAct");

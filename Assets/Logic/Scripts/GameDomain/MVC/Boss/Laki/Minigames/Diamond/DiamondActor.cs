@@ -45,7 +45,9 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Diamond
 			{
 				UnityEngine.Debug.Log("[Laki] DiamondActor: destroyed by player");
 				_callbacks?.OnDiamondDestroyed();
-				Destroy(gameObject);
+				_exploded = true;
+				try { _envReg?.Remove(this); } catch { }
+				if (this != null) Destroy(gameObject);
 			}
 		}
 		public void TakeDamagePerTurn(int damageAmount, int duration) { }

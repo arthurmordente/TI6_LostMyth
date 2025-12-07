@@ -7,11 +7,14 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Chips
 	{
 		private int _player;
 		private int _boss;
+		private int _hpPerChip = 20;
 		public int PlayerChips => _player;
 		public int BossChips => _boss;
+		public int HpPerChip => _hpPerChip;
 		public System.Action<int, int> OnChipsChanged { get; set; }
 		public System.Action<int, int> OnBetPlaced { get; set; }
 		public System.Action<bool, int> OnPotResolve { get; set; }
+		public System.Action<bool, int, int> OnChipPurchased { get; set; }
 
 		public void SetInitial(int player, int boss)
 		{
@@ -42,6 +45,11 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Chips
 			OnChipsChanged?.Invoke(_player, _boss);
 		}
 
+		public void SetHpPerChip(int hpPerChip)
+		{
+			_hpPerChip = hpPerChip > 0 ? hpPerChip : 20;
+		}
+
 		public bool TryPayPlayer(Logic.Scripts.GameDomain.MVC.Nara.INaraController player, int cost, out int hpConverted)
 		{
 			hpConverted = 0;
@@ -56,12 +64,14 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Chips
 			var eff = player as IEffectable;
 			if (eff == null) return false;
 			hpConverted = need;
-			try { eff.TakeDamage(need); } catch { }
+			int payHp = need * _hpPerChip;
+			try { eff.TakeDamage(payHp); } catch { }
 			_player += need;
+			OnChipPurchased?.Invoke(true, need, _hpPerChip);
 			if (_player < 0) _player = 0;
 			_player -= cost;
 			if (_player < 0) _player = 0;
-			UnityEngine.Debug.Log($"[Laki][Chips] TryPayPlayer cost={cost} convertHP={need} -> P={_player}");
+			UnityEngine.Debug.Log($"[Laki][Chips] TryPayPlayer cost={cost} convertHP={payHp} -> P={_player}");
 			return true;
 		}
 
@@ -79,12 +89,14 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Chips
 			var eff = boss as IEffectable;
 			if (eff == null) return false;
 			hpConverted = need;
-			try { eff.TakeDamage(need); } catch { }
+			int payHp = need * _hpPerChip;
+			try { eff.TakeDamage(payHp); } catch { }
 			_boss += need;
+			OnChipPurchased?.Invoke(false, need, _hpPerChip);
 			if (_boss < 0) _boss = 0;
 			_boss -= cost;
 			if (_boss < 0) _boss = 0;
-			UnityEngine.Debug.Log($"[Laki][Chips] TryPayBoss cost={cost} convertHP={need} -> B={_boss}");
+			UnityEngine.Debug.Log($"[Laki][Chips] TryPayBoss cost={cost} convertHP={payHp} -> B={_boss}");
 			return true;
 		}
 	}

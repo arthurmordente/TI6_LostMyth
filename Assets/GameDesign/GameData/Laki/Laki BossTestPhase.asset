@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _availableAttacks:
   - {fileID: 2382607159073431541, guid: dc38b79479d8d7649af7b2552c4f5fa0, type: 3}
+  - {fileID: 4162083758434111994, guid: b73b8e1d5658ccd479392756754a6725, type: 3}
   _fallbackStepDistance: 1
   _stepDistance: 2
   _randomChangeDirectionSeconds: 1.5
@@ -21,7 +22,7 @@ MonoBehaviour:
   _turnPattern:
   - Mode: 3
     DistanceMultiplier: 0
-    AttackIndices: 
+    AttackIndices: 01000000
   - Mode: 3
     DistanceMultiplier: 0
     AttackIndices: 00000000

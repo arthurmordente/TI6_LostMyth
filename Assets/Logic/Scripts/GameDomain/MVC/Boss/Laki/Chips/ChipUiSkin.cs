@@ -8,6 +8,9 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Chips
 		public Sprite PlayerChip;
 		public Sprite BossChip;
 		public Sprite PotChip;
+		public GameObject PlayerChipUiPrefab;
+		public GameObject BossChipUiPrefab;
+		public GameObject PotChipUiPrefab;
 	}
 }
 

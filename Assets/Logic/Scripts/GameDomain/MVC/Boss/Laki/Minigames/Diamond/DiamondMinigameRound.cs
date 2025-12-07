@@ -12,7 +12,6 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Diamond
 		[SerializeField] private int _rounds = 3;
 		[SerializeField] private int _diamondsPerRound = 1;
 		[SerializeField] private int _bossWinsOnExplosions = 2;
-		[SerializeField] private int _playerWinsOnDestroyed = 2;
 		[SerializeField] private int _diamondHp = 10;
 		[SerializeField] private GameObject _diamondPrefab;
 
@@ -79,15 +78,14 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Diamond
 			if (_cancelled || _turnState == null) return false;
 			bool roundsFinished = (_spawnedRoundIndex + 1) >= _rounds;
 			bool bossWins = _explodedCount >= _bossWinsOnExplosions;
-			bool playerWins = roundsFinished && _destroyedCount >= _playerWinsOnDestroyed;
+			bool playerWins = roundsFinished && !bossWins;
 			if (!bossWins && !playerWins)
 			{
 				int active = CountActiveDiamonds();
-				UnityEngine.Debug.Log($"[Laki] DiamondMinigame: resolve check bossTurn; round={_spawnedRoundIndex+1}/{_rounds} exp={_explodedCount}/{_bossWinsOnExplosions} dest={_destroyedCount}/{_playerWinsOnDestroyed} activeDiamonds={active}");
+				UnityEngine.Debug.Log($"[Laki] DiamondMinigame: resolve check bossTurn; round={_spawnedRoundIndex+1}/{_rounds} exp={_explodedCount}/{_bossWinsOnExplosions} dest={_destroyedCount} activeDiamonds={active}");
 				if (roundsFinished && active == 0)
 				{
-					bossWins = _destroyedCount < _playerWinsOnDestroyed;
-					playerWins = !bossWins;
+					playerWins = true;
 				}
 			}
 			if (!bossWins && !playerWins) return false;
@@ -174,14 +172,13 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Diamond
 			if (_cancelled || _resolved) return false;
 			bool roundsFinished = (_spawnedRoundIndex + 1) >= _rounds;
 			bool bossWins = _explodedCount >= _bossWinsOnExplosions;
-			bool playerWins = roundsFinished && _destroyedCount >= _playerWinsOnDestroyed;
+			bool playerWins = roundsFinished && !bossWins;
 			int active = CountActiveDiamonds();
 			if (!bossWins && !playerWins && roundsFinished && active == 0)
 			{
-				bossWins = _destroyedCount < _playerWinsOnDestroyed;
-				playerWins = !bossWins;
+				playerWins = true;
 			}
-			UnityEngine.Debug.Log($"[Laki] DiamondMinigame: env-check round={_spawnedRoundIndex+1}/{_rounds} exp={_explodedCount}/{_bossWinsOnExplosions} dest={_destroyedCount}/{_playerWinsOnDestroyed} activeDiamonds={active} -> bw={bossWins} pw={playerWins}");
+			UnityEngine.Debug.Log($"[Laki] DiamondMinigame: env-check round={_spawnedRoundIndex+1}/{_rounds} exp={_explodedCount}/{_bossWinsOnExplosions} dest={_destroyedCount} activeDiamonds={active} -> bw={bossWins} pw={playerWins}");
 			if (!bossWins && !playerWins) return false;
 			if (_resolved) return true;
 			int pot = _chipCost * 2;
@@ -199,7 +196,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Diamond
 
 
 
-		private class DiamondRoundProgressActor : IEnvironmentTurnActor
+		private class DiamondRoundProgressActor : IEnvironmentTurnActor, Logic.Scripts.Turns.IEnvironmentProgressActor
 		{
 			private readonly DiamondMinigameRound _owner;
 			public DiamondRoundProgressActor(DiamondMinigameRound owner) { _owner = owner; }

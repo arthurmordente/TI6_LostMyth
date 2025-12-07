@@ -53,16 +53,20 @@ namespace Logic.Scripts.Turns
 			System.Collections.Generic.IReadOnlyList<IEnvironmentTurnActor> snapshot = _actorsRegistry != null ? _actorsRegistry.Snapshot() : null;
 			if (snapshot != null && snapshot.Count > 0)
             {
-				// Reordena para executar DiamondActor primeiro
+				// Reordena: DiamondActor primeiro, depois atores normais, e progress actors por último
+				System.Collections.Generic.List<IEnvironmentTurnActor> diamond = new System.Collections.Generic.List<IEnvironmentTurnActor>(8);
+				System.Collections.Generic.List<IEnvironmentTurnActor> normals = new System.Collections.Generic.List<IEnvironmentTurnActor>(16);
+				System.Collections.Generic.List<IEnvironmentTurnActor> progress = new System.Collections.Generic.List<IEnvironmentTurnActor>(8);
+				for (int i = 0; i < snapshot.Count; i++) {
+					var a = snapshot[i];
+					if (a is Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Diamond.DiamondActor) { diamond.Add(a); continue; }
+					if (a is IEnvironmentProgressActor) { progress.Add(a); continue; }
+					normals.Add(a);
+				}
 				System.Collections.Generic.List<IEnvironmentTurnActor> ordered = new System.Collections.Generic.List<IEnvironmentTurnActor>(snapshot.Count);
-				for (int i = 0; i < snapshot.Count; i++) {
-					var a = snapshot[i];
-					if (a is Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Diamond.DiamondActor) ordered.Add(a);
-				}
-				for (int i = 0; i < snapshot.Count; i++) {
-					var a = snapshot[i];
-					if (!(a is Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Diamond.DiamondActor)) ordered.Add(a);
-				}
+				ordered.AddRange(diamond);
+				ordered.AddRange(normals);
+				ordered.AddRange(progress);
 
 				// Log dos atores enfileirados (já ordenados)
 				System.Text.StringBuilder namesBuilder = new System.Text.StringBuilder(256);

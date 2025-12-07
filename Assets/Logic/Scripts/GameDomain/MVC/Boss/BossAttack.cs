@@ -382,7 +382,6 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
                 var chipSvc = sceneContainer != null ? sceneContainer.Resolve<Logic.Scripts.GameDomain.MVC.Boss.Laki.Chips.IChipService>() : null;
                 if (chipSvc != null && round != null)
                 {
-                    try { chipSvc.OnBetPlaced?.Invoke(round.ChipCost, round.ChipCost); } catch { }
                     if (nara != null)
                     {
                         int convertedPlayer;
@@ -395,6 +394,8 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
                         bool okB = chipSvc.TryPayBoss(bossCtrl, round.ChipCost, out convertedBoss);
                         Debug.Log($"[Laki][Chips] Pay boss cost={round.ChipCost} convertedHP={convertedBoss} ok={okB}");
                     }
+                    // After ensuring chips exist (including purchases), place the bet into the pot
+                    try { chipSvc.OnBetPlaced?.Invoke(round.ChipCost, round.ChipCost); } catch { }
                     chipSvc.Refresh();
                 }
             }
