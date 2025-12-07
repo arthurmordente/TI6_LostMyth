@@ -2,6 +2,7 @@ using CoreDomain.GameDomain.GameStateDomain.GamePlayDomain.Scripts.Commands.Star
 using Logic.Scripts.GameDomain.GameInputActions;
 using Logic.Scripts.GameDomain.MVC.Nara;
 using Logic.Scripts.Services.CommandFactory;
+using Logic.Scripts.Services.AudioService;
 using System.Threading;
 using UnityEngine;
 

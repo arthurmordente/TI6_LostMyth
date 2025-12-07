@@ -23,21 +23,26 @@ public class LobbyUiController : ILobbyController {
     public void InitEntryPoint() {
         _lobbyView.Initialize(_abilityPointService.AllAbilities[0]);
         _lobbyView.RegisterCallbacks(OnClickPlay, OnClickLoad, OnClickOptions, OnExitPlay);
+        _audioService.PlayAudio(AudioClipType.MenuTheme, AudioChannelType.Music, AudioPlayType.Loop);
     }
 
     public void OnClickPlay() {
         _stateMachineService.SwitchState(_explorationStateFactory.Create(new ExplorationInitiatorEnterData(0)));
+        _audioService.PlayAudio(AudioClipType.UIClick1SFX, AudioChannelType.Fx);
     }
 
     public void OnClickLoad() {
         _universalUIController.ShowLoadScreen();
+        _audioService.PlayAudio(AudioClipType.UIClick1SFX, AudioChannelType.Fx);
     }
 
     public void OnClickOptions() {
         _universalUIController.ShowCreditsScreen();
+        _audioService.PlayAudio(AudioClipType.UIClick1SFX, AudioChannelType.Fx);
     }
 
     public void OnExitPlay() {
+        _audioService.PlayAudio(AudioClipType.UIClick2SFX, AudioChannelType.Fx);
         Application.Quit();
     }
 }
