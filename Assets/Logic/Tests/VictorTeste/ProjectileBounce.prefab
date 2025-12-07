@@ -167,7 +167,7 @@ Rigidbody:
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 0
+  m_Constraints: 4
   m_CollisionDetection: 0
 --- !u!114 &1283081609188221361
 MonoBehaviour:
@@ -181,4 +181,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 001dc290cf0d2d843ae7e78fa8b366d9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speedMultiplier: 1
+  direction: {x: 0, y: 0, z: 0}
+  speed: 10
+  maxBounces: 3
+  raycastDistance: 1

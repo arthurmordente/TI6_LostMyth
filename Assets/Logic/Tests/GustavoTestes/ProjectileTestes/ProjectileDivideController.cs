@@ -11,19 +11,19 @@ public class ProjectileDivideController : MonoBehaviour
     public float splitAngle = 30f;
     public GameObject projectilePrefab;
 
-    private Rigidbody rb;
+    private Rigidbody _rigidBody;
     private bool hasSplit = false;
 
     private void Start()
     {
-        rb = GetComponent<Rigidbody>();
+        _rigidBody = GetComponent<Rigidbody>();
         if (direction == Vector3.zero)
         {
             direction = transform.forward;
         }
 
         Vector3 moveDir = direction.normalized;
-        rb.linearVelocity = moveDir * speed;
+        _rigidBody.linearVelocity = moveDir * speed;
 
         Invoke(nameof(Split), splitTime);
     }
@@ -35,7 +35,7 @@ public class ProjectileDivideController : MonoBehaviour
 
         hasSplit = true;
 
-        Vector3 baseDir = rb.linearVelocity.normalized;
+        Vector3 baseDir = _rigidBody.linearVelocity.normalized;
         if (baseDir == Vector3.zero)
             baseDir = direction.normalized;
 
@@ -71,7 +71,23 @@ public class ProjectileDivideController : MonoBehaviour
 
     void OnCollisionEnter(Collision collision)
     {
-        //Dano
-        Destroy(this);
+        if(collision.gameObject.name != "SphereDivide")
+        {
+            //Dar dano se possivel
+            Debug.LogWarning("Projectile Divide colidiu");
+
+            Destroy(gameObject);
+        }
+    }
+
+    void OnTriggerEnter(Collider other)
+    {
+        if(other.gameObject.name != "SphereDivide")
+        {
+            //Dar dano se possivel
+            Debug.LogWarning("Projectile Divide colidiu");
+
+            Destroy(gameObject);
+        }
     }
 }

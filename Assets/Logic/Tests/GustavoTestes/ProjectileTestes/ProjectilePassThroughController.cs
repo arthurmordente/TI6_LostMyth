@@ -1,12 +1,44 @@
-using Logic.Scripts.GameDomain.MVC.Abilitys;
-using Logic.Scripts.Services.UpdateService;
 using UnityEngine;
-using Zenject;
 
-public class ProjectilePassThroughController : MonoBehaviour, IFixedUpdatable
+public class ProjectilePassThroughController : MonoBehaviour
 {
-    public void ManagedFixedUpdate()
+    public Vector3 direction = Vector3.zero;
+    public float speed = 10f;
+    private Rigidbody _rigidBody;
+
+    private void Start()
     {
-        //
+        _rigidBody = GetComponent<Rigidbody>();
+        if (direction == Vector3.zero)
+        {
+            direction = transform.forward;
+        }
+
+        Vector3 moveDir = direction.normalized;
+        _rigidBody.linearVelocity = moveDir * speed;
+    }
+
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.name != "HOC_Arena")
+        {
+            //Dar dano
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+
+    void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.name != "HOC_Arena")
+        {
+            //Dar dano
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 }
