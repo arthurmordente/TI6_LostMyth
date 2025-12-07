@@ -1,13 +1,15 @@
-using Logic.Scripts.Services.UpdateService;
 using UnityEngine;
-namespace Logic.Scripts.Core.Mvc.WorldCamera {
-    public interface IWorldCameraController {
+namespace Logic.Scripts.Core.Mvc.WorldCamera
+{
+    public interface IWorldCameraController
+    {
         bool IsRotateEnabled { get; }
-        public void UpdateAngles();
-        public void StartFollowTarget(Transform targetTransform);
-        public void StopFollowTarget();
-        public void UnlockCameraRotate();
-        public void LockCameraRotate();
-        public void SetMouseDelta(Vector2 delta);
+        void UpdateAngles();
+        void StartFollowTarget(Transform targetTransform);
+        void StopFollowTarget();
+        void UnlockCameraRotate();
+        void LockCameraRotate();
+        void SetMouseDelta(Vector2 delta);
+        void AdjustZoom(float delta);
     }
 }
