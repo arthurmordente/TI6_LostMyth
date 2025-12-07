@@ -60,6 +60,6 @@ MonoBehaviour:
   - Key: 26
     Clip: {fileID: 8300000, guid: fc4778381e8f8d845944d4d02ee5dc4c, type: 3}
   - Key: 27
-    Clip: {fileID: 0}
+    Clip: {fileID: 8300000, guid: 57e4e13e8e0a72c4b8ef980ff84eb397, type: 3}
   - Key: 28
     Clip: {fileID: 8300000, guid: 57e4e13e8e0a72c4b8ef980ff84eb397, type: 3}
