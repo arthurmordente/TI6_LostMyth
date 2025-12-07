@@ -13,13 +13,13 @@ namespace Logic.Scripts.Turns
             Container.BindInterfacesAndSelfTo<EchoService>().AsSingle();
 			Container.BindInterfacesAndSelfTo<Logic.Scripts.GameDomain.MVC.Echo.CloneUseLimiter>().AsSingle();
 
-			Container.BindInterfacesAndSelfTo<EnvironmentActorsRegistry>().AsSingle();
+			Container.BindInterfacesAndSelfTo<EnvironmentActorsRegistry>()
+				.AsSingle()
+				.OnInstantiated<EnvironmentActorsRegistry>((ctx, reg) => {
+					EnvironmentActorsRegistryService.Instance = reg;
+				});
             Container.BindInterfacesAndSelfTo<EnviromentActionService>().AsSingle();
 			// OrbEnvironmentRule desabilitada: orb agora é executada como IEnvironmentTurnActor
-
-			// Publicar registro globalmente para acesso cross-container
-			var envReg = Container.Resolve<IEnvironmentActorsRegistry>();
-			EnvironmentActorsRegistryService.Instance = envReg;
 
 			Container.BindInterfacesAndSelfTo<Logic.Scripts.GameDomain.MVC.Boss.Laki.Chips.LakiChipRuntimeService>().AsSingle();
             Container.BindInterfacesAndSelfTo<TurnFlowController>().AsSingle();

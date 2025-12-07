@@ -80,6 +80,16 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames
 			resolver = null;
 			return false;
 		}
+
+		public static void Reset()
+		{
+			_activeCount = 0;
+			_skipOnceOnBossTurn = false;
+			_pauseBossOnce = false;
+			StatusProvider = null;
+			_resolvers.Clear();
+			UnityEngine.Debug.Log("[Laki] MinigameRuntime: RESET");
+		}
 	}
 }
 

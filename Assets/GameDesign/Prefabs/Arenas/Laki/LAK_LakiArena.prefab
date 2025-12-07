@@ -9,9 +9,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 53685876089475916}
-  - component: {fileID: 5519873358626572788}
   - component: {fileID: 3184916098027555293}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: LAK_COLLIDERArena
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -33,14 +32,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 4473674872686501833}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!33 &5519873358626572788
-MeshFilter:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 777550120698036122}
-  m_Mesh: {fileID: 7044831029442735450, guid: f62347398134c4a419f5b65435fafa18, type: 3}
 --- !u!64 &3184916098027555293
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -62,7 +53,7 @@ MeshCollider:
   serializedVersion: 5
   m_Convex: 0
   m_CookingOptions: 30
-  m_Mesh: {fileID: 7044831029442735450, guid: f62347398134c4a419f5b65435fafa18, type: 3}
+  m_Mesh: {fileID: 605986099113773620, guid: f62347398134c4a419f5b65435fafa18, type: 3}
 --- !u!1 &2654020099288555440
 GameObject:
   m_ObjectHideFlags: 0
@@ -160,6 +151,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4473674872686501833}
+  - component: {fileID: -7333723666792195030}
   m_Layer: 0
   m_Name: LAK_LakiArena
   m_TagString: Untagged
@@ -177,10 +169,25 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 0.7, y: 0.7, z: 0.7}
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 53685876089475916}
   - {fileID: 5655392662069887230}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &-7333723666792195030
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4500758365014782116}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 76b53afe83f59044ea02265870458af1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  <PortalViews>k__BackingField: []
+  <Interactableviews>k__BackingField: []
+  <EchoInteractableview>k__BackingField: []

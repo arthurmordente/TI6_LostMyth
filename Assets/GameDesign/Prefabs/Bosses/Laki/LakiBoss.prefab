@@ -2394,9 +2394,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d78fc8acd88caf04ea0fd997a7dca121, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _centerWorld: {x: 0, y: 7.2, z: 0}
+  _centerWorld: {x: 0, y: 0.1, z: 0}
   _innerRadius: 10
-  _outerRadius: 20
+  _outerRadius: 22
   _radialSplit01: 0.6
   _positiveEffects:
   - rid: 9037664587430232238
@@ -2407,6 +2407,7 @@ MonoBehaviour:
   _initialPlayerChips: 3
   _initialBossChips: 3
   _chipUiSkin: {fileID: 11400000, guid: ec8de1247115d25429b31db6450311fa, type: 2}
+  _uiScale: 2
   references:
     version: 2
     RefIds:
