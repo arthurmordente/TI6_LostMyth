@@ -4,7 +4,7 @@ using Logic.Scripts.Services.CommandFactory;
 using Logic.Scripts.Services.Logger.Base;
 using UnityEngine;
 
-public class PauseGameplayInputCommand : BaseCommand, ICommandVoid {
+public class ResumeGameplayInputCommand : BaseCommand, ICommandVoid {
     private IGamePlayUiController _gamePlayUiController;
     private IGameInputActionsController _gameInputActionsController;
     public override void ResolveDependencies() {
@@ -13,10 +13,10 @@ public class PauseGameplayInputCommand : BaseCommand, ICommandVoid {
     }
 
     public void Execute() {
-        LogService.Log("Pause pressed");
-        Time.timeScale = 0f;
-        _gamePlayUiController.ShowPauseScreen();
-        _gameInputActionsController.UnregisterGameplayInputListeners();
-        _gameInputActionsController.RegisterUIGameplayInputListeners();
+        LogService.Log("Resume pressed");
+        Time.timeScale = 1f;
+        _gamePlayUiController.HidePauseScreen();
+        _gameInputActionsController.RegisterGameplayInputListeners();
+        _gameInputActionsController.UnregisterUIGameplayInputListeners();
     }
 }

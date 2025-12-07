@@ -1,6 +1,7 @@
 using Logic.Scripts.Core.Mvc.UICamera;
 using Logic.Scripts.GameDomain.States;
 using Logic.Scripts.Services.AudioService;
+using Logic.Scripts.Services.CommandFactory;
 using Logic.Scripts.Services.StateMachineService;
 using System.Threading;
 using UnityEngine;
@@ -15,9 +16,10 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
         private readonly GamePlayUiBindSO _gamePlayUiBindSO;
         private readonly PauseUiView _pauseUiView;
         private readonly IUniversalUIController _universalUIController;
+        private readonly ICommandFactory _commandFactory;
 
         public GamePlayUiController(IStateMachineService stateMachineService, ExplorationState.Factory explorationStateFactory, IUICameraController uiCameraController,
-            GamePlayUiView gamePlayView, IAudioService audioService, PauseUiView pauseUiView, IUniversalUIController universalUIController) {
+            GamePlayUiView gamePlayView, IAudioService audioService, PauseUiView pauseUiView, IUniversalUIController universalUIController, ICommandFactory commandFactory) {
             _stateMachineService = stateMachineService;
             _explorationStateFactory = explorationStateFactory;
             _uiCameraController = uiCameraController;
@@ -25,6 +27,7 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
             _audioService = audioService;
             _pauseUiView = pauseUiView;
             _universalUIController = universalUIController;
+            _commandFactory = commandFactory;
         }
 
         public void InitEntryPoint() {
@@ -41,8 +44,12 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
         public void ShowPauseScreen() {
             _pauseUiView.Show();
         }
+        public void HidePauseScreen() {
+            _pauseUiView.Hide();
+        }
         private void ResumeGame() {
             Debug.LogWarning("Voltando para o Jogo");
+            _commandFactory.CreateCommandVoid<ResumeGameplayInputCommand>().Execute();
         }
 
         private void BackToLobby() {

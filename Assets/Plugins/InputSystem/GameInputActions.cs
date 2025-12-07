@@ -852,6 +852,24 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""ResumeGameplay"",
+                    ""type"": ""Button"",
+                    ""id"": ""da7933d9-23ef-42f9-8e3e-18f64ed6fb7b"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""ResumeExploration"",
+                    ""type"": ""Button"",
+                    ""id"": ""556c2c14-a877-4fe8-b4ae-5f84848dda72"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -1272,6 +1290,28 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
                     ""action"": ""TrackedDeviceOrientation"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""4f75690d-d9a4-45bf-9f6a-2f359846ba18"",
+                    ""path"": ""<Keyboard>/escape"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ResumeGameplay"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""60d12af1-f26e-4280-a3a8-6c712a92863b"",
+                    ""path"": ""<Keyboard>/escape"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ResumeExploration"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -1379,6 +1419,8 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
         m_UI_ScrollWheel = m_UI.FindAction("ScrollWheel", throwIfNotFound: true);
         m_UI_TrackedDevicePosition = m_UI.FindAction("TrackedDevicePosition", throwIfNotFound: true);
         m_UI_TrackedDeviceOrientation = m_UI.FindAction("TrackedDeviceOrientation", throwIfNotFound: true);
+        m_UI_ResumeGameplay = m_UI.FindAction("ResumeGameplay", throwIfNotFound: true);
+        m_UI_ResumeExploration = m_UI.FindAction("ResumeExploration", throwIfNotFound: true);
     }
 
     ~@GameInputActions()
@@ -1905,6 +1947,8 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
     private readonly InputAction m_UI_ScrollWheel;
     private readonly InputAction m_UI_TrackedDevicePosition;
     private readonly InputAction m_UI_TrackedDeviceOrientation;
+    private readonly InputAction m_UI_ResumeGameplay;
+    private readonly InputAction m_UI_ResumeExploration;
     /// <summary>
     /// Provides access to input actions defined in input action map "UI".
     /// </summary>
@@ -1956,6 +2000,14 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "UI/TrackedDeviceOrientation".
         /// </summary>
         public InputAction @TrackedDeviceOrientation => m_Wrapper.m_UI_TrackedDeviceOrientation;
+        /// <summary>
+        /// Provides access to the underlying input action "UI/ResumeGameplay".
+        /// </summary>
+        public InputAction @ResumeGameplay => m_Wrapper.m_UI_ResumeGameplay;
+        /// <summary>
+        /// Provides access to the underlying input action "UI/ResumeExploration".
+        /// </summary>
+        public InputAction @ResumeExploration => m_Wrapper.m_UI_ResumeExploration;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -2012,6 +2064,12 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
             @TrackedDeviceOrientation.started += instance.OnTrackedDeviceOrientation;
             @TrackedDeviceOrientation.performed += instance.OnTrackedDeviceOrientation;
             @TrackedDeviceOrientation.canceled += instance.OnTrackedDeviceOrientation;
+            @ResumeGameplay.started += instance.OnResumeGameplay;
+            @ResumeGameplay.performed += instance.OnResumeGameplay;
+            @ResumeGameplay.canceled += instance.OnResumeGameplay;
+            @ResumeExploration.started += instance.OnResumeExploration;
+            @ResumeExploration.performed += instance.OnResumeExploration;
+            @ResumeExploration.canceled += instance.OnResumeExploration;
         }
 
         /// <summary>
@@ -2053,6 +2111,12 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
             @TrackedDeviceOrientation.started -= instance.OnTrackedDeviceOrientation;
             @TrackedDeviceOrientation.performed -= instance.OnTrackedDeviceOrientation;
             @TrackedDeviceOrientation.canceled -= instance.OnTrackedDeviceOrientation;
+            @ResumeGameplay.started -= instance.OnResumeGameplay;
+            @ResumeGameplay.performed -= instance.OnResumeGameplay;
+            @ResumeGameplay.canceled -= instance.OnResumeGameplay;
+            @ResumeExploration.started -= instance.OnResumeExploration;
+            @ResumeExploration.performed -= instance.OnResumeExploration;
+            @ResumeExploration.canceled -= instance.OnResumeExploration;
         }
 
         /// <summary>
@@ -2412,5 +2476,19 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnTrackedDeviceOrientation(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "ResumeGameplay" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnResumeGameplay(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "ResumeExploration" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnResumeExploration(InputAction.CallbackContext context);
     }
 }

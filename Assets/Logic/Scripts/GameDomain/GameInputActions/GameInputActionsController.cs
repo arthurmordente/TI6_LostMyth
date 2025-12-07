@@ -4,6 +4,7 @@ using Logic.Scripts.Utils;
 using System.Threading;
 using UnityEngine.InputSystem;
 using UnityEngine;
+using System;
 
 namespace Logic.Scripts.GameDomain.GameInputActions {
     public class GameInputActionsController : IGameInputActionsController {
@@ -13,16 +14,12 @@ namespace Logic.Scripts.GameDomain.GameInputActions {
         public GameInputActionsController(global::GameInputActions gameInputActions, ICommandFactory commandFactory) {
             _gameInputActions = gameInputActions;
             _commandFactory = commandFactory;
+            _gameInputActions.Disable();
         }
 
         public void EnableGameplayInputs() {
             LogService.LogTopic("EnableInputs", LogTopicType.Inputs);
             _gameInputActions.Player.Enable();
-        }
-
-        public void EnableUIInputs() {
-            LogService.LogTopic("EnableUIInputs", LogTopicType.Inputs);
-            _gameInputActions.UI.Enable();
         }
 
         public void EnableExplorationInputs() {
@@ -44,6 +41,20 @@ namespace Logic.Scripts.GameDomain.GameInputActions {
             LogService.LogTopic("EnableExplorationInputs", LogTopicType.Inputs);
             _gameInputActions.Exploration.Disable();
         }
+
+        #region uiInput
+        public void RegisterUIGameplayInputListeners() {
+            _gameInputActions.UI.ResumeGameplay.started += OnResumeGameplayStarted;
+        }
+
+        public void UnregisterUIGameplayInputListeners() {
+            _gameInputActions.UI.ResumeGameplay.started -= OnResumeGameplayStarted;
+        }
+
+        private void OnResumeGameplayStarted(InputAction.CallbackContext context) {
+            _commandFactory.CreateCommandVoid<ResumeGameplayInputCommand>().Execute();
+        }
+        #endregion
 
         #region gameplayInput
         public void RegisterGameplayInputListeners() {
