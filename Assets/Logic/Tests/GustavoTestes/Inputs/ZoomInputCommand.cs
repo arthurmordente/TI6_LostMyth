@@ -18,7 +18,7 @@ public class ZoomInputCommand : BaseCommand, ICommandVoid
     {
         if (_worldCameraController == null || Mouse.current == null) return;
 
-        float dy = Mouse.current.scroll.ReadValue().y;
+        float dy = Mouse.current.scroll.ReadValue().y * -1f;
         if (Mathf.Abs(dy) < 0.01f) return;
 
         float step = Mathf.Sign(dy) * StepPerNotch;
