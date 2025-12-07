@@ -48,6 +48,24 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 			try { _commandFactory = container.Resolve<ICommandFactory>(); }
 			catch { Debug.LogError("[LakiArenaBossBootstrap] ICommandFactory not bound."); return; }
 
+			// Set arena Y from BossConfiguration.InitialPlayerPosition.y (try multiple sources)
+			bool ySet = false;
+			try {
+				var bossCfg = container.Resolve<Logic.Scripts.GameDomain.MVC.Boss.BossConfigurationSO>();
+				_centerWorld = new Vector3(_centerWorld.x, bossCfg.InitialPlayerPosition.y, _centerWorld.z);
+				ySet = true;
+			} catch { }
+			if (!ySet) {
+				try {
+					var levelTurnData = container.Resolve<LevelTurnData>();
+					if (levelTurnData != null && levelTurnData.BossConfiguration != null) {
+						float y = levelTurnData.BossConfiguration.InitialPlayerPosition.y;
+						_centerWorld = new Vector3(_centerWorld.x, y, _centerWorld.z);
+						ySet = true;
+					}
+				} catch { }
+			}
+
 			if (_chipUiSkin == null)
 			{
 				try { _chipUiSkin = container.Resolve<Logic.Scripts.GameDomain.MVC.Boss.Laki.Chips.ChipUiSkin>(); }
@@ -303,6 +321,10 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 			UnityEngine.Debug.Log($"[Laki] Chips UI created: GO='{uiRoot.name}' viewOnRoot={(uiRoot.GetComponent<Logic.Scripts.GameDomain.MVC.Boss.Laki.Chips.ChipUiView>()!=null)} viewAssigned={(view!=null)}");
 		}
 		
+		private void OnDestroy()
+		{
+			try { Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.MinigameRuntimeService.Reset(); } catch { }
+		}
 	}
 }
 
