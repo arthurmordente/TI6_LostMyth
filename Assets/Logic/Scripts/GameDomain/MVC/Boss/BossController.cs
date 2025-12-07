@@ -48,6 +48,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
         private bool _isCasting;
         private int _remainingCastTurns;
         private int _loopingAttackAnimId = -1;
+        private bool _movingAnimActive = false;
         private struct PendingCast { public BossAttack Attack; public int TurnsRemaining; }
         private System.Collections.Generic.List<PendingCast> _pendingCasts;
         private bool _registeredFixed;
@@ -140,7 +141,19 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
                     break;
             }
 
-			if (worldDir.sqrMagnitude > 0.0001f) {
+			bool hasDir = worldDir.sqrMagnitude > 0.0001f;
+			bool movingNow = hasDir && _turnMoveDistanceBudget > 0f;
+
+			// Movement animation state machine: start prep when movement actually begins; finish when it ends
+			if (movingNow && !_movingAnimActive) {
+				if (_bossView != null) { _bossView.PlayMovePrep(); _bossView.SetMoving(true); }
+				_movingAnimActive = true;
+			} else if (!movingNow && _movingAnimActive) {
+				if (_bossView != null) { _bossView.SetMoving(false); _bossView.PlayMoveFinish(); }
+				_movingAnimActive = false;
+			}
+
+			if (hasDir) {
 				// Rotaciona sempre para olhar na direção, mesmo sem deslocar
 				Quaternion targetRot = Quaternion.LookRotation(worldDir.normalized, Vector3.up);
 				Quaternion newRot = Quaternion.Slerp(_bossTransform.rotation, targetRot, Time.fixedDeltaTime * _rotationSpeed);
@@ -148,7 +161,6 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
 
 				// Translada apenas se houver orçamento de movimento
 				if (_turnMoveDistanceBudget > 0f) {
-					if (_bossView != null) _bossView.SetMoving(true);
 					float step = _moveSpeed * Time.fixedDeltaTime;
 					if (step > _turnMoveDistanceBudget) step = _turnMoveDistanceBudget;
 					_turnMoveDistanceBudget -= step;
@@ -156,14 +168,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
 					Vector3 toPos = fromPos + worldDir.normalized * step;
 					Vector3 toPlanar = new Vector3(toPos.x, fromPos.y, toPos.z);
 					_bossRigidbody.MovePosition(toPlanar);
-					if (_turnMoveDistanceBudget <= 0f) {
-						if (_bossView != null) _bossView.SetMoving(false);
-					}
-				} else {
-					if (_bossView != null) _bossView.SetMoving(false);
 				}
-			} else {
-				if (_bossView != null) _bossView.SetMoving(false);
 			}
         }
 
@@ -312,7 +317,6 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
         private async Task MoveTurnAsync() {
             ConfigureTurnMovement();
             if (_turnMoveDistanceBudget <= 0f) return;
-            if (_bossView != null) { _bossView.PlayMovePrep(); _bossView.SetMoving(true); }
             const float stopDistance = 1.2f;
             while (_turnMoveDistanceBudget > 0f) {
                 if (_moveMode == BossMoveMode.TowardPlayer) {
@@ -323,7 +327,6 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
                         float dist = delta.magnitude;
                         if (dist <= stopDistance) {
                             _turnMoveDistanceBudget = 0f;
-                            if (_bossView != null) { _bossView.SetMoving(false); _bossView.PlayMoveFinish(); }
                             break;
                         }
                     }
