@@ -60,6 +60,22 @@ PrefabInstance:
       propertyPath: m_StaticEditorFlags
       value: 2147483647
       objectReference: {fileID: 0}
+    - target: {fileID: 2542269325525129157, guid: 6f3b99bdad930814fa58c3f2342e7d3e, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2542269325525129157, guid: 6f3b99bdad930814fa58c3f2342e7d3e, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2542269325525129157, guid: 6f3b99bdad930814fa58c3f2342e7d3e, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2542269325525129157, guid: 6f3b99bdad930814fa58c3f2342e7d3e, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
     - {fileID: -5657245237533611626, guid: 6f3b99bdad930814fa58c3f2342e7d3e, type: 3}

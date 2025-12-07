@@ -60,6 +60,22 @@ PrefabInstance:
       propertyPath: m_StaticEditorFlags
       value: 2147483647
       objectReference: {fileID: 0}
+    - target: {fileID: 7740270627073060101, guid: 6f3b99bdad930814fa58c3f2342e7d3e, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7740270627073060101, guid: 6f3b99bdad930814fa58c3f2342e7d3e, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7740270627073060101, guid: 6f3b99bdad930814fa58c3f2342e7d3e, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7740270627073060101, guid: 6f3b99bdad930814fa58c3f2342e7d3e, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
     - {fileID: -5657245237533611626, guid: 6f3b99bdad930814fa58c3f2342e7d3e, type: 3}
@@ -69,14 +85,14 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 6f3b99bdad930814fa58c3f2342e7d3e, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 6370392009974302640}
+      addedObject: {fileID: 6020240303895919146}
   m_SourcePrefab: {fileID: 100100000, guid: 6f3b99bdad930814fa58c3f2342e7d3e, type: 3}
 --- !u!1 &131733547210570039 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 6f3b99bdad930814fa58c3f2342e7d3e, type: 3}
   m_PrefabInstance: {fileID: 942777514171941990}
   m_PrefabAsset: {fileID: 0}
---- !u!64 &6370392009974302640
+--- !u!64 &6020240303895919146
 MeshCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -97,4 +113,4 @@ MeshCollider:
   serializedVersion: 5
   m_Convex: 0
   m_CookingOptions: 30
-  m_Mesh: {fileID: 6883902821163951072, guid: 6f3b99bdad930814fa58c3f2342e7d3e, type: 3}
+  m_Mesh: {fileID: 6883902821163951072, guid: 31088a28e794deb45b0a16f2fd9492df, type: 3}
