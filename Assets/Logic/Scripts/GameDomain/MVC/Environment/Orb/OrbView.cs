@@ -32,13 +32,14 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Orb {
                 _rqAdd = layer.QueueAdd;
             }
             var provider = TelegraphMaterialService.Provider;
-            Material baseMat = provider != null ? provider.GetMaterial(false, null) : new Material(Shader.Find("Sprites/Default"));
+            Material baseLine = provider != null ? provider.GetLineMaterial(false, null) : new Material(Shader.Find("Sprites/Default"));
+            Material baseMesh = provider != null ? provider.GetMeshMaterial(false, null) : new Material(Shader.Find("Sprites/Default"));
 
             _telegraphGO = new GameObject("OrbTelegraph");
             _telegraphGO.transform.SetParent(transform, false);
 
             _line = _telegraphGO.AddComponent<LineRenderer>();
-            var lineMat = new Material(baseMat);
+            var lineMat = new Material(baseLine);
             lineMat.renderQueue += _rqAdd;
             _line.material = lineMat;
             _line.useWorldSpace = true;
@@ -47,7 +48,7 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Orb {
 
             _meshFilter = _telegraphGO.AddComponent<MeshFilter>();
             _meshRenderer = _telegraphGO.AddComponent<MeshRenderer>();
-            var meshMat = new Material(baseMat);
+            var meshMat = new Material(baseMesh);
             meshMat.renderQueue += _rqAdd;
             _meshRenderer.material = meshMat;
             _mesh = new Mesh();

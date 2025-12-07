@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 1559907657335424906}
   - component: {fileID: 5392954002756818700}
   - component: {fileID: 7540813036317866533}
+  - component: {fileID: 8953824343904534656}
   m_Layer: 6
   m_Name: HokariBoss
   m_TagString: Untagged
@@ -27,14 +28,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3005417857088838520}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3448328581731096150}
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
 --- !u!65 &1559907657335424906
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -97,8 +98,30 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _rigidbody: {fileID: 5392954002756818700}
   _collider: {fileID: 1559907657335424906}
-  _animator: {fileID: 8735505841426615340}
+  _animator: {fileID: 8953824343904534656}
   _phaseTransitionDuration: 1
+--- !u!95 &8953824343904534656
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3005417857088838520}
+  m_Enabled: 1
+  m_Avatar: {fileID: 9000000, guid: 159f75395f24a054e8688d7a39a2ac9c, type: 3}
+  m_Controller: {fileID: 9100000, guid: 524936b5ed05c704da8b83f2b05c9743, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1001 &2904916241558139325
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2015,10 +2038,5 @@ PrefabInstance:
 --- !u!4 &3448328581731096150 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 159f75395f24a054e8688d7a39a2ac9c, type: 3}
-  m_PrefabInstance: {fileID: 2904916241558139325}
-  m_PrefabAsset: {fileID: 0}
---- !u!95 &8735505841426615340 stripped
-Animator:
-  m_CorrespondingSourceObject: {fileID: 5866666021909216657, guid: 159f75395f24a054e8688d7a39a2ac9c, type: 3}
   m_PrefabInstance: {fileID: 2904916241558139325}
   m_PrefabAsset: {fileID: 0}

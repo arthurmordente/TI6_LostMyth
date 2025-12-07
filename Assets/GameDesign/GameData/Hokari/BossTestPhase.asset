@@ -29,13 +29,13 @@ MonoBehaviour:
   _turnPattern:
   - Mode: 3
     DistanceMultiplier: 0
-    AttackIndices: 05000000
+    AttackIndices: 06000000
   - Mode: 3
     DistanceMultiplier: 0
-    AttackIndices: 01000000
+    AttackIndices: 06000000
   - Mode: 3
     DistanceMultiplier: 0
-    AttackIndices: 02000000
+    AttackIndices: 06000000
   - Mode: 3
     DistanceMultiplier: 0
     AttackIndices: 0300000005000000

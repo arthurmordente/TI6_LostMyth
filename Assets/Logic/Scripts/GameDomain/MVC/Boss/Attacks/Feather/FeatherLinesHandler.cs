@@ -14,7 +14,7 @@ using Logic.Scripts.GameDomain.MVC.Boss.Telegraph;
 
 namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Feather
 {
-    public class FeatherLinesHandler : IBossAttackHandler, IUpdatable
+    public class FeatherLinesHandler : IBossAttackHandler, IUpdatable, Logic.Scripts.GameDomain.MVC.Boss.Attacks.Core.ITelegraphVisibility
     {
         private readonly FeatherLinesParams _params;
         private readonly IUpdateSubscriptionService _updateSvc;
@@ -37,6 +37,10 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Feather
         private float _stripWidth;
 		private readonly Material _baseMaterial;
 		private readonly Material _displacementMaterial;
+		private readonly Material _lineBase;
+		private readonly Material _lineDisp;
+		private readonly Material _meshBase;
+		private readonly Material _meshDisp;
 
         private Transform _parentTransform;
         private ArenaPosReference _arenaRef;
@@ -80,6 +84,10 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Feather
             _ctorIsPush = !isPull;
 			_baseMaterial = baseMaterial;
 			_displacementMaterial = displacementMaterial;
+			_lineBase = baseMaterial;
+			_lineDisp = displacementMaterial;
+			_meshBase = baseMaterial;
+			_meshDisp = displacementMaterial;
         }
 
 		public FeatherLinesHandler(FeatherLinesParams p, bool isPull)
@@ -89,6 +97,10 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Feather
             _ctorIsPush = !isPull;
 			_baseMaterial = null;
 			_displacementMaterial = null;
+			_lineBase = null;
+			_lineDisp = null;
+			_meshBase = null;
+			_meshDisp = null;
         }
 
 		public FeatherLinesHandler(FeatherLinesParams p, bool isPull, Material baseMaterial, Material displacementMaterial = null)
@@ -98,6 +110,23 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Feather
 			_ctorIsPush = !isPull;
 			_baseMaterial = baseMaterial;
 			_displacementMaterial = displacementMaterial;
+			_lineBase = baseMaterial;
+			_lineDisp = displacementMaterial;
+			_meshBase = baseMaterial;
+			_meshDisp = displacementMaterial;
+		}
+
+		public FeatherLinesHandler(FeatherLinesParams p, bool isPull, Material lineBase, Material lineDisp, Material meshBase, Material meshDisp)
+		{
+			_params = p;
+			_updateSvc = TryFindUpdateServiceInScene();
+			_ctorIsPush = !isPull;
+			_baseMaterial = null;
+			_displacementMaterial = null;
+			_lineBase = lineBase;
+			_lineDisp = lineDisp;
+			_meshBase = meshBase;
+			_meshDisp = meshDisp;
 		}
 
         public void SetAudio(IAudioService audio) { _audio = audio; }
@@ -156,10 +185,10 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Feather
                     Mesh = new Mesh { name = "FeatherStripMesh" }
                 };
 
-                Material selected = (_telegraphDisplacementEnabled && i == _specialIndex && _displacementMaterial != null)
-					? _displacementMaterial
-					: (_baseMaterial != null ? _baseMaterial : new Material(Shader.Find("Sprites/Default")));
-				var lineMat = new Material(selected);
+                Material selLine = (_telegraphDisplacementEnabled && i == _specialIndex && _lineDisp != null)
+					? _lineDisp
+					: (_lineBase != null ? _lineBase : (_baseMaterial != null ? _baseMaterial : new Material(Shader.Find("Sprites/Default"))));
+				var lineMat = new Material(selLine);
 				lineMat.renderQueue += _rqAdd;
 				v.Line.material = lineMat;
                 v.Line.useWorldSpace = true;
@@ -167,7 +196,10 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Feather
                 v.Line.widthMultiplier = 0.1f;
 				// Cor via material (ShaderGraph); removemos tint manual
 
-				var meshMat = new Material(selected);
+				Material selMesh = (_telegraphDisplacementEnabled && i == _specialIndex && _meshDisp != null)
+					? _meshDisp
+					: (_meshBase != null ? _meshBase : (_baseMaterial != null ? _baseMaterial : new Material(Shader.Find("Sprites/Default"))));
+				var meshMat = new Material(selMesh);
 				meshMat.renderQueue += _rqAdd;
 				v.MeshRenderer.material = meshMat;
                 v.MeshFilter.sharedMesh = v.Mesh;
@@ -186,7 +218,9 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Feather
 				var arrowMat = new Material(shader);
 				// não forçar renderQueue; manter padrão opaco do shader
 				// cor da seta igual à cor do material ativo (displacement => displacementMaterial; senão baseMaterial)
-				Material refMat = (_telegraphDisplacementEnabled && _displacementMaterial != null) ? _displacementMaterial : _baseMaterial;
+				Material refMat = (_telegraphDisplacementEnabled && (_meshDisp != null || _lineDisp != null))
+					? (_meshDisp != null ? _meshDisp : _lineDisp)
+					: (_meshBase != null ? _meshBase : (_lineBase != null ? _lineBase : _baseMaterial));
 				if (refMat != null)
 				{
 					Color col;
@@ -204,7 +238,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Feather
 				_singleArrow.enabled = true;
 			}
 
-			UpdateTelegraphGeometryAtCenter(parentTransform.position);
+            UpdateTelegraphGeometryAtCenter(parentTransform.position);
 			// Apenas o ataque habilitado para deslocamento deve fixar eixo/posições globais
 			if (_telegraphDisplacementEnabled)
 			{
@@ -213,6 +247,9 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Feather
             EnsureAudio();
             _audio?.PlayAudio(AudioClipType.BossPrepAttack1SFX, AudioChannelType.Fx, AudioPlayType.OneShot);
             _updateSvc?.RegisterUpdatable(this);
+
+            // Start hidden; boss controller will reveal at mid prep
+            SetTelegraphVisible(false);
         }
 
         private bool ResolveInitialPushMode()
@@ -720,6 +757,20 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Feather
             }
 
             _views = null;
+        }
+
+        public void SetTelegraphVisible(bool visible)
+        {
+            if (_views != null)
+            {
+                for (int i = 0; i < _views.Length; i++)
+                {
+                    var v = _views[i];
+                    if (v?.Line != null) v.Line.enabled = visible;
+                    if (v?.MeshRenderer != null) v.MeshRenderer.enabled = visible;
+                }
+            }
+            if (_singleArrow != null) _singleArrow.enabled = visible;
         }
     }
 }

@@ -2,6 +2,7 @@ using Logic.Scripts.GameDomain.MVC.Nara;
 using UnityEngine;
 using Logic.Scripts.Turns;
 using Logic.Scripts.Services.UpdateService;
+using Zenject;
 
 public class NaraTurnMovementController : NaraMovementController {
     private Vector3 _movement;
@@ -12,6 +13,7 @@ public class NaraTurnMovementController : NaraMovementController {
     public NaraAreaLineHandlerController LineHandlerController;
     private ActionPointsService _actionPointsService;
     private int _extraMovementSpaceCost = 2;
+    private TurnStateService _turnStateService;
 
     public NaraTurnMovementController(GameInputActions inputActions, IUpdateSubscriptionService updateSubscriptionService,
         NaraConfigurationSO naraConfiguration) : base(inputActions, updateSubscriptionService, naraConfiguration) {
@@ -68,6 +70,11 @@ public class NaraTurnMovementController : NaraMovementController {
 
     public override void Move(Vector2 direction, float velocity, float rotation) {
         if (NaraRigidbody == null || NaraTransform == null) return;
+        if (!IsPlayerActPhase()) {
+            // hard lock: zero planar velocity when not in player phase
+            NaraRigidbody.linearVelocity = new Vector3(0f, NaraRigidbody.linearVelocity.y, 0f);
+            return;
+        }
 
         Vector3 camF = Cam.transform.forward;
         camF.y = 0f; camF.Normalize();
@@ -88,6 +95,9 @@ public class NaraTurnMovementController : NaraMovementController {
 
 
     public override void MoveToPoint(Vector3 endPosition, float velocity, float rotation) {
+        if (!IsPlayerActPhase()) {
+            return;
+        }
         float distance = Vector3.Distance(endPosition, _movementCenter);
 
         if (distance < _movementRadius) {
@@ -137,5 +147,25 @@ public class NaraTurnMovementController : NaraMovementController {
     public void DeactivateNaraGravity() {
         NaraRigidbody.useGravity = false;
         NaraRigidbody.constraints |= RigidbodyConstraints.FreezePositionY;
+    }
+
+    private bool IsPlayerActPhase() {
+        if (_turnStateService == null) {
+            // Prefer SceneContext container (scene-scoped bindings), fallback to ProjectContext
+            try {
+                SceneContext sceneContainer = null;
+                var contexts = UnityEngine.Object.FindObjectsByType<SceneContext>(FindObjectsSortMode.None);
+                for (int i = 0; i < contexts.Length; i++) {
+                    var sc = contexts[i];
+                    if (sc != null && sc.gameObject.scene == NaraTransform.gameObject.scene) { sceneContainer = sc; break; }
+                }
+                if (sceneContainer != null) {
+                    _turnStateService = sceneContainer.Container.Resolve<TurnStateService>();
+                } else {
+                    _turnStateService = ProjectContext.Instance.Container.Resolve<TurnStateService>();
+                }
+            } catch { _turnStateService = null; }
+        }
+        return _turnStateService != null && _turnStateService.Phase == TurnPhase.PlayerAct;
     }
 }

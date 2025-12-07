@@ -5,7 +5,7 @@ using Logic.Scripts.GameDomain.MVC.Abilitys;
 
 namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Cone
 {
-    public class ConeAttackHandler : IBossAttackHandler
+    public class ConeAttackHandler : IBossAttackHandler, Logic.Scripts.GameDomain.MVC.Boss.Attacks.Core.ITelegraphVisibility
     {
         private readonly float _radius;
         private readonly float _angleDeg;
@@ -19,16 +19,18 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Cone
             public Mesh Mesh;
         }
 		private ConeSubView[] _views;
-		private readonly Material _areaMaterial;
+		private readonly Material _lineMaterial;
+		private readonly Material _meshMaterial;
 		private Logic.Scripts.GameDomain.MVC.Boss.Telegraph.ITelegraphLayeringService.TelegraphLayer _layer;
 
-		public ConeAttackHandler(float radius, float angleDeg, int sides, float[] yaws, Material areaMaterial)
+		public ConeAttackHandler(float radius, float angleDeg, int sides, float[] yaws, Material lineMaterial, Material meshMaterial)
         {
             _radius = radius;
             _angleDeg = angleDeg;
             _sides = sides;
             _yaws = yaws;
-			_areaMaterial = areaMaterial;
+			_lineMaterial = lineMaterial;
+			_meshMaterial = meshMaterial;
         }
 
         public void PrepareTelegraph(Transform parentTransform)
@@ -45,7 +47,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Cone
 
                 ConeSubView v = new ConeSubView();
                 v.Line = go.AddComponent<LineRenderer>();
-				var lineMat = _areaMaterial != null ? new Material(_areaMaterial) : new Material(Shader.Find("Sprites/Default"));
+				var lineMat = _lineMaterial != null ? new Material(_lineMaterial) : new Material(Shader.Find("Sprites/Default"));
 				lineMat.renderQueue += _layer.QueueAdd;
 				v.Line.material = lineMat;
                 v.Line.useWorldSpace = true;
@@ -55,7 +57,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Cone
 
                 v.MeshFilter = go.AddComponent<MeshFilter>();
                 v.MeshRenderer = go.AddComponent<MeshRenderer>();
-				var meshMat = _areaMaterial != null ? new Material(_areaMaterial) : new Material(Shader.Find("Sprites/Default"));
+				var meshMat = _meshMaterial != null ? new Material(_meshMaterial) : new Material(Shader.Find("Sprites/Default"));
 				meshMat.renderQueue += _layer.QueueAdd;
 				v.MeshRenderer.material = meshMat;
                 v.Mesh = new Mesh();
@@ -103,6 +105,9 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Cone
 
                 _views[i] = v;
             }
+
+            // Start hidden; boss controller will reveal at mid prep
+            SetTelegraphVisible(false);
         }
 
         public bool ComputeHits(ArenaPosReference arenaReference, Transform originTransform, IEffectable caster)
@@ -161,6 +166,17 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Cone
 
 			var layering = Logic.Scripts.GameDomain.MVC.Boss.Telegraph.TelegraphLayeringLocator.Service;
 			if (layering != null && _layer.Id >= 0) layering.Unregister(_layer.Id);
+        }
+
+        public void SetTelegraphVisible(bool visible)
+        {
+            if (_views == null) return;
+            for (int i = 0; i < _views.Length; i++)
+            {
+                var v = _views[i];
+                if (v?.Line != null) v.Line.enabled = visible;
+                if (v?.MeshRenderer != null) v.MeshRenderer.enabled = visible;
+            }
         }
     }
 }

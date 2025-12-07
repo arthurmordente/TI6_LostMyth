@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using System.Threading.Tasks;
 
 namespace Logic.Scripts.GameDomain.MVC.Boss {
     public class BossView : MonoBehaviour, IEffectable {
@@ -72,6 +73,77 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
                 _animator.SetTrigger("PhaseTransition");
             }
         }
+
+        public void PlayAttackPrep(int attackId) {
+            if (_animator == null) return;
+            _animator.SetInteger("AttackId", attackId);
+            _animator.SetTrigger("AttackPrep");
+        }
+
+        public void SetAttackLoop(bool looping) {
+            if (_animator == null) return;
+            _animator.SetBool("AttackLoop", looping);
+        }
+
+        public void PlayAttackFinish() {
+            if (_animator == null) return;
+            _animator.SetTrigger("AttackFinish");
+        }
+
+        public void PlayMovePrep() {
+            if (_animator == null) return;
+            _animator.SetTrigger("MovePrep");
+        }
+
+        public void PlayMoveFinish() {
+            if (_animator == null) return;
+            _animator.SetTrigger("MoveFinish");
+        }
+
+        public void PlayIdle() {
+            if (_animator == null) return;
+            _animator.SetTrigger("Idle");
+        }
+
+        public async Task WaitUntilAttackLoopAsync(float timeoutSeconds = 3f, int layer = 0) {
+            if (_animator == null) return;
+            float elapsed = 0f;
+            while (elapsed < Mathf.Max(0.01f, timeoutSeconds)) {
+                // Avoid reporting loop reached while in transition
+                bool inTransition = _animator.IsInTransition(layer);
+                var st = _animator.GetCurrentAnimatorStateInfo(layer);
+                if (!inTransition && st.IsTag("AttackLoop")) return;
+                elapsed += Time.deltaTime;
+                await Task.Yield();
+            }
+        }
+
+		public async Task WaitUntilIdleAsync(float timeoutSeconds = 3f, int layer = 0) {
+			if (_animator == null) return;
+			float elapsed = 0f;
+			while (elapsed < Mathf.Max(0.01f, timeoutSeconds)) {
+				bool inTransition = _animator.IsInTransition(layer);
+				var st = _animator.GetCurrentAnimatorStateInfo(layer);
+				if (!inTransition && st.IsTag("Idle")) return;
+				elapsed += Time.deltaTime;
+				await Task.Yield();
+			}
+		}
+
+		public async Task WaitUntilStateTagNormalizedAsync(string tag, float normalizedTime, float timeoutSeconds = 3f, int layer = 0)
+		{
+			if (_animator == null) return;
+			normalizedTime = Mathf.Clamp01(normalizedTime);
+			float elapsed = 0f;
+			while (elapsed < Mathf.Max(0.01f, timeoutSeconds))
+			{
+				bool inTransition = _animator.IsInTransition(layer);
+				var st = _animator.GetCurrentAnimatorStateInfo(layer);
+				if (!inTransition && st.IsTag(tag) && st.normalizedTime >= normalizedTime) return;
+				elapsed += Time.deltaTime;
+				await Task.Yield();
+			}
+		}
 
         public float GetPhaseTransitionDuration() {
             return _phaseTransitionDuration;
