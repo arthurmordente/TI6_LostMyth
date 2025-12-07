@@ -2,6 +2,7 @@ using Logic.Scripts.GameDomain.MVC.Abilitys;
 using Logic.Scripts.GameDomain.MVC.Nara;
 using System;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public enum AimingMode {
     StraightAim,
@@ -45,9 +46,6 @@ public class ProjectileTargeting : TargetingStrategy {
     }
 
     private void UpdateNaraViewRotation() {
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
-
         if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out RaycastHit hit, float.MaxValue, GroundLayerMask)) {
             if (Vector3.Distance(hit.point, Caster.GetReferenceTransform().position) > _projectilePlotData.ParabolicMinRange) {
                 switch (aimingMode) {
@@ -64,21 +62,14 @@ public class ProjectileTargeting : TargetingStrategy {
     }
 
     private void AimStraight(Vector3 targetPoint) {
-        Vector3 casterOrigin = Caster.GetReferenceTransform().position;
-        Vector3 startPos = Caster.GetTransformCastPoint().position;
+        Transform refTransform = Caster.GetReferenceTransform();
+        Vector3 lookAtPoint = new Vector3(targetPoint.x, refTransform.position.y, targetPoint.z);
 
-        float maxRange = Ability.GetRange();
+        Vector3 direction = lookAtPoint - refTransform.position;
 
-        Vector3 directionFromCasterXZ = new Vector3(targetPoint.x - casterOrigin.x, 0, targetPoint.z - casterOrigin.z);
-
-        float distanceXZ = directionFromCasterXZ.magnitude;
-
-        Vector3 finalAimDirection;
-        finalAimDirection = directionFromCasterXZ.normalized;
-
-        Vector3 lookPointCaster = finalAimDirection;
-        lookPointCaster.y = 0f;
-        Caster.GetReferenceTransform().LookAt(lookPointCaster);
+        if (direction != Vector3.zero) {
+            refTransform.rotation = Quaternion.LookRotation(direction);
+        }
     }
 
     private void AimParabolic(Vector3 targetPoint) {

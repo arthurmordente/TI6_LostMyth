@@ -13,6 +13,7 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
 
         [SerializeField] private GamePlayUiBindSO _gamePlayUiBindSO;
         [SerializeField] private float tweenDuration = 0.5f;
+        private VisualElement _mainContainer;
 
         private Button _setSkillSet1Btn;
         private Button _setSkillSet2Btn;
@@ -101,6 +102,7 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
 
         public void InitStartPoint() {
             VisualElement root = GetComponent<UIDocument>().rootVisualElement;
+            _mainContainer = root.Q<VisualElement>("main-container");
 
             _setSkillSet1Btn = root.Q<Button>("Skill-Set1-btn");
             _setSkillSet2Btn = root.Q<Button>("Skill-Set2-btn");
@@ -114,6 +116,12 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
             if (_nextTurnBtn != null) {
                 _nextTurnBtn.clicked += () => _commandFactory.CreateCommandVoid<CompletePlayerActionCommand>().Execute();
             }
+        }
+
+        public VisualElement GetMainContainer() {
+            VisualElement root = GetComponent<UIDocument>().rootVisualElement;
+            _mainContainer = root.Q<VisualElement>("main-container");
+            return _mainContainer;
         }
 
         public void ShowGameOverPanel(CancellationTokenSource cancellationTokenSource) {

@@ -1,8 +1,11 @@
+using UnityEngine.UIElements;
+
 namespace Logic.Scripts.GameDomain.MVC.Ui {
     public interface IGamePlayUiController {
         void InitEntryPoint();
         void ShowPauseScreen();
         void HidePauseScreen();
+        VisualElement GameplayMainContainer();
         void SetBossValues(int newValue);
         void SetBossValues(int newPreviewValue, int newActualValue);
         void SetPlayerValues(int newValue);

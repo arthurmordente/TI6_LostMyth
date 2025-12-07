@@ -5,6 +5,7 @@ using Logic.Scripts.Services.CommandFactory;
 using Logic.Scripts.Services.StateMachineService;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace Logic.Scripts.GameDomain.MVC.Ui {
     public class GamePlayUiController : IGamePlayUiController {
@@ -38,6 +39,10 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
 
         public void InitExitPoint() {
 
+        }
+
+        public VisualElement GameplayMainContainer() {
+            return _gamePlayView.GetMainContainer();
         }
 
         #region Pause
