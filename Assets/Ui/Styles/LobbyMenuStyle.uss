@@ -443,3 +443,11 @@
     border-bottom-right-radius: 22px;
     border-bottom-left-radius: 22px;
 }
+
+#unity-low-button {
+    display: none;
+}
+
+#unity-high-button {
+    display: none;
+}
