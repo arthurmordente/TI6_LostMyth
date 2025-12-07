@@ -32,15 +32,17 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.SkySwords
 		private bool? _pullOverride = null;
 		public static void PrimeNextTelegraphPull(bool isPull) => _nextIsPull = isPull;
 
-		private readonly Material _areaMaterial;
+		private readonly Material _lineMaterial;
+		private readonly Material _meshMaterial;
 
-		public SkySwordsHandler(float radius, float ringWidth, bool isPull, bool telegraphDisplacementEnabled, Material areaMaterial)
+		public SkySwordsHandler(float radius, float ringWidth, bool isPull, bool telegraphDisplacementEnabled, Material lineMaterial, Material meshMaterial)
 		{
 			_radius = Mathf.Max(0.1f, radius);
 			_ringWidth = Mathf.Max(0.02f, ringWidth);
 			_isPull = isPull;
 			_telegraphDisplacementEnabled = telegraphDisplacementEnabled;
-			_areaMaterial = areaMaterial;
+			_lineMaterial = lineMaterial;
+			_meshMaterial = meshMaterial;
 		}
 
 		public void PrepareTelegraph(Transform parentTransform)
@@ -64,7 +66,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.SkySwords
 			var layer = layering != null ? layering.Register(preferTop: _telegraphDisplacementEnabled) : default;
 			_yOffset = layer.Y;
 			_rqAdd = layer.QueueAdd;
-			var ringMat = _areaMaterial != null ? new Material(_areaMaterial) : new Material(Shader.Find("Sprites/Default"));
+			var ringMat = _lineMaterial != null ? new Material(_lineMaterial) : new Material(Shader.Find("Sprites/Default"));
 			ringMat.renderQueue += _rqAdd;
 			_ring.material = ringMat;
 			_ring.useWorldSpace = true;
@@ -81,7 +83,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.SkySwords
 				discGo.transform.SetParent(parentTransform, false);
 				_discFilter = discGo.AddComponent<MeshFilter>();
 				_discRenderer = discGo.AddComponent<MeshRenderer>();
-				var discMat = _areaMaterial != null ? new Material(_areaMaterial) : new Material(Shader.Find("Sprites/Default"));
+				var discMat = _meshMaterial != null ? new Material(_meshMaterial) : new Material(Shader.Find("Sprites/Default"));
 				discMat.renderQueue += _rqAdd;
 				_discRenderer.material = discMat;
 				float effectiveRadius = Mathf.Max(0.01f, _radius - _ringWidth * 0.5f);
@@ -100,12 +102,12 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.SkySwords
 					if (shader == null) shader = Shader.Find("Sprites/Default");
 					var arrowMat = new Material(shader);
 					// não forçar renderQueue; manter no padrão do shader (opaco)
-					// cor da seta igual à cor do material de área (provider já resolveu Grapple/Knockback)
-					if (_areaMaterial != null)
+					// cor da seta igual à cor do material de MESH (provider já resolveu Grapple/Knockback)
+					if (_meshMaterial != null)
 					{
 						Color col;
-						if (_areaMaterial.HasProperty("_BaseColor")) col = _areaMaterial.GetColor("_BaseColor");
-						else if (_areaMaterial.HasProperty("_Color")) col = _areaMaterial.color;
+						if (_meshMaterial.HasProperty("_BaseColor")) col = _meshMaterial.GetColor("_BaseColor");
+						else if (_meshMaterial.HasProperty("_Color")) col = _meshMaterial.color;
 						else col = Color.white;
 						col.a = 1f; // força opacidade total na seta
 						if (arrowMat.HasProperty("_BaseColor")) arrowMat.SetColor("_BaseColor", col);
