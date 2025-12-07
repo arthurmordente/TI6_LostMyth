@@ -27,13 +27,14 @@ public class ProjectileBounceController : MonoBehaviour
     {
         /*if(currentBounces >= maxBounces)
         {
+            Debug.LogWarning("Projectile Bounce colidiu");
             Destroy(gameObject);
         } */
 
         if (other.gameObject.name != "HOC_Arena")
         {
             //Dar dano
-
+            Debug.LogWarning("Projectile Bounce colidiu");
             Destroy(gameObject);
         }
 
@@ -67,13 +68,14 @@ public class ProjectileBounceController : MonoBehaviour
     {
         /*if(currentBounces >= maxBounces)
         {
+            Debug.LogWarning("Projectile Bounce colidiu");
             Destroy(gameObject);
         } */
 
         if (collision.gameObject.name != "HOC_Arena")
         {
             //Dar dano
-
+            Debug.LogWarning("Projectile Bounce colidiu");
             Destroy(gameObject);
         }
 

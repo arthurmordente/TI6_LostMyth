@@ -23,9 +23,11 @@ public class ProjectilePassThroughController : MonoBehaviour
         if (other.gameObject.name != "HOC_Arena")
         {
             //Dar dano
+            Debug.LogWarning("Projectile Pass Through colidiu");
         }
         else
         {
+            Debug.LogWarning("Projectile Pass Through colidiu");
             Destroy(gameObject);
         }
     }
@@ -35,9 +37,11 @@ public class ProjectilePassThroughController : MonoBehaviour
         if (collision.gameObject.name != "HOC_Arena")
         {
             //Dar dano
+            Debug.LogWarning("Projectile Pass Through colidiu");
         }
         else
         {
+            Debug.LogWarning("Projectile Pass Through colidiu");
             Destroy(gameObject);
         }
     }
