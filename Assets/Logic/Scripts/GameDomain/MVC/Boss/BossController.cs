@@ -12,7 +12,7 @@ using Logic.Scripts.GameDomain.MVC.Ui;
 
 namespace Logic.Scripts.GameDomain.MVC.Boss {
     [Serializable]
-    public class BossController : IBossController, IFixedUpdatable, IInitializable, IEffectable {
+    public class BossController : IBossController, IFixedUpdatable, IInitializable, IEffectable, IDisposable {
         private readonly IUpdateSubscriptionService _updateSubscriptionService;
         private readonly IAudioService _audioService;
         private readonly ICommandFactory _commandFactory;
@@ -49,6 +49,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
         private int _remainingCastTurns;
         private struct PendingCast { public BossAttack Attack; public int TurnsRemaining; }
         private System.Collections.Generic.List<PendingCast> _pendingCasts;
+        private bool _registeredFixed;
 
         public bool IsCasting => _isCasting;
         public int RemainingCastTurns => _remainingCastTurns;
@@ -75,6 +76,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
             _remainingCastTurns = 0;
             _pendingCasts = new System.Collections.Generic.List<PendingCast>();
             _updateSubscriptionService.RegisterFixedUpdatable(this);
+            _registeredFixed = true;
             CreateBoss();
             _arenaReference = Object.FindFirstObjectByType<ArenaPosReference>();
             // Initialize UI with correct percentages and absolute values
@@ -540,6 +542,17 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
 
         public void ResetPreview() {
 
+        }
+
+        public void Dispose() {
+            TryUnregisterFromUpdate();
+        }
+
+        private void TryUnregisterFromUpdate() {
+            if (_registeredFixed) {
+                try { _updateSubscriptionService.UnregisterFixedUpdatable(this); } catch { }
+                _registeredFixed = false;
+            }
         }
 
         private BossBehaviorSO GetCurrentBehavior() {
