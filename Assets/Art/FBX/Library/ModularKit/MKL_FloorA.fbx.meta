@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 540990c2a2a923841bf67ddfdc8212ec
+guid: 6f3b99bdad930814fa58c3f2342e7d3e
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
@@ -7,13 +7,8 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: Book
-    second: {fileID: 2100000, guid: b531ea2eebd65904db28252928a2e72d, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Wood
-    second: {fileID: 2100000, guid: 0b0bb49868e796b4e8c22dd912c226c5, type: 2}
+      name: RockAndMarbleTrim
+    second: {fileID: 2100000, guid: 310db4b2c97793c43adcc8d66cc3a91a, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

@@ -3,7 +3,37 @@ guid: 50792ae23907de646aaf16d08231a4bb
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Black
+    second: {fileID: 2100000, guid: ec61e12c9ec211e44a2314aa27c26d73, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Candle
+    second: {fileID: 2100000, guid: 3f9fd12f99a75344a86e6ad1472a475f, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Glass
+    second: {fileID: -6271897200390792742, guid: 32a5c66b5024a6c4296bd9d9c8542a3f, type: 3}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: LightGrey
+    second: {fileID: -4780871956200985000, guid: 32a5c66b5024a6c4296bd9d9c8542a3f, type: 3}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Misc
+    second: {fileID: 2100000, guid: 3f9fd12f99a75344a86e6ad1472a475f, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: White
+    second: {fileID: 8713530393282890821, guid: 0227de05f4fb5154899b5e28e0e6a9b6, type: 3}
   materials:
     materialImportMode: 2
     materialName: 0
