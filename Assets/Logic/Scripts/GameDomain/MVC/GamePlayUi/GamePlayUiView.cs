@@ -1,12 +1,7 @@
 using DG.Tweening;
-using System.Threading;
 using UnityEngine;
 using UnityEngine.UIElements;
-using Zenject;
-using Logic.Scripts.Turns;
-using Logic.Scripts.Services.CommandFactory;
-using Logic.Scripts.GameDomain.Commands;
-using Unity.VisualScripting;
+using System;
 
 namespace Logic.Scripts.GameDomain.MVC.Ui {
     public class GamePlayUiView : MonoBehaviour {
@@ -22,19 +17,21 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
         private VisualElement _cooldownSlot5Container;
         private VisualElement _cooldownClone1Container;
         private VisualElement _cooldownClone2Container;
+        private Label _cooldownSlot1Text;
+        private Label _cooldownSlot2Text;
+        private Label _cooldownSlot3Text;
+        private Label _cooldownSlot4Text;
+        private Label _cooldownSlot5Text;
 
-        private Button _setSkillSet1Btn;
-        private Button _setSkillSet2Btn;
-        private Button _setSkillSet3Btn;
         private Button _useSkill1Btn;
         private Button _useSkill2Btn;
         private Button _useSkill3Btn;
+        private Button _useSkill4Btn;
+        private Button _useSkill5Btn;
+        private Button _useClone1Btn;
+        private Button _useClone2Btn;
 
         private Button _nextTurnBtn;
-
-        private ITurnQuery _turnQuery;
-        private ICommandFactory _commandFactory;
-        private int _cachedAp;
 
         #region AuxMethods
         void TweenLength(System.Func<Length> getter, System.Action<Length> setter, int newValue) {
@@ -119,22 +116,38 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
             _cooldownSlot5Container = root.Q<VisualElement>("Ability-Slot5-cooldown-container");
             _cooldownClone1Container = root.Q<VisualElement>("Clone-Slot1-Cooldown-label");
             _cooldownClone2Container = root.Q<VisualElement>("Clone-Slot2-Cooldown-label");
+
+            _cooldownSlot1Text = root.Q<Label>("Ability-Slot1-Cooldown-label");
+            _cooldownSlot2Text = root.Q<Label>("Ability-Slot2-Cooldown-label");
+            _cooldownSlot3Text = root.Q<Label>("Ability-Slot3-Cooldown-label");
+            _cooldownSlot4Text = root.Q<Label>("Ability-Slot4-Cooldown-label");
+            _cooldownSlot5Text = root.Q<Label>("Ability-Slot5-Cooldown-label");
+
             for (int i = 1; i <= 7; i++) {
                 SetCooldownContainer(i, true);
             }
 
-            _setSkillSet1Btn = root.Q<Button>("Skill-Set1-btn");
-            _setSkillSet2Btn = root.Q<Button>("Skill-Set2-btn");
-            _setSkillSet3Btn = root.Q<Button>("Skill-Set3-btn");
             _useSkill1Btn = root.Q<Button>("Ability-Slot1-btn");
             _useSkill2Btn = root.Q<Button>("Ability-Slot2-btn");
             _useSkill3Btn = root.Q<Button>("Ability-Slot3-btn");
+            _useSkill4Btn = root.Q<Button>("Ability-Slot4-btn");
+            _useSkill5Btn = root.Q<Button>("Ability-Slot5-btn");
+            _useClone1Btn = root.Q<Button>("Clone-Slot1-btn");
+            _useClone2Btn = root.Q<Button>("Clone-Slot2-btn");
 
             _nextTurnBtn = root.Q<Button>("Next-Turn-btn");
+        }
 
-            //if (_nextTurnBtn != null) {
-            //    _nextTurnBtn.clicked += () => _commandFactory.CreateCommandVoid<CompletePlayerActionCommand>().Execute();
-            //}
+        public void RegisterCallbacks(Action OnNextTurnClick, Action OnSkill1Click, Action OnSkill2Click, Action OnSkill3Click,
+            Action OnSkill4Click, Action OnSkill5Click, Action OnClone1Click, Action OnClone2Click) {
+            _nextTurnBtn.clicked += OnNextTurnClick;
+            _useSkill1Btn.clicked += OnSkill1Click;
+            _useSkill2Btn.clicked += OnSkill2Click;
+            _useSkill3Btn.clicked += OnSkill3Click;
+            _useSkill4Btn.clicked += OnSkill4Click;
+            _useSkill5Btn.clicked += OnSkill5Click;
+            _useClone1Btn.clicked += OnClone1Click;
+            _useClone2Btn.clicked += OnClone2Click;
         }
 
         public VisualElement GetMainContainer() {
@@ -176,28 +189,28 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
             }
         }
 
-        public void SetStartingValues(CancellationTokenSource cancellationTokenSource) {
-
+        public void SetActualCooldownText(int slotIndex, int NewCooldown) {
+            switch (slotIndex) {
+                case 1:
+                    _cooldownSlot1Text.text = NewCooldown.ToString();
+                    break;
+                case 2:
+                    _cooldownSlot2Text.text = NewCooldown.ToString();
+                    break;
+                case 3:
+                    _cooldownSlot3Text.text = NewCooldown.ToString();
+                    break;
+                case 4:
+                    _cooldownSlot4Text.text = NewCooldown.ToString();
+                    break;
+                case 5:
+                    _cooldownSlot5Text.text = NewCooldown.ToString();
+                    break;
+            }
         }
 
         public void InitExitPoint() {
 
-        }
-
-        [Inject]
-        public void Construct(ITurnQuery turnQuery, ICommandFactory commandFactory) {
-            _turnQuery = turnQuery;
-            _commandFactory = commandFactory;
-            _cachedAp = -1;
-        }
-
-        private void Update() {
-            if (_turnQuery == null) return;
-            int ap = _turnQuery.ActionPointsCurrent;
-            if (ap != _cachedAp) {
-                _cachedAp = ap;
-                OnPlayerActionPointsChange(ap);
-            }
         }
     }
 
