@@ -409,6 +409,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
                 Destroy(go);
                 return;
             }
+			try { Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.MinigameRuntimeService.SetActiveName(round.MinigameName); } catch { }
             Logic.Scripts.Turns.TurnStateService turnSvc = null;
             Logic.Scripts.Turns.IEnvironmentActorsRegistry envReg = null;
             Assets.Logic.Scripts.GameDomain.Effects.EffectableRelay bossRelay = null;

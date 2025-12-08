@@ -6,6 +6,8 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames
 {
 	public interface IMinigameRound
 	{
+		// Exposed display name for UI
+		string MinigameName { get; }
 		int ChipCost { get; }
 		int MaxTurnsToResolve { get; }
 		Task<MinigameResult> StartAsync(Logic.Scripts.Turns.TurnStateService turnState,

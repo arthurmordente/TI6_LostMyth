@@ -7,6 +7,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Dice
 {
 	public class DiceMinigameRound : MonoBehaviour, IMinigameRound, Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.IMinigameResolver, IDiceCallbacks
 	{
+		[SerializeField] private string _minigameName = "Dice";
 		[SerializeField] private int _chipCost = 2;
 		[SerializeField] private int _rounds = 3;
 		[SerializeField] private int _maxValue = 6;
@@ -35,6 +36,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Dice
 		private int _curPlayerValue;
 		private int _curBossValue;
 
+		public string MinigameName => _minigameName;
 		public int ChipCost => _chipCost;
 		public int MaxTurnsToResolve => _rounds;
 

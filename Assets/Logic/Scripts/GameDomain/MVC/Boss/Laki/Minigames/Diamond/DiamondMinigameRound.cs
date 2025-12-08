@@ -8,6 +8,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Diamond
 {
 	public class DiamondMinigameRound : MonoBehaviour, IMinigameRound, Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.IMinigameResolver
 	{
+		[SerializeField] private string _minigameName = "Diamonds";
 		[SerializeField] private int _chipCost = 1;
 		[SerializeField] private int _rounds = 3;
 		[SerializeField] private int _diamondsPerRound = 1;
@@ -29,6 +30,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Diamond
 		private bool _resolved;
 		private MinigameResult _finalResult;
 
+		public string MinigameName => _minigameName;
 		public int ChipCost => _chipCost;
 		public int MaxTurnsToResolve => _rounds;
 
