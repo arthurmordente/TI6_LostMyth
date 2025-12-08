@@ -55,15 +55,29 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
             _canMove = true;
         }
 
+        public void FreezeInputs() {
+            _canMove = false;
+            try { _naraMovementController?.DisableInputs(); } catch { }
+        }
+
+        public void UnfreezeInputs() {
+            _canMove = true;
+            try { _naraMovementController?.EnableInputs(); } catch { }
+        }
+
         public void ManagedFixedUpdate() {
             Vector2 dir = _naraMovementController.ReadInputs();
+            bool movementAllowed = true;
+            if (_naraMovementController is NaraTurnMovementController ntm) {
+                movementAllowed = ntm.IsMovementAllowed();
+            }
             if (dir == Vector2.zero || _canMove == false) {
                 _naraMovementController.Move(Vector2.zero, 0f, 0f);
                 _naraView?.SetMoving(false);
             }
             else {
                 _naraMovementController.Move(dir, _naraConfiguration.MoveSpeed, _naraConfiguration.RotationSpeed);
-                bool willMove = dir.sqrMagnitude > 0.0001f && _naraConfiguration.MoveSpeed > 0f;
+                bool willMove = movementAllowed && dir.sqrMagnitude > 0.0001f && _naraConfiguration.MoveSpeed > 0f;
                 _naraView?.SetMoving(willMove);
             }
         }

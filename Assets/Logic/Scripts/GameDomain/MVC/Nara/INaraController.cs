@@ -13,6 +13,8 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
         void StopMovingAnim();
         void Freeeze();
         void Unfreeeze();
+        void FreezeInputs();
+        void UnfreezeInputs();
         void RegisterListeners();
         void UnregisterListeners();
         void ManagedFixedUpdate();

@@ -17,7 +17,7 @@ MonoBehaviour:
     TriggerType: 0
     HealthPercentThreshold: 1
     HealthAbsoluteThreshold: 0
-    Behavior: {fileID: 11400000, guid: dae6ecb413c8a6345bc2f6f747a5ffe6, type: 2}
+    Behavior: {fileID: 11400000, guid: 0f5a2b18c13417b4ea437b193fff578c, type: 2}
   - Name: EnragedPhase
     TriggerType: 0
     HealthPercentThreshold: 0.5

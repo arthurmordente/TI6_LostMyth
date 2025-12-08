@@ -59,6 +59,7 @@ namespace Logic.Scripts.Turns {
             _actionPointsService.Reset();
             _turnStateService.EnterTurnMode();
             // Hard lock immediately to avoid a first-frame where animations could run before BossAct begins
+            _naraController?.FreezeInputs();
             _naraController?.Freeeze();
             _naraController?.StopMovingAnim();
             AdvanceTurnAsync();
@@ -80,7 +81,9 @@ namespace Logic.Scripts.Turns {
             _phase = TurnPhase.BossAct;
             _turnStateService.AdvanceTurn(_turnNumber, _phase);
             // Hard lock player at the beginning of BossAct
+            _naraController?.FreezeInputs();
             _naraController?.Freeeze();
+            _naraController?.StopMovingAnim();
             try { _chipService?.Refresh(); UnityEngine.Debug.Log("[Laki][ChipsUI] Turn start -> Refresh chips"); } catch { }
             if (Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.MinigameRuntimeService.IsActive) {
                 LogService.Log("[Laki] Minigame ativo - boss pausado (apenas resolução/arena)");
@@ -121,7 +124,10 @@ namespace Logic.Scripts.Turns {
             _turnMovement.ResetMovementArea();
             _turnStateService.AdvanceTurn(_turnNumber, _phase);
             // Unlock player controls and animations on PlayerAct
+            _naraController?.UnfreezeInputs();
             _naraController?.Unfreeeze();
+            // Garantir que todos os telegraphs preparados estejam visíveis para o jogador
+            Logic.Scripts.GameDomain.MVC.Boss.Telegraph.TelegraphVisibilityRegistry.SetAllVisible(true);
 			_cloneUseLimiter?.ResetForPlayerTurn();
             LogService.Log($"Turno {_turnNumber} - Fase: PlayerAct");
             _waitingPlayer = true;
@@ -148,6 +154,7 @@ namespace Logic.Scripts.Turns {
             _phase = TurnPhase.EchoesAct;
             _turnStateService.AdvanceTurn(_turnNumber, _phase);
             // Lock during Echoes
+            _naraController?.FreezeInputs();
             _naraController?.Freeeze();
             _naraController?.StopMovingAnim();
             LogService.Log($"Turno {_turnNumber} - Fase: EchoesAct");
@@ -163,6 +170,7 @@ namespace Logic.Scripts.Turns {
             _phase = TurnPhase.EnviromentAct;
             _turnStateService.AdvanceTurn(_turnNumber, _phase);
             // Lock during Environment
+            _naraController?.FreezeInputs();
             _naraController?.Freeeze();
             _naraController?.StopMovingAnim();
             LogService.Log($"Turno {_turnNumber} - Fase: EnviromentAct");
