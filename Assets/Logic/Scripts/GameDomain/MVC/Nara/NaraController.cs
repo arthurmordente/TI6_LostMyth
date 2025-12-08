@@ -11,6 +11,7 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
     public class NaraController : INaraController, IFixedUpdatable, IEffectable, IEffectableAction {
         private readonly IUpdateSubscriptionService _updateSubscriptionService;
         private readonly IAudioService _audioService;
+        private readonly ICommandFactory _commandFactory;
         private readonly NaraView _naraViewPrefab;
         private readonly NaraData _naraData;
         private readonly NaraConfigurationSO _naraConfiguration;
@@ -34,6 +35,7 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
             _updateSubscriptionService = updateSubscriptionService;
             _audioService = audioService;
             _naraViewPrefab = naraViewPrefab;
+            _commandFactory = commandFactory;
         }
 
         public void RegisterListeners() {
@@ -137,6 +139,7 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
             _gamePlayUiController.OnPreviewPlayerLifePercentChange(_naraData.ActualHealth);
             if (_naraData.IsAlive()) {
                 _naraView?.PlayDeath();
+                _commandFactory.CreateCommandVoid<GameOverCommand>().SetData(new GameOverCommandData(false)).Execute();
             }
         }
 
@@ -222,12 +225,14 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
                         if (_actionPointsService != null) return _actionPointsService;
                     }
                 }
-            } catch { }
+            }
+            catch { }
             try {
                 if (ProjectContext.Instance != null) {
                     _actionPointsService = ProjectContext.Instance.Container.Resolve<IActionPointsService>();
                 }
-            } catch { }
+            }
+            catch { }
             return _actionPointsService;
         }
 
