@@ -12,24 +12,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0c0c6085d048acf4fb600bcd04cc02b7, type: 3}
   m_Name: Laki BossPhase1 Final
   m_EditorClassIdentifier: 
-  _availableAttacks: []
+  _availableAttacks:
+  - {fileID: 4162083758434111994, guid: b73b8e1d5658ccd479392756754a6725, type: 3}
+  - {fileID: 2382607159073431541, guid: dc38b79479d8d7649af7b2552c4f5fa0, type: 3}
   _fallbackStepDistance: 1
   _stepDistance: 2
   _randomChangeDirectionSeconds: 1.5
-  _turnPatternLength: 8
+  _turnPatternLength: 3
   _turnPattern:
-  - Mode: 0
+  - Mode: 3
+    DistanceMultiplier: 0
+    AttackIndices: 01000000
+  - Mode: 3
     DistanceMultiplier: 0
     AttackIndices: 
-  - Mode: 0
+  - Mode: 3
     DistanceMultiplier: 0
-    AttackIndices: 
-  - Mode: 0
-    DistanceMultiplier: 0
-    AttackIndices: 
-  - Mode: 0
-    DistanceMultiplier: 0
-    AttackIndices: 
-  - Mode: 0
-    DistanceMultiplier: 0
-    AttackIndices: 
+    AttackIndices: 00000000
