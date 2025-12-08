@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 3472693768532237631}
   - component: {fileID: 5092126765207610062}
   - component: {fileID: 8366397698674977720}
+  - component: {fileID: 1607742839796567802}
   m_Layer: 5
   m_Name: UI_PopUp_Interactable
   m_TagString: Untagged
@@ -102,6 +103,18 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!114 &1607742839796567802
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3216017063035654670}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 42f699119294da04da47b2ced7d4384c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &3450577907987353203
 GameObject:
   m_ObjectHideFlags: 0
