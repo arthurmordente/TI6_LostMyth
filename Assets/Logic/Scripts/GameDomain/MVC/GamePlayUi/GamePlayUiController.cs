@@ -93,6 +93,7 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
         public async void OnClickPlayAgain() {
             _commandFactory.CreateCommandVoid<ResumeGameplayInputCommand>().Execute();
             await _commandFactory.CreateCommandAsync<ReloadLevelCommand>().Execute(CancellationTokenSource.CreateLinkedTokenSource(Application.exitCancellationToken));
+            _gameOverUIView.Hide();
         }
         public void OnLoad() {
             Debug.LogWarning("Clicou no load");

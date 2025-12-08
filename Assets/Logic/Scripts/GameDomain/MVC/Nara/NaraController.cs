@@ -15,6 +15,7 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
         private readonly NaraView _naraViewPrefab;
         private readonly NaraData _naraData;
         private readonly NaraConfigurationSO _naraConfiguration;
+        private readonly ICheatController _cheatController;
         public GameObject NaraViewGO => _naraView.gameObject;
         public Transform NaraSkillSpotTransform => _naraView.transform;
         public NaraMovementController NaraMove => _naraMovementController;
@@ -29,13 +30,14 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
         public NaraController(IUpdateSubscriptionService updateSubscriptionService,
             IAudioService audioService, ICommandFactory commandFactory,
             IResourcesLoaderService resourcesLoaderService, NaraView naraViewPrefab,
-            NaraConfigurationSO naraConfiguration) {
+            NaraConfigurationSO naraConfiguration, ICheatController cheatController) {
             _naraData = new NaraData(naraConfiguration);
             _naraConfiguration = naraConfiguration;
             _updateSubscriptionService = updateSubscriptionService;
             _audioService = audioService;
             _naraViewPrefab = naraViewPrefab;
             _commandFactory = commandFactory;
+            _cheatController = cheatController;
         }
 
         public void RegisterListeners() {
@@ -118,7 +120,7 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
         }
 
         public void TakeDamage(int damageAmound) {
-            _naraData.TakeDamage(damageAmound);
+            if (_cheatController.Imortal == false) _naraData.TakeDamage(damageAmound);
             _audioService?.PlayAudio(AudioClipType.AbilityPrep2SFX, AudioChannelType.Fx);
             _gamePlayUiController.OnActualPlayerHealthChange(_naraData.ActualHealth);
             _gamePlayUiController.OnActualPlayerLifePercentChange(_naraData.ActualHealth);

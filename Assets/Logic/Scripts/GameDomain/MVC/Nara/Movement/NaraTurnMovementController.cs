@@ -9,6 +9,7 @@ public class NaraTurnMovementController : NaraMovementController {
     private Vector3 _movementCenter;
     private int _movementRadius;
     private int _initialMovementRadius;
+    private ICheatController _cheatController;
 
     public NaraAreaLineHandlerController LineHandlerController;
     private ActionPointsService _actionPointsService;
@@ -16,9 +17,10 @@ public class NaraTurnMovementController : NaraMovementController {
     private TurnStateService _turnStateService;
 
     public NaraTurnMovementController(GameInputActions inputActions, IUpdateSubscriptionService updateSubscriptionService,
-        NaraConfigurationSO naraConfiguration) : base(inputActions, updateSubscriptionService, naraConfiguration) {
+        NaraConfigurationSO naraConfiguration, ICheatController cheatController) : base(inputActions, updateSubscriptionService, naraConfiguration) {
         _initialMovementRadius = naraConfiguration.InitialMovementDistance;
         LineHandlerController = new NaraAreaLineHandlerController(naraConfiguration, updateSubscriptionService);
+        _cheatController = cheatController;
     }
 
     public override void InitEntryPoint(Rigidbody rigidbody, Camera camera) {
@@ -128,7 +130,8 @@ public class NaraTurnMovementController : NaraMovementController {
     }
 
     public void ResetMovementRadius() {
-        _movementRadius = _initialMovementRadius;
+        if (_cheatController.InfinityMove) RemoveMovementRadius();
+        else _movementRadius = _initialMovementRadius;
     }
 
     public void RemoveMovementRadius() {
@@ -161,10 +164,12 @@ public class NaraTurnMovementController : NaraMovementController {
                 }
                 if (sceneContainer != null) {
                     _turnStateService = sceneContainer.Container.Resolve<TurnStateService>();
-                } else {
+                }
+                else {
                     _turnStateService = ProjectContext.Instance.Container.Resolve<TurnStateService>();
                 }
-            } catch { _turnStateService = null; }
+            }
+            catch { _turnStateService = null; }
         }
         return _turnStateService != null && _turnStateService.Phase == TurnPhase.PlayerAct;
     }
