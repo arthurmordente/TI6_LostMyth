@@ -44,6 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c6b2eab22464e7c43963c788b73d6171, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _minigameName: Diamond is Unbreakable!
   _chipCost: 2
   _rounds: 1
   _diamondsPerRound: 1

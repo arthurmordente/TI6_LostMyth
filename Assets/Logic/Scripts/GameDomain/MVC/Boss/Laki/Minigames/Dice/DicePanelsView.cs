@@ -21,6 +21,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Dice
 			_playerPanelRoot = playerPanelRoot;
 			_playerSumText = playerSumText;
 			_playerFactorsText = playerFactorsText;
+			EnsureHidden();
 		}
 
 		private void OnEnable()
@@ -39,6 +40,11 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Dice
 		}
 
 		private void OnReset()
+		{
+			EnsureHidden();
+		}
+
+		private void EnsureHidden()
 		{
 			if (_lakiPanelRoot != null) _lakiPanelRoot.SetActive(false);
 			if (_playerPanelRoot != null) _playerPanelRoot.SetActive(false);
