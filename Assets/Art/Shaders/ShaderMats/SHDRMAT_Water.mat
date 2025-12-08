@@ -43,18 +43,18 @@ Material:
     - _CellScale: 30
     - _DeformFrequency: 1
     - _DeformVelocity: 1
-    - _Distance: 0
-    - _Intensity: 0
+    - _Distance: 0.5
+    - _Intensity: 0.1
     - _Metalic: 0
     - _NormalMapForce: 0.2
     - _NormalMapSize: 10
     - _QueueControl: 0
     - _QueueOffset: 0
     - _Smooth: 0
-    - _Transparency: 0.5
+    - _Transparency: 0.4
     - _TransparencyMask: 0
     m_Colors:
-    - _NormalMapVelocity: {r: 0, g: 0.2, b: 0, a: 0}
+    - _NormalMapVelocity: {r: 0.01, g: 0.01, b: 0, a: 0}
     - _ReflectionColor: {r: 0.22027409, g: 0.89644223, b: 1.8679246, a: 1}
     - _WaterColor: {r: 0.56069773, g: 0.9715243, b: 1.8867924, a: 1}
     - _WaterVelocity: {r: 0.01, g: 0.01, b: 0, a: 0}
