@@ -8,6 +8,8 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames
 		public interface IMinigameStatusProvider { string GetStatus(); }
 		public static IMinigameStatusProvider StatusProvider { get; set; }
 		private static readonly System.Collections.Generic.List<IMinigameResolver> _resolvers = new System.Collections.Generic.List<IMinigameResolver>(2);
+		public static string ActiveMinigameName { get; private set; }
+		public static System.Action<string> OnMinigameNameChanged;
 
 		public static bool IsActive => _activeCount > 0;
 
@@ -37,12 +39,19 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames
 			UnityEngine.Debug.Log($"[Laki] MinigameRuntime: Begin (active={_activeCount})");
 		}
 
+		public static void SetActiveName(string name)
+		{
+			ActiveMinigameName = name;
+			try { OnMinigameNameChanged?.Invoke(ActiveMinigameName); } catch {}
+		}
+
 		public static void EndAndScheduleBossResolutionSkip()
 		{
 			if (_activeCount > 0) _activeCount--;
 			_skipOnceOnBossTurn = true;
 			_pauseBossOnce = true;
 			if (_activeCount <= 0) StatusProvider = null;
+			SetActiveName(null);
 			UnityEngine.Debug.Log($"[Laki] MinigameRuntime: End (active={_activeCount}) -> will skip next boss prep");
 		}
 

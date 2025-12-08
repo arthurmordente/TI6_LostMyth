@@ -2295,6 +2295,7 @@ GameObject:
   - component: {fileID: 6848104616740789463}
   - component: {fileID: 6143116250716774284}
   - component: {fileID: 3114752621752471854}
+  - component: {fileID: 8695215367175580558}
   m_Layer: 0
   m_Name: LakiBoss
   m_TagString: Untagged
@@ -2395,9 +2396,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _centerWorld: {x: 0, y: 0.1, z: 0}
-  _innerRadius: 10
-  _outerRadius: 22
-  _radialSplit01: 0.6
+  _innerRadius: 8
+  _outerRadius: 26
+  _radialSplit01: 0.5
   _positiveEffects:
   - rid: 9037664587430232238
   - rid: 9037664587430232239
@@ -2439,6 +2440,20 @@ MonoBehaviour:
         Description: -1AP
         IsAutoCast: 0
         amount: 1
+--- !u!114 &8695215367175580558
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3694188558464357575}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9f14a02ebdd47e4dacefc081f6a2adb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _uiCanvasPrefab: {fileID: 303414991133466283, guid: 2f759b6be58c38c45830f2a5a3e6ce0d, type: 3}
+  _uiScale: 1
 --- !u!1 &3714948367433055870
 GameObject:
   m_ObjectHideFlags: 0
