@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &228885286881348693
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5510583642069434315}
+  - component: {fileID: 2353304401579540294}
+  m_Layer: 0
+  m_Name: DiceMinigame
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5510583642069434315
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 228885286881348693}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 415.94568, y: 287.55505, z: 170.06323}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2353304401579540294
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 228885286881348693}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91a457ac59e7c55439a8bc9b8352c65d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _minigameName: Roll DaDice!
+  _chipCost: 2
+  _rounds: 3
+  _maxValue: 6
+  _dieHp: 99
+  _playerDiePrefab: {fileID: 6735503299288627155, guid: a07f2265a248f6e49b3f05efc14c5b14, type: 3}
+  _bossDiePrefab: {fileID: 2022372803364641405, guid: acad9a1ee0076cd41860f0687a346561, type: 3}
+  _playerWinsOnTie: 0

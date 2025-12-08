@@ -88,7 +88,12 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 			IChipService chipSvc = null;
 			try { chipSvc = container.Resolve<IChipService>(); } catch { chipSvc = null; }
 			if (chipSvc != null) chipSvc.SetInitial(_initialPlayerChips, _initialBossChips);
-			BuildChipUi(container);
+			bool hasNewUi = UnityEngine.Object.FindObjectOfType<Logic.Scripts.GameDomain.MVC.Environment.Laki.LakiArenaUiBootstrap>() != null;
+			if (!hasNewUi) {
+				BuildChipUi(container);
+			} else {
+				UnityEngine.Debug.Log("[Laki] New LakiArenaUiBootstrap detected; skipping legacy chips UI creation.");
+			}
 		}
 
 		private static Sprite CreateSquareSprite(Color color)
