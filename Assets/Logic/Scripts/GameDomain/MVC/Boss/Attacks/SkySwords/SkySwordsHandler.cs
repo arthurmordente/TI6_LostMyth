@@ -132,6 +132,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.SkySwords
 
 			// Start hidden; boss controller will reveal at mid prep
 			SetTelegraphVisible(false);
+			Logic.Scripts.GameDomain.MVC.Boss.Telegraph.TelegraphVisibilityRegistry.Register(this);
 		}
 
 		public bool ComputeHits(ArenaPosReference arenaReference, Transform originTransform, IEffectable caster)
@@ -207,6 +208,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.SkySwords
 					_arrowUpdater = null;
 				}
 				CurrentDisplacementEnabled = false;
+				Logic.Scripts.GameDomain.MVC.Boss.Telegraph.TelegraphVisibilityRegistry.Unregister(this);
 		}
 
 		public void SetTelegraphVisible(bool visible)

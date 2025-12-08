@@ -149,6 +149,10 @@ public class NaraTurnMovementController : NaraMovementController {
         NaraRigidbody.constraints |= RigidbodyConstraints.FreezePositionY;
     }
 
+    public bool IsMovementAllowed() {
+        return IsPlayerActPhase();
+    }
+
     private bool IsPlayerActPhase() {
         if (_turnStateService == null) {
             // Prefer SceneContext container (scene-scoped bindings), fallback to ProjectContext

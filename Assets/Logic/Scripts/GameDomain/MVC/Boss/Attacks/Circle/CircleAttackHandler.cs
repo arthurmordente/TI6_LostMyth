@@ -5,7 +5,7 @@ using Logic.Scripts.GameDomain.MVC.Abilitys;
 
 namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Circle
 {
-	public sealed class CircleAttackHandler : IBossAttackHandler
+	public sealed class CircleAttackHandler : IBossAttackHandler, Logic.Scripts.GameDomain.MVC.Boss.Attacks.Core.ITelegraphVisibility
 	{
 		private readonly float _radius;
 		private readonly float _ringWidth;
@@ -64,6 +64,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Circle
 
 			// Start hidden; boss controller will reveal at mid prep
 			SetTelegraphVisible(false);
+			Logic.Scripts.GameDomain.MVC.Boss.Telegraph.TelegraphVisibilityRegistry.Register(this);
 		}
 
 		public bool ComputeHits(ArenaPosReference arenaReference, Transform originTransform, IEffectable caster)
@@ -103,6 +104,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Circle
 		{
 			if (_ring != null) { Object.Destroy(_ring.gameObject); _ring = null; }
 			if (_discFilter != null) { Object.Destroy(_discFilter.gameObject); _discFilter = null; _discRenderer = null; }
+			Logic.Scripts.GameDomain.MVC.Boss.Telegraph.TelegraphVisibilityRegistry.Unregister(this);
 		}
 
 		public void SetTelegraphVisible(bool visible)

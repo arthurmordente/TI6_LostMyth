@@ -368,13 +368,16 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
                 }
                 case AttackType.SkySwords:
                 {
+                    // Materiais específicos (line/mesh) resolvidos com displacement flag (para Grapple/Knockback/Normal)
+                    Material ssLine = ResolveTelegraphLineMaterialFor(_telegraphDisplacementEnabled);
+                    Material ssMesh = ResolveTelegraphMeshMaterialFor(_telegraphDisplacementEnabled);
                     _handler = new Logic.Scripts.GameDomain.MVC.Boss.Attacks.SkySwords.SkySwordsHandler(
                         _skySwords.radius,
                         _skySwords.ringWidth,
                         _skySwordsIsPull,
                         _telegraphDisplacementEnabled,
-                        lineBase ?? meshBase,
-                        meshBase);
+                        ssLine,
+                        ssMesh);
                     break;
                 }
                 default:

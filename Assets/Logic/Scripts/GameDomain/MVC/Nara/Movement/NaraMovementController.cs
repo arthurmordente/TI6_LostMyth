@@ -60,4 +60,12 @@ public abstract class NaraMovementController : INaraMovementController, IFixedUp
     public void UnregisterListeners() {
         UpdateSubscriptionService.UnregisterFixedUpdatable(this);
     }
+
+    public void DisableInputs() {
+        try { GameInputActions.Player.Disable(); } catch { }
+    }
+
+    public void EnableInputs() {
+        try { GameInputActions.Player.Enable(); } catch { }
+    }
 }
