@@ -71,7 +71,7 @@ public class ProjectileTargeting : TargetingStrategy {
         if (directionToTarget.sqrMagnitude > 0) {
             directionToTarget.y = 0f;
             Caster.GetReferenceTransform().rotation = Quaternion.LookRotation(directionToTarget);
-            directionToTarget.y = Caster.GetTransformCastPoint().rotation.y;
+            directionToTarget.y = Caster.GetTransformCastPoint().position.y;
             Caster.GetTransformCastPoint().rotation = Quaternion.LookRotation(directionToTarget);
         }
     }

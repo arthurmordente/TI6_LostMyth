@@ -8,11 +8,11 @@ using UnityEngine;
 using Zenject;
 using Logic.Scripts.Services.AudioService;
 
-public class CastController : ICastController
-{
+public class CastController : ICastController {
     private readonly IActionPointsService _actionPointsService;
     private readonly IUpdateSubscriptionService _subscriptionService;
     private readonly ICommandFactory _commandFactory;
+    private readonly ICheatController _cheatController;
     private readonly AbilityData[] _abilities;
 
     private AbilityData _currentAbility;
@@ -25,47 +25,40 @@ public class CastController : ICastController
     private IAudioService _audio;
 
     public CastController(IUpdateSubscriptionService updateSubscriptionService, ICommandFactory commandFactory,
-        IActionPointsService actionPointsService, AbilityData[] abilities)
-    {
+        IActionPointsService actionPointsService, AbilityData[] abilities, ICheatController cheatController) {
         _subscriptionService = updateSubscriptionService;
         _actionPointsService = actionPointsService;
         _commandFactory = commandFactory;
         _abilities = abilities;
-
+        _cheatController = cheatController;
         try { _audio = ProjectContext.Instance.Container.Resolve<IAudioService>(); } catch { _audio = null; }
     }
 
-    public void InitEntryPoint(INaraController naraController)
-    {
+    public void InitEntryPoint(INaraController naraController) {
         PlayerTransform = naraController.NaraViewGO.transform;
         foreach (AbilityData ability in _abilities)
             ability.SetUp(_subscriptionService, _commandFactory);
     }
 
-    public bool TryUseAbility(int index, IEffectable caster)
-    {
-        if (_actionPointsService.CanSpend(_abilities[index].GetCost()))
-        {
+    public bool TryUseAbility(int index, IEffectable caster) {
+        if (_actionPointsService.CanSpend(_abilities[index].GetCost()) || _cheatController.InfinityCast) {
             _abilities[index].Aim(caster);
             _currentAbility = _abilities[index];
             _currentCaster = caster;
             _currentAbilityIndex = index;
 
-            if (caster is INaraController naraController)
-            {
+            if (caster is INaraController naraController) {
                 int attackType = _abilities[index] != null ? _abilities[index].AnimatorAttackType : 1;
                 naraController.PlayAttackType(attackType);
             }
             return true;
         }
-        else
-        {
+        else {
             return false;
         }
     }
 
-    public void CancelAbilityUse()
-    {
+    public void CancelAbilityUse() {
         if (_currentCaster is INaraController naraController)
             naraController.TriggerCancel();
 
@@ -75,15 +68,13 @@ public class CastController : ICastController
         _currentAbilityIndex = -1;
     }
 
-    public void UseAbility(IEffectable caster)
-    {
+    public void UseAbility(IEffectable caster) {
         if (_currentAbility == null) return;
 
         _canUseAbility = true;
-        _actionPointsService.Spend(_currentAbility.GetCost());
+        if (_cheatController.InfinityCast == false) _actionPointsService.Spend(_currentAbility.GetCost());
 
-        if (caster is INaraController naraController)
-        {
+        if (caster is INaraController naraController) {
             naraController.TriggerExecute();
         }
 
@@ -102,18 +93,15 @@ public class CastController : ICastController
     public void UseSlowEcho(IEchoController echoController, Transform caster) =>
         echoController.CreateSlowEcho(caster);
 
-    private void PlayUsedSfxByIndex(int index)
-    {
+    private void PlayUsedSfxByIndex(int index) {
         if (_audio == null) return;
 
         AudioClipType clip = MapUsedClip(index);
         _audio.PlayAudio(clip, AudioChannelType.Fx, AudioPlayType.OneShot);
     }
 
-    private static AudioClipType MapUsedClip(int index)
-    {
-        switch (index)
-        {
+    private static AudioClipType MapUsedClip(int index) {
+        switch (index) {
             case 0: return AudioClipType.AbilityUsed1SFX;
             case 1: return AudioClipType.AbilityUsed2SFX;
             case 2: return AudioClipType.AbilityUsed3SFX;

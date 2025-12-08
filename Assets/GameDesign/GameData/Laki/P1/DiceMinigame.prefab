@@ -44,6 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 91a457ac59e7c55439a8bc9b8352c65d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _minigameName: Roll DaDice!
   _chipCost: 2
   _rounds: 3
   _maxValue: 6

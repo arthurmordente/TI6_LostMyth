@@ -17,23 +17,23 @@
                     <engine:Label text="Trapaças" name="title-label" style="height: 100%; width: 90%; -unity-font-definition: url(&quot;project://database/Assets/Ui/UI%20Fonts/SubTitle.ttf?fileID=12800000&amp;guid=b88dc2cdbf2798c4fa1b3984c567e570&amp;type=3#SubTitle&quot;); font-size: 100%; color: rgb(107, 15, 142); -unity-text-align: middle-left;" />
                     <engine:Button name="exit-options-button" class="close-button" />
                 </engine:VisualElement>
-                <engine:VisualElement name="body-container" style="flex-grow: 1; height: 83%; width: 100%; justify-content: space-between; padding-top: 2%;">
-                    <engine:VisualElement class="Item-container">
+                <engine:VisualElement name="body-container" style="flex-grow: 1; height: 83%; width: 100%; justify-content: space-between; padding-top: 10%; padding-bottom: 10%;">
+                    <engine:VisualElement class="Item-container" style="flex-grow: 1;">
                         <engine:VisualElement style="flex-grow: 0; width: 35%; flex-direction: row; align-items: center; justify-content: center; height: 100%; position: relative;" />
-                        <engine:Toggle style="height: 80%; width: 10%;" />
+                        <engine:Toggle name="life-toggle" style="height: 80%; width: 10%;" />
                         <engine:Label text="Vida infinita" style="-unity-font-definition: url(&quot;project://database/Assets/Ui/UI%20Fonts/Text-Bold.otf?fileID=12800000&amp;guid=4778bedcd2ddc204c8a5bdab7a003316&amp;type=3#Text-Bold&quot;); font-size: 55%;" />
                     </engine:VisualElement>
-                    <engine:VisualElement class="Item-container">
+                    <engine:VisualElement class="Item-container" style="flex-grow: 1;">
                         <engine:VisualElement style="flex-grow: 0; width: 35%; flex-direction: row; align-items: center; justify-content: center; height: 100%; position: relative;" />
-                        <engine:Toggle style="height: 80%; width: 10%;" />
+                        <engine:Toggle name="pa-toggle" style="height: 80%; width: 10%;" />
                         <engine:Label text="PA Infinito" style="-unity-font-definition: url(&quot;project://database/Assets/Ui/UI%20Fonts/Text-Bold.otf?fileID=12800000&amp;guid=4778bedcd2ddc204c8a5bdab7a003316&amp;type=3#Text-Bold&quot;); font-size: 55%;" />
                     </engine:VisualElement>
-                    <engine:VisualElement class="Item-container">
+                    <engine:VisualElement class="Item-container" style="flex-grow: 1;">
                         <engine:VisualElement style="flex-grow: 0; width: 35%; flex-direction: row; align-items: center; justify-content: center; height: 100%; position: relative;" />
-                        <engine:Toggle style="height: 80%; width: 10%;" />
+                        <engine:Toggle name="pm-toggle" style="height: 80%; width: 10%;" />
                         <engine:Label text="PM Infinito" style="-unity-font-definition: url(&quot;project://database/Assets/Ui/UI%20Fonts/Text-Bold.otf?fileID=12800000&amp;guid=4778bedcd2ddc204c8a5bdab7a003316&amp;type=3#Text-Bold&quot;); font-size: 55%;" />
                     </engine:VisualElement>
-                    <engine:VisualElement class="Item-container">
+                    <engine:VisualElement class="Item-container" style="display: none;">
                         <engine:VisualElement style="flex-grow: 0; width: 35%; flex-direction: row; align-items: center; justify-content: center; height: 100%; position: relative;" />
                         <engine:Toggle style="height: 80%; width: 10%;" />
                         <engine:Label text="Liberar plots" style="-unity-font-definition: url(&quot;project://database/Assets/Ui/UI%20Fonts/Text-Bold.otf?fileID=12800000&amp;guid=4778bedcd2ddc204c8a5bdab7a003316&amp;type=3#Text-Bold&quot;); font-size: 55%;" />

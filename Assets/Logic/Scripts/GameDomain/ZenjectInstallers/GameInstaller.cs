@@ -23,12 +23,13 @@ namespace Logic.Scripts.GameDomain.ZenjectInstallers {
 
         public override void InstallBindings() {
             Container.Bind<IGameInitiator>().To<GameInitiator.GameInitiator>().AsSingle().NonLazy();
+            Container.BindInterfacesTo<CheatController>().AsSingle().NonLazy();
             Container.BindInterfacesTo<AbilityPointService>().AsSingle().WithArguments(Abilities, PointData).NonLazy();
             Container.BindFactory<GamePlayInitatorEnterData, GamePlayState, GamePlayState.Factory>();
             Container.BindFactory<ExplorationInitiatorEnterData, ExplorationState, ExplorationState.Factory>();
             Container.BindInterfacesTo<LevelsDataService>().AsSingle().NonLazy();
             Container.BindFactory<LobbyInitiatorEnterData, LobbyState, LobbyState.Factory>().AsSingle().NonLazy();
-            Container.BindInterfacesTo<UniversalUIController>().AsSingle().WithArguments(_loadView, _guideView, 
+            Container.BindInterfacesTo<UniversalUIController>().AsSingle().WithArguments(_loadView, _guideView,
                 _cheatsView, _creditsUIView, _optionsView).NonLazy();
 
             Container.Bind<IAudioService>()

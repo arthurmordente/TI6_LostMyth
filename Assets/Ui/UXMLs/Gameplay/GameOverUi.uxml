@@ -1,16 +1,15 @@
 <engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/Ui/Styles/LobbyMenuStyle.uss?fileID=7433441132597879392&amp;guid=8c15ef07de17af044bf70c45766414bf&amp;type=3#LobbyMenuStyle" />
-    <engine:VisualElement name="main-container" style="flex-grow: 1; align-self: auto; align-items: center; justify-content: center; background-image: url(&quot;project://database/Assets/Ui/Images/BlurBackground.png?fileID=2800000&amp;guid=3e44ed5141441a844b6db4c85916fa02&amp;type=3#BlurBackground&quot;); -unity-background-scale-mode: stretch-to-fill; background-size: 103% 105%;">
+    <engine:VisualElement name="main-container" class="close-container" style="flex-grow: 1; align-self: auto; align-items: center; justify-content: center; background-image: url(&quot;project://database/Assets/Ui/Images/BlurBackground.png?fileID=2800000&amp;guid=3e44ed5141441a844b6db4c85916fa02&amp;type=3#BlurBackground&quot;); -unity-background-scale-mode: stretch-to-fill; background-size: 103% 105%;">
         <engine:VisualElement name="header-container" style="flex-grow: 1; height: 45%;">
-            <engine:Label text="Você ganhou" style="width: 100%; height: 100%; -unity-text-align: middle-center; font-size: 200%; -unity-font-definition: url(&quot;project://database/Assets/Ui/UI%20Fonts/Title.ttf?fileID=12800000&amp;guid=e8f8a8a2d6ddad14086f666da53e1f84&amp;type=3#Title&quot;); color: rgb(243, 235, 235);" />
+            <engine:Label text="Você ganhou" name="final-txt" style="width: 100%; height: 100%; -unity-text-align: middle-center; font-size: 200%; -unity-font-definition: url(&quot;project://database/Assets/Ui/UI%20Fonts/Title.ttf?fileID=12800000&amp;guid=e8f8a8a2d6ddad14086f666da53e1f84&amp;type=3#Title&quot;); color: rgb(243, 235, 235);" />
         </engine:VisualElement>
         <engine:VisualElement name="body-container" style="flex-grow: 1; height: 20%;" />
         <engine:VisualElement name="footer-container" style="flex-grow: 1; height: 30%; padding-top: 2%; padding-right: 3%; padding-bottom: 2%; padding-left: 3%; width: 100%;">
-            <engine:VisualElement style="flex-grow: 1; flex-direction: row; background-image: url(&quot;project://database/Assets/Ui/Images/ButtonsListHorizontalBackground.png?fileID=2800000&amp;guid=47afd5df0d0b0ed4aa553c9f7e5ca9fb&amp;type=3#ButtonsListHorizontalBackground&quot;); padding-top: 2%; padding-right: 2%; padding-bottom: 2%; padding-left: 2%; justify-content: space-between; align-items: center;">
-                <engine:Button text="Novo Jogo" name="play-btn" class="mainMenu-button" />
-                <engine:Button text="Carregar" name="load-btn" class="mainMenu-button" style="display: none;" />
-                <engine:Button text="Opções" name="options-btn" class="mainMenu-button" />
-                <engine:Button text="Sair" name="exit-btn" class="mainMenu-button" />
+            <engine:VisualElement style="flex-grow: 1; flex-direction: row; background-image: url(&quot;project://database/Assets/Ui/Images/ButtonsListHorizontalBackground.png?fileID=2800000&amp;guid=47afd5df0d0b0ed4aa553c9f7e5ca9fb&amp;type=3#ButtonsListHorizontalBackground&quot;); padding-top: 2%; padding-right: 2%; padding-bottom: 2%; padding-left: 2%; justify-content: center; align-items: center;">
+                <engine:Button text="Jogar&#10;Novamente" name="play-btn" class="mainMenu-button" style="margin-right: 2%; margin-left: 2%; visibility: hidden; display: none;" />
+                <engine:Button text="Carregar" name="load-btn" class="mainMenu-button" style="margin-left: 2%; margin-right: 2%; display: none;" />
+                <engine:Button text="À biblioteca" name="exit-btn" class="mainMenu-button" style="margin-left: 2%; margin-right: 2%;" />
             </engine:VisualElement>
         </engine:VisualElement>
     </engine:VisualElement>

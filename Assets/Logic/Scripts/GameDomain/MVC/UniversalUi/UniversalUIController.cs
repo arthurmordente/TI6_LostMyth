@@ -6,13 +6,16 @@ public class UniversalUIController : IUniversalUIController {
     private readonly CheatsUIView _cheatsView;
     private readonly CreditsUIView _creditsView;
     private readonly OptionsUIView _optionsView;
+    private readonly ICheatController _cheatController;
 
-    public UniversalUIController(LoadUIView loadView, GuideUIView guideView, CheatsUIView cheatsView, CreditsUIView creditsView, OptionsUIView optionsView) {
+    public UniversalUIController(LoadUIView loadView, GuideUIView guideView, CheatsUIView cheatsView, CreditsUIView creditsView,
+        OptionsUIView optionsView, ICheatController cheatController) {
         _loadView = loadView;
         _guideView = guideView;
         _cheatsView = cheatsView;
         _creditsView = creditsView;
         _optionsView = optionsView;
+        _cheatController = cheatController;
     }
 
     public async Awaitable InitEntryPoint() {
@@ -21,7 +24,8 @@ public class UniversalUIController : IUniversalUIController {
         await _guideView.InitiPoint();
         _guideView.RegisterCallbacks();
         _cheatsView.InitEntryPoint();
-        _cheatsView.RegisterCallbacks(ShowGuideScreen, ShowLoadScreen, ShowCreditsScreen, OnClickExit, ShowOptionsScreen);
+        _cheatsView.RegisterCallbacks(ShowGuideScreen, ShowLoadScreen, ShowCreditsScreen, OnClickExit, ShowOptionsScreen,
+            _cheatController.SetImortal, _cheatController.SetInfinityCast, _cheatController.SetInifinityMove);
         _creditsView.InitEntryPoint();
         _creditsView.RegisterCallbacks(ShowGuideScreen, ShowLoadScreen, ShowCheatsScreen, OnClickExit, ShowOptionsScreen);
         _optionsView.InitEntryPoint();
