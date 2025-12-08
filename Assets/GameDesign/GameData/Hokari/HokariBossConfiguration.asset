@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5a9864f9802f4794f8e6ae5d748c17fb, type: 3}
   m_Name: HokariBossConfiguration
   m_EditorClassIdentifier: 
-  <MaxHealth>k__BackingField: 10
+  <MaxHealth>k__BackingField: 30
   <InitialMovementDistance>k__BackingField: 8
   <MoveSpeed>k__BackingField: 8
   <RotationSpeed>k__BackingField: 20

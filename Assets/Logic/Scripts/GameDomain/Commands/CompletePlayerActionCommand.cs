@@ -14,7 +14,7 @@ namespace Logic.Scripts.GameDomain.Commands {
 
         public void Execute() {
             _turnFlowController.CompletePlayerAction();
-            _naraController.Freeeze();
+            _naraController.FreezeInputs();
         }
     }
 }

@@ -108,6 +108,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Cone
 
             // Start hidden; boss controller will reveal at mid prep
             SetTelegraphVisible(false);
+            Logic.Scripts.GameDomain.MVC.Boss.Telegraph.TelegraphVisibilityRegistry.Register(this);
         }
 
         public bool ComputeHits(ArenaPosReference arenaReference, Transform originTransform, IEffectable caster)
@@ -166,6 +167,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Cone
 
 			var layering = Logic.Scripts.GameDomain.MVC.Boss.Telegraph.TelegraphLayeringLocator.Service;
 			if (layering != null && _layer.Id >= 0) layering.Unregister(_layer.Id);
+            Logic.Scripts.GameDomain.MVC.Boss.Telegraph.TelegraphVisibilityRegistry.Unregister(this);
         }
 
         public void SetTelegraphVisible(bool visible)

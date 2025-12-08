@@ -145,6 +145,26 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
 			}
 		}
 
+		// Helper específico para gating do movimento: libera quando (MoveLoop ativo) OU (MovePrep >= threshold)
+		public async Task WaitUntilMoveLoopOrPrepAsync(float prepThreshold = 0.9f, float timeoutSeconds = 3.5f, int layer = 0)
+		{
+			if (_animator == null) return;
+			prepThreshold = Mathf.Clamp01(prepThreshold);
+			float elapsed = 0f;
+			while (elapsed < Mathf.Max(0.01f, timeoutSeconds))
+			{
+				bool inTransition = _animator.IsInTransition(layer);
+				var st = _animator.GetCurrentAnimatorStateInfo(layer);
+				if (!inTransition)
+				{
+					if (st.IsTag("MoveLoop")) return;
+					if (st.IsTag("MovePrep") && st.normalizedTime >= prepThreshold) return;
+				}
+				elapsed += Time.deltaTime;
+				await Task.Yield();
+			}
+		}
+
         public float GetPhaseTransitionDuration() {
             return _phaseTransitionDuration;
         }

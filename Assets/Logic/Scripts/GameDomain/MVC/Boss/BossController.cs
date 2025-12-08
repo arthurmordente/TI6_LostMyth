@@ -49,6 +49,10 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
         private int _remainingCastTurns;
         private int _loopingAttackAnimId = -1;
         private bool _movingAnimActive = false;
+        private bool _movementAllowed = false;
+        private bool _movementGatePending = false;
+        private Vector3 _plannedMoveDirection = Vector3.zero;
+        private bool _hasPlannedMoveDirection = false;
         private struct PendingCast { public BossAttack Attack; public int TurnsRemaining; }
         private System.Collections.Generic.List<PendingCast> _pendingCasts;
         private bool _registeredFixed;
@@ -142,33 +146,31 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
             }
 
 			bool hasDir = worldDir.sqrMagnitude > 0.0001f;
-			bool movingNow = hasDir && _turnMoveDistanceBudget > 0f;
+			// Desejo de animar movimento depende só do orçamento do turno (evita flicker por variação momentânea de direção)
+			bool movingAnimDesired = _turnMoveDistanceBudget > 0f;
 
 			// Movement animation state machine: start prep when movement actually begins; finish when it ends
-			if (movingNow && !_movingAnimActive) {
-				if (_bossView != null) { _bossView.PlayMovePrep(); _bossView.SetMoving(true); }
+			if (movingAnimDesired && !_movingAnimActive) {
+                if (_bossView != null) { _bossView.PlayMovePrep(); _bossView.SetMoving(true); }
 				_movingAnimActive = true;
-			} else if (!movingNow && _movingAnimActive) {
-				if (_bossView != null) { _bossView.SetMoving(false); _bossView.PlayMoveFinish(); }
+                _movementAllowed = false;
+                if (!_movementGatePending) { _movementGatePending = true; BeginMovementGateAsync(); }
+			} else if (!movingAnimDesired && _movingAnimActive) {
+                if (_bossView != null) { _bossView.SetMoving(false); _bossView.PlayMoveFinish(); }
 				_movingAnimActive = false;
+                _movementAllowed = false;
+                _movementGatePending = false;
 			}
 
-			if (hasDir) {
-				// Rotaciona sempre para olhar na direção, mesmo sem deslocar
-				Quaternion targetRot = Quaternion.LookRotation(worldDir.normalized, Vector3.up);
-				Quaternion newRot = Quaternion.Slerp(_bossTransform.rotation, targetRot, Time.fixedDeltaTime * _rotationSpeed);
-				_bossRigidbody.MoveRotation(newRot);
-
-				// Translada apenas se houver orçamento de movimento
-				if (_turnMoveDistanceBudget > 0f) {
-					float step = _moveSpeed * Time.fixedDeltaTime;
-					if (step > _turnMoveDistanceBudget) step = _turnMoveDistanceBudget;
-					_turnMoveDistanceBudget -= step;
-					Vector3 fromPos = _bossTransform.position;
-					Vector3 toPos = fromPos + worldDir.normalized * step;
-					Vector3 toPlanar = new Vector3(toPos.x, fromPos.y, toPos.z);
-					_bossRigidbody.MovePosition(toPlanar);
-				}
+			// Translada apenas quando liberado pelo gate e com direção planejada
+			if (_turnMoveDistanceBudget > 0f && _movementAllowed && _hasPlannedMoveDirection) {
+				float step = _moveSpeed * Time.fixedDeltaTime;
+				if (step > _turnMoveDistanceBudget) step = _turnMoveDistanceBudget;
+				_turnMoveDistanceBudget -= step;
+				Vector3 fromPos = _bossTransform.position;
+				Vector3 toPos = fromPos + _plannedMoveDirection * step;
+				Vector3 toPlanar = new Vector3(toPos.x, fromPos.y, toPos.z);
+				_bossRigidbody.MovePosition(toPlanar);
 			}
         }
 
@@ -317,6 +319,8 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
         private async Task MoveTurnAsync() {
             ConfigureTurnMovement();
             if (_turnMoveDistanceBudget <= 0f) return;
+            float elapsed = 0f;
+            const float moveTimeoutSeconds = 5f;
             const float stopDistance = 1.2f;
             while (_turnMoveDistanceBudget > 0f) {
                 if (_moveMode == BossMoveMode.TowardPlayer) {
@@ -331,8 +335,84 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
                         }
                     }
                 }
+                // Timeout de segurança para não ficar preso em loop de movimento
+                elapsed += Time.deltaTime;
+                if (elapsed >= moveTimeoutSeconds) {
+                    Debug.LogWarning($"[BossMove] Movement timeout reached ({moveTimeoutSeconds:0.##}s). Forcing finish.");
+                    _turnMoveDistanceBudget = 0f;
+                    break;
+                }
                 await Task.Yield();
             }
+        }
+
+        // Habilita a locomoção física somente quando a animação de MovePrep já avançou (ou entrou no loop)
+        private async void BeginMovementGateAsync()
+        {
+            try {
+                if (_bossView != null) {
+                    // Espera entrar no loop OU atingir 90% do prep antes de permitir deslocamento
+                    await _bossView.WaitUntilMoveLoopOrPrepAsync(0.9f, 3.5f);
+                } else {
+                    // fallback: pequeno atraso
+                    await Task.Delay(450);
+                }
+            } catch { }
+            // Planeja direção e aplica rotação inicial uma única vez
+            Vector3 planned = ComputePlannedDirection();
+            if (planned.sqrMagnitude > 0.0001f) {
+                _plannedMoveDirection = planned.normalized;
+                _hasPlannedMoveDirection = true;
+                try {
+                    Quaternion targetRot = Quaternion.LookRotation(_plannedMoveDirection, Vector3.up);
+                    _bossRigidbody.MoveRotation(targetRot);
+                } catch { }
+                _movementAllowed = true;
+            } else {
+                // Sem direção válida: encerra movimento deste turno
+                _plannedMoveDirection = Vector3.zero;
+                _hasPlannedMoveDirection = false;
+                _movementAllowed = false;
+                _turnMoveDistanceBudget = 0f;
+                if (_movingAnimActive && _bossView != null) {
+                    _bossView.SetMoving(false); _bossView.PlayMoveFinish();
+                    _movingAnimActive = false;
+                }
+            }
+            _movementAllowed = true;
+            _movementGatePending = false;
+        }
+
+        private Vector3 ComputePlannedDirection()
+        {
+            try {
+                switch (_moveMode) {
+                    case BossMoveMode.Forward:
+                        {
+                            Vector3 fwd = _bossTransform.forward; fwd.y = 0f;
+                            return fwd.sqrMagnitude > 0.0001f ? fwd.normalized : Vector3.zero;
+                        }
+                    case BossMoveMode.TowardPlayer:
+                        {
+                            GameObject target = FindPlayerTarget();
+                            if (target == null) return Vector3.zero;
+                            Vector3 dir = target.transform.position - _bossTransform.position; dir.y = 0f;
+                            return dir.sqrMagnitude > 0.0001f ? dir.normalized : Vector3.zero;
+                        }
+                    case BossMoveMode.Random:
+                        {
+                            Vector3 d = _randomDirection; d.y = 0f;
+                            return d.sqrMagnitude > 0.0001f ? d.normalized : Vector3.zero;
+                        }
+                    case BossMoveMode.TowardArenaCenter:
+                        {
+                            Vector3 center = _arenaReference != null ? _arenaReference.transform.position : Vector3.zero;
+                            Vector3 dir = center - _bossTransform.position; dir.y = 0f;
+                            return dir.sqrMagnitude > 0.0001f ? dir.normalized : Vector3.zero;
+                        }
+                    default: return Vector3.zero;
+                }
+            } catch { return Vector3.zero; }
         }
 
         public void PlayPhaseTransitionAnimation() {
@@ -476,6 +556,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
                 SetMoveModeTowardPlayer(_bossConfiguration.MoveSpeed, _bossConfiguration.RotationSpeed);
                 _turnMoveDistanceBudget = baseStep;
                 Debug.Log($"Boss turn move: Mode=TowardPlayer | distance={_turnMoveDistanceBudget:0.###}");
+                if (_turnMoveDistanceBudget > 0f) StartMovementPrepIfNeeded();
                 return;
             }
             int indexInPattern = _executedTurnsCount % pattern.Length;
@@ -500,6 +581,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
 					Debug.Log($"Boss turn move: Mode=TowardArenaCenter | distance={_turnMoveDistanceBudget:0.###}");
 					break;
             }
+            if (_turnMoveDistanceBudget > 0f) StartMovementPrepIfNeeded();
         }
 
         public void SetMoveModeForward(float moveSpeed, float rotationSpeed) {
@@ -530,6 +612,14 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
 
 
 
+        private void StartMovementPrepIfNeeded()
+        {
+            if (_movingAnimActive) return;
+            if (_bossView != null) { _bossView.PlayMovePrep(); _bossView.SetMoving(true); }
+            _movingAnimActive = true;
+            _movementAllowed = false;
+            if (!_movementGatePending) { _movementGatePending = true; BeginMovementGateAsync(); }
+        }
         private AbilityData SelectAbilityByHealth(out int selectedIndex) { selectedIndex = 0; return null; }
         private int GetAbilityDefaultDelay(AbilityData ability) { return 0; }
 
@@ -566,6 +656,14 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
             // Handle death immediately
             if (_bossData.ActualHealth <= 0) {
                 Debug.Log("[Boss] Died");
+                // Ensure movement/animations are stopped and gates cleared to avoid being stuck in MoveLoop/idle
+                _turnMoveDistanceBudget = 0f;
+                _movementAllowed = false;
+                _movementGatePending = false;
+                if (_movingAnimActive) {
+                    try { _bossView?.SetMoving(false); } catch { }
+                    _movingAnimActive = false;
+                }
                 try { _updateSubscriptionService.UnregisterFixedUpdatable(this); } catch {}
                 if (_bossView != null) {
                     // Optional: play death animation here if available

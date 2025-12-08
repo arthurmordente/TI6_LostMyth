@@ -250,6 +250,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Feather
 
             // Start hidden; boss controller will reveal at mid prep
             SetTelegraphVisible(false);
+            Logic.Scripts.GameDomain.MVC.Boss.Telegraph.TelegraphVisibilityRegistry.Register(this);
         }
 
         private bool ResolveInitialPushMode()
@@ -757,6 +758,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Feather
             }
 
             _views = null;
+            Logic.Scripts.GameDomain.MVC.Boss.Telegraph.TelegraphVisibilityRegistry.Unregister(this);
         }
 
         public void SetTelegraphVisible(bool visible)

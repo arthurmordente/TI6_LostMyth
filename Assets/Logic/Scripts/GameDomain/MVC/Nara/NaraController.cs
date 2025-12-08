@@ -55,6 +55,16 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
             _canMove = true;
         }
 
+        public void FreezeInputs() {
+            _canMove = false;
+            try { _naraMovementController?.DisableInputs(); } catch { }
+        }
+
+        public void UnfreezeInputs() {
+            _canMove = true;
+            try { _naraMovementController?.EnableInputs(); } catch { }
+        }
+
         public void ManagedFixedUpdate() {
             Vector2 dir = _naraMovementController.ReadInputs();
             bool movementAllowed = true;
