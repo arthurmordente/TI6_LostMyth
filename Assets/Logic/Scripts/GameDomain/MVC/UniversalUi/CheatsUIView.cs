@@ -6,6 +6,11 @@ public class CheatsUIView : MonoBehaviour {
     [SerializeField] private UIDocument _loadUIDocument;
     private VisualElement _root;
     private VisualElement _mainContainer;
+
+    private Toggle _lifeToggle;
+    private Toggle _actionPointsToggle;
+    private Toggle _movementToggle;
+
     private Button _closeButton;
     private Button _guideButton;
     private Button _loadButton;
@@ -22,9 +27,14 @@ public class CheatsUIView : MonoBehaviour {
         _creditsButton = _root.Q<Button>("credits-btn");
         _exitButton = _root.Q<Button>("exit-btn");
         _optionsButton = _root.Q<Button>("options-btn");
+
+        _lifeToggle = _root.Q<Toggle>("life-toggle");
+        _actionPointsToggle = _root.Q<Toggle>("pa-toggle");
+        _movementToggle = _root.Q<Toggle>("pm-toggle");
     }
 
-    public void RegisterCallbacks(Action OnClikGuide, Action OnClickLoad, Action OnCreditsClick, Action OnExitClick, Action OnOptionsClick) {
+    public void RegisterCallbacks(Action OnClikGuide, Action OnClickLoad, Action OnCreditsClick, Action OnExitClick, Action OnOptionsClick,
+        Action<bool> OnLifeToggle, Action<bool> OnActionToggle, Action<bool> OnMovementToggle) {
         _closeButton.clicked += Hide;
         _guideButton.clicked += OnClikGuide;
         _loadButton.clicked += OnClickLoad;
@@ -33,6 +43,9 @@ public class CheatsUIView : MonoBehaviour {
         _creditsButton.clicked += Hide;
         _exitButton.clicked += OnExitClick;
         _optionsButton.clicked += OnOptionsClick;
+        _lifeToggle.RegisterCallback<ChangeEvent<bool>>((evt) => { OnLifeToggle.Invoke(evt.newValue); });
+        _actionPointsToggle.RegisterCallback<ChangeEvent<bool>>((evt) => { OnActionToggle.Invoke(evt.newValue); });
+        _movementToggle.RegisterCallback<ChangeEvent<bool>>((evt) => { OnMovementToggle.Invoke(evt.newValue); });
     }
 
     public void Show() {
