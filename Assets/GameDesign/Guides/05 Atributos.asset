@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   guideTitle: Atributos
   pages:
-  - pageSprite: {fileID: 21300000, guid: 3897ed9b9626be647b54ce47b620e01e, type: 3}
+  - pageSprite: {fileID: 21300000, guid: a51b557bf4d1a28419338556b91ef571, type: 3}
     descriptionText: "Cada habilidade possui 4 atributos que definem suas caracter\xEDsticas
       base, s\xE3o eles: For\xE7a, Efici\xEAncia, Extens\xE3o e Celeridade."
-  - pageSprite: {fileID: 21300000, guid: 3897ed9b9626be647b54ce47b620e01e, type: 3}
+  - pageSprite: {fileID: 21300000, guid: e2c7224b22fc6464599e5b8795421f7f, type: 3}
     descriptionText: "1. For\xE7a aumenta o dano causado ou a cura fornecida.\n2.
       Efici\xEAncia reduz o custo de PA.\n3. Extens\xE3o aumenta o alcance.\n4. Celeridade
       reduz o tempo de recarga."

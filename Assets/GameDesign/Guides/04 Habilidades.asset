@@ -25,7 +25,6 @@ MonoBehaviour:
       excelente op\xE7\xE3o para acertar v\xE1rios alvos em \xE1rea, mas seu dano
       \xE9 o menor entre as tr\xEAs."
   - pageSprite: {fileID: 21300000, guid: c4af56b69acf64e4f845e8c480188c61, type: 3}
-    descriptionText: "4. Totem \xE9 a melhor op\xE7\xE3o para curar Nara, mas ela
-      precisa se manter pr\xF3xima a ele para receber seus efeitos.\n5. Teleporte
-      consegue levar Nara de forma instant\xE2nea para outro local dentro de seu
-      alcance."
+    descriptionText: "4. Totem \xE9 a escolha ideal para curar Nara, mas ela precisa
+      se manter pr\xF3xima a ele para receber seus efeitos.\n5. Teleporte consegue
+      levar Nara de forma instant\xE2nea para outro local dentro de seu alcance."

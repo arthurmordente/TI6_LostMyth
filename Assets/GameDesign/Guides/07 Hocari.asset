@@ -12,14 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 02fd617bcf3e6174fac4f95d3839e4aa, type: 3}
   m_Name: 07 Hocari
   m_EditorClassIdentifier: 
-  guideTitle: Aprimoramentos
+  guideTitle: Hocari
   pages:
   - pageSprite: {fileID: 21300000, guid: b0ab71406f1833f4a9e131e597727ede, type: 3}
     descriptionText: "Hocari utiliza diversos golpes com grandes \xE1reas de efeito,
       mas sua mec\xE2nica principal \xE9 o deslocamento for\xE7ado do jogador. Suas
-      habilidades conseguem puxar e empurrar o jogador, fazendo com que o mesmo tenha
-      que tomar cuidado n\xE3o apenas em desviar de Hocari mas n\xE3o ser derrubado
+      habilidades conseguem puxar e empurrar Nara, fazendo com que a mesma tenha
+      que tomar cuidado n\xE3o apenas em desviar de Hocari mas n\xE3o ser derrubada
       da arena."
   - pageSprite: {fileID: 21300000, guid: 33375be4fcc5be74c8ad2ace7e337209, type: 3}
-    descriptionText: "Quando um golpe de Hocari deslocar\xE1 o jogador, uma seta
-      aparecer\xE1 exibindo tanto a dire\xE7\xE3o quanto a pot\xEAncia do mesmo."
+    descriptionText: "Quando um golpe de Hocari for deslocar Nara, uma seta aparecer\xE1
+      exibindo tanto a dire\xE7\xE3o quanto a pot\xEAncia do mesmo.\LTodos os locais
+      destacados causam dano a Nara, caso a mesma termine o turno em cima da \xE1rea."
+  - pageSprite: {fileID: 21300000, guid: 95c99cd9bbaba5b4983ea2e023013b9a, type: 3}
+    descriptionText: Um orbe pode ser gerado no decorrer da luta, Nara pode utilizar
+      seus clones como isca e impedir que o orbe detone em si mesma. Ou apenas atacar
+      e destrui-los antes que explodam.

@@ -1,0 +1,75 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: SHDRMAT_Water
+  m_Shader: {fileID: -6465566751694194690, guid: a9e62dc6684d8704f81d108343d5f78f, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 1
+  m_EnableInstancingVariants: 1
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: 3000
+  stringTagMap: {}
+  disabledShaderPasses:
+  - MOTIONVECTORS
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - unity_Lightmaps:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_LightmapsInd:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_ShadowMasks:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _Agitation: 1
+    - _CellIntensity: 7
+    - _CellScale: 30
+    - _DeformFrequency: 1
+    - _DeformVelocity: 1
+    - _Distance: 0.5
+    - _Intensity: 0.1
+    - _Metalic: 0
+    - _NormalMapForce: 0.2
+    - _NormalMapSize: 10
+    - _QueueControl: 0
+    - _QueueOffset: 0
+    - _Smooth: 0
+    - _Transparency: 0.4
+    - _TransparencyMask: 0
+    m_Colors:
+    - _NormalMapVelocity: {r: 0.01, g: 0.01, b: 0, a: 0}
+    - _ReflectionColor: {r: 0.22027409, g: 0.89644223, b: 1.8679246, a: 1}
+    - _WaterColor: {r: 0.56069773, g: 0.9715243, b: 1.8867924, a: 1}
+    - _WaterVelocity: {r: 0.01, g: 0.01, b: 0, a: 0}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1
+--- !u!114 &7058909007615700308
+MonoBehaviour:
+  m_ObjectHideFlags: 11
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  version: 9

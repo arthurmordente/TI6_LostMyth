@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02fd617bcf3e6174fac4f95d3839e4aa, type: 3}
+  m_Name: 08 Laki
+  m_EditorClassIdentifier: 
+  guideTitle: Laki
+  pages:
+  - pageSprite: {fileID: 21300000, guid: b0ab71406f1833f4a9e131e597727ede, type: 3}
+    descriptionText: "Laki despreza combates diretos. N\xE3o adianta tentar acerta-la:
+      est\xE1 sempre um passo \xE0 frente e bem protegida. A \xFAnica forma de venc\xEA-la
+      \xE9 aceitar suas regras \u2014 sem aposta, n\xE3o h\xE1 jogo."
+  - pageSprite: {fileID: 21300000, guid: 33375be4fcc5be74c8ad2ace7e337209, type: 3}
+    descriptionText: "As apostas sempre usam fichas. Se o jogador \u2014 ou a pr\xF3pria
+      Laki \u2014 entrar numa nova aposta sem fichas suficientes, uma taxa de vitalidade
+      \xE9 cobrada automaticamente para cobrir o valor. Cada jogo define o custo
+      m\xEDnimo de fichas e o vencedor leva tudo."
+  - pageSprite: {fileID: 21300000, guid: 33375be4fcc5be74c8ad2ace7e337209, type: 3}
+    descriptionText: "Sua arena foi montada pensando em melhorar a divers\xE3o de
+      seus desafiantes e refletir a generosidade de Laki. A cada turno, certas casas
+      podem conceder b\xEAn\xE7\xE3os ou maldi\xE7\xF5es a quem terminar nelas."
+  - pageSprite: {fileID: 21300000, guid: 33375be4fcc5be74c8ad2ace7e337209, type: 3}
+    descriptionText: "Rolem os Dados: Neste jogo Laki e Nara competem pela maior
+      soma ao final da aposta. Durante a rodada, Nara pode acertar um dado na mesa
+      para for\xE7ar um novo lan\xE7amento."
+  - pageSprite: {fileID: 21300000, guid: 33375be4fcc5be74c8ad2ace7e337209, type: 3}
+    descriptionText: "O Melhor Amigo: Diamantes s\xE3o criados pela arena, que s\xE3o
+      recolhidos por Laki ap\xF3s um turno. O objetivo de Nara neste jogo \xE9 destruir
+      o maior n\xFAmero poss\xEDvel de diamantes, enquanto o de Laki \xE9 recolher."
