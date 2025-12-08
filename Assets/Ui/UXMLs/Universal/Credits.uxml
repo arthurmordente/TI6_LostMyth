@@ -6,7 +6,7 @@
             <engine:VisualElement style="flex-grow: 1; height: 83%; background-image: url(&quot;project://database/Assets/Ui/Images/ButtonsListBackground.png?fileID=2800000&amp;guid=bc6e36229f8a9eb45822fc6a45b3eb6d&amp;type=3#ButtonsListBackground&quot;); padding-left: 5%; padding-top: 3%; padding-right: 3%; padding-bottom: 3%; justify-content: center;">
                 <engine:Button text="Features" name="guide-btn" class="simple-button" />
                 <engine:Button text="Configurações" name="options-btn" class="simple-button" />
-                <engine:Button text="Carregar" name="load-btn" class="simple-button" />
+                <engine:Button text="Carregar" name="load-btn" class="simple-button" style="display: none;" />
                 <engine:Button text="Trapaças" name="cheat-btn" class="simple-button" />
                 <engine:Button text="Sair" name="exit-btn" class="simple-button" style="display: none;" />
             </engine:VisualElement>

@@ -8,7 +8,7 @@
         <engine:VisualElement name="footer-container" style="flex-grow: 1; height: 30%; padding-top: 2%; padding-right: 3%; padding-bottom: 2%; padding-left: 3%; width: 100%;">
             <engine:VisualElement style="flex-grow: 1; flex-direction: row; background-image: url(&quot;project://database/Assets/Ui/Images/ButtonsListHorizontalBackground.png?fileID=2800000&amp;guid=47afd5df0d0b0ed4aa553c9f7e5ca9fb&amp;type=3#ButtonsListHorizontalBackground&quot;); padding-top: 2%; padding-right: 2%; padding-bottom: 2%; padding-left: 2%; justify-content: space-between; align-items: center;">
                 <engine:Button text="Novo Jogo" name="play-btn" class="mainMenu-button" />
-                <engine:Button text="Carregar" name="load-btn" class="mainMenu-button" />
+                <engine:Button text="Carregar" name="load-btn" class="mainMenu-button" style="display: none;" />
                 <engine:Button text="Opções" name="options-btn" class="mainMenu-button" />
                 <engine:Button text="Sair" name="exit-btn" class="mainMenu-button" />
             </engine:VisualElement>

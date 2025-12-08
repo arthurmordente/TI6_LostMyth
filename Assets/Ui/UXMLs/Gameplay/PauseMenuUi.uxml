@@ -8,7 +8,7 @@
             <engine:VisualElement style="flex-grow: 1; flex-direction: column; background-image: url(&quot;project://database/Assets/Ui/Images/ButtonsListBackground.png?fileID=2800000&amp;guid=bc6e36229f8a9eb45822fc6a45b3eb6d&amp;type=3#ButtonsListBackground&quot;); padding-top: 2%; padding-right: 2%; padding-bottom: 2%; padding-left: 2%; justify-content: center; align-items: center; width: 30%; height: 100%;">
                 <engine:Button text="Features" name="guide-btn" class="simple-button" />
                 <engine:Button text="Opções" name="options-btn" class="simple-button" />
-                <engine:Button text="Carregar" name="load-btn" class="simple-button" />
+                <engine:Button text="Carregar" name="load-btn" class="simple-button" style="display: none;" />
                 <engine:Button text="Trapaças" name="cheat-btn" class="simple-button" />
                 <engine:Button text="Voltar ao Jogo" name="return-btn" class="simple-button" />
                 <engine:Button text="Voltar a Livraria" name="lobby-btn" class="simple-button" />
