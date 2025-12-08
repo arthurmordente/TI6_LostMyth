@@ -1380,8 +1380,8 @@
     "m_ObjectId": "08643aad1f4f403fbc0c6bc861b175c8",
     "m_Title": "MainAlpha",
     "m_Position": {
-        "x": -928.0,
-        "y": 630.999755859375
+        "x": -928.0001220703125,
+        "y": 631.0
     }
 }
 
@@ -2302,7 +2302,7 @@
     "m_Title": "TransparencyEdge",
     "m_Position": {
         "x": -1783.0,
-        "y": 638.9998779296875
+        "y": 639.0
     }
 }
 
@@ -2781,7 +2781,7 @@
     "m_Title": "NormalMap",
     "m_Position": {
         "x": -2160.0,
-        "y": -487.9999694824219
+        "y": -488.0
     }
 }
 
@@ -7545,7 +7545,7 @@
     "m_CustomColors": {
         "m_SerializableColors": []
     },
-    "m_Space": 2,
+    "m_Space": 0,
     "m_PositionSource": 0
 }
 
@@ -8108,7 +8108,7 @@
     "m_Title": "WaterMovement",
     "m_Position": {
         "x": -2305.0,
-        "y": 54.99998092651367
+        "y": 55.0
     }
 }
 
