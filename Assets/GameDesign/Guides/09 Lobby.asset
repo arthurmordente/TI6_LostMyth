@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02fd617bcf3e6174fac4f95d3839e4aa, type: 3}
+  m_Name: 09 Lobby
+  m_EditorClassIdentifier: 
+  guideTitle: Lobby / Biblioteca
+  pages:
+  - pageSprite: {fileID: 21300000, guid: e060323c08da55e4594a8d79b54d107f, type: 3}
+    descriptionText: "O Lobby \xE9 o ponto de partida e retorno de Nara, a partir
+      dele o jogador consegue viajar para diferentes hist\xF3rias e enfrentar os
+      Chefes de Arena."
+  - pageSprite: {fileID: 21300000, guid: 77ca6afe111393f48a28ef1ba6894e0a, type: 3}
+    descriptionText: "A biblioteca de Nara tamb\xE9m serve como galeria para todos
+      os assets que est\xE3o temporariamente desabrigados. N\xE3o deixe de conferi-los!"

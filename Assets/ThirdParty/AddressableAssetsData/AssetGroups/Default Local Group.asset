@@ -26,6 +26,18 @@ MonoBehaviour:
     m_SerializedLabels:
     - Guides
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 34404bd6ba54e494cbfe99d76a54151d
+    m_Address: Assets/GameDesign/Guides/08 Laki.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Guides
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 34702f7c9c035cb4485ad94923a03a22
+    m_Address: Assets/GameDesign/Guides/09 Lobby.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Guides
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 3fe45202d200c6945a774f2d1692b234
     m_Address: Assets/GameDesign/Guides/PM 1.asset
     m_ReadOnly: 0
@@ -36,6 +48,12 @@ MonoBehaviour:
     m_Address: LevelsSettings
     m_ReadOnly: 0
     m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 481fb91eb21b10440871773ba6284e23
+    m_Address: "Assets/GameDesign/Guides/10 Intera\xE7\xE3o.asset"
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Guides
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a041e9b9d2d7fcb4885fd60677f9e3ad
     m_Address: ArenaLaki
@@ -56,6 +74,12 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: bbc393544f7fbb243a192161ac812429
     m_Address: Assets/GameDesign/Guides/05 Atributos 1.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Guides
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c27cbdec3a735dd4395df24ee45704ab
+    m_Address: Assets/GameDesign/Guides/11 Comandos.asset
     m_ReadOnly: 0
     m_SerializedLabels:
     - Guides
