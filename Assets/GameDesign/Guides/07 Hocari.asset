@@ -22,4 +22,9 @@ MonoBehaviour:
       da arena."
   - pageSprite: {fileID: 21300000, guid: 33375be4fcc5be74c8ad2ace7e337209, type: 3}
     descriptionText: "Quando um golpe de Hocari for deslocar Nara, uma seta aparecer\xE1
-      exibindo tanto a dire\xE7\xE3o quanto a pot\xEAncia do mesmo."
+      exibindo tanto a dire\xE7\xE3o quanto a pot\xEAncia do mesmo.\LTodos os locais
+      destacados causam dano a Nara, caso a mesma termine o turno em cima da \xE1rea."
+  - pageSprite: {fileID: 21300000, guid: 95c99cd9bbaba5b4983ea2e023013b9a, type: 3}
+    descriptionText: Um orbe pode ser gerado no decorrer da luta, Nara pode utilizar
+      seus clones como isca e impedir que o orbe detone em si mesma. Ou apenas atacar
+      e destrui-los antes que explodam.

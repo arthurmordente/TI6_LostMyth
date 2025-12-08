@@ -23,10 +23,10 @@ public abstract class ProjectileController : MonoBehaviour, IFixedUpdatable {
     public abstract void ManagedFixedUpdate();
 
     private void OnTriggerEnter(Collider other) {
-        if (other) OnHit();
+        OnHit(other);
     }
 
-    public void OnHit() {
+    public virtual void OnHit(Collider other) {
         UnregisterOnUpdate();
         Destroy(this);
     }

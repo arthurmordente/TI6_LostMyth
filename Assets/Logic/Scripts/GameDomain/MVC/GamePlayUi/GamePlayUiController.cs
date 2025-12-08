@@ -1,4 +1,5 @@
 using Logic.Scripts.Core.Mvc.UICamera;
+using Logic.Scripts.GameDomain.Commands;
 using Logic.Scripts.GameDomain.States;
 using Logic.Scripts.Services.AudioService;
 using Logic.Scripts.Services.CommandFactory;
@@ -35,8 +36,43 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
             _pauseUiView.InitEntryPoint();
             _pauseUiView.RegisterCallbacks(_universalUIController.ShowGuideScreen, _universalUIController.ShowOptionsScreen,
                 _universalUIController.ShowLoadScreen, _universalUIController.ShowCheatsScreen, ResumeGame, BackToLobby);
+            _gamePlayView.InitStartPoint();
+            _gamePlayView.RegisterCallbacks(OnClickNextTurn, OnClickAbility1, OnClickAbility2, OnClickAbility3,
+                OnClickAbility4, OnClickAbility5, OnClickClone1, OnClickClone2);
+        }
+        #region GameplayUiInputs
+        public void OnClickNextTurn() {
+            _commandFactory.CreateCommandVoid<CompletePlayerActionCommand>().Execute();
         }
 
+        public void OnClickAbility1() {
+            _commandFactory.CreateCommandVoid<UseAbility1InputCommand>().Execute();
+        }
+
+        public void OnClickAbility2() {
+            _commandFactory.CreateCommandVoid<UseAbility2InputCommand>().Execute();
+        }
+
+        public void OnClickAbility3() {
+            _commandFactory.CreateCommandVoid<UseAbility3InputCommand>().Execute();
+        }
+
+        public void OnClickAbility4() {
+            _commandFactory.CreateCommandVoid<UseAbility4InputCommand>().Execute();
+        }
+
+        public void OnClickAbility5() {
+            _commandFactory.CreateCommandVoid<UseAbility5InputCommand>().Execute();
+        }
+
+        public void OnClickClone1() {
+            _commandFactory.CreateCommandVoid<CreateCopy1InputCommand>().Execute();
+        }
+
+        public void OnClickClone2() {
+            _commandFactory.CreateCommandVoid<CreateCopy2InputCommand>().Execute();
+        }
+        #endregion
         public void InitExitPoint() {
 
         }
@@ -53,12 +89,10 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
             _pauseUiView.Hide();
         }
         private void ResumeGame() {
-            Debug.LogWarning("Voltando para o Jogo");
             _commandFactory.CreateCommandVoid<ResumeGameplayInputCommand>().Execute();
         }
 
         private void BackToLobby() {
-            Debug.LogWarning("Voltando para o lobby");
             _commandFactory.CreateCommandVoid<ResumeGameplayInputCommand>().Execute();
             _stateMachineService.SwitchState(_explorationStateFactory.Create(new ExplorationInitiatorEnterData(0)));
         }

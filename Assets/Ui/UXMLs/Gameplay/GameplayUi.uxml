@@ -4,7 +4,7 @@
             <engine:Button style="border-top-left-radius: 1493px; border-top-right-radius: 1493px; border-bottom-right-radius: 1493px; border-bottom-left-radius: 1493px; -unity-background-scale-mode: stretch-to-fill; width: 10%; visibility: hidden;" />
             <engine:VisualElement style="flex-grow: 1; width: 15%;" />
             <engine:VisualElement name="BossInfoContainer" data-source="project://database/Assets/Ui/UXMLs/Gameplay/GamePlayUiBindSO.asset?fileID=11400000&amp;guid=e8d4fa4f31b9e0d40bd27b86b839d846&amp;type=2#GamePlayUiBindSO" style="flex-grow: 1; width: 50%;">
-                <engine:VisualElement name="BossLife-Bar-Continaer" style="flex-grow: 1; height: 80%; padding-top: 16px; padding-right: 16px; padding-bottom: 16px; padding-left: 16px;">
+                <engine:VisualElement name="BossLife-Bar-Continaer" style="flex-grow: 1; height: 80%; padding-top: 3%; padding-right: 3%; padding-bottom: 3%; padding-left: 3%;">
                     <engine:VisualElement style="flex-grow: 1; background-color: rgb(41, 41, 41); border-top-left-radius: 50px; border-top-right-radius: 50px; border-bottom-right-radius: 50px; border-bottom-left-radius: 50px; padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 10px;">
                         <engine:VisualElement style="flex-grow: 1; background-color: rgb(84, 75, 75); width: 100%; height: 100%; border-top-left-radius: 50px; border-top-right-radius: 50px; border-bottom-right-radius: 50px; border-bottom-left-radius: 50px; overflow: hidden;">
                             <engine:VisualElement name="Actual-Boss-Life-Bar" data-source="project://database/Assets/Ui/UXMLs/Gameplay/GamePlayUiBindSO.asset?fileID=11400000&amp;guid=e8d4fa4f31b9e0d40bd27b86b839d846&amp;type=2#GamePlayUiBindSO" style="flex-grow: 1; background-color: rgb(118, 35, 35); width: 80%; height: 100%; position: absolute; min-width: 0; max-width: 100%;">
@@ -31,7 +31,7 @@
                     <engine:VisualElement name="VisualElement" style="flex-grow: 1; background-color: rgb(152, 26, 26); border-top-left-radius: 11px; border-top-right-radius: 11px; border-bottom-right-radius: 11px; border-bottom-left-radius: 11px; width: 5%; margin-top: 3px; margin-right: 3px; margin-bottom: 3px; margin-left: 3px;" />
                     <engine:VisualElement name="VisualElement" style="flex-grow: 1; background-color: rgb(152, 26, 26); border-top-left-radius: 11px; border-top-right-radius: 11px; border-bottom-right-radius: 11px; border-bottom-left-radius: 11px; width: 5%; margin-top: 3px; margin-right: 3px; margin-bottom: 3px; margin-left: 3px;" />
                 </engine:VisualElement>
-                <engine:Label name="Boss-Health-label" style="position: absolute; border-left-color: rgb(0, 0, 0); border-right-color: rgb(0, 0, 0); border-top-color: rgb(0, 0, 0); border-bottom-color: rgb(0, 0, 0); right: -9%; top: 9%; background-color: rgb(84, 10, 10); border-top-left-radius: 21%; border-top-right-radius: 21%; border-bottom-right-radius: 21%; border-bottom-left-radius: 21%; border-top-width: 12px; border-right-width: 12px; border-bottom-width: 12px; border-left-width: 12px; width: 15%; height: 54%; -unity-text-align: middle-center; color: rgb(238, 233, 233); font-size: 53%;">
+                <engine:Label name="Boss-Health-label" style="position: absolute; border-left-color: rgb(0, 0, 0); border-right-color: rgb(0, 0, 0); border-top-color: rgb(0, 0, 0); border-bottom-color: rgb(0, 0, 0); right: -9%; top: 25%; background-color: rgb(84, 10, 10); border-top-left-radius: 21%; border-top-right-radius: 21%; border-bottom-right-radius: 21%; border-bottom-left-radius: 21%; border-top-width: 12px; border-right-width: 12px; border-bottom-width: 12px; border-left-width: 12px; width: 15%; height: 50%; -unity-text-align: middle-center; color: rgb(238, 233, 233); font-size: 53%;">
                     <Bindings>
                         <engine:DataBinding property="text" binding-mode="ToTarget" data-source-path="_actualBossLife" />
                     </Bindings>
@@ -44,14 +44,14 @@
             <engine:VisualElement style="flex-grow: 1; width: 13%; flex-direction: row; justify-content: space-around; align-self: auto; align-items: center; background-color: rgb(185, 67, 36); border-top-right-radius: 40px; border-top-left-radius: 0; border-bottom-right-radius: 0; border-bottom-left-radius: 0; height: 20%;">
                 <engine:Button text="Clone" name="Clone-Slot1-btn" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; height: 70%; width: 40%; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; border-top-left-radius: 279px; border-top-right-radius: 279px; border-bottom-right-radius: 279px; border-bottom-left-radius: 279px; align-items: center; justify-content: flex-end;">
                     <engine:Label text="C" style="background-color: rgb(60, 60, 60); color: rgb(233, 233, 233); border-left-color: rgb(140, 140, 140); border-right-color: rgb(140, 140, 140); border-top-color: rgb(140, 140, 140); border-bottom-color: rgb(140, 140, 140); border-top-left-radius: 40px; border-top-right-radius: 40px; border-bottom-right-radius: 40px; border-bottom-left-radius: 40px; width: 20%;" />
-                    <engine:VisualElement name="clone1-cooldown-container" style="flex-grow: 1; position: absolute; width: 120%; height: 120%; background-color: rgba(0, 0, 0, 0.57);">
-                        <engine:Label text="39&#x9;" name="Clone-Slot1-Cooldown-label" style="width: 100%; height: 100%; font-size: 35%; color: rgb(255, 255, 255);" />
+                    <engine:VisualElement name="clone1-cooldown-container" style="flex-grow: 1; position: absolute; width: 120%; height: 120%; background-color: rgba(0, 0, 0, 0.57); background-image: url(&quot;project://database/Assets/Ui/Images/Abilities/Icon_CloneA.png?fileID=2800000&amp;guid=8fdd7d6134597d74b84abb1e46a485f8&amp;type=3#Icon_CloneA&quot;); -unity-background-scale-mode: scale-and-crop;">
+                        <engine:Label name="Clone-Slot1-Cooldown-label" style="width: 100%; height: 100%; font-size: 35%; color: rgb(255, 255, 255); background-color: rgba(29, 27, 27, 0.71);" />
                     </engine:VisualElement>
                 </engine:Button>
                 <engine:Button text="Clone 2" name="Clone-Slot2-btn" focusable="true" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; height: 70%; width: 40%; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; border-top-left-radius: 279px; border-top-right-radius: 279px; border-bottom-right-radius: 279px; border-bottom-left-radius: 279px; justify-content: flex-end; align-items: center;">
                     <engine:Label text="V" style="background-color: rgb(60, 60, 60); color: rgb(233, 233, 233); border-left-color: rgb(140, 140, 140); border-right-color: rgb(140, 140, 140); border-top-color: rgb(140, 140, 140); border-bottom-color: rgb(140, 140, 140); border-top-left-radius: 40px; border-top-right-radius: 40px; border-bottom-right-radius: 40px; border-bottom-left-radius: 40px; width: 20%;" />
-                    <engine:VisualElement name="clone2-cooldown-container" style="flex-grow: 1; position: absolute; width: 120%; height: 120%; background-color: rgba(0, 0, 0, 0.57);">
-                        <engine:Label text="39&#x9;" name="Clone-Slot2-Cooldown-label" style="width: 100%; height: 100%; font-size: 35%; color: rgb(255, 255, 255);" />
+                    <engine:VisualElement name="clone2-cooldown-container" style="flex-grow: 1; position: absolute; width: 120%; height: 120%; background-color: rgba(0, 0, 0, 0.57); background-image: url(&quot;project://database/Assets/Ui/Images/Abilities/Icon_CloneB.png?fileID=2800000&amp;guid=549fb2d64fdda58478e8343b76a22a0f&amp;type=3#Icon_CloneB&quot;);">
+                        <engine:Label name="Clone-Slot2-Cooldown-label" style="width: 100%; height: 100%; font-size: 35%; color: rgb(255, 255, 255); background-color: rgba(29, 27, 27, 0.71);" />
                     </engine:VisualElement>
                 </engine:Button>
             </engine:VisualElement>
@@ -59,7 +59,7 @@
         <engine:VisualElement name="Footer-Container" style="flex-grow: 1; height: 15%; flex-direction: row;">
             <engine:VisualElement style="flex-grow: 1; width: 35%; flex-direction: row;">
                 <engine:VisualElement style="flex-grow: 1; width: 70%; flex-direction: row; justify-content: space-around; align-self: auto; align-items: center; background-color: rgb(153, 159, 31); border-top-right-radius: 40px; border-top-left-radius: 0; border-bottom-right-radius: 0; border-bottom-left-radius: 0;">
-                    <engine:Button text="Button" name="Ability-Slot1-btn" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; height: 70%; width: 15%; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; border-top-left-radius: 279px; border-top-right-radius: 279px; border-bottom-right-radius: 279px; border-bottom-left-radius: 279px; align-items: center; justify-content: flex-end;">
+                    <engine:Button name="Ability-Slot1-btn" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; height: 70%; width: 15%; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; border-top-left-radius: 279px; border-top-right-radius: 279px; border-bottom-right-radius: 279px; border-bottom-left-radius: 279px; align-items: center; justify-content: flex-end;">
                         <engine:Label text="1" style="background-color: rgb(60, 60, 60); color: rgb(233, 233, 233); border-left-color: rgb(140, 140, 140); border-right-color: rgb(140, 140, 140); border-top-color: rgb(140, 140, 140); border-bottom-color: rgb(140, 140, 140); border-top-left-radius: 40px; border-top-right-radius: 40px; border-bottom-right-radius: 40px; border-bottom-left-radius: 40px; width: 20%;" />
                         <engine:Label text="1" name="Ability-Slot1-Cost-label" style="background-color: rgb(60, 60, 60); color: rgb(233, 233, 233); border-left-color: rgb(140, 140, 140); border-right-color: rgb(140, 140, 140); border-top-color: rgb(140, 140, 140); border-bottom-color: rgb(140, 140, 140); border-top-left-radius: 40px; border-top-right-radius: 40px; border-bottom-right-radius: 40px; border-bottom-left-radius: 40px; width: 20%; position: absolute; top: 0; left: 40%; height: 22%; -unity-text-align: middle-center;">
                             <Bindings>
@@ -67,13 +67,13 @@
                             </Bindings>
                         </engine:Label>
                         <engine:VisualElement name="Ability-Slot1-cooldown-container" style="flex-grow: 1; position: absolute; width: 120%; height: 120%; background-color: rgba(0, 0, 0, 0.57); top: -10%;">
-                            <engine:Label text="39&#x9;" name="Ability-Slot1-Cooldown-label" style="width: 100%; height: 100%; font-size: 35%; color: rgb(255, 255, 255);" />
+                            <engine:Label text="39&#x9;" name="Ability-Slot1-Cooldown-label" style="width: 100%; height: 100%; font-size: 35%; color: rgb(255, 255, 255); background-color: rgba(29, 27, 27, 0.71);" />
                         </engine:VisualElement>
                         <Bindings>
-                            <engine:DataBinding property="text" data-source="project://database/Assets/Ui/UXMLs/Gameplay/GamePlayUiBindSO.asset?fileID=11400000&amp;guid=e8d4fa4f31b9e0d40bd27b86b839d846&amp;type=2#GamePlayUiBindSO" binding-mode="ToTarget" data-source-path="_skill1Name" />
+                            <engine:DataBinding property="style.backgroundImage" data-source-path="Icon" data-source="project://database/Assets/GameDesign/GameData/Abilities/01%20Disparo%20Magico.asset?fileID=11400000&amp;guid=4c82f2d9bc2cf09418a437c668996e07&amp;type=2#01 Disparo Magico" binding-mode="ToTarget" />
                         </Bindings>
                     </engine:Button>
-                    <engine:Button text="Button" name="Ability-Slot2-btn" focusable="true" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; height: 70%; width: 15%; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; border-top-left-radius: 279px; border-top-right-radius: 279px; border-bottom-right-radius: 279px; border-bottom-left-radius: 279px; justify-content: flex-end; align-items: center;">
+                    <engine:Button name="Ability-Slot2-btn" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; height: 70%; width: 15%; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; border-top-left-radius: 279px; border-top-right-radius: 279px; border-bottom-right-radius: 279px; border-bottom-left-radius: 279px; justify-content: flex-end; align-items: center;">
                         <engine:Label text="2" style="background-color: rgb(60, 60, 60); color: rgb(233, 233, 233); border-left-color: rgb(140, 140, 140); border-right-color: rgb(140, 140, 140); border-top-color: rgb(140, 140, 140); border-bottom-color: rgb(140, 140, 140); border-top-left-radius: 40px; border-top-right-radius: 40px; border-bottom-right-radius: 40px; border-bottom-left-radius: 40px; width: 20%;" />
                         <engine:Label text="1" name="Ability-Slot2-Cost-label" style="background-color: rgb(60, 60, 60); color: rgb(233, 233, 233); border-left-color: rgb(140, 140, 140); border-right-color: rgb(140, 140, 140); border-top-color: rgb(140, 140, 140); border-bottom-color: rgb(140, 140, 140); border-top-left-radius: 40px; border-top-right-radius: 40px; border-bottom-right-radius: 40px; border-bottom-left-radius: 40px; width: 20%; position: absolute; top: 0; left: 40%; height: 22%; -unity-text-align: middle-center;">
                             <Bindings>
@@ -81,13 +81,13 @@
                             </Bindings>
                         </engine:Label>
                         <engine:VisualElement name="Ability-Slot2-cooldown-container" style="flex-grow: 1; position: absolute; width: 120%; height: 120%; background-color: rgba(0, 0, 0, 0.57); top: -10%;">
-                            <engine:Label text="39&#x9;" name="Ability-Slot2-Cooldown-label" style="width: 100%; height: 100%; font-size: 35%; color: rgb(255, 255, 255);" />
+                            <engine:Label text="39&#x9;" name="Ability-Slot2-Cooldown-label" style="width: 100%; height: 100%; font-size: 35%; color: rgb(255, 255, 255); background-color: rgba(29, 27, 27, 0.71);" />
                         </engine:VisualElement>
                         <Bindings>
-                            <engine:DataBinding property="text" data-source="project://database/Assets/Ui/UXMLs/Gameplay/GamePlayUiBindSO.asset?fileID=11400000&amp;guid=e8d4fa4f31b9e0d40bd27b86b839d846&amp;type=2#GamePlayUiBindSO" binding-mode="ToTarget" data-source-path="_skill2Name" />
+                            <engine:DataBinding property="style.backgroundImage" data-source-path="Icon" data-source="project://database/Assets/GameDesign/GameData/Abilities/02%20Arremesso%20de%20Bomba.asset?fileID=11400000&amp;guid=d9d52de431f81e94c97467c811060a54&amp;type=2#02 Arremesso de Bomba" binding-mode="ToTarget" />
                         </Bindings>
                     </engine:Button>
-                    <engine:Button text="Button" name="Ability-Slot3-btn" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; height: 70%; width: 15%; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; border-top-left-radius: 279px; border-top-right-radius: 279px; border-bottom-right-radius: 279px; border-bottom-left-radius: 279px; justify-content: flex-end; align-items: center;">
+                    <engine:Button name="Ability-Slot3-btn" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; height: 70%; width: 15%; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; border-top-left-radius: 279px; border-top-right-radius: 279px; border-bottom-right-radius: 279px; border-bottom-left-radius: 279px; justify-content: flex-end; align-items: center;">
                         <engine:Label text="3" style="background-color: rgb(60, 60, 60); color: rgb(233, 233, 233); border-left-color: rgb(140, 140, 140); border-right-color: rgb(140, 140, 140); border-top-color: rgb(140, 140, 140); border-bottom-color: rgb(140, 140, 140); border-top-left-radius: 40px; border-top-right-radius: 40px; border-bottom-right-radius: 40px; border-bottom-left-radius: 40px; width: 20%;" />
                         <engine:Label text="1" name="Ability-Slot3-Cost-label" style="background-color: rgb(60, 60, 60); color: rgb(233, 233, 233); border-left-color: rgb(140, 140, 140); border-right-color: rgb(140, 140, 140); border-top-color: rgb(140, 140, 140); border-bottom-color: rgb(140, 140, 140); border-top-left-radius: 40px; border-top-right-radius: 40px; border-bottom-right-radius: 40px; border-bottom-left-radius: 40px; width: 20%; position: absolute; top: 0; left: 40%; height: 22%; -unity-text-align: middle-center; display: flex;">
                             <Bindings>
@@ -95,13 +95,13 @@
                             </Bindings>
                         </engine:Label>
                         <engine:VisualElement name="Ability-Slot3-cooldown-container" style="flex-grow: 1; position: absolute; width: 120%; height: 120%; background-color: rgba(0, 0, 0, 0.57); top: -10%;">
-                            <engine:Label text="39&#x9;" name="Ability-Slot3-Cooldown-label" style="width: 100%; height: 100%; font-size: 35%; color: rgb(255, 255, 255);" />
+                            <engine:Label text="39&#x9;" name="Ability-Slot3-Cooldown-label" style="width: 100%; height: 100%; font-size: 35%; color: rgb(255, 255, 255); background-color: rgba(29, 27, 27, 0.71);" />
                         </engine:VisualElement>
                         <Bindings>
-                            <engine:DataBinding property="text" data-source="project://database/Assets/Ui/UXMLs/Gameplay/GamePlayUiBindSO.asset?fileID=11400000&amp;guid=e8d4fa4f31b9e0d40bd27b86b839d846&amp;type=2#GamePlayUiBindSO" binding-mode="ToTarget" data-source-path="_skill3Name" />
+                            <engine:DataBinding property="style.backgroundImage" data-source-path="Icon" data-source="project://database/Assets/GameDesign/GameData/Abilities/03%20Explosao%20Cristalina.asset?fileID=11400000&amp;guid=d774261d7df73ed4fa8f08149dc4b81f&amp;type=2#03 Explosao Cristalina" binding-mode="ToTarget" />
                         </Bindings>
                     </engine:Button>
-                    <engine:Button text="Button" name="Ability-Slot4-btn" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; height: 70%; width: 15%; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; border-top-left-radius: 279px; border-top-right-radius: 279px; border-bottom-right-radius: 279px; border-bottom-left-radius: 279px; justify-content: flex-end; align-items: center;">
+                    <engine:Button name="Ability-Slot4-btn" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; height: 70%; width: 15%; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; border-top-left-radius: 279px; border-top-right-radius: 279px; border-bottom-right-radius: 279px; border-bottom-left-radius: 279px; justify-content: flex-end; align-items: center;">
                         <engine:Label text="Q" style="background-color: rgb(60, 60, 60); color: rgb(233, 233, 233); border-left-color: rgb(140, 140, 140); border-right-color: rgb(140, 140, 140); border-top-color: rgb(140, 140, 140); border-bottom-color: rgb(140, 140, 140); border-top-left-radius: 40px; border-top-right-radius: 40px; border-bottom-right-radius: 40px; border-bottom-left-radius: 40px; width: 20%;" />
                         <engine:Label text="1" name="Ability-Slot4-Cost-label" style="background-color: rgb(60, 60, 60); color: rgb(233, 233, 233); border-left-color: rgb(140, 140, 140); border-right-color: rgb(140, 140, 140); border-top-color: rgb(140, 140, 140); border-bottom-color: rgb(140, 140, 140); border-top-left-radius: 40px; border-top-right-radius: 40px; border-bottom-right-radius: 40px; border-bottom-left-radius: 40px; width: 20%; position: absolute; top: 0; left: 40%; height: 22%; -unity-text-align: middle-center; display: flex;">
                             <Bindings>
@@ -109,13 +109,13 @@
                             </Bindings>
                         </engine:Label>
                         <engine:VisualElement name="Ability-Slot4-cooldown-container" style="flex-grow: 1; position: absolute; width: 120%; height: 120%; background-color: rgba(0, 0, 0, 0.57); top: -10%;">
-                            <engine:Label text="39&#x9;" name="Ability-Slot4-Cooldown-label" style="width: 100%; height: 100%; font-size: 35%; color: rgb(255, 255, 255);" />
+                            <engine:Label text="39&#x9;" name="Ability-Slot4-Cooldown-label" style="width: 100%; height: 100%; font-size: 35%; color: rgb(255, 255, 255); background-color: rgba(29, 27, 27, 0.71);" />
                         </engine:VisualElement>
                         <Bindings>
-                            <engine:DataBinding property="text" data-source="project://database/Assets/Ui/UXMLs/Gameplay/GamePlayUiBindSO.asset?fileID=11400000&amp;guid=e8d4fa4f31b9e0d40bd27b86b839d846&amp;type=2#GamePlayUiBindSO" binding-mode="ToTarget" data-source-path="_skill3Name" />
+                            <engine:DataBinding property="style.backgroundImage" data-source-path="Icon" data-source="project://database/Assets/GameDesign/GameData/Abilities/04%20Aura%20de%20Protecao.asset?fileID=11400000&amp;guid=72ba9ea640b863144836fdfdc9469bd6&amp;type=2#04 Aura de Protecao" binding-mode="ToTarget" />
                         </Bindings>
                     </engine:Button>
-                    <engine:Button text="Button" name="Ability-Slot5-btn" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; height: 70%; width: 15%; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; border-top-left-radius: 279px; border-top-right-radius: 279px; border-bottom-right-radius: 279px; border-bottom-left-radius: 279px; justify-content: flex-end; align-items: center;">
+                    <engine:Button name="Ability-Slot5-btn" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; height: 70%; width: 15%; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; border-top-left-radius: 279px; border-top-right-radius: 279px; border-bottom-right-radius: 279px; border-bottom-left-radius: 279px; justify-content: flex-end; align-items: center;">
                         <engine:Label text="E" style="background-color: rgb(60, 60, 60); color: rgb(233, 233, 233); border-left-color: rgb(140, 140, 140); border-right-color: rgb(140, 140, 140); border-top-color: rgb(140, 140, 140); border-bottom-color: rgb(140, 140, 140); border-top-left-radius: 40px; border-top-right-radius: 40px; border-bottom-right-radius: 40px; border-bottom-left-radius: 40px; width: 20%;" />
                         <engine:Label text="1" name="Ability-Slot5-Cost-label" style="background-color: rgb(60, 60, 60); color: rgb(233, 233, 233); border-left-color: rgb(140, 140, 140); border-right-color: rgb(140, 140, 140); border-top-color: rgb(140, 140, 140); border-bottom-color: rgb(140, 140, 140); border-top-left-radius: 40px; border-top-right-radius: 40px; border-bottom-right-radius: 40px; border-bottom-left-radius: 40px; width: 20%; position: absolute; top: 0; left: 40%; height: 22%; -unity-text-align: middle-center; display: flex;">
                             <Bindings>
@@ -123,10 +123,10 @@
                             </Bindings>
                         </engine:Label>
                         <engine:VisualElement name="Ability-Slot5-cooldown-container" style="flex-grow: 1; position: absolute; width: 120%; height: 120%; background-color: rgba(0, 0, 0, 0.57); top: -10%;">
-                            <engine:Label text="39&#x9;" name="Ability-Slot5-Cooldown-label" style="width: 100%; height: 100%; font-size: 35%; color: rgb(255, 255, 255);" />
+                            <engine:Label text="39&#x9;" name="Ability-Slot5-Cooldown-label" style="width: 100%; height: 100%; font-size: 35%; color: rgb(255, 255, 255); background-color: rgba(29, 27, 27, 0.71);" />
                         </engine:VisualElement>
                         <Bindings>
-                            <engine:DataBinding property="text" data-source="project://database/Assets/Ui/UXMLs/Gameplay/GamePlayUiBindSO.asset?fileID=11400000&amp;guid=e8d4fa4f31b9e0d40bd27b86b839d846&amp;type=2#GamePlayUiBindSO" binding-mode="ToTarget" data-source-path="_skill3Name" />
+                            <engine:DataBinding property="style.backgroundImage" data-source-path="Icon" data-source="project://database/Assets/GameDesign/GameData/Abilities/05%20Teleporte.asset?fileID=11400000&amp;guid=f4ae99592295ab4438105fcbb1c1ae10&amp;type=2#05 Teleporte" binding-mode="ToTarget" />
                         </Bindings>
                     </engine:Button>
                 </engine:VisualElement>
@@ -138,11 +138,7 @@
                         <engine:DataBinding property="text" data-source="project://database/Assets/Ui/UXMLs/Gameplay/GamePlayUiBindSO.asset?fileID=11400000&amp;guid=e8d4fa4f31b9e0d40bd27b86b839d846&amp;type=2#GamePlayUiBindSO" binding-mode="ToTarget" data-source-path="_playerActionPoints" />
                     </Bindings>
                 </engine:Label>
-                <engine:Button name="Next-Turn-btn" text="Next turn" style="border-top-left-radius: 0; border-top-right-radius: 0; border-bottom-right-radius: 0; border-bottom-left-radius: 0; -unity-background-scale-mode: stretch-to-fill; width: 80%; height: 20%; display: flex;">
-                    <Bindings>
-                        <UnityEngine.Localization.LocalizedString property="text" table="GUID:b20707e21c9ea64418cb0d6a1a2a5962" entry="Id(728916082688)" />
-                    </Bindings>
-                </engine:Button>
+                <engine:Button name="Next-Turn-btn" text="Próximo Turno" style="border-top-left-radius: 0; border-top-right-radius: 0; border-bottom-right-radius: 0; border-bottom-left-radius: 0; -unity-background-scale-mode: stretch-to-fill; width: 80%; height: 20%; display: flex;" />
             </engine:VisualElement>
             <engine:VisualElement style="flex-grow: 1; width: 10%;" />
             <engine:VisualElement name="PlayerInfoContainer" style="flex-grow: 1; width: 35%;">
@@ -160,7 +156,7 @@
                         <engine:VisualElement name="VisualElement" style="flex-grow: 1; background-color: rgb(152, 26, 26); border-top-left-radius: 11px; border-top-right-radius: 11px; border-bottom-right-radius: 11px; border-bottom-left-radius: 11px; width: 5%; margin-top: 3px; margin-right: 3px; margin-bottom: 3px; margin-left: 3px;" />
                     </engine:VisualElement>
                 </engine:VisualElement>
-                <engine:VisualElement name="PlayerLife-Bar-Continaer" style="flex-grow: 1; height: 80%; padding-top: 16px; padding-right: 16px; padding-bottom: 16px; padding-left: 16px;">
+                <engine:VisualElement name="PlayerLife-Bar-Continaer" style="flex-grow: 1; height: 80%; padding-top: 4%; padding-right: 4%; padding-bottom: 4%; padding-left: 4%;">
                     <engine:VisualElement style="flex-grow: 1; background-color: rgb(41, 41, 41); border-top-left-radius: 50px; border-top-right-radius: 50px; border-bottom-right-radius: 50px; border-bottom-left-radius: 50px; padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 10px;">
                         <engine:VisualElement style="flex-grow: 1; background-color: rgb(84, 75, 75); width: 100%; height: 100%; border-top-left-radius: 50px; border-top-right-radius: 50px; border-bottom-right-radius: 50px; border-bottom-left-radius: 50px; overflow: hidden;">
                             <engine:VisualElement name="Actual-Player-Life-Bar" style="flex-grow: 1; background-color: rgb(35, 118, 37); width: 80%; height: 100%; position: absolute; min-width: 0; max-width: 100%;">
@@ -176,7 +172,7 @@
                         </engine:VisualElement>
                     </engine:VisualElement>
                 </engine:VisualElement>
-                <engine:Label text="80&#x9;" name="Player-Health-label" data-source="project://database/Assets/Ui/UXMLs/Gameplay/GamePlayUiBindSO.asset?fileID=11400000&amp;guid=e8d4fa4f31b9e0d40bd27b86b839d846&amp;type=2#GamePlayUiBindSO" style="position: absolute; border-left-color: rgb(0, 0, 0); border-right-color: rgb(0, 0, 0); border-top-color: rgb(0, 0, 0); border-bottom-color: rgb(0, 0, 0); right: auto; top: 30%; background-color: rgb(10, 84, 43); border-top-left-radius: 21%; border-top-right-radius: 21%; border-bottom-right-radius: 21%; border-bottom-left-radius: 21%; border-top-width: 12px; border-right-width: 12px; border-bottom-width: 12px; border-left-width: 12px; width: 15%; height: 54%; -unity-text-align: middle-center; color: rgb(238, 233, 233); font-size: 32%;">
+                <engine:Label text="80&#x9;" name="Player-Health-label" data-source="project://database/Assets/Ui/UXMLs/Gameplay/GamePlayUiBindSO.asset?fileID=11400000&amp;guid=e8d4fa4f31b9e0d40bd27b86b839d846&amp;type=2#GamePlayUiBindSO" style="position: absolute; border-left-color: rgb(0, 0, 0); border-right-color: rgb(0, 0, 0); border-top-color: rgb(0, 0, 0); border-bottom-color: rgb(0, 0, 0); right: auto; top: 25%; background-color: rgb(10, 84, 43); border-top-left-radius: 21%; border-top-right-radius: 21%; border-bottom-right-radius: 21%; border-bottom-left-radius: 21%; border-top-width: 12px; border-right-width: 12px; border-bottom-width: 12px; border-left-width: 12px; width: 15%; height: 50%; -unity-text-align: middle-center; color: rgb(238, 233, 233); font-size: 32%;">
                     <Bindings>
                         <engine:DataBinding property="text" data-source="project://database/Assets/Ui/UXMLs/Gameplay/GamePlayUiBindSO.asset?fileID=11400000&amp;guid=e8d4fa4f31b9e0d40bd27b86b839d846&amp;type=2#GamePlayUiBindSO" binding-mode="ToTarget" data-source-path="_actualPlayerHealth" />
                     </Bindings>
