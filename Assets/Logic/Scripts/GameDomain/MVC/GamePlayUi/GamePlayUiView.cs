@@ -15,6 +15,14 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
         [SerializeField] private float tweenDuration = 0.5f;
         private VisualElement _mainContainer;
 
+        private VisualElement _cooldownSlot1Container;
+        private VisualElement _cooldownSlot2Container;
+        private VisualElement _cooldownSlot3Container;
+        private VisualElement _cooldownSlot4Container;
+        private VisualElement _cooldownSlot5Container;
+        private VisualElement _cooldownClone1Container;
+        private VisualElement _cooldownClone2Container;
+
         private Button _setSkillSet1Btn;
         private Button _setSkillSet2Btn;
         private Button _setSkillSet3Btn;
@@ -104,6 +112,17 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
             VisualElement root = GetComponent<UIDocument>().rootVisualElement;
             _mainContainer = root.Q<VisualElement>("main-container");
 
+            _cooldownSlot1Container = root.Q<VisualElement>("Ability-Slot1-cooldown-container");
+            _cooldownSlot2Container = root.Q<VisualElement>("Ability-Slot2-cooldown-container");
+            _cooldownSlot3Container = root.Q<VisualElement>("Ability-Slot3-cooldown-container");
+            _cooldownSlot4Container = root.Q<VisualElement>("Ability-Slot4-cooldown-container");
+            _cooldownSlot5Container = root.Q<VisualElement>("Ability-Slot5-cooldown-container");
+            _cooldownClone1Container = root.Q<VisualElement>("Clone-Slot1-Cooldown-label");
+            _cooldownClone2Container = root.Q<VisualElement>("Clone-Slot2-Cooldown-label");
+            for (int i = 1; i <= 7; i++) {
+                SetCooldownContainer(i, true);
+            }
+
             _setSkillSet1Btn = root.Q<Button>("Skill-Set1-btn");
             _setSkillSet2Btn = root.Q<Button>("Skill-Set2-btn");
             _setSkillSet3Btn = root.Q<Button>("Skill-Set3-btn");
@@ -113,9 +132,9 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
 
             _nextTurnBtn = root.Q<Button>("Next-Turn-btn");
 
-            if (_nextTurnBtn != null) {
-                _nextTurnBtn.clicked += () => _commandFactory.CreateCommandVoid<CompletePlayerActionCommand>().Execute();
-            }
+            //if (_nextTurnBtn != null) {
+            //    _nextTurnBtn.clicked += () => _commandFactory.CreateCommandVoid<CompletePlayerActionCommand>().Execute();
+            //}
         }
 
         public VisualElement GetMainContainer() {
@@ -124,19 +143,40 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
             return _mainContainer;
         }
 
-        public void ShowGameOverPanel(CancellationTokenSource cancellationTokenSource) {
-
-        }
-
-        public void SwitchToInGameView() {
-
+        public void SetCooldownContainer(int slotIndex, bool isHidden) {
+            switch (slotIndex) {
+                case 1:
+                    if (isHidden) _cooldownSlot1Container.style.visibility = Visibility.Hidden;
+                    else _cooldownSlot1Container.style.visibility = Visibility.Visible;
+                    break;
+                case 2:
+                    if (isHidden) _cooldownSlot2Container.style.visibility = Visibility.Hidden;
+                    else _cooldownSlot2Container.style.visibility = Visibility.Visible;
+                    break;
+                case 3:
+                    if (isHidden) _cooldownSlot3Container.style.visibility = Visibility.Hidden;
+                    else _cooldownSlot3Container.style.visibility = Visibility.Visible;
+                    break;
+                case 4:
+                    if (isHidden) _cooldownSlot4Container.style.visibility = Visibility.Hidden;
+                    else _cooldownSlot4Container.style.visibility = Visibility.Visible;
+                    break;
+                case 5:
+                    if (isHidden) _cooldownSlot5Container.style.visibility = Visibility.Hidden;
+                    else _cooldownSlot5Container.style.visibility = Visibility.Visible;
+                    break;
+                case 6:
+                    if (isHidden) _cooldownClone1Container.style.visibility = Visibility.Hidden;
+                    else _cooldownClone1Container.style.visibility = Visibility.Visible;
+                    break;
+                case 7:
+                    if (isHidden) _cooldownClone2Container.style.visibility = Visibility.Hidden;
+                    else _cooldownClone2Container.style.visibility = Visibility.Visible;
+                    break;
+            }
         }
 
         public void SetStartingValues(CancellationTokenSource cancellationTokenSource) {
-
-        }
-
-        public void ShowWinPanel(CancellationTokenSource cancellationTokenSource) {
 
         }
 

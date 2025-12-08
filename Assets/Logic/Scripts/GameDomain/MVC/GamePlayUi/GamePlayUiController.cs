@@ -35,6 +35,7 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
             _pauseUiView.InitEntryPoint();
             _pauseUiView.RegisterCallbacks(_universalUIController.ShowGuideScreen, _universalUIController.ShowOptionsScreen,
                 _universalUIController.ShowLoadScreen, _universalUIController.ShowCheatsScreen, ResumeGame, BackToLobby);
+            _gamePlayView.InitStartPoint();
         }
 
         public void InitExitPoint() {
@@ -53,12 +54,10 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
             _pauseUiView.Hide();
         }
         private void ResumeGame() {
-            Debug.LogWarning("Voltando para o Jogo");
             _commandFactory.CreateCommandVoid<ResumeGameplayInputCommand>().Execute();
         }
 
         private void BackToLobby() {
-            Debug.LogWarning("Voltando para o lobby");
             _commandFactory.CreateCommandVoid<ResumeGameplayInputCommand>().Execute();
             _stateMachineService.SwitchState(_explorationStateFactory.Create(new ExplorationInitiatorEnterData(0)));
         }
