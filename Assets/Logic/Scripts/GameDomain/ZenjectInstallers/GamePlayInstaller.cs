@@ -15,6 +15,7 @@ public class GamePlayInstaller : MonoInstaller {
 
     [SerializeField] private GamePlayUiView _gamePlayUiView;
     [SerializeField] private PauseUiView _pauseUiView;
+    [SerializeField] private GameOverUIView _gameOverUIView;
 
     [SerializeField] private AbilityData[] _skills;
 
@@ -49,7 +50,7 @@ public class GamePlayInstaller : MonoInstaller {
 
     private void BindControllers() {
         Container.BindInterfacesTo<GameInputActionsController>().AsSingle().NonLazy();
-        Container.BindInterfacesTo<GamePlayUiController>().AsSingle().WithArguments(_gamePlayUiView, _pauseUiView).NonLazy();
+        Container.BindInterfacesTo<GamePlayUiController>().AsSingle().WithArguments(_gamePlayUiView, _pauseUiView, _gameOverUIView).NonLazy();
         Container.BindInterfacesTo<LevelScenarioController>().AsSingle().NonLazy();
         Container.BindInterfacesTo<NaraController>().AsSingle().WithArguments(_naraViewPrefab, _naraConfiguration).NonLazy();
         Container.BindInterfacesTo<CastController>().AsSingle().WithArguments(_skills).NonLazy();

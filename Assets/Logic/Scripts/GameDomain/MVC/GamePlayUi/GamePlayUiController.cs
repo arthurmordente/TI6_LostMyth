@@ -17,11 +17,13 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
         private readonly GamePlayUiView _gamePlayView;
         private readonly GamePlayUiBindSO _gamePlayUiBindSO;
         private readonly PauseUiView _pauseUiView;
+        private readonly GameOverUIView _gameOverUIView;
         private readonly IUniversalUIController _universalUIController;
         private readonly ICommandFactory _commandFactory;
 
-        public GamePlayUiController(IStateMachineService stateMachineService, ExplorationState.Factory explorationStateFactory, IUICameraController uiCameraController,
-            GamePlayUiView gamePlayView, IAudioService audioService, PauseUiView pauseUiView, IUniversalUIController universalUIController, ICommandFactory commandFactory) {
+        public GamePlayUiController(IStateMachineService stateMachineService, ExplorationState.Factory explorationStateFactory,
+            IUICameraController uiCameraController, GamePlayUiView gamePlayView, IAudioService audioService, PauseUiView pauseUiView,
+            IUniversalUIController universalUIController, ICommandFactory commandFactory, GameOverUIView gameOverUIView) {
             _stateMachineService = stateMachineService;
             _explorationStateFactory = explorationStateFactory;
             _uiCameraController = uiCameraController;
@@ -30,6 +32,7 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
             _pauseUiView = pauseUiView;
             _universalUIController = universalUIController;
             _commandFactory = commandFactory;
+            _gameOverUIView = gameOverUIView;
         }
 
         public void InitEntryPoint() {
@@ -39,6 +42,8 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
             _gamePlayView.InitStartPoint();
             _gamePlayView.RegisterCallbacks(OnClickNextTurn, OnClickAbility1, OnClickAbility2, OnClickAbility3,
                 OnClickAbility4, OnClickAbility5, OnClickClone1, OnClickClone2);
+            _gameOverUIView.InitEntryPoint();
+            _gameOverUIView.RegisterCallbacks(OnClickPlayAgain, OnClickPlayAgain, BackToLobby);
         }
         #region GameplayUiInputs
         public void OnClickNextTurn() {
@@ -80,6 +85,19 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
         public VisualElement GameplayMainContainer() {
             return _gamePlayView.GetMainContainer();
         }
+
+        #region GameOver
+        public void ShowGameOver(bool IsWin) {
+            _gameOverUIView.Show(IsWin);
+        }
+        public async void OnClickPlayAgain() {
+            _commandFactory.CreateCommandVoid<ResumeGameplayInputCommand>().Execute();
+            await _commandFactory.CreateCommandAsync<ReloadLevelCommand>().Execute(CancellationTokenSource.CreateLinkedTokenSource(Application.exitCancellationToken));
+        }
+        public void OnLoad() {
+            Debug.LogWarning("Clicou no load");
+        }
+        #endregion
 
         #region Pause
         public void ShowPauseScreen() {

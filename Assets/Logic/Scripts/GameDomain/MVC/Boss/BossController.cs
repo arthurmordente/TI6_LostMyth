@@ -567,6 +567,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
                 if (_bossView != null) {
                     // Optional: play death animation here if available
                 }
+                _commandFactory.CreateCommandVoid<GameOverCommand>().SetData(new GameOverCommandData(true)).Execute();
                 return;
             }
             // Evaluate phase transition immediately after damage

@@ -5,6 +5,7 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
         void InitEntryPoint();
         void ShowPauseScreen();
         void HidePauseScreen();
+        void ShowGameOver(bool IsWin);
         VisualElement GameplayMainContainer();
         void SetBossValues(int newValue);
         void SetBossValues(int newPreviewValue, int newActualValue);
