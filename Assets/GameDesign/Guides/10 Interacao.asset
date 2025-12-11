@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 02fd617bcf3e6174fac4f95d3839e4aa, type: 3}
-  m_Name: "10 Intera\xE7\xE3o"
+  m_Name: 10 Interacao
   m_EditorClassIdentifier: 
   guideTitle: "Intera\xE7\xE3o"
   pages:
