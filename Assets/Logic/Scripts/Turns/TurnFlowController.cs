@@ -108,7 +108,6 @@ namespace Logic.Scripts.Turns {
             LogService.Log($"Turno {_turnNumber} - Fase: BossAct");
             _waitingBoss = true;
             await _bossActionService.ExecuteBossTurnAsync();
-            await System.Threading.Tasks.Task.Delay(1500);
             OnBossCompleted();
         }
 

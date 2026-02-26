@@ -246,15 +246,12 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
             // After executing the previously prepared action, evaluate phase change for this turn
             bool didTransition = await EvaluateAndMaybeSwitchPhaseAsync();
             await MoveTurnAsync();
-            // Garante Idle pós movimento antes de preparar o próximo ataque
+            // Garante Idle pós movimento antes de preparar o próximo ataque (timeout curto: animação costuma terminar rápido)
             if (_bossView != null) {
-                await _bossView.WaitUntilIdleAsync(3f);
+                await _bossView.WaitUntilIdleAsync(1.5f);
             }
             await PrepareNextActionAsync();
-            // Espera entrar no estado de AttackLoop do ataque preparado (para o próximo round) antes de encerrar o turno
-            if (_bossView != null) {
-                await _bossView.WaitUntilAttackLoopAsync(3f);
-            }
+            // Não esperamos AttackLoop: o telegraph já foi exibido no prep; passamos controle ao jogador logo.
             _executedTurnsCount++;
         }
 
@@ -309,9 +306,9 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
             try {
                 await System.Threading.Tasks.Task.WhenAll(tasks);
             } catch (Exception) { }
-            // Após aplicar, aguarda o término do finish e retorno ao Idle via ResetState
+            // Após aplicar, aguarda o término do finish e retorno ao Idle (timeout de segurança reduzido)
             if (_bossView != null) {
-                await _bossView.WaitUntilIdleAsync(4f);
+                await _bossView.WaitUntilIdleAsync(2f);
             }
             // Não forçar Idle aqui; confiamos no Animator (finish -> reset -> idle)
 		}
@@ -501,9 +498,9 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
                         _bossView.PlayAttackPrep(animId);
                         _bossView.SetAttackLoop(true);
                         _loopingAttackAnimId = animId;
-                        // Exibir telegraph no MEIO do prep
+                        // Exibir telegraph cedo no prep para reduzir espera antes de passar o turno
                         try {
-                            await _bossView.WaitUntilStateTagNormalizedAsync("AttackPrep", 0.5f, 2.5f);
+                            await _bossView.WaitUntilStateTagNormalizedAsync("AttackPrep", 0.35f, 1.5f);
                             primary.TrySetTelegraphVisible(true);
                         } catch { }
                     }
