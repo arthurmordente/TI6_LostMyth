@@ -1,0 +1,283 @@
+PLAYER SKILL SYSTEM (NARA) - VISÃO GERAL
+
+1. OBJETOS PRINCIPAIS
+- AbilityData (ScriptableObject)
+  - Define um "skill" do jogador.
+  - Campos principais:
+    - Name, Description, Icon.
+    - Base stats: _baseDamage, _baseCost, _baseCooldown, _baseRange.
+    - Modificadores em runtime: Damage, Cooldown, Cost, Range.
+    - AnimatorAttackType: inteiro usado para escolher a animação de ataque na Nara.
+    - TargetingStrategy (Strategy pattern):
+      - Responsável por mirar (aim), travar o alvo (lock), e devolver caster/targets/aimPoint.
+    - PlotData (IPlotTwistData):
+      - Contém a lista de AbilityEffect que serão executados quando a habilidade for usada.
+  - Métodos chave:
+    - SetUp(IUpdateSubscriptionService, ICommandFactory):
+      - Passa serviços necessários para o TargetingStrategy.
+    - Aim(IEffectable caster):
+      - Inicializa a mira da habilidade para um caster (no caso padrão, a Nara).
+    - Cast(IEffectable caster):
+      - Usa TargetingStrategy.LockAim para obter:
+        - targets (IEffectable[]) e aimPoint (Vector3).
+      - Para cada effect em PlotData.Effects:
+        - effect.SetUp(aimPoint);
+        - effect.Execute(this, caster, target) para cada target, ou effect.Execute(this, caster) se não houver alvo.
+    - Cancel():
+      - Cancela a mira via TargetingStrategy.Cancel().
+    - GetDamage/GetCost/GetCooldown/GetRange:
+      - Retornam valores finais combinando base + modificadores.
+    - ResetModifiers/GetPointsSpent/GetBaseStatValue/GetCurrentStatValue/GetModifierStatValue/SetModifierStatValue:
+      - Utilizados pelo sistema de upgrade (AbilityPointService).
+
+- AbilityEffect (classe base abstrata)
+  - Define a interface para efeitos de habilidades (dano, cura, buffs, etc).
+  - Métodos virtuais:
+    - SetUp(Vector3 point)
+    - Execute(AbilityData data, IEffectable caster, IEffectable target)
+    - Execute(AbilityData data, IEffectable caster)
+    - Execute(IEffectable caster, IEffectable target)
+    - Cancel(IEffectable caster, IEffectable target)
+  - Implementações concretas (exemplos):
+    - HealAbilityEffect, AddActionPointsAbilityEffect, RemoveActionPointsAbilityEffect, TeleportEffect, etc.
+
+- AbilityPointData (ScriptableObject)
+  - Configura:
+    - StartPoints: pontos iniciais para upgrades.
+    - GainPerBossPoints: quanto o jogador ganha (provavelmente) por chefe.
+
+- AbilityPointService
+  - Serviço injetado no GameInstaller:
+    - Bind: Container.BindInterfacesTo<AbilityPointService>().AsSingle().WithArguments(Abilities, PointData).
+    - Usa uma lista de AbilityData (Abilities) e um AbilityPointData (PointData).
+  - Responsável por:
+    - Carregar pontos disponíveis e modificadores de cada habilidade do PlayerPrefs.
+    - Recalcular saldo atual de pontos (_currentBalance).
+    - Aplicar upgrade/downgrade de atributos das habilidades (Damage, Cost, Cooldown, Range).
+  - Campos:
+    - _availablePoints: total bruto de pontos (carregado de PlayerPrefs ou PointData.StartPoints).
+    - _currentBalance: quanto ainda pode ser gasto (availablePoints - pontos já usados).
+    - allTrackedAbilities: lista de AbilityData rastreadas.
+    - AbilityPointData: referência ao asset AbilityPointData.
+  - Métodos principais:
+    - RecomputeStats():
+      - Soma ability.GetPointsSpent() de todas as habilidades.
+      - _currentBalance = _availablePoints - totalPointsSpent.
+    - TryIncreaseStat(AbilityData ability, AbilityStat stat):
+      - Custa 1 ponto do saldo.
+      - Incrementa o modificador da AbilityData para aquele stat e recalcula saldo.
+    - TryDecreaseStat(AbilityData ability, AbilityStat stat):
+      - Diminui o modificador se não quebrar a igualdade (base + mod >= base).
+      - Atualiza saldo.
+    - ResetAllAbilities():
+      - Zera modificadores de todas as AbilityData.
+    - SaveStats()/LoadStats()/DeleteSavedStats():
+      - Salva/recupera/deleta modificadores em PlayerPrefs (chave: abilityName + "_" + stat).
+
+
+2. CONTROLLER DE CAST (SKILL USAGE) E RELAÇÃO COM A NARA
+
+- NaraController (player controller principal)
+  - Responsável pela entidade do jogador (Nara):
+    - Vida, debuffs, movimentação, animações de movimento/ataque/execução/cancelamento.
+  - Implementa:
+    - INaraController: interface usada em vários lugares (incluindo o CastController e comandos de input).
+    - IEffectable / IEffectableAction: permite que habilidades e efeitos tratem a Nara como alvo/caster.
+  - Ligações importantes com o sistema de skill:
+    - NaraViewGO: GameObject da Nara na cena.
+    - NaraSkillSpotTransform / GetTransformCastPoint():
+      - Ponto de origem para conjurar habilidades (por exemplo, spawn de projéteis, linhas de mira).
+    - métodos de animação:
+      - PlayAttackType(int type):
+        - Configura a animação de ataque na Nara a partir do AnimatorAttackType da AbilityData.
+      - TriggerExecute()/ResetExecuteTrigger():
+        - Disparam triggers de "usar habilidade" e resetam depois.
+      - TriggerCancel():
+        - Toca animação de cancelamento e reseta AttackType.
+    - Integração com Action Points:
+      - Implementações de IEffectableAction chamam EnsureApService() para:
+        - SubtractActionPoints, AddActionPoints, etc.
+      - Isso permite que efeitos de habilidades alterem Action Points via IActionPointsService.
+
+- CastController (núcleo do uso de skills em gameplay)
+  - Bind no GamePlayInstaller:
+    - Container.BindInterfacesTo<CastController>().AsSingle().WithArguments(_skills).NonLazy();
+    - _skills é um array de AbilityData configurado no inspector (as habilidades do jogador).
+  - Injeções:
+    - IActionPointsService: controla AP (Action Points) por turno.
+    - IUpdateSubscriptionService: passado para AbilityData/TargetingStrategy.
+    - ICommandFactory: usado por TargetingStrategy/efeitos se necessário.
+    - ICheatController: para ignorar custo (InfinityCast).
+    - AbilityData[] _abilities: as habilidades disponíveis no gameplay.
+  - Estado interno:
+    - _currentAbility: AbilityData atualmente em mira/uso.
+    - _currentCaster: o IEffectable que está conjurando (tipicamente a Nara).
+    - _canUseAbility: flag genérica de permissão.
+    - _currentAbilityIndex: índice da habilidade selecionada (0–4).
+    - PlayerTransform: transform da Nara (apenas referência).
+  - Métodos principais:
+    - InitEntryPoint(INaraController naraController):
+      - PlayerTransform = naraController.NaraViewGO.transform;
+      - Para cada AbilityData em _abilities, chama ability.SetUp(updateSubscriptionService, commandFactory).
+      - Ou seja, prepara todas as habilidades do jogador no início da gameplay.
+    - bool TryUseAbility(int index, IEffectable caster):
+      - Verifica Action Points:
+        - if _actionPointsService.CanSpend(_abilities[index].GetCost()) || InfinityCast:
+      - Se puder:
+        - _abilities[index].Aim(caster);  // inicia mira (TargetingStrategy.Initialize)
+        - Atualiza _currentAbility, _currentCaster, _currentAbilityIndex.
+        - Se o caster for INaraController:
+          - Lê ability.AnimatorAttackType e chama naraController.PlayAttackType(attackType).
+          - Isso sincroniza a animação de ataque da Nara com a habilidade.
+        - Retorna true.
+      - Senão, retorna false.
+    - void UseAbility(IEffectable caster):
+      - Se _currentAbility == null, retorna.
+      - Define _canUseAbility = true.
+      - Gasta Action Points se InfinityCast == false:
+        - _actionPointsService.Spend(_currentAbility.GetCost()).
+      - Se caster é INaraController:
+        - naraController.TriggerExecute(); // animação + SFX de skill (via NaraController+IAudioService).
+      - PlayUsedSfxByIndex(_currentAbilityIndex):
+        - escolhe AudioClipType específico por índice da skill.
+      - _currentAbility.Cast(caster):
+        - Executa TargetingStrategy + efeitos (AbilityEffect / PlotTwistData).
+      - CancelAbilityUse(): limpa estado e reseta animação/uso.
+    - void CancelAbilityUse():
+      - Se _currentCaster é INaraController, chama naraController.TriggerCancel().
+      - _currentAbility.Cancel() para cancelar mira/efeitos persistentes.
+      - Zera _currentAbility, _currentCaster, _currentAbilityIndex.
+    - UseFastEcho/UseSlowEcho:
+      - Encaminham para EchoController criar ecos (skills especiais ligadas ao clone).
+
+
+3. INPUT SYSTEM → COMANDOS → CASTCONTROLLER → NARA
+
+3.1. Mapeamento de inputs (GameInputActionsController)
+- Arquivo: Logic/Scripts/GameDomain/GameInputActions/GameInputActionsController.cs.
+- Usa o asset gerado pelo novo Input System: GameInputActions.
+- Registro de listeners de gameplay:
+  - RegisterGameplayInputListeners():
+    - Player.UseAbility1.started += OnUseAbility1Started;
+    - Player.UseAbility2.started += OnUseAbility2Started;
+    - Player.UseAbility3.started += OnUseAbility3Started;
+    - Player.UseAbility4.started += UseAbility4Started;
+    - Player.UseAbility5.started += UseAbility5Started;
+    - Player.MouseClick.started += OnMouseClickStarted;
+    - Player.ActivateCam.started/canceled → ativa/desativa câmera e cancela habilidade.
+    - Player.PassTurn.started → PassTurnInputCommand (termina o turno do jogador).
+- Cada callback de "UseAbilityX" chama um Command:
+  - OnUseAbility1Started → CreateCommandVoid<UseAbility1InputCommand>().Execute();
+  - OnUseAbility2Started → CreateCommandVoid<UseAbility2InputCommand>().Execute();
+  - etc.
+
+3.2. Comandos de input de habilidade (UseAbilityXInputCommand)
+- Exemplo: UseAbility1InputCommand
+  - ResolveDependencies():
+    - _naraController = Resolve<INaraController>();
+    - _castController = Resolve<ICastController>();
+  - Execute():
+    - _castController.CancelAbilityUse();  // cancela skill anterior (se houver).
+    - if (_castController.TryUseAbility(0, (IEffectable)_naraController)) {
+        _naraController.Freeeze();
+      }
+    - Comportamento:
+      - Seleciona a habilidade de índice 0 (Ability 1) e inicia mira, se houver AP.
+      - Em seguida chama NaraController.Freeeze() para bloquear o movimento enquanto o jogador mira a habilidade.
+- UseAbility2/3/4/5InputCommand:
+  - idênticos, mudando o índice (1, 2, 3, 4).
+
+3.3. Comando de cancelar habilidade + câmera (ActivateCamAndCancelAbilityInputCommand)
+- Ao pressionar o input de "ActivateCam" (por ex. botão direito ou outro), é executado:
+  - ActivateCamAndCancelAbilityInputCommand:
+    - Resolve IWorldCameraController, ICastController, INaraController.
+    - Execute():
+      - _castController.CancelAbilityUse();
+      - _naraController.Unfreeeze();
+      - _WorldCameraController.UnlockCameraRotate();
+    - Efeito: ao ativar a câmera, cancela a skill em mira e libera novamente o movimento da Nara.
+
+
+4. UI DE GAMEPLAY → COMANDOS → CASTCONTROLLER → NARA
+
+- GamePlayUiController
+  - Registra callbacks de UI (botões):
+    - OnClickAbility1/2/3/4/5:
+      - Cada um cria e executa o respectivo UseAbilityXInputCommand, exatamente como o input de teclado/controller.
+    - OnClickNextTurn:
+      - Executa CompletePlayerActionCommand (termina turno).
+  - Também atualiza UI de custos/nomes das habilidades:
+    - SetAbilityValues(int ability1Cost, string ability1Name, int ability2Cost, string ability2Name):
+      - Chama métodos da view para atualizar textos/custos.
+    - Outros métodos expõem OnSkill1CostChange/OnSkill2CostChange/OnSkillXNameChange etc.
+  - Resultado:
+    - O fluxo de skill via UI é o mesmo que via input:
+      - UI Button → Command (UseAbilityXInputCommand) → CastController.TryUseAbility → NaraController anima/mira.
+
+
+5. RELAÇÃO COM O SISTEMA DE TURNOS E ACTION POINTS
+
+- Action Points (IActionPointsService)
+  - Não é definido aqui, mas interage com CastController e NaraController:
+    - CastController:
+      - TryUseAbility:
+        - verifica se CanSpend(cost) ou InfinityCast está ativo.
+      - UseAbility:
+        - se não há InfinityCast, chama Spend(cost).
+    - NaraController:
+      - métodos de IEffectableAction permitem que efeitos modifiquem AP (AddActionPoints, SubtractActionPoints).
+  - Isso significa:
+    - O sistema de skill está integrado com o sistema de AP e respeita custo de habilidade por turno.
+
+- Turnos:
+  - O turno é orquestrado por TurnFlowController, mas não há lógica de skill direto nele.
+  - O jogador pode usar habilidades durante PlayerAct enquanto tem Action Points disponíveis.
+  - Quando o jogador termina suas ações:
+    - CompletePlayerActionCommand → TurnFlowController.CompletePlayerAction() → começa EchoesAct.
+
+
+6. RESUMO DO FLUXO COMPLETO (INPUT → PLAYER → SKILL → EFEITO)
+
+1) Input:
+   - Jogador aperta tecla/botão de habilidade (ou clica no botão da UI).
+   - GameInputActionsController dispara UseAbilityXInputCommand (ou GamePlayUiController faz o mesmo via botão).
+
+2) Comando de input:
+   - Resolve INaraController + ICastController.
+   - Cancela habilidade anterior e chama CastController.TryUseAbility(index, NaraController como IEffectable).
+   - Se a habilidade puder ser usada (AP suficiente, etc):
+     - Congela o movimento da Nara (Freeeze) para mira/telegraph.
+
+3) CastController.TryUseAbility:
+   - Checa CanSpend(cost) ou InfinityCast.
+   - Chama AbilityData.Aim(caster) (TargetingStrategy.Initialize).
+   - Guarda AbilityData/IEffectable atuais.
+   - Pede para a Nara tocar a animação de ataque correta (PlayAttackType(AnimatorAttackType)).
+
+4) Execução da habilidade:
+   - Em algum momento (por exemplo, clique de confirmação / MouseClickInputCommand, ou outro trigger) é chamado CastController.UseAbility(caster).
+   - CastController:
+     - Gasta AP (Spend(cost)) se aplicável.
+     - Pede para a Nara tocar TriggerExecute (animação + som).
+     - Chama AbilityData.Cast(caster):
+       - TargetingStrategy.LockAim → targets + aimPoint.
+       - Para cada AbilityEffect em PlotData:
+         - effect.SetUp(aimPoint).
+         - effect.Execute(data, caster, target) / Execute(data, caster).
+     - Por fim, CancelAbilityUse() limpa estado e reseta animação.
+
+5) Cancelar habilidade:
+   - Jogador pode cancelar com o input de câmera (ActivateCamAndCancelAbilityInputCommand) ou outros comandos de cancel.
+   - Isso:
+     - Cancela a habilidade atual (TargetingStrategy.Cancel, reseta triggers).
+     - Libera movimento da Nara (Unfreeeze).
+     - Libera rotação da câmera.
+
+Em resumo:
+- O sistema de skill do jogador é centrado em:
+  - AbilityData (dados + targeting + efeitos via PlotTwistData),
+  - CastController (orquestra AP, mira, execução e animações),
+  - NaraController (corpo/transform/animator do player, mais integração com Action Points),
+  - GameInputActionsController + GamePlayUiController (entrada de input e UI chamando Commands),
+  - AbilityPointService (progressão de habilidade via pontos).
+
