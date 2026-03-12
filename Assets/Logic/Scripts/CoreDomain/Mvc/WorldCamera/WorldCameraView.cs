@@ -15,10 +15,24 @@ public class WorldCameraView : MonoBehaviour
     [SerializeField] private float _minRadius = 2.5f;
     [SerializeField] private float _maxRadius = 11.5f;
 
+    [Header("Target Transition")]
+    [SerializeField] private float _transitionDuration = 0.4f;
+
+    private Vector3 _transitionFromPos;
+    private float _transitionElapsed = float.MaxValue;
+
     public void SetNewTarget(Transform target)
     {
         if (_cineCam == null) return;
         if (_orbital == null) _orbital = _cineCam.GetComponent<CinemachineOrbitalFollow>();
+
+        // Begin a smooth positional transition whenever the target actually changes.
+        if (target != _target && _orbital?.FollowTarget != null)
+        {
+            _transitionFromPos = _orbital.FollowTarget.position;
+            _transitionElapsed = 0f;
+        }
+
         _target = target;
         _cineCam.Follow = _target;
     }
@@ -32,7 +46,19 @@ public class WorldCameraView : MonoBehaviour
         _orbital.HorizontalAxis.Value = _horizontalAngle;
 
         if (_target != null)
-            _orbital.FollowTarget.position = _target.position;
+        {
+            if (_transitionElapsed < _transitionDuration)
+            {
+                _transitionElapsed += deltaTime;
+                float t = Mathf.Clamp01(_transitionElapsed / _transitionDuration);
+                float smooth = Mathf.SmoothStep(0f, 1f, t);
+                _orbital.FollowTarget.position = Vector3.Lerp(_transitionFromPos, _target.position, smooth);
+            }
+            else
+            {
+                _orbital.FollowTarget.position = _target.position;
+            }
+        }
     }
 
     public void SetTargetNull()

@@ -523,6 +523,12 @@ MonoBehaviour:
   - {fileID: 11400000, guid: d774261d7df73ed4fa8f08149dc4b81f, type: 2}
   - {fileID: 11400000, guid: 72ba9ea640b863144836fdfdc9469bd6, type: 2}
   - {fileID: 11400000, guid: f4ae99592295ab4438105fcbb1c1ae10, type: 2}
+  _bookSkills:
+  - {fileID: 11400000, guid: 4c82f2d9bc2cf09418a437c668996e07, type: 2}
+  - {fileID: 11400000, guid: d9d52de431f81e94c97467c811060a54, type: 2}
+  - {fileID: 11400000, guid: d774261d7df73ed4fa8f08149dc4b81f, type: 2}
+  - {fileID: 11400000, guid: 72ba9ea640b863144836fdfdc9469bd6, type: 2}
+  - {fileID: 11400000, guid: f4ae99592295ab4438105fcbb1c1ae10, type: 2}
   _layerMaskMouse:
     serializedVersion: 2
     m_Bits: 1

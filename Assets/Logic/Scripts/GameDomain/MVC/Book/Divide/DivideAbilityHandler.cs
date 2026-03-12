@@ -130,6 +130,9 @@ namespace Logic.Scripts.GameDomain.MVC.Book.Divide
         private void DeployBook(Vector3 position)
         {
             _bookController.CreateBook(position);
+            // Grant the Book its first turn's AP immediately so the player
+            // can cast abilities on the same turn it is deployed.
+            _bookController.GainTurnActionPoints();
             _activeUnitService.RegisterBook(_bookController);
             _cooldownRemaining = COOLDOWN_TURNS;
         }

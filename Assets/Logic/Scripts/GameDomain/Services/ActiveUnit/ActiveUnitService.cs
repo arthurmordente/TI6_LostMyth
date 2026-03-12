@@ -1,5 +1,6 @@
-using Logic.Scripts.GameDomain.MVC.Shared;
+using Logic.Scripts.Core.Mvc.WorldCamera;
 using Logic.Scripts.GameDomain.MVC.Nara;
+using Logic.Scripts.GameDomain.MVC.Shared;
 using UnityEngine;
 
 namespace Logic.Scripts.GameDomain.Services.ActiveUnit
@@ -7,28 +8,28 @@ namespace Logic.Scripts.GameDomain.Services.ActiveUnit
     public class ActiveUnitService : IActiveUnitService
     {
         private readonly INaraController _naraController;
+        private readonly IWorldCameraController _worldCamera;
         private IPlayableUnit _bookUnit;
 
         public IPlayableUnit ActiveUnit { get; private set; }
         public bool IsBookDeployed => _bookUnit != null;
 
-        public ActiveUnitService(INaraController naraController)
+        public ActiveUnitService(INaraController naraController, IWorldCameraController worldCameraController)
         {
             _naraController = naraController;
+            _worldCamera = worldCameraController;
             ActiveUnit = naraController as IPlayableUnit;
         }
 
         public void RegisterBook(IPlayableUnit book)
         {
             _bookUnit = book;
-            // Book starts with movement disabled; TAB or explicit call enables it
             _bookUnit.SetMovementActive(false);
         }
 
         public void UnregisterBook()
         {
             _bookUnit = null;
-            // Ensure Nara is active again
             SetNaraAsActiveUnit();
         }
 
@@ -41,6 +42,8 @@ namespace Logic.Scripts.GameDomain.Services.ActiveUnit
             ActiveUnit = _naraController as IPlayableUnit;
             ActiveUnit?.SetMovementActive(true);
             ActiveUnit?.OnBecomeActive();
+
+            FollowActiveUnit();
         }
 
         public void SetBookAsActiveUnit(IPlayableUnit book)
@@ -52,6 +55,8 @@ namespace Logic.Scripts.GameDomain.Services.ActiveUnit
             ActiveUnit = book;
             ActiveUnit?.SetMovementActive(true);
             ActiveUnit?.OnBecomeActive();
+
+            FollowActiveUnit();
         }
 
         public void ToggleActiveUnit()
@@ -63,6 +68,15 @@ namespace Logic.Scripts.GameDomain.Services.ActiveUnit
                 SetBookAsActiveUnit(_bookUnit);
             else
                 SetNaraAsActiveUnit();
+        }
+
+        // Redirects the camera to orbit the unit that just became active.
+        private void FollowActiveUnit()
+        {
+            if (_worldCamera == null || ActiveUnit == null) return;
+            var target = ActiveUnit.UnitViewGO?.transform;
+            if (target != null)
+                _worldCamera.StartFollowTarget(target);
         }
     }
 }

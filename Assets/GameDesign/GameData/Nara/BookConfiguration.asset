@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: BookConfiguration
   m_EditorClassIdentifier: Assembly-CSharp::Logic.Scripts.GameDomain.MVC.Nara.NaraConfigurationSO
   <MaxHealth>k__BackingField: 1
-  <InitialMovementDistance>k__BackingField: 4
-  <MaxActionPoints>k__BackingField: 1
-  <ActionPointsTurnGain>k__BackingField: 0
-  <MoveSpeed>k__BackingField: 1
-  <RotationSpeed>k__BackingField: 1
-  <MaxMovementRadius>k__BackingField: 4
+  <InitialMovementDistance>k__BackingField: 10
+  <MaxActionPoints>k__BackingField: 99
+  <ActionPointsTurnGain>k__BackingField: 99
+  <MoveSpeed>k__BackingField: 10
+  <RotationSpeed>k__BackingField: 5
+  <MaxMovementRadius>k__BackingField: 10
   <NaraAreaLineHandlerView>k__BackingField: {fileID: 4812206158285913741, guid: 0024f082e082b7142b5357f92d68a16d, type: 3}

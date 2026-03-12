@@ -43,17 +43,31 @@ public class CastController : ICastController {
     }
 
     public bool TryUseAbility(int index, IPlayableUnit caster) {
+        Debug.Log($"[CastController] TryUseAbility — caster: {caster?.GetType().Name ?? "NULL"}, index: {index}");
+
         var abilities = caster?.GetAbilities();
-        if (abilities == null || index < 0 || index >= abilities.Length) return false;
+        if (abilities == null) {
+            Debug.LogWarning($"[CastController] TryUseAbility — caster.GetAbilities() returned NULL.");
+            return false;
+        }
+        if (index < 0 || index >= abilities.Length) {
+            Debug.LogWarning($"[CastController] TryUseAbility — index {index} out of range (abilities.Length={abilities.Length}).");
+            return false;
+        }
 
         // Use the caster's own AP.  For Nara the lazy EnsureApService() is the primary path;
         // _naraActionPointsService is an injected fallback in case it hasn't resolved yet.
         // Book returns its own BookActionPoints directly.
         var ap = caster.GetActionPoints() ?? _naraActionPointsService;
-        bool canAfford = (ap == null || ap.CanSpend(abilities[index].GetCost()))
-                         || _cheatController.InfinityCast;
-        if (!canAfford) return false;
+        int cost = abilities[index].GetCost();
+        bool canAfford = (ap == null || ap.CanSpend(cost)) || _cheatController.InfinityCast;
+        Debug.Log($"[CastController] TryUseAbility — ability: {abilities[index].name}, cost: {cost}, AP: {(ap == null ? "NULL (free)" : ap.Current.ToString())}, canAfford: {canAfford}, InfinityCast: {_cheatController.InfinityCast}");
+        if (!canAfford) {
+            Debug.LogWarning($"[CastController] TryUseAbility — cannot afford ability (cost {cost}, AP {ap?.Current}).");
+            return false;
+        }
 
+        Debug.Log($"[CastController] TryUseAbility — calling Aim on {abilities[index].name} with caster {caster.GetType().Name}");
         abilities[index].Aim(caster);
         _currentAbility = abilities[index];
         _currentCaster = caster;
@@ -73,6 +87,7 @@ public class CastController : ICastController {
     }
 
     public void UseAbility(IPlayableUnit caster) {
+        Debug.Log($"[CastController] UseAbility — caster: {caster?.GetType().Name ?? "NULL"}, currentAbility: {(_currentAbility != null ? _currentAbility.name : "NULL")}");
         if (_currentAbility == null) return;
 
         _canUseAbility = true;

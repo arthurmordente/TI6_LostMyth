@@ -54,13 +54,13 @@ namespace Assets.Logic.Scripts.GameDomain.Effects
         }
 
         public Transform GetTransformCastPoint() {
-            //To-do Criar retorno
-            return transform;
+            return _target != null ? _target.GetTransformCastPoint() : transform;
         }
 
+        public LineRenderer GetPointLineRenderer() => _target?.GetPointLineRenderer();
+
         public GameObject GetReferenceTargetPrefab() {
-            //To-do Criar retorno
-            return gameObject;
+            return _target != null ? _target.GetReferenceTargetPrefab() : gameObject;
         }
     }
 }

@@ -4,6 +4,7 @@ public interface IEffectable
 {
     public Transform GetReferenceTransform();
     public Transform GetTransformCastPoint();
+    public LineRenderer GetPointLineRenderer();
     public GameObject GetReferenceTargetPrefab();
     public void PreviewHeal(int healAmound);
     public void PreviewDamage(int damageAmound);

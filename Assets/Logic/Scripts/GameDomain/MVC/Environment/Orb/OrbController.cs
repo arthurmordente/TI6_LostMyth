@@ -273,6 +273,8 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Orb
             return transform;
         }
 
+        public LineRenderer GetPointLineRenderer() => null;
+
         public GameObject GetReferenceTargetPrefab() {
             return gameObject;
         }

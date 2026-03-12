@@ -1,5 +1,4 @@
 using Logic.Scripts.GameDomain.MVC.Abilitys;
-using Logic.Scripts.GameDomain.MVC.Nara;
 using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -26,15 +25,26 @@ public class ProjectileTargeting : TargetingStrategy {
         base.Initialize(data, caster);
         _projectilePlotData = data.PlotData as ProjectilePlotTwistData;
         if (_projectilePlotData != null && _projectilePlotData.ProjectilePrefab != null) {
-            if (Caster is NaraController) {
-                NaraController controller = (NaraController)Caster;
-                trajectoryLine = controller.GetPointLineRenderer();
-            }
-            hitMarker = UnityEngine.Object.Instantiate(Caster.GetReferenceTargetPrefab()).transform;
+            // Use the interface instead of casting to NaraController so any IEffectable
+            // (including the Book) provides its own line renderer for the trajectory preview.
+            trajectoryLine = Caster.GetPointLineRenderer();
+
+            var targetPrefab = Caster.GetReferenceTargetPrefab();
+            if (targetPrefab != null)
+                hitMarker = UnityEngine.Object.Instantiate(targetPrefab).transform;
+            else
+                Debug.LogWarning($"[ProjectileTargeting] {caster.GetType().Name} has no TargetPrefab assigned — hit marker will be absent.");
+
             SetTrajectoryVisible(true);
             currentLaunchSpeed = _projectilePlotData.ProjectilePrefab.InitialSpeed;
         }
-        Caster.GetTransformCastPoint().rotation = Quaternion.identity;
+
+        var castPoint = Caster.GetTransformCastPoint();
+        if (castPoint != null) {
+            castPoint.rotation = Quaternion.identity;
+        } else {
+            Debug.LogWarning($"[ProjectileTargeting] {caster.GetType().Name} has no CastPoint assigned — aiming origin will be incorrect.");
+        }
         Caster.GetReferenceTransform().rotation = Quaternion.identity;
         SubscriptionService.RegisterUpdatable(this);
     }
@@ -150,7 +160,8 @@ public class ProjectileTargeting : TargetingStrategy {
 
     public override void Cancel() {
         SetTrajectoryVisible(false);
-        UnityEngine.Object.Destroy(hitMarker.gameObject);
+        if (hitMarker != null)
+            UnityEngine.Object.Destroy(hitMarker.gameObject);
         base.Cancel();
     }
 

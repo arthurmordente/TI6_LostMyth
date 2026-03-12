@@ -52,6 +52,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Dice
 
 		public Transform GetReferenceTransform() { return transform; }
 		public Transform GetTransformCastPoint() { return transform; }
+		public LineRenderer GetPointLineRenderer() => null;
 		public GameObject GetReferenceTargetPrefab() { return gameObject; }
 		public void PreviewHeal(int healAmound) { }
 		public void PreviewDamage(int damageAmound) { }

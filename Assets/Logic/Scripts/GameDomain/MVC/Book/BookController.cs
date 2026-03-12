@@ -1,6 +1,7 @@
 using Logic.Scripts.GameDomain.MVC.Abilitys;
 using Logic.Scripts.GameDomain.MVC.Nara;
 using Logic.Scripts.GameDomain.MVC.Shared;
+using Logic.Scripts.Services.CommandFactory;
 using Logic.Scripts.Services.UpdateService;
 using Logic.Scripts.Turns;
 using UnityEngine;
@@ -13,10 +14,12 @@ namespace Logic.Scripts.GameDomain.MVC.Book
         private readonly NaraConfigurationSO _config;
         private readonly global::GameInputActions _gameInputActions;
         private readonly IUpdateSubscriptionService _updateSubscriptionService;
+        private readonly ICommandFactory _commandFactory;
         private readonly ICheatController _cheatController;
         // The Book's own ability set — configured separately in the inspector.
         // Initially points to the same abilities as Nara; swap to a dedicated array to diverge.
         private readonly AbilityData[] _abilities;
+        private bool _abilitiesSetUp;
 
         private BookView _bookView;
         private NaraTurnMovementController _movementController;
@@ -35,6 +38,7 @@ namespace Logic.Scripts.GameDomain.MVC.Book
             AbilityData[] abilities,
             global::GameInputActions gameInputActions,
             IUpdateSubscriptionService updateSubscriptionService,
+            ICommandFactory commandFactory,
             ICheatController cheatController)
         {
             _bookViewPrefab = bookViewPrefab;
@@ -42,6 +46,7 @@ namespace Logic.Scripts.GameDomain.MVC.Book
             _abilities = abilities ?? System.Array.Empty<AbilityData>();
             _gameInputActions = gameInputActions;
             _updateSubscriptionService = updateSubscriptionService;
+            _commandFactory = commandFactory;
             _cheatController = cheatController;
         }
 
@@ -65,6 +70,17 @@ namespace Logic.Scripts.GameDomain.MVC.Book
 
             _bookData = new BookData(_config);
             _bookActionPoints = new BookActionPoints(_config.MaxActionPoints, _config.ActionPointsTurnGain);
+
+            // Ensure the Book's ability set is registered with the update/command systems.
+            // This is a no-op if the Book shares the exact same AbilityData assets as Nara
+            // (already set up by CastController.InitEntryPoint), but is required when the Book
+            // uses its own dedicated ability assets assigned via _bookSkills in the installer.
+            if (!_abilitiesSetUp)
+            {
+                foreach (var ability in _abilities)
+                    ability.SetUp(_updateSubscriptionService, _commandFactory);
+                _abilitiesSetUp = true;
+            }
 
             _movementController = new NaraTurnMovementController(
                 _gameInputActions,

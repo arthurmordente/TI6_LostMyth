@@ -779,6 +779,8 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
             return _bossView.GetTransformCastPoint();
         }
 
+        public LineRenderer GetPointLineRenderer() => null;
+
         public GameObject GetReferenceTargetPrefab() {
             return _bossView.GetReferenceTargetPrefab();
         }
