@@ -668,6 +668,7 @@ MonoBehaviour:
   _maxHeight: 14
   _minRadius: 2.5
   _maxRadius: 11.5
+  _transitionDuration: 0.4
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
