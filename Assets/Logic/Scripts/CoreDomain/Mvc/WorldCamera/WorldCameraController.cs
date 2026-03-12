@@ -6,6 +6,7 @@ namespace Logic.Scripts.Core.Mvc.WorldCamera {
         private readonly WorldCameraView _worldCameraView;
         private readonly IUpdateSubscriptionService _updateSubscriptionService;
         private bool _rotateEnabled;
+        private bool _isRegistered;
         private Vector2 _mouseDelta;
         private Transform _target;
         private GameInputActions _gameInputActions;
@@ -19,22 +20,33 @@ namespace Logic.Scripts.Core.Mvc.WorldCamera {
         }
 
         public void UpdateAngles() {
-            if (!_rotateEnabled) return;
-            Vector2 delta = Vector2.zero;
-            if (_gameInputActions.Player.enabled == true) delta = _gameInputActions.Player.RotateCam.ReadValue<Vector2>();
-            if (_gameInputActions.Exploration.enabled == true) delta = _gameInputActions.Exploration.RotateCam.ReadValue<Vector2>();
-            SetMouseDelta(delta);
-            _worldCameraView.UpdateCameraRotation(_mouseDelta.x, Time.deltaTime);
+            // Always update the camera follow proxy so the camera tracks the unit every frame.
+            // Only read rotation input when rotation is enabled.
+            float rotationDeltaX = 0f;
+            if (_rotateEnabled) {
+                Vector2 delta = Vector2.zero;
+                if (_gameInputActions.Player.enabled == true) delta = _gameInputActions.Player.RotateCam.ReadValue<Vector2>();
+                if (_gameInputActions.Exploration.enabled == true) delta = _gameInputActions.Exploration.RotateCam.ReadValue<Vector2>();
+                SetMouseDelta(delta);
+                rotationDeltaX = _mouseDelta.x;
+            }
+            _worldCameraView.UpdateCameraRotation(rotationDeltaX, Time.deltaTime);
         }
 
         public void StartFollowTarget(Transform targetTransform) {
             _target = targetTransform;
             _worldCameraView.SetNewTarget(_target);
-            _updateSubscriptionService.RegisterUpdatable(this);
+            if (!_isRegistered) {
+                _updateSubscriptionService.RegisterUpdatable(this);
+                _isRegistered = true;
+            }
         }
 
         public void StopFollowTarget() {
-            _updateSubscriptionService.UnregisterUpdatable(this);
+            if (_isRegistered) {
+                _updateSubscriptionService.UnregisterUpdatable(this);
+                _isRegistered = false;
+            }
             _target = null;
         }
 

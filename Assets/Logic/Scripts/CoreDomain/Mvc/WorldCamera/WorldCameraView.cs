@@ -18,28 +18,52 @@ public class WorldCameraView : MonoBehaviour
     [Header("Target Transition")]
     [SerializeField] private float _transitionDuration = 0.4f;
 
+    // An invisible proxy that Cinemachine always follows.
+    // We interpolate this proxy's position between targets — unit transforms are never touched.
+    private Transform _followProxy;
     private Vector3 _transitionFromPos;
     private float _transitionElapsed = float.MaxValue;
 
+    private void Awake()
+    {
+        // Create a root-level proxy so its world position is never affected by parent transforms.
+        var proxyGO = new GameObject("CameraFollowProxy");
+        _followProxy = proxyGO.transform;
+
+        if (_cineCam != null)
+        {
+            if (_orbital == null) _orbital = _cineCam.GetComponent<CinemachineOrbitalFollow>();
+            // Initialise proxy at the Inspector-assigned follow target's position so there
+            // is no jump on the first frame.
+            if (_cineCam.Follow != null)
+            {
+                _followProxy.position = _cineCam.Follow.position;
+                if (_target == null) _target = _cineCam.Follow;
+            }
+            // Point Cinemachine at the proxy; we never change this again.
+            _cineCam.Follow = _followProxy;
+        }
+    }
+
     public void SetNewTarget(Transform target)
     {
-        if (_cineCam == null) return;
+        if (_cineCam == null || _followProxy == null) return;
         if (_orbital == null) _orbital = _cineCam.GetComponent<CinemachineOrbitalFollow>();
 
-        // Begin a smooth positional transition whenever the target actually changes.
-        if (target != _target && _orbital?.FollowTarget != null)
+        if (target != _target)
         {
-            _transitionFromPos = _orbital.FollowTarget.position;
+            // Record where the proxy currently is so the lerp starts from here.
+            _transitionFromPos = _followProxy.position;
             _transitionElapsed = 0f;
         }
 
         _target = target;
-        _cineCam.Follow = _target;
+        // _cineCam.Follow stays pointed at _followProxy — do not reassign it here.
     }
 
     public void UpdateCameraRotation(float mouseDeltaX, float deltaTime)
     {
-        if (_cineCam == null) return;
+        if (_cineCam == null || _followProxy == null) return;
         if (_orbital == null) _orbital = _cineCam.GetComponent<CinemachineOrbitalFollow>();
 
         _horizontalAngle += mouseDeltaX * _velocidade * deltaTime;
@@ -51,12 +75,11 @@ public class WorldCameraView : MonoBehaviour
             {
                 _transitionElapsed += deltaTime;
                 float t = Mathf.Clamp01(_transitionElapsed / _transitionDuration);
-                float smooth = Mathf.SmoothStep(0f, 1f, t);
-                _orbital.FollowTarget.position = Vector3.Lerp(_transitionFromPos, _target.position, smooth);
+                _followProxy.position = Vector3.Lerp(_transitionFromPos, _target.position, Mathf.SmoothStep(0f, 1f, t));
             }
             else
             {
-                _orbital.FollowTarget.position = _target.position;
+                _followProxy.position = _target.position;
             }
         }
     }
@@ -75,14 +98,11 @@ public class WorldCameraView : MonoBehaviour
         _orbital.OrbitStyle = CinemachineOrbitalFollow.OrbitStyles.ThreeRing;
 
         var settings = _orbital.Orbits;
-        float newH = Mathf.Clamp(settings.Center.Height + delta, _minHeight, _maxHeight);
-        float newR = Mathf.Clamp(settings.Center.Radius + delta, _minRadius, _maxRadius);
-
-        settings.Center.Height = newH;
-        settings.Center.Radius = newR;
+        settings.Center.Height = Mathf.Clamp(settings.Center.Height + delta, _minHeight, _maxHeight);
+        settings.Center.Radius = Mathf.Clamp(settings.Center.Radius + delta, _minRadius, _maxRadius);
         _orbital.Orbits = settings;
 
-        if (_target != null)
-            _orbital.FollowTarget.position = _target.position;
+        if (_target != null && _followProxy != null)
+            _followProxy.position = _target.position;
     }
 }
