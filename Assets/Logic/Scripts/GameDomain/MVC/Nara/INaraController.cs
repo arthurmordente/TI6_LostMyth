@@ -1,8 +1,13 @@
+using Logic.Scripts.GameDomain.MVC.Shared;
 using Logic.Scripts.GameDomain.MVC.Ui;
 using UnityEngine;
 
 namespace Logic.Scripts.GameDomain.MVC.Nara {
-    public interface INaraController {
+    /// <summary>
+    /// Nara-specific interface. Extends IPlayableUnit so Nara can be used
+    /// interchangeably with the Book in the active-unit system.
+    /// </summary>
+    public interface INaraController : IPlayableUnit {
         GameObject NaraViewGO { get; }
         Transform NaraSkillSpotTransform { get; }
         NaraMovementController NaraMove { get; }
@@ -10,19 +15,10 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
         void InitEntryPointGamePlay(IGamePlayUiController gamePlayUiController);
         void CreateNara(NaraMovementController movementController);
         void ResetController();
-        void StopMovingAnim();
-        void Freeeze();
-        void Unfreeeze();
-        void FreezeInputs();
-        void UnfreezeInputs();
+        void PlayAttackType1();
         void RegisterListeners();
         void UnregisterListeners();
         void ManagedFixedUpdate();
-        void PlayAttackType(int type);
-        void PlayAttackType1();
-        void TriggerExecute();
-        void ResetExecuteTrigger();
-        void TriggerCancel();
         void SetPosition(Vector3 movementCenter);
     }
 }

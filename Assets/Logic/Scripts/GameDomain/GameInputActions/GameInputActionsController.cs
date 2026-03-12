@@ -11,6 +11,9 @@ namespace Logic.Scripts.GameDomain.GameInputActions {
         private readonly global::GameInputActions _gameInputActions;
         private readonly ICommandFactory _commandFactory;
 
+        // TAB key programmatic binding — added without modifying the Input Actions asset
+        private InputAction _switchUnitTabAction;
+
         public GameInputActionsController(global::GameInputActions gameInputActions, ICommandFactory commandFactory) {
             _gameInputActions = gameInputActions;
             _commandFactory = commandFactory;
@@ -82,6 +85,11 @@ namespace Logic.Scripts.GameDomain.GameInputActions {
             _gameInputActions.Player.UseAbility5.started += UseAbility5Started;
             _gameInputActions.Player.MouseClick.started += OnMouseClickStarted;
             _gameInputActions.Player.Zoom.performed += OnZoomPerformed;
+
+            // TAB key — programmatic binding so the Input Actions asset does not need changes
+            _switchUnitTabAction = new InputAction(type: InputActionType.Button, binding: "<Keyboard>/tab");
+            _switchUnitTabAction.started += OnSwitchUnitStarted;
+            _switchUnitTabAction.Enable();
         }
 
         public void UnregisterGameplayInputListeners() {
@@ -105,6 +113,13 @@ namespace Logic.Scripts.GameDomain.GameInputActions {
 
             _gameInputActions.Player.MouseClick.started -= OnMouseClickStarted;
             _gameInputActions.Player.Zoom.performed -= OnZoomPerformed;
+
+            if (_switchUnitTabAction != null) {
+                _switchUnitTabAction.started -= OnSwitchUnitStarted;
+                _switchUnitTabAction.Disable();
+                _switchUnitTabAction.Dispose();
+                _switchUnitTabAction = null;
+            }
         }
 
         private void OnMouseClickStarted(InputAction.CallbackContext context) {
@@ -145,6 +160,9 @@ namespace Logic.Scripts.GameDomain.GameInputActions {
         }
         private void OnCreateCopy1Started(InputAction.CallbackContext obj) {
             _commandFactory.CreateCommandVoid<CreateCopy1InputCommand>().Execute();
+        }
+        private void OnSwitchUnitStarted(InputAction.CallbackContext obj) {
+            _commandFactory.CreateCommandVoid<SwitchUnitInputCommand>().Execute();
         }
         private void OnActivateCamAndCancelAbilityStarted(InputAction.CallbackContext obj) {
             _commandFactory.CreateCommandVoid<ActivateCamAndCancelAbilityInputCommand>().Execute();

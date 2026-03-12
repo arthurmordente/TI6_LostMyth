@@ -1,25 +1,34 @@
-using Logic.Scripts.GameDomain.MVC.Nara;
+using Logic.Scripts.GameDomain.MVC.Book.Divide;
+using Logic.Scripts.GameDomain.Services.ActiveUnit;
 using Logic.Scripts.Services.CommandFactory;
-using UnityEngine;
 
 public class MouseClickInputCommand : BaseCommand, ICommandVoid {
-    private INaraController _naraController;
+    private IActiveUnitService _activeUnitService;
     private ICastController _castController;
+    private IDivideAbilityHandler _divideAbilityHandler;
+
     public override void ResolveDependencies() {
-        _naraController = _diContainer.Resolve<INaraController>();
+        _activeUnitService = _diContainer.Resolve<IActiveUnitService>();
         _castController = _diContainer.Resolve<ICastController>();
+        _divideAbilityHandler = _diContainer.Resolve<IDivideAbilityHandler>();
     }
 
     public void Execute() {
-        _castController.UseAbility((IEffectable)_naraController);
+        // If the Dividir ability is in aiming mode, this click places the book
+        if (_divideAbilityHandler != null && _divideAbilityHandler.IsAiming) {
+            _divideAbilityHandler.ConfirmPlacement();
+            return;
+        }
+
+        // Otherwise, confirm the currently aimed ability for the active unit
+        var caster = _activeUnitService?.ActiveUnit;
+        if (caster == null) return;
+
+        _castController.UseAbility(caster);
+
         if (_castController?.GetCanUseAbility() == true) {
-            if (_naraController?.NaraMove is NaraTurnMovementController naraTurnMovement) {
-                naraTurnMovement.RecalculateRadiusAfterAbility();
-                naraTurnMovement.SetMovementRadiusCenter();
-                naraTurnMovement.Refresh();
-                _castController.SetCanUseAbility(false);
-                _naraController.Unfreeeze();
-            }
+            caster.OnAbilityExecuted();
+            _castController.SetCanUseAbility(false);
         }
     }
 }

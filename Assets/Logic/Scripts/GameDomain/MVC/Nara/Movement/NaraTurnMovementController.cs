@@ -16,6 +16,13 @@ public class NaraTurnMovementController : NaraMovementController {
     private int _extraMovementSpaceCost = 2;
     private TurnStateService _turnStateService;
 
+    /// <summary>
+    /// When false, this controller ignores movement input even during PlayerAct phase.
+    /// Used to gate movement to the currently active unit (Nara or Book) without
+    /// disabling the shared Player Input Action Map.
+    /// </summary>
+    public bool IsActivelyControlled { get; set; } = true;
+
     public NaraTurnMovementController(GameInputActions inputActions, IUpdateSubscriptionService updateSubscriptionService,
         NaraConfigurationSO naraConfiguration, ICheatController cheatController) : base(inputActions, updateSubscriptionService, naraConfiguration) {
         _initialMovementRadius = naraConfiguration.InitialMovementDistance;
@@ -26,9 +33,13 @@ public class NaraTurnMovementController : NaraMovementController {
     public override void InitEntryPoint(Rigidbody rigidbody, Camera camera) {
         base.InitEntryPoint(rigidbody, camera);
         _movementRadius = _initialMovementRadius;
-        LineHandlerController.InitEntryPoint(NaraTransform);
-        // Ensure movement center starts at current position to avoid unintended clamps before first player phase
+        // Set center BEFORE initialising the line handler so its first Refresh() uses
+        // the actual spawn position instead of the default Vector3.zero.
         SetMovementRadiusCenter();
+        LineHandlerController.InitEntryPoint(NaraTransform);
+        // Force a second Refresh so the line handler's internal _center matches _movementCenter
+        // (InitEntryPoint draws with its own stale _center field first).
+        LineHandlerController.Refresh(_movementCenter, _movementRadius, NaraTransform.position);
     }
     public override Vector2 ReadInputs() {
         return GameInputActions.Player.Move.ReadValue<Vector2>();
@@ -72,8 +83,8 @@ public class NaraTurnMovementController : NaraMovementController {
 
     public override void Move(Vector2 direction, float velocity, float rotation) {
         if (NaraRigidbody == null || NaraTransform == null) return;
-        if (!IsPlayerActPhase()) {
-            // hard lock: zero planar velocity when not in player phase
+        if (!IsPlayerActPhase() || !IsActivelyControlled) {
+            // hard lock: zero planar velocity when not in player phase or not the active unit
             NaraRigidbody.linearVelocity = new Vector3(0f, NaraRigidbody.linearVelocity.y, 0f);
             return;
         }
@@ -153,7 +164,7 @@ public class NaraTurnMovementController : NaraMovementController {
     }
 
     public bool IsMovementAllowed() {
-        return IsPlayerActPhase();
+        return IsPlayerActPhase() && IsActivelyControlled;
     }
 
     private bool IsPlayerActPhase() {

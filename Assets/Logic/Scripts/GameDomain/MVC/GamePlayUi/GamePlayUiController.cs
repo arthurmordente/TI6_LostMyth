@@ -70,13 +70,16 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
             _commandFactory.CreateCommandVoid<UseAbility5InputCommand>().Execute();
         }
 
+        /// <summary>
+        /// Previously "Clone 1" button. Now triggers the Dividir ability (deploy/recall the Book).
+        /// Rename the button label in the UXML to "Dividir" / "Book".
+        /// </summary>
         public void OnClickClone1() {
-            _commandFactory.CreateCommandVoid<CreateCopy1InputCommand>().Execute();
+            _commandFactory.CreateCommandVoid<UseDivideAbilityInputCommand>().Execute();
         }
 
-        public void OnClickClone2() {
-            _commandFactory.CreateCommandVoid<CreateCopy2InputCommand>().Execute();
-        }
+        /// <summary>Clone-2 slot is no longer used — kept to avoid UI binding errors.</summary>
+        public void OnClickClone2() { }
         #endregion
         public void InitExitPoint() {
 

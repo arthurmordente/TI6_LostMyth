@@ -1,3 +1,4 @@
+using Logic.Scripts.GameDomain.MVC.Abilitys;
 using Logic.Scripts.GameDomain.MVC.Ui;
 using Logic.Scripts.Services.AudioService;
 using Logic.Scripts.Services.CommandFactory;
@@ -8,7 +9,9 @@ using Zenject;
 using Logic.Scripts.Turns;
 
 namespace Logic.Scripts.GameDomain.MVC.Nara {
-    public class NaraController : INaraController, IFixedUpdatable, IEffectable, IEffectableAction {
+    // INaraController now extends IPlayableUnit, IEffectable and IEffectableAction,
+    // so we no longer need to list those separately here.
+    public class NaraController : INaraController, IFixedUpdatable {
         private readonly IUpdateSubscriptionService _updateSubscriptionService;
         private readonly IAudioService _audioService;
         private readonly ICommandFactory _commandFactory;
@@ -26,11 +29,13 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
         private int _debuffStacks;
         private bool _canMove;
         private IActionPointsService _actionPointsService;
+        private readonly AbilityData[] _abilities;
 
         public NaraController(IUpdateSubscriptionService updateSubscriptionService,
             IAudioService audioService, ICommandFactory commandFactory,
             IResourcesLoaderService resourcesLoaderService, NaraView naraViewPrefab,
-            NaraConfigurationSO naraConfiguration, ICheatController cheatController) {
+            NaraConfigurationSO naraConfiguration, ICheatController cheatController,
+            AbilityData[] abilities) {
             _naraData = new NaraData(naraConfiguration);
             _naraConfiguration = naraConfiguration;
             _updateSubscriptionService = updateSubscriptionService;
@@ -38,6 +43,7 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
             _naraViewPrefab = naraViewPrefab;
             _commandFactory = commandFactory;
             _cheatController = cheatController;
+            _abilities = abilities ?? System.Array.Empty<AbilityData>();
         }
 
         public void RegisterListeners() {
@@ -186,8 +192,7 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
         }
 
         public void SubtractActionPoints(int value) {
-            var ap = EnsureApService();
-            ap?.Subtract(value);
+            EnsureApService()?.Subtract(value);
         }
 
         public void SubtractAllActionPoints(int value) {
@@ -203,8 +208,7 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
         }
 
         public void AddActionPoints(int valueToIncrease) {
-            var ap = EnsureApService();
-            ap?.Add(valueToIncrease);
+            EnsureApService()?.Add(valueToIncrease);
         }
 
         public void ReduceMovementPerTurn(int valueToSubtract, int duration) {
@@ -230,9 +234,8 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
             }
             catch { }
             try {
-                if (ProjectContext.Instance != null) {
+                if (ProjectContext.Instance != null)
                     _actionPointsService = ProjectContext.Instance.Container.Resolve<IActionPointsService>();
-                }
             }
             catch { }
             return _actionPointsService;
@@ -264,5 +267,41 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
         public LineRenderer GetPointLineRenderer() {
             return _naraView.CastLineRenderer;
         }
+
+        #region IPlayableUnit additional members
+
+        // IPlayableUnit aliases — NaraViewGO / NaraSkillSpotTransform are the canonical
+        // Nara properties; UnitViewGO / UnitSkillSpotTransform are the generic aliases.
+        public GameObject UnitViewGO => _naraView != null ? _naraView.gameObject : null;
+        public Transform UnitSkillSpotTransform => _naraView != null ? _naraView.transform : null;
+
+        public void SetMovementActive(bool isActive) {
+            if (_naraMovementController is NaraTurnMovementController ntm)
+                ntm.IsActivelyControlled = isActive;
+        }
+
+        public void OnBecomeActive() {
+            if (_naraMovementController is NaraTurnMovementController ntm)
+                ntm.LineHandlerController.SetVisible(true);
+        }
+
+        public void OnBecomeInactive() {
+            if (_naraMovementController is NaraTurnMovementController ntm)
+                ntm.LineHandlerController.SetVisible(false);
+        }
+
+        public IActionPointsService GetActionPoints() => EnsureApService();
+        public AbilityData[] GetAbilities() => _abilities;
+
+        public void OnAbilityExecuted() {
+            if (_naraMovementController is NaraTurnMovementController ntm) {
+                ntm.RecalculateRadiusAfterAbility();
+                ntm.SetMovementRadiusCenter();
+                ntm.Refresh();
+            }
+            Unfreeeze();
+        }
+
+        #endregion
     }
 }

@@ -153,9 +153,13 @@ MonoBehaviour:
   m_ParentUI: {fileID: 0}
   sourceAsset: {fileID: 9197481963319205126, guid: 37185272e6ffad0488ba404135399126, type: 3}
   m_SortingOrder: 0
+  m_Position: 0
   m_WorldSpaceSizeMode: 1
   m_WorldSpaceWidth: 1920
   m_WorldSpaceHeight: 1080
+  m_PivotReferenceSize: 0
+  m_Pivot: 0
+  m_WorldSpaceCollider: {fileID: 0}
 --- !u!4 &4449307
 Transform:
   m_ObjectHideFlags: 0
@@ -231,9 +235,13 @@ MonoBehaviour:
   m_ParentUI: {fileID: 0}
   sourceAsset: {fileID: 9197481963319205126, guid: 13e605ac397af0142a317cb70aed08d1, type: 3}
   m_SortingOrder: 0
+  m_Position: 0
   m_WorldSpaceSizeMode: 1
   m_WorldSpaceWidth: 1920
   m_WorldSpaceHeight: 1080
+  m_PivotReferenceSize: 0
+  m_Pivot: 0
+  m_WorldSpaceCollider: {fileID: 0}
 --- !u!4 &126545383
 Transform:
   m_ObjectHideFlags: 0
@@ -351,9 +359,13 @@ MonoBehaviour:
   m_ParentUI: {fileID: 0}
   sourceAsset: {fileID: 9197481963319205126, guid: 7bf29f537b869c141a048b4fe06b346b, type: 3}
   m_SortingOrder: 0
+  m_Position: 0
   m_WorldSpaceSizeMode: 1
   m_WorldSpaceWidth: 1920
   m_WorldSpaceHeight: 1080
+  m_PivotReferenceSize: 0
+  m_Pivot: 0
+  m_WorldSpaceCollider: {fileID: 0}
 --- !u!4 &703431457
 Transform:
   m_ObjectHideFlags: 0
@@ -515,6 +527,9 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 1
   _echoviewPrefab: {fileID: 2514628826693967162, guid: 129572cef78695d4db9eafd60f165ed6, type: 3}
+  _bookViewPrefab: {fileID: -7066848488704670114, guid: 872fe8a64482a804a89c3db0e8ad462e, type: 3}
+  _bookConfiguration: {fileID: 11400000, guid: 734bbf1d31b4223428d6ede70dd08435, type: 2}
+  _divideTargetingData: {fileID: 11400000, guid: cdf5ea619825b5c4abdff030ffc69def, type: 2}
   _telegraphMaterials: {fileID: 11400000, guid: f55d7723a1e531b479d9a3b4d9873ffd, type: 2}
 --- !u!4 &2129559430
 Transform:

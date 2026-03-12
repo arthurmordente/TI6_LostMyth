@@ -2,6 +2,7 @@ using Zenject;
 using Logic.Scripts.Services.Logger.Base;
 using Logic.Scripts.Services.CommandFactory;
 using Logic.Scripts.GameDomain.MVC.Nara;
+using Logic.Scripts.GameDomain.MVC.Book.Divide;
 
 namespace Logic.Scripts.Turns {
     public class TurnFlowController : System.IDisposable {
@@ -12,6 +13,7 @@ namespace Logic.Scripts.Turns {
 		private readonly Logic.Scripts.GameDomain.MVC.Echo.ICloneUseLimiter _cloneUseLimiter;
 		private readonly Logic.Scripts.GameDomain.MVC.Boss.Laki.Chips.IChipService _chipService;
         private readonly INaraController _naraController;
+        private readonly IDivideAbilityHandler _divideAbilityHandler;
 
         private IBossActionService _bossActionService;
         private IEnviromentActionService _enviromentActionService;
@@ -29,7 +31,8 @@ namespace Logic.Scripts.Turns {
             ICommandFactory commandFactory,
 			INaraController naraController,
 			Logic.Scripts.GameDomain.MVC.Echo.ICloneUseLimiter cloneUseLimiter,
-			Logic.Scripts.GameDomain.MVC.Boss.Laki.Chips.IChipService chipService) {
+			Logic.Scripts.GameDomain.MVC.Boss.Laki.Chips.IChipService chipService,
+            IDivideAbilityHandler divideAbilityHandler) {
             _actionPointsService = actionPointsService;
             _echoService = echoService;
             _turnStateService = turnStateService;
@@ -37,6 +40,7 @@ namespace Logic.Scripts.Turns {
             _naraController = naraController;
 			_cloneUseLimiter = cloneUseLimiter;
 			_chipService = chipService;
+            _divideAbilityHandler = divideAbilityHandler;
         }
 
         public void Initialize(IBossActionService bossActionService,
@@ -128,6 +132,8 @@ namespace Logic.Scripts.Turns {
             // Garantir que todos os telegraphs preparados estejam visíveis para o jogador
             Logic.Scripts.GameDomain.MVC.Boss.Telegraph.TelegraphVisibilityRegistry.SetAllVisible(true);
 			_cloneUseLimiter?.ResetForPlayerTurn();
+            // Tick divide ability cooldown and grant Book its AP for this turn
+            _divideAbilityHandler?.OnPlayerTurnStart();
             LogService.Log($"Turno {_turnNumber} - Fase: PlayerAct");
             _waitingPlayer = true;
             _commandFactory.CreateCommandVoid<Logic.Scripts.GameDomain.Commands.RecenterNaraMovementOnPlayerTurnCommand>().Execute();
@@ -139,12 +145,14 @@ namespace Logic.Scripts.Turns {
         public void SkipTurn() {
             if (!_active || !_waitingPlayer) return;
             _waitingPlayer = false;
+            _divideAbilityHandler?.OnPlayerTurnEnd();
             StartEchoPhaseAsync();
         }
 
         public void CompletePlayerAction() {
             if (!_active || !_waitingPlayer) return;
             _waitingPlayer = false;
+            _divideAbilityHandler?.OnPlayerTurnEnd();
             _turnMovement.ActivateNaraGravity();
             StartEchoPhaseAsync();
         }

@@ -1,20 +1,30 @@
-using Logic.Scripts.GameDomain.MVC.Nara;
+using Logic.Scripts.GameDomain.MVC.Book.Divide;
+using Logic.Scripts.GameDomain.Services.ActiveUnit;
 using Logic.Scripts.Services.CommandFactory;
 
 public class UseAbility1InputCommand : BaseCommand, ICommandVoid {
-    private const int ZERO_INT_CONST = 0;
+    private const int ABILITY_INDEX = 0;
 
-    private INaraController _naraController;
+    private IActiveUnitService _activeUnitService;
     private ICastController _castController;
+    private IDivideAbilityHandler _divideAbilityHandler;
+
     public override void ResolveDependencies() {
-        _naraController = _diContainer.Resolve<INaraController>();
+        _activeUnitService = _diContainer.Resolve<IActiveUnitService>();
         _castController = _diContainer.Resolve<ICastController>();
+        _divideAbilityHandler = _diContainer.Resolve<IDivideAbilityHandler>();
     }
 
     public void Execute() {
+        var caster = _activeUnitService?.ActiveUnit;
+        if (caster == null) return;
+
+        // Cancel any in-progress Divide aiming before starting a regular ability.
+        _divideAbilityHandler?.CancelAim();
+
         _castController.CancelAbilityUse();
-        if (_castController.TryUseAbility(ZERO_INT_CONST, (IEffectable)_naraController)) {
-            _naraController.Freeeze();
+        if (_castController.TryUseAbility(ABILITY_INDEX, caster)) {
+            caster.Freeeze();
         }
     }
 }
