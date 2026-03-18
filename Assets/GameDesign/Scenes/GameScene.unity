@@ -360,11 +360,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Abilities:
-  - {fileID: 11400000, guid: d9d52de431f81e94c97467c811060a54, type: 2}
-  - {fileID: 11400000, guid: 4c82f2d9bc2cf09418a437c668996e07, type: 2}
-  - {fileID: 11400000, guid: d774261d7df73ed4fa8f08149dc4b81f, type: 2}
-  - {fileID: 11400000, guid: 72ba9ea640b863144836fdfdc9469bd6, type: 2}
-  - {fileID: 11400000, guid: f4ae99592295ab4438105fcbb1c1ae10, type: 2}
+  - {fileID: 11400000, guid: 5b91df082e7286a4db5caf468c7fcc40, type: 2}
+  - {fileID: 11400000, guid: 5b91df082e7286a4db5caf468c7fcc40, type: 2}
+  - {fileID: 11400000, guid: 5b91df082e7286a4db5caf468c7fcc40, type: 2}
+  - {fileID: 11400000, guid: 5b91df082e7286a4db5caf468c7fcc40, type: 2}
+  - {fileID: 11400000, guid: 5b91df082e7286a4db5caf468c7fcc40, type: 2}
   PointData: {fileID: 11400000, guid: 9e946bc4bff420943a724d914a258b15, type: 2}
   _gameplayAudioClips: {fileID: 0}
   _loadView: {fileID: 1181922116}
