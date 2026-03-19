@@ -173,7 +173,55 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 			return appliedName;
 		}
 
-		private static int DeterministicIndex(int turnNumber, int tileIndex, int count)
+		/// <summary>
+	/// Applies the current tile effect to any IEffectable target (e.g. the Book).
+	/// Mirrors ApplyEffectToPlayer but without needing INaraController.
+	/// </summary>
+	public string ApplyEffectToEffectable(IEffectable caster, IEffectable target, int tileIndex, int turnNumber)
+	{
+		if (target == null) return null;
+		if (tileIndex < 0 || tileIndex >= TILE_COUNT) return null;
+
+		TileEffectType effect = _effectsCurrentTurn[tileIndex];
+		const int healAmount = 5;
+		const int damageAmount = 5;
+		string appliedName = null;
+
+		switch (effect)
+		{
+			case TileEffectType.Positive:
+				if (_positivePool.Count > 0)
+				{
+					int idx = DeterministicIndex(turnNumber, tileIndex, _positivePool.Count);
+					var eff = _positivePool[idx];
+					appliedName = eff != null ? eff.Name : null;
+					eff?.Execute(caster, target);
+				}
+				else
+				{
+					target.Heal(healAmount);
+					appliedName = "Heal5";
+				}
+				break;
+			case TileEffectType.Negative:
+				if (_negativePool.Count > 0)
+				{
+					int idxN = DeterministicIndex(turnNumber, tileIndex, _negativePool.Count);
+					var effN = _negativePool[idxN];
+					appliedName = effN != null ? effN.Name : null;
+					effN?.Execute(caster, target);
+				}
+				else
+				{
+					target.TakeDamage(damageAmount);
+					appliedName = "Damage5";
+				}
+				break;
+		}
+		return appliedName;
+	}
+
+	private static int DeterministicIndex(int turnNumber, int tileIndex, int count)
 		{
 			if (count <= 0) return 0;
 			int seed = turnNumber * 73856093 ^ tileIndex * 19349663;

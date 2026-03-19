@@ -82,7 +82,17 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 			view.RefreshFrom(arenaService);
 			var casterRelay = GetComponent<Assets.Logic.Scripts.GameDomain.Effects.EffectableRelay>();
 			IEffectable caster = casterRelay != null ? casterRelay as IEffectable : null;
-			var actor = new LakiRouletteArenaActor(_turnStateService, _naraController, arenaService, _centerWorld, view, caster);
+
+			// Resolve the Book as IEffectable so the arena can apply tile effects to it
+			IEffectable bookEffectable = null;
+			try
+			{
+				var bookCtrl = container.Resolve<Logic.Scripts.GameDomain.MVC.Book.IBookController>();
+				bookEffectable = bookCtrl as IEffectable;
+			}
+			catch { Debug.LogWarning("[LakiArenaBossBootstrap] IBookController não encontrado no container – Livro não receberá efeitos de casa."); }
+
+			var actor = new LakiRouletteArenaActor(_turnStateService, _naraController, arenaService, _centerWorld, view, caster, bookEffectable);
 			var cmd = _commandFactory.CreateCommandVoid<Logic.Scripts.GameDomain.Commands.RegisterEnvironmentActorCommand>();
 			cmd.SetActor(actor);
 			cmd.Execute();

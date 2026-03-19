@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using TMPro;
 using UnityEngine;
 
 namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
@@ -24,8 +26,8 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 		[SerializeField] private float _angularGapDeg = 2f;
 		[SerializeField] private float _radialGap = 0.05f;
 
-		private readonly List<MeshRenderer> _renderers = new List<MeshRenderer>(32);
-		private readonly List<Color> _baseColors = new List<Color>(32);
+		private readonly List<MeshRenderer> _renderers = new List<MeshRenderer>(16);
+		private readonly List<Color> _baseColors = new List<Color>(16);
 		private Material _matTemplate;
 
 		public int TileCount => _sectorCount * _radialBands;
@@ -78,13 +80,21 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 					float rMax = Mathf.Max(r0, r1) - Mathf.Max(0f, _radialGap);
 					if (rMax <= rMin) rMax = rMin + 0.005f;
 
+					// Place each tile's pivot at its own geometric centre so that
+					// scaling localScale.x produces a flip around the tile itself.
+					float midAngle = (a0 + a1) * 0.5f * Mathf.Deg2Rad;
+					float midR     = (rMin + rMax) * 0.5f;
+					Vector3 tileCenter = _centerWorld + new Vector3(
+						Mathf.Cos(midAngle) * midR, 0f, Mathf.Sin(midAngle) * midR);
+					Vector3 pivotOffset = tileCenter - _centerWorld;
+
 					GameObject go = new GameObject($"Tile_{tileIndex:D2}_S{s}_B{band}");
 					go.transform.SetParent(transform, false);
-					go.transform.position = _centerWorld;
+					go.transform.position = tileCenter;
 					var mf = go.AddComponent<MeshFilter>();
 					var mr = go.AddComponent<MeshRenderer>();
 					mr.sharedMaterial = new Material(_matTemplate);
-					mf.sharedMesh = GenerateRingSectorMesh(rMin, rMax, a0, a1, _angularSmooth);
+					mf.sharedMesh = GenerateRingSectorMesh(rMin, rMax, a0, a1, _angularSmooth, pivotOffset);
 
 					_renderers.Add(mr);
 					_baseColors.Add(Color.clear);
@@ -93,7 +103,8 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 			}
 		}
 
-		private static Mesh GenerateRingSectorMesh(float innerR, float outerR, float degStart, float degEnd, int arcSegments)
+		/// <param name="pivotOffset">Subtracted from every vertex so that (0,0,0) in local space is the tile's geometric centre.</param>
+		private static Mesh GenerateRingSectorMesh(float innerR, float outerR, float degStart, float degEnd, int arcSegments, Vector3 pivotOffset = default)
 		{
 			arcSegments = Mathf.Max(1, arcSegments);
 			int vertsPerRing = arcSegments + 1;
@@ -114,8 +125,8 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 				float a = a0 + da * i;
 				float ca = Mathf.Cos(a);
 				float sa = Mathf.Sin(a);
-				verts[vi + 0] = new Vector3(ca * innerR, 0f, sa * innerR);
-				verts[vi + 1] = new Vector3(ca * outerR, 0f, sa * outerR);
+				verts[vi + 0] = new Vector3(ca * innerR, 0f, sa * innerR) - pivotOffset;
+				verts[vi + 1] = new Vector3(ca * outerR, 0f, sa * outerR) - pivotOffset;
 				uvs[vi + 0] = new Vector2((float)i / arcSegments, 0f);
 				uvs[vi + 1] = new Vector2((float)i / arcSegments, 1f);
 				vi += 2;
@@ -149,6 +160,7 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 		public void RefreshFrom(RouletteArenaService service)
 		{
 			if (service == null) return;
+			CacheTileEffects(service);
 			int tiles = service.TileCount;
 			for (int i = 0; i < _renderers.Count && i < tiles; i++)
 			{
@@ -211,6 +223,170 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 					else if (mat.HasProperty("_Color")) mat.color = c;
 				}
 			}
+		}
+
+		// ─── Tile index from world position ──────────────────────────────────────
+
+		/// <summary>Computes the tile index for a world position using the same polar-coordinate math as RouletteArenaService.</summary>
+		public int ComputeTileIndex(Vector3 worldPos)
+		{
+			Vector2 rel = new Vector2(worldPos.x - _centerWorld.x, worldPos.z - _centerWorld.z);
+			float r = rel.magnitude;
+			if (r < _innerRadius || r > _outerRadius) return -1;
+
+			float split = _innerRadius + _radialSplit01 * (_outerRadius - _innerRadius);
+			float theta = Mathf.Atan2(rel.y, rel.x);
+			if (theta < 0f) theta += 2f * Mathf.PI;
+
+			float arcStartRad = _arcStartDeg * Mathf.Deg2Rad;
+			float arcRad = Mathf.Clamp(_arcDeg, 1f, 360f) * Mathf.Deg2Rad;
+			float sectorAngleRad = arcRad / Mathf.Max(1, _sectorCount);
+
+			float relTheta = theta - arcStartRad;
+			if (relTheta < 0f) relTheta += 2f * Mathf.PI;
+			if (relTheta >= arcRad) return -1;
+
+			int sectorIndex = Mathf.Clamp(Mathf.FloorToInt(relTheta / sectorAngleRad), 0, _sectorCount - 1);
+			int band = r < split ? 0 : 1;
+			return sectorIndex * _radialBands + band;
+		}
+
+		// ─── Tile effect cache ────────────────────────────────────────────────────
+
+		private RouletteArenaService.TileEffectType[] _cachedTileEffects;
+
+		public void CacheTileEffects(RouletteArenaService service)
+		{
+			if (service == null) return;
+			int count = service.TileCount;
+			if (_cachedTileEffects == null || _cachedTileEffects.Length != count)
+				_cachedTileEffects = new RouletteArenaService.TileEffectType[count];
+			for (int i = 0; i < count; i++)
+				_cachedTileEffects[i] = service.GetTileEffect(i);
+		}
+
+		public RouletteArenaService.TileEffectType GetCachedTileEffect(int tileIndex)
+		{
+			if (_cachedTileEffects == null || tileIndex < 0 || tileIndex >= _cachedTileEffects.Length)
+				return RouletteArenaService.TileEffectType.Neutral;
+			return _cachedTileEffects[tileIndex];
+		}
+
+		// ─── Suit overlay ─────────────────────────────────────────────────────────
+
+		private TextMeshPro[] _suitLabels;
+
+		public void InitSuitOverlay()
+		{
+			DestroySuitOverlay();
+			int count = _renderers.Count;
+			_suitLabels = new TextMeshPro[count];
+			for (int i = 0; i < count; i++)
+			{
+				if (_renderers[i] == null) continue;
+				Vector3 tileCenter = GetTileWorldCenter(i);
+				var go = new GameObject($"SuitLabel_{i}");
+				go.transform.SetParent(_renderers[i].transform, false);
+				// Tile pivot is now at tileCenter, so (0, 0.5f, 0) places the label
+				// at the tile centre slightly above the surface.
+				go.transform.localPosition = new Vector3(0f, 0.5f, 0f);
+				// Radial direction comes from the tile centre relative to the arena centre.
+				Vector3 outward = tileCenter - _centerWorld;
+				outward.y = 0f;
+				float yAngle = outward.sqrMagnitude > 0.001f
+					? Mathf.Atan2(outward.x, outward.z) * Mathf.Rad2Deg + 180f
+					: 0f;
+				go.transform.localRotation = Quaternion.Euler(90f, yAngle, 0f);
+				var tmp = go.AddComponent<TextMeshPro>();
+				tmp.alignment = TextAlignmentOptions.Center;
+				tmp.fontSize = 30f;
+				tmp.color = Color.black;
+				tmp.enableAutoSizing = false;
+				go.SetActive(false);
+				_suitLabels[i] = tmp;
+			}
+		}
+
+		public void DestroySuitOverlay()
+		{
+			if (_suitLabels == null) return;
+			for (int i = 0; i < _suitLabels.Length; i++)
+			{
+				if (_suitLabels[i] != null) Destroy(_suitLabels[i].gameObject);
+			}
+			_suitLabels = null;
+		}
+
+		/// <summary>Animates all tiles: flash white → show suit number → flash back → hide number.</summary>
+		public Task AnimateSuitRevealAsync(int[] suits, int flipMs, int holdMs)
+		{
+			return AnimateSuitRevealTilesAsync(null, suits, flipMs, holdMs);
+		}
+
+		/// <summary>Same as AnimateSuitRevealAsync but restricted to the given tile indices (null = all).</summary>
+		public Task AnimateSuitRevealTilesAsync(ICollection<int> indices, int[] suits, int flipMs, int holdMs)
+		{
+			int halfMs = Mathf.Max(50, flipMs / 2);
+			var tasks  = new System.Collections.Generic.List<Task>();
+			for (int i = 0; i < _renderers.Count; i++)
+			{
+				if (indices != null && !indices.Contains(i)) continue;
+				tasks.Add(FlipSingleTileAsync(i, suits, halfMs, holdMs));
+			}
+			return Task.WhenAll(tasks);
+		}
+
+		/// <summary>Flips a single tile independently: fold → show number → unfold → hold → fold → hide number → unfold.</summary>
+		private async Task FlipSingleTileAsync(int i, int[] suits, int halfMs, int holdMs)
+		{
+			if (i < 0 || i >= _renderers.Count || _renderers[i] == null) return;
+			var tr    = _renderers[i].transform;
+			int steps = Mathf.Max(3, halfMs / 16);
+			int stepMs = Mathf.Max(16, halfMs / steps);
+
+			// Fold: scale X 1 → 0
+			for (int s = steps; s >= 0; s--)
+			{
+				var sc = tr.localScale; sc.x = (float)s / steps; tr.localScale = sc;
+				await Task.Delay(stepMs);
+			}
+
+			// Midpoint: show number
+			if (suits != null && _suitLabels != null && i < _suitLabels.Length && i < suits.Length && _suitLabels[i] != null)
+			{
+				_suitLabels[i].SetText(suits[i].ToString());
+				_suitLabels[i].gameObject.SetActive(true);
+			}
+
+			// Unfold: scale X 0 → 1
+			for (int s = 0; s <= steps; s++)
+			{
+				var sc = tr.localScale; sc.x = (float)s / steps; tr.localScale = sc;
+				await Task.Delay(stepMs);
+			}
+
+			await Task.Delay(Mathf.Max(100, holdMs));
+
+			// Fold: scale X 1 → 0
+			for (int s = steps; s >= 0; s--)
+			{
+				var sc = tr.localScale; sc.x = (float)s / steps; tr.localScale = sc;
+				await Task.Delay(stepMs);
+			}
+
+			// Midpoint: hide number
+			if (_suitLabels != null && i < _suitLabels.Length && _suitLabels[i] != null)
+				_suitLabels[i].gameObject.SetActive(false);
+
+			// Unfold: scale X 0 → 1 (tile returns to normal)
+			for (int s = 0; s <= steps; s++)
+			{
+				var sc = tr.localScale; sc.x = (float)s / steps; tr.localScale = sc;
+				await Task.Delay(stepMs);
+			}
+
+			// Restore exact scale
+			var final = tr.localScale; final.x = 1f; tr.localScale = final;
 		}
 
 		public Vector3 GetTileWorldCenter(int tileIndex)

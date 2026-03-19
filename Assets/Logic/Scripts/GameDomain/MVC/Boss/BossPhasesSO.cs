@@ -24,7 +24,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
         {
             if (_phases == null || _phases.Length == 0) return -1;
             float hpPct = maxHealth > 0 ? Mathf.Clamp01((float)currentHealth / maxHealth) : 0f;
-            Debug.Log($"[BossPhases] Evaluate hpPct={hpPct:0.###} (hp={currentHealth}/{maxHealth})");
+            //Debug.Log($"[BossPhases] Evaluate hpPct={hpPct:0.###} (hp={currentHealth}/{maxHealth})");
             int selectedIndex = -1;
             // Para PercentBelow queremos o MENOR threshold que ainda satisfaz (mais específico)
             float bestThresholdPct = float.MaxValue;
@@ -37,7 +37,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
                 switch (p.TriggerType)
                 {
                     case PhaseTriggerType.HealthPercentBelow:
-                        Debug.Log($"[BossPhases] Phase[{i}] PercentBelow threshold={p.HealthPercentThreshold:0.###} behavior={(p.Behavior!=null ? p.Behavior.name : "NULL")}");
+                        //Debug.Log($"[BossPhases] Phase[{i}] PercentBelow threshold={p.HealthPercentThreshold:0.###} behavior={(p.Behavior!=null ? p.Behavior.name : "NULL")}");
                         if (hpPct <= p.HealthPercentThreshold && p.Behavior != null)
                         {
                             if (p.HealthPercentThreshold < bestThresholdPct)
@@ -48,7 +48,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
                         }
                         break;
                     case PhaseTriggerType.HealthAbsoluteBelow:
-                        Debug.Log($"[BossPhases] Phase[{i}] AbsoluteBelow threshold={p.HealthAbsoluteThreshold} behavior={(p.Behavior!=null ? p.Behavior.name : "NULL")}");
+                        //Debug.Log($"[BossPhases] Phase[{i}] AbsoluteBelow threshold={p.HealthAbsoluteThreshold} behavior={(p.Behavior!=null ? p.Behavior.name : "NULL")}");
                         if (currentHealth <= p.HealthAbsoluteThreshold && p.Behavior != null)
                         {
                             if (p.HealthAbsoluteThreshold < bestAbsolute)
@@ -60,10 +60,10 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
                         break;
                 }
             }
-            if (selectedIndex < 0)
-            {
-                Debug.Log("[BossPhases] No phase matched current health.");
-            }
+            //if (selectedIndex < 0)
+            //{
+            //    Debug.Log("[BossPhases] No phase matched current health.");
+            //}
             return selectedIndex;
         }
     }

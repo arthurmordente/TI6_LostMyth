@@ -12,17 +12,19 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 		private readonly RouletteArenaService _arena;
 		private readonly IEffectable _caster;
 		private readonly IRouletteArenaVisual _visual;
+		private readonly IEffectable _bookEffectable;
 		private Vector3 _centerWorld;
 
 		public bool RemoveAfterRun => false;
 
-		public LakiRouletteArenaActor(ITurnStateReader turnState, INaraController nara, RouletteArenaService arena, Vector3? centerWorld = null, IRouletteArenaVisual visual = null, IEffectable caster = null)
+		public LakiRouletteArenaActor(ITurnStateReader turnState, INaraController nara, RouletteArenaService arena, Vector3? centerWorld = null, IRouletteArenaVisual visual = null, IEffectable caster = null, IEffectable bookEffectable = null)
 		{
 			_turnState = turnState;
 			_nara = nara;
 			_arena = arena ?? new RouletteArenaService();
 			_visual = visual;
 			_caster = caster;
+			_bookEffectable = bookEffectable;
 			_centerWorld = centerWorld ?? new Vector3(0f, 7f, 0f);
 
 			int t = _turnState != null ? _turnState.TurnNumber : 0;
@@ -39,19 +41,15 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 			System.Collections.Generic.HashSet<int> tilesToEmphasize = new System.Collections.Generic.HashSet<int>();
 			if (playerTile >= 0) tilesToEmphasize.Add(playerTile);
 
+			// Detect the Book's tile for emphasis
+			int bookTile = -1;
 			try
 			{
-				var echoes = UnityEngine.Object.FindObjectsByType<Logic.Scripts.GameDomain.MVC.Echo.EchoView>(FindObjectsSortMode.None);
-				if (echoes != null && echoes.Length > 0)
+				var bookView = UnityEngine.Object.FindFirstObjectByType<Logic.Scripts.GameDomain.MVC.Book.BookView>();
+				if (bookView != null)
 				{
-					for (int i = 0; i < echoes.Length; i++)
-					{
-						var e = echoes[i];
-						if (e == null) continue;
-						int ct = _arena.ComputeTileIndex(e.transform.position, _centerWorld);
-						if (ct < 0) continue;
-						tilesToEmphasize.Add(ct);
-					}
+					bookTile = _arena.ComputeTileIndex(bookView.transform.position, _centerWorld);
+					if (bookTile >= 0) tilesToEmphasize.Add(bookTile);
 				}
 			}
 			catch { }
@@ -67,18 +65,20 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 				}
 			}
 
+			// Apply tile effect to the player
 			if (playerTile >= 0)
 			{
 				var type = _arena.GetTileEffect(playerTile);
 				string applied = _arena.ApplyEffectToPlayer(_caster, _nara, playerTile, turn);
-				UnityEngine.Debug.Log($"[LakiRouletteArena] Turn={turn} Tile={playerTile} Type={type} Effect={(applied ?? "None")}");
+				UnityEngine.Debug.Log($"[LakiRouletteArena][Jogador] Turn={turn} Tile={playerTile} Type={type} Effect={(applied ?? "None")}");
 			}
-			foreach (int ct in tilesToEmphasize)
+
+			// Apply tile effect to the Book separately (so it receives its own tile's effect)
+			if (bookTile >= 0 && _bookEffectable != null)
 			{
-				if (ct == playerTile) continue;
-				var ctype = _arena.GetTileEffect(ct);
-				string capplied = _arena.ApplyEffectToPlayer(_caster, _nara, ct, turn);
-				UnityEngine.Debug.Log($"[LakiRouletteArena][CloneTile] Turn={turn} Tile={ct} Type={ctype} Effect={(capplied ?? "None")}");
+				var btype = _arena.GetTileEffect(bookTile);
+				string bapplied = _arena.ApplyEffectToEffectable(_caster, _bookEffectable, bookTile, turn);
+				UnityEngine.Debug.Log($"[LakiRouletteArena][Livro] Turn={turn} Tile={bookTile} Type={btype} Effect={(bapplied ?? "None")}");
 			}
 
 			await System.Threading.Tasks.Task.Delay(1000);
