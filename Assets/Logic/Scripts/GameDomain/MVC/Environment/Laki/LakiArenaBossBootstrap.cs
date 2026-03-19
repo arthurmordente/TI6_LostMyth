@@ -18,6 +18,8 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 		[SerializeField] private float _innerRadius = RouletteArenaService.INNER_RADIUS_DEFAULT;
 		[SerializeField] private float _outerRadius = RouletteArenaService.OUTER_RADIUS_DEFAULT;
 		[SerializeField, Range(0f, 1f)] private float _radialSplit01 = 0.6f;
+		[SerializeField] private float _arcStartDeg = 180f;
+		[SerializeField] private float _arcDeg = 180f;
 
 		[SerializeReference] private System.Collections.Generic.List<Logic.Scripts.GameDomain.MVC.Abilitys.AbilityEffect> _positiveEffects;
 		[SerializeReference] private System.Collections.Generic.List<Logic.Scripts.GameDomain.MVC.Abilitys.AbilityEffect> _negativeEffects;
@@ -72,11 +74,11 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 				catch { _chipUiSkin = null; }
 			}
 
-			var arenaService = new RouletteArenaService(_innerRadius, _outerRadius, _radialSplit01);
+			var arenaService = new RouletteArenaService(_innerRadius, _outerRadius, _radialSplit01, _arcStartDeg, _arcDeg);
 			arenaService.SetEffectPools(_positiveEffects, _negativeEffects);
 			var viewGO = new GameObject("LakiRouletteArena");
 			var view = viewGO.AddComponent<LakiRouletteArenaView>();
-			view.SetGeometry(_centerWorld, _innerRadius, _outerRadius, _radialSplit01);
+			view.SetGeometry(_centerWorld, _innerRadius, _outerRadius, _radialSplit01, _arcStartDeg, _arcDeg);
 			view.RefreshFrom(arenaService);
 			var casterRelay = GetComponent<Assets.Logic.Scripts.GameDomain.Effects.EffectableRelay>();
 			IEffectable caster = casterRelay != null ? casterRelay as IEffectable : null;

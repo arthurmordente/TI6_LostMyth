@@ -22,7 +22,7 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 		public const float INNER_RADIUS_DEFAULT = 6f;
 		public const float OUTER_RADIUS_DEFAULT = 12f;
 
-		private const int SECTOR_COUNT = 16;
+		private const int SECTOR_COUNT = 8;
 		private const int RADIAL_BANDS = 2;
 		private const int TILE_COUNT = SECTOR_COUNT * RADIAL_BANDS;
 
@@ -30,17 +30,26 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 		private readonly float _outerRadius;
 		private readonly float _radialSplit01;
 		private readonly float _sectorAngleRad;
+		private readonly float _arcStartRad;
+		private readonly float _arcRad;
 
 		private int _lastRolledTurn = int.MinValue;
 		private TileEffectType[] _effectsCurrentTurn = new TileEffectType[TILE_COUNT];
 		
 
-		public RouletteArenaService(float innerRadius = INNER_RADIUS_DEFAULT, float outerRadius = OUTER_RADIUS_DEFAULT, float radialSplit01 = 0.6f)
+		public RouletteArenaService(
+			float innerRadius = INNER_RADIUS_DEFAULT,
+			float outerRadius = OUTER_RADIUS_DEFAULT,
+			float radialSplit01 = 0.6f,
+			float arcStartDeg = 0f,
+			float arcDeg = 180f)
 		{
 			_innerRadius = Mathf.Max(0.01f, Mathf.Min(innerRadius, outerRadius * 0.999f));
 			_outerRadius = Mathf.Max(_innerRadius + 0.01f, outerRadius);
 			_radialSplit01 = Mathf.Clamp01(radialSplit01);
-			_sectorAngleRad = (2f * Mathf.PI) / SECTOR_COUNT;
+			_arcStartRad = arcStartDeg * Mathf.Deg2Rad;
+			_arcRad = Mathf.Clamp(arcDeg, 1f, 360f) * Mathf.Deg2Rad;
+			_sectorAngleRad = _arcRad / SECTOR_COUNT;
 			for (int i = 0; i < TILE_COUNT; i++) _effectsCurrentTurn[i] = TileEffectType.Neutral;
 		}
 
@@ -54,8 +63,8 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 			if (turnNumber == _lastRolledTurn) return;
 			if (rng == null) rng = new System.Random();
 
-			int positives = 10;
-			int negatives = 11;
+			int positives = 5;
+			int negatives = 6;
 			int neutrals = TILE_COUNT - positives - negatives;
 
 			List<TileEffectType> bag = new List<TileEffectType>(TILE_COUNT);
@@ -87,7 +96,16 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 
 			float theta = Mathf.Atan2(rel.y, rel.x);
 			if (theta < 0f) theta += 2f * Mathf.PI;
-			int sectorIndex = Mathf.Clamp(Mathf.FloorToInt(theta / _sectorAngleRad), 0, SECTOR_COUNT - 1);
+
+			// Normalize theta relative to arc start, wrapping into [0, 2π)
+			float arcStart = _arcStartRad;
+			float relTheta = theta - arcStart;
+			if (relTheta < 0f) relTheta += 2f * Mathf.PI;
+
+			// Outside the active arc → not on any tile
+			if (relTheta >= _arcRad) return -1;
+
+			int sectorIndex = Mathf.Clamp(Mathf.FloorToInt(relTheta / _sectorAngleRad), 0, SECTOR_COUNT - 1);
 			float split = SplitRadius;
 			int band = r < split ? 0 : 1;
 			return sectorIndex * RADIAL_BANDS + band;

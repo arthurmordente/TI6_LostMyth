@@ -1,0 +1,554 @@
+================================================================================
+  GUIA DE INTEGRAÇÃO — SUBSTITUINDO O SISTEMA DE SKILLS
+  TI6-RPG | Para: novo membro implementando sistema de habilidades do zero
+================================================================================
+
+Este guia assume que você vai REMOVER o sistema atual (AbilityData, TargetingStrategy,
+PlotTwistData, AbilityEffect) e implementar um sistema próprio do zero.
+
+O objetivo é manter tudo que já existe funcionando:
+  ✓ CastController (input → mira → confirma → cancela)
+  ✓ NaraController e BookController (PA, animação, freeze)
+  ✓ IEffectable (dano, cura em qualquer entidade — Boss, Orbs, etc.)
+  ✓ IActionPointsService (custo de PA por skill)
+  ✓ GamePlayInstaller (binding Zenject)
+  ✓ Teclas 1–5 já mapeadas para skills
+
+
+--------------------------------------------------------------------------------
+PARTE 1 — O QUE O CASTCONTROLLER ESPERA DE VOCÊ
+--------------------------------------------------------------------------------
+
+CastController é o "árbitro" que conecta input → skill. Ele NUNCA vai mudar.
+Você precisa fazer seu novo sistema falar a língua que ele já entende.
+
+CastController usa 3 métodos em cada AbilityData:
+
+  ability.SetUp(IUpdateSubscriptionService, ICommandFactory)
+  → Chamado UMA VEZ ao iniciar a cena (InitEntryPoint)
+  → Injeta dependências no sistema de mira (update loop, command factory)
+  → No seu sistema novo: use para guardar referências de serviços
+
+  ability.Aim(IEffectable caster)
+  → Chamado quando o jogador pressiona 1–5
+  → Inicia o modo de mira (preview visual, registrar no update loop)
+  → Recebe o CASTER (Nara ou Livro) como IEffectable
+
+  ability.Cast(IEffectable caster)
+  → Chamado quando o jogador clica (confirma o cast)
+  → Deve finalizar a mira, encontrar alvos, executar o efeito
+  → É aqui que dano/cura/área acontece
+
+  ability.Cancel()
+  → Chamado ao cancelar (botão direito, trocar skill)
+  → Deve limpar qualquer preview visual e desregistrar do update loop
+
+E 2 propriedades/métodos de stat:
+
+  ability.GetCost()       → int: custo em PA. CastController deduz automaticamente.
+  ability.AnimatorAttackType → int: qual pose o animator assume ao mirar.
+
+Se seu novo sistema implementar esses 5 pontos, o CastController não precisa
+mudar nem uma linha.
+
+
+--------------------------------------------------------------------------------
+PARTE 2 — O CONTRATO MÍNIMO: INTERFACE INewAbility
+--------------------------------------------------------------------------------
+
+Defina uma interface para suas skills. Recomendado:
+
+  ─────────────────────────────────────────────────────────────────────────────
+  // ISkill.cs (ou o nome que preferir)
+  using Logic.Scripts.Services.UpdateService;
+  using Logic.Scripts.Services.CommandFactory;
+
+  public interface ISkill
+  {
+      // Exibidos na UI
+      string Name { get; }
+      string Description { get; }
+      UnityEngine.Sprite Icon { get; }
+
+      // Lido pelo CastController para PA e animação
+      int GetCost();
+      int AnimatorAttackType { get; }
+
+      // Ciclo de vida da skill (chamados pelo seu AbilityData-wrapper ou diretamente)
+      void SetUp(IUpdateSubscriptionService updateService, ICommandFactory commandFactory);
+      void Aim(IEffectable caster);
+      void Cast(IEffectable caster);
+      void Cancel();
+  }
+  ─────────────────────────────────────────────────────────────────────────────
+
+Depois crie um WRAPPER que adapta sua ISkill para o que o CastController lê.
+Veja Parte 3.
+
+
+--------------------------------------------------------------------------------
+PARTE 3 — O WRAPPER: NOVO AbilityData (ou substituto)
+--------------------------------------------------------------------------------
+
+O CastController referencia AbilityData diretamente. Você tem 2 caminhos:
+
+  OPÇÃO A — Manter a classe AbilityData, mas esvaziar e redirecionar
+  OPÇÃO B — Substituir completamente por uma nova classe
+
+━━━ OPÇÃO A (mais rápida, menos disruptiva) ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Mantenha AbilityData como ScriptableObject mas substitua o conteúdo:
+
+  ─────────────────────────────────────────────────────────────────────────────
+  // AbilityData.cs — versão simplificada para seu novo sistema
+  using UnityEngine;
+  using Logic.Scripts.Services.UpdateService;
+  using Logic.Scripts.Services.CommandFactory;
+
+  namespace Logic.Scripts.GameDomain.MVC.Abilitys {
+
+      [CreateAssetMenu(menuName = "Skills/Ability")]
+      public class AbilityData : ScriptableObject
+      {
+          // Campos que CastController lê diretamente
+          public int AnimatorAttackType;
+          [SerializeField] private int _baseCost = 1;
+
+          // Referência para a sua skill concreta (novo sistema)
+          [SerializeReference] public ISkill Skill;
+
+          // CastController chama estes 4 métodos:
+          public void SetUp(IUpdateSubscriptionService upd, ICommandFactory cmd)
+              => Skill?.SetUp(upd, cmd);
+
+          public void Aim(IEffectable caster)
+              => Skill?.Aim(caster);
+
+          public void Cast(IEffectable caster)
+              => Skill?.Cast(caster);
+
+          public void Cancel()
+              => Skill?.Cancel();
+
+          public int GetCost() => Mathf.Max(1, _baseCost);
+
+          // Manter se você quer compatibilidade com o sistema de upgrades:
+          // public int GetDamage() => _baseDamage + Damage;
+      }
+  }
+  ─────────────────────────────────────────────────────────────────────────────
+
+  Com isso, você pode criar qualquer skill implementando ISkill e referenciá-la
+  no campo "Skill" via [SerializeReference] no Inspector — sem mudar o CastController.
+
+━━━ OPÇÃO B (mais limpa, requer mudar CastController) ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Crie uma nova classe NewAbilityData e altere CastController para usar ISkill
+  diretamente em vez de AbilityData:
+
+  Em CastController.cs, mude:
+    private AbilityData _currentAbility;   → private ISkill _currentAbility;
+    var abilities = caster.GetAbilities(); → var abilities = caster.GetSkills();
+
+  Em IPlayableUnit.cs, mude:
+    AbilityData[] GetAbilities();          → ISkill[] GetSkills();
+
+  Em NaraController e BookController, mude o array para ISkill[].
+
+  Em GamePlayInstaller, atribua ISkill[] no Inspector.
+
+  RECOMENDAÇÃO: Use a Opção A primeiro para validar seu sistema,
+  depois refatore para B quando tudo estiver funcionando.
+
+
+--------------------------------------------------------------------------------
+PARTE 4 — COMO CAUSAR DANO E CURA COM IEFFECTABLE
+--------------------------------------------------------------------------------
+
+IEffectable é a porta de entrada para aplicar efeitos em qualquer entidade.
+Nara, Livro, Boss e Orbs todos a implementam (ou delegam via EffectableRelay).
+
+Dentro do seu Cast() ou em qualquer ponto do seu sistema:
+
+  // Causar dano
+  target.TakeDamage(int amount);
+
+  // Curar
+  target.Heal(int amount);
+
+  // Pré-visualizar antes de confirmar (UI feedback)
+  target.PreviewDamage(int amount);
+  target.PreviewHeal(int amount);
+  target.ResetPreview();
+
+Como encontrar targets:
+  ─────────────────────────────────────────────────────────────────────────────
+  // Área (OverlapSphere)
+  var hits = Physics.OverlapSphere(center, radius, layerMask);
+  foreach (var col in hits) {
+      if (col.TryGetComponent<IEffectable>(out var target)) {
+          target.TakeDamage(damage);
+      }
+  }
+
+  // Raycast (linha reta / ponto)
+  if (Physics.Raycast(origin, direction, out RaycastHit hit, range, layerMask)) {
+      if (hit.collider.TryGetComponent<IEffectable>(out var target)) {
+          target.TakeDamage(damage);
+      }
+  }
+  ─────────────────────────────────────────────────────────────────────────────
+
+ATENÇÃO — Sobre o Boss especificamente:
+  O BossController não é MonoBehaviour. Ele tem um EffectableRelay no GameObject
+  do BossView que delega TakeDamage → BossController.TakeDamage.
+  TryGetComponent<IEffectable>() funciona normalmente com ele — a canalização
+  é transparente para o seu código.
+
+  Para projéteis: o projétil precisa usar OnTriggerEnter e chamar TryGetComponent.
+  Veja a seção de projéteis abaixo.
+
+
+--------------------------------------------------------------------------------
+PARTE 5 — ESTRUTURA SUGERIDA PARA UM NOVO SISTEMA DE SKILLS
+--------------------------------------------------------------------------------
+
+Abaixo está uma estrutura limpa e extensível que se integra com tudo que existe.
+
+━━━ 5.1 Skill base abstrata ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ─────────────────────────────────────────────────────────────────────────────
+  [Serializable]
+  public abstract class BaseSkill : ISkill
+  {
+      [SerializeField] protected int baseCost = 1;
+      [SerializeField] protected LayerMask targetLayerMask;
+
+      protected IUpdateSubscriptionService UpdateService;
+      protected ICommandFactory CommandFactory;
+      protected IEffectable CurrentCaster;
+
+      public abstract string Name { get; }
+      public abstract string Description { get; }
+      public abstract Sprite Icon { get; }
+      public abstract int AnimatorAttackType { get; }
+
+      public virtual int GetCost() => Mathf.Max(1, baseCost);
+
+      public virtual void SetUp(IUpdateSubscriptionService upd, ICommandFactory cmd) {
+          UpdateService = upd;
+          CommandFactory = cmd;
+      }
+
+      public abstract void Aim(IEffectable caster);
+      public abstract void Cast(IEffectable caster);
+      public abstract void Cancel();
+  }
+  ─────────────────────────────────────────────────────────────────────────────
+
+━━━ 5.2 Skill de projétil ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ─────────────────────────────────────────────────────────────────────────────
+  [Serializable]
+  public class ProjectileSkill : BaseSkill, IUpdatable
+  {
+      [SerializeField] private GameObject projectilePrefab;
+      [SerializeField] private float speed = 20f;
+      [SerializeField] private int damage = 10;
+      [SerializeField] private LayerMask groundMask;
+
+      // Preview visual (linha de trajetória, marcador de impacto, etc.)
+      private LineRenderer _trajectoryLine;
+      private Transform _hitMarker;
+
+      public override string Name => "Disparo";
+      public override string Description => "Lança um projétil";
+      public override Sprite Icon => null;
+      public override int AnimatorAttackType => 1;
+
+      public override void Aim(IEffectable caster) {
+          CurrentCaster = caster;
+          _trajectoryLine = caster.GetPointLineRenderer();
+          // Instanciar marcador de impacto se necessário
+          UpdateService.RegisterUpdatable(this);
+      }
+
+      // Chamado todo frame enquanto está mirando
+      public void ManagedUpdate() {
+          // Atualizar preview da trajetória
+          // Raycast para o mouse para mostrar onde vai cair
+          if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition),
+              out RaycastHit hit, float.MaxValue, groundMask)) {
+              // Atualizar _hitMarker.position, _trajectoryLine, etc.
+          }
+      }
+
+      public override void Cast(IEffectable caster) {
+          Cancel(); // limpar preview antes de lançar
+
+          // Instanciar o projétil na posição do CastPoint
+          var castPoint = caster.GetTransformCastPoint();
+          var go = Object.Instantiate(projectilePrefab,
+              castPoint.position, castPoint.rotation);
+
+          // Configurar o projétil com caster e dano
+          if (go.TryGetComponent<MyProjectile>(out var proj)) {
+              proj.Initialize(caster, damage, targetLayerMask);
+          }
+      }
+
+      public override void Cancel() {
+          if (_trajectoryLine != null) _trajectoryLine.enabled = false;
+          if (_hitMarker != null) Object.Destroy(_hitMarker.gameObject);
+          UpdateService?.UnregisterUpdatable(this);
+          CurrentCaster = null;
+      }
+  }
+  ─────────────────────────────────────────────────────────────────────────────
+
+  // O projétil em si (MonoBehaviour)
+  ─────────────────────────────────────────────────────────────────────────────
+  public class MyProjectile : MonoBehaviour
+  {
+      private IEffectable _caster;
+      private int _damage;
+      private LayerMask _targetMask;
+
+      public void Initialize(IEffectable caster, int damage, LayerMask mask) {
+          _caster = caster;
+          _damage = damage;
+          _targetMask = mask;
+          GetComponent<Rigidbody>()
+              .AddForce(transform.forward * speed, ForceMode.Impulse);
+      }
+
+      private void OnTriggerEnter(Collider other) {
+          // Ignorar o próprio caster
+          if (_caster != null) {
+              var root = _caster.GetReferenceTransform();
+              if (root != null &&
+                  (other.transform == root || other.transform.IsChildOf(root)))
+                  return;
+          }
+
+          if (other.TryGetComponent<IEffectable>(out var target)) {
+              target.TakeDamage(_damage);
+          }
+
+          Destroy(gameObject);
+      }
+  }
+  ─────────────────────────────────────────────────────────────────────────────
+
+━━━ 5.3 Skill de área (AoE) ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ─────────────────────────────────────────────────────────────────────────────
+  [Serializable]
+  public class AoeSkill : BaseSkill, IUpdatable
+  {
+      [SerializeField] private float radius = 3f;
+      [SerializeField] private int damage = 15;
+      [SerializeField] private GameObject aoePreviewPrefab;
+      [SerializeField] private LayerMask groundMask;
+
+      private GameObject _preview;
+      private Vector3 _aimPoint;
+
+      public override string Name => "Explosão";
+      public override int AnimatorAttackType => 2;
+      public override int GetCost() => baseCost;
+
+      public override void Aim(IEffectable caster) {
+          CurrentCaster = caster;
+          _preview = Object.Instantiate(aoePreviewPrefab);
+          _preview.transform.localScale = Vector3.one * radius * 2f;
+          UpdateService.RegisterUpdatable(this);
+      }
+
+      public void ManagedUpdate() {
+          if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition),
+              out RaycastHit hit, float.MaxValue, groundMask)) {
+              _aimPoint = hit.point;
+              _preview.transform.position = _aimPoint;
+          }
+      }
+
+      public override void Cast(IEffectable caster) {
+          Vector3 center = _aimPoint;
+          Cancel();
+
+          // Encontrar todos os IEffectable na área
+          var hits = Physics.OverlapSphere(center, radius, targetLayerMask);
+          var affected = new HashSet<IEffectable>();
+          foreach (var col in hits) {
+              if (col.TryGetComponent<IEffectable>(out var t) && affected.Add(t))
+                  t.TakeDamage(damage);
+          }
+      }
+
+      public override void Cancel() {
+          if (_preview != null) Object.Destroy(_preview);
+          UpdateService?.UnregisterUpdatable(this);
+          CurrentCaster = null;
+      }
+  }
+  ─────────────────────────────────────────────────────────────────────────────
+
+━━━ 5.4 Skill de cura própria ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ─────────────────────────────────────────────────────────────────────────────
+  [Serializable]
+  public class SelfHealSkill : BaseSkill
+  {
+      [SerializeField] private int healAmount = 20;
+
+      public override string Name => "Cura";
+      public override int AnimatorAttackType => 0;
+
+      // SelfTargeting não precisa de update loop — confirma instantaneamente
+      public override void Aim(IEffectable caster) {
+          CurrentCaster = caster;
+          // Opcional: efeito visual imediato sem mira
+      }
+
+      public override void Cast(IEffectable caster) {
+          caster.Heal(healAmount);
+          CurrentCaster = null;
+      }
+
+      public override void Cancel() {
+          CurrentCaster = null;
+      }
+  }
+  ─────────────────────────────────────────────────────────────────────────────
+
+
+--------------------------------------------------------------------------------
+PARTE 6 — CONECTANDO AO CASTCONTROLLER (PASSO A PASSO)
+--------------------------------------------------------------------------------
+
+PASSO 1 — IPlayableUnit.GetAbilities() deve retornar o array do novo tipo
+
+  Se você escolheu a Opção A (manter AbilityData como wrapper):
+    NaraController.GetAbilities() já retorna AbilityData[]
+    Você só precisa preencher o campo "Skill" em cada AbilityData no Inspector.
+    Nenhuma mudança em código necessária.
+
+  Se você escolheu a Opção B (substituir AbilityData):
+    Mude IPlayableUnit para:
+      ISkill[] GetSkills();   (ou mantenha GetAbilities mas retornando o novo tipo)
+    Atualize NaraController e BookController para guardar ISkill[].
+    Atualize CastController para usar ISkill em vez de AbilityData.
+
+PASSO 2 — SetUp: injetar serviços nas skills
+
+  CastController.InitEntryPoint() chama ability.SetUp() para as skills da Nara.
+  BookController.CreateBook() chama ability.SetUp() para as skills do Livro.
+
+  Suas skills recebem IUpdateSubscriptionService e ICommandFactory.
+  Guarde-os em campos protegidos da BaseSkill (já mostrado na Parte 5).
+
+PASSO 3 — Aim: iniciar preview
+
+  Quando o jogador pressiona 1–5:
+    CastController.TryUseAbility(index, caster)
+      → ability.Aim(caster)       ← SEU CÓDIGO AQUI
+      → caster.PlayAttackType(n)  ← animação automática
+
+  Seu Aim() deve:
+    ✓ Guardar referência do caster
+    ✓ Instanciar preview visual
+    ✓ Registrar no UpdateService para ManagedUpdate()
+
+PASSO 4 — Cast: executar efeito
+
+  Quando o jogador clica:
+    CastController.UseAbility(caster)
+      → ap.Spend(GetCost())   ← dedução de PA automática
+      → caster.TriggerExecute()  ← animação de cast
+      → ability.Cast(caster)  ← SEU CÓDIGO AQUI
+      → CancelAbilityUse()    ← limpeza automática
+
+  Seu Cast() deve:
+    ✓ Chamar Cancel() para destruir preview
+    ✓ Encontrar alvos (OverlapSphere, Raycast, ou lançar projétil)
+    ✓ Chamar target.TakeDamage() / target.Heal() nos alvos
+
+PASSO 5 — Cancel: limpeza
+
+  Chamado automaticamente após Cast() e ao cancelar com botão direito.
+  Seu Cancel() deve:
+    ✓ Destruir qualquer GameObject de preview
+    ✓ Chamar UpdateService.UnregisterUpdatable(this) se estava registrado
+    ✓ Limpar referências (CurrentCaster = null)
+
+PASSO 6 — Atribuir no Inspector
+
+  GamePlayInstaller → campo "_skills" → adicione seus AbilityData (ou nova classe)
+  Posição 0 = tecla 1, posição 1 = tecla 2, ..., posição 4 = tecla 5
+
+
+--------------------------------------------------------------------------------
+PARTE 7 — SISTEMA DE CUSTO (PA) — SEM MUDANÇAS NECESSÁRIAS
+--------------------------------------------------------------------------------
+
+O CastController já gerencia tudo:
+
+  1. Antes do Aim: checa se ap.CanSpend(ability.GetCost())
+  2. Após o Cast: chama ap.Spend(ability.GetCost())
+
+  Você só precisa implementar GetCost() na sua skill retornando um int.
+  O pool correto (Nara vs. Livro) é resolvido automaticamente pelo CastController
+  via caster.GetActionPoints().
+
+  Nara:  ActionPointsService  (aparece no HUD, ganha 2 PA por turno)
+  Livro: BookActionPoints     (independente, sem HUD)
+
+
+--------------------------------------------------------------------------------
+PARTE 8 — CHECKLIST DE INTEGRAÇÃO
+--------------------------------------------------------------------------------
+
+  ☐ Criar interface ISkill (ou usar AbilityData diretamente com novo conteúdo)
+  ☐ Criar BaseSkill abstrata com SetUp, Aim, Cast, Cancel, GetCost
+  ☐ Implementar skills concretas (Projétil, AoE, Cura, etc.)
+  ☐ Cada skill que usa preview registra IUpdatable no UpdateService
+  ☐ Cada skill destrói previews e desregistra em Cancel()
+  ☐ Projéteis implementam OnTriggerEnter com auto-ignore do caster
+  ☐ Projéteis chamam Destroy(gameObject) (não Destroy(this)) ao colidir
+  ☐ AbilityData.Aim/Cast/Cancel delegam para a skill concreta
+  ☐ AbilityData.GetCost() retorna o custo correto
+  ☐ GamePlayInstaller: arrays de skills atribuídos no Inspector
+  ☐ Testar: pressionar 1 → preview aparece
+  ☐ Testar: clicar → preview some, efeito aplica
+  ☐ Testar: botão direito → preview some, sem efeito
+  ☐ Testar: trocar skill sem cancelar a anterior → preview anterior some
+  ☐ Testar: Livro pode usar skills da mesma forma que Nara
+  ☐ Testar: custo é descontado do PA correto (Nara ou Livro)
+  ☐ Testar: projétil não se auto-destrói ao sair do CastPoint
+  ☐ Testar: projétil destrói o GameObject ao colidir com o Boss
+
+
+--------------------------------------------------------------------------------
+PARTE 9 — REFERÊNCIA RÁPIDA DOS PONTOS DE ENTRADA
+--------------------------------------------------------------------------------
+
+  O QUE                        | ONDE NO CÓDIGO
+  ─────────────────────────────|──────────────────────────────────────────────
+  Injetar serviços nas skills  | CastController.InitEntryPoint()
+                               | BookController.CreateBook()
+  Tecla pressionada → Aim()    | CastController.TryUseAbility()
+  Clique → Cast()              | CastController.UseAbility()
+  Cancelar → Cancel()          | CastController.CancelAbilityUse()
+  Atribuir skills a Nara       | GamePlayInstaller._skills (Inspector)
+  Atribuir skills ao Livro     | GamePlayInstaller._bookSkills (Inspector)
+  Entidade recebe dano         | IEffectable.TakeDamage(int)
+  Entidade é curada            | IEffectable.Heal(int)
+  Encontrar alvos por área     | Physics.OverlapSphere → TryGetComponent<IEffectable>
+  Animação de mirar            | AbilityData.AnimatorAttackType → PlayAttackType(n)
+  Animação de executar         | Automática via caster.TriggerExecute()
+  PA descontado                | Automático: CastController → ap.Spend(GetCost())
+
+================================================================================
+  FIM DO DOCUMENTO
+================================================================================

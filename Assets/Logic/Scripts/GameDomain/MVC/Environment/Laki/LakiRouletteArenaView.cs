@@ -10,9 +10,11 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 		[SerializeField] private Vector3 _centerWorld = new Vector3(0f, 7f, 0f);
 		[SerializeField] private float _innerRadius = RouletteArenaService.INNER_RADIUS_DEFAULT;
 		[SerializeField] private float _outerRadius = RouletteArenaService.OUTER_RADIUS_DEFAULT;
-		[SerializeField] private int _sectorCount = 16;
+		[SerializeField] private int _sectorCount = 8;
 		[SerializeField] private int _radialBands = 2;
 		[SerializeField, Range(0f, 1f)] private float _radialSplit01 = 0.6f;
+		[SerializeField] private float _arcStartDeg = 180f;
+		[SerializeField] private float _arcDeg = 180f;
 
 		[Header("Rendering")]
 		[SerializeField] private int _angularSmooth = 8;
@@ -30,25 +32,25 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 
 		private void Awake()
 		{
-			if (_sectorCount * _radialBands != 32)
-			{
-				_sectorCount = 16;
-				_radialBands = 2;
-			}
+			if (_sectorCount <= 0) _sectorCount = 8;
+			if (_radialBands <= 0) _radialBands = 2;
 			if (_innerRadius <= 0.01f) _innerRadius = RouletteArenaService.INNER_RADIUS_DEFAULT;
 			if (_outerRadius <= _innerRadius + 0.01f) _outerRadius = RouletteArenaService.OUTER_RADIUS_DEFAULT;
+			_arcDeg = Mathf.Clamp(_arcDeg, 1f, 360f);
 
 			Shader lit = Shader.Find("Universal Render Pipeline/Lit");
 			_matTemplate = new Material(lit) { enableInstancing = true };
 			BuildTiles();
 		}
 
-		public void SetGeometry(Vector3 centerWorld, float innerRadius, float outerRadius, float radialSplit01 = 0.6f)
+		public void SetGeometry(Vector3 centerWorld, float innerRadius, float outerRadius, float radialSplit01 = 0.6f, float arcStartDeg = 0f, float arcDeg = 180f)
 		{
 			_centerWorld = centerWorld;
 			_innerRadius = innerRadius;
 			_outerRadius = Mathf.Max(_innerRadius + 0.01f, outerRadius);
 			_radialSplit01 = Mathf.Clamp01(radialSplit01);
+			_arcStartDeg = arcStartDeg;
+			_arcDeg = Mathf.Clamp(arcDeg, 1f, 360f);
 			BuildTiles();
 		}
 
@@ -58,15 +60,15 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 			_renderers.Clear();
 			_baseColors.Clear();
 
-			float sectorAngle = 360f / _sectorCount;
+			float sectorAngle = _arcDeg / _sectorCount;
 			float split = _innerRadius + _radialSplit01 * (_outerRadius - _innerRadius);
 			float halfGap = Mathf.Max(0f, _angularGapDeg) * 0.5f;
 
 			int tileIndex = 0;
 			for (int s = 0; s < _sectorCount; s++)
 			{
-				float a0 = s * sectorAngle + halfGap;
-				float a1 = (s + 1) * sectorAngle - halfGap;
+				float a0 = _arcStartDeg + s * sectorAngle + halfGap;
+				float a1 = _arcStartDeg + (s + 1) * sectorAngle - halfGap;
 
 				for (int band = 0; band < _radialBands; band++)
 				{
@@ -218,14 +220,14 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 			if (max <= 0) return _centerWorld;
 			tileIndex = tileIndex % max;
 
-			float sectorAngle = 360f / _sectorCount;
+			float sectorAngle = _arcDeg / _sectorCount;
 			float split = _innerRadius + _radialSplit01 * (_outerRadius - _innerRadius);
 			float halfGap = Mathf.Max(0f, _angularGapDeg) * 0.5f;
 
 			int sector = tileIndex / _radialBands;
 			int band = tileIndex % _radialBands;
-			float a0 = sector * sectorAngle + halfGap;
-			float a1 = (sector + 1) * sectorAngle - halfGap;
+			float a0 = _arcStartDeg + sector * sectorAngle + halfGap;
+			float a1 = _arcStartDeg + (sector + 1) * sectorAngle - halfGap;
 			float amidDeg = 0.5f * (a0 + a1);
 			float amid = amidDeg * Mathf.Deg2Rad;
 
