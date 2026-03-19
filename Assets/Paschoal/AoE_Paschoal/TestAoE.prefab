@@ -303,4 +303,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8e3ce973d871b654397314e8d71ba8a5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AoEBehavior
-  type: 0
+  type: 1
