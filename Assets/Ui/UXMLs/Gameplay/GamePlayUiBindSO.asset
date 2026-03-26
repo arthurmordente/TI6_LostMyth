@@ -13,23 +13,35 @@ MonoBehaviour:
   m_Name: GamePlayUiBindSO
   m_EditorClassIdentifier: 
   _actualBosshealthPercent:
-    m_Value: 71.6
+    m_Value: 100
     m_Unit: 1
   _previewBossHealthPercent:
-    m_Value: 41.9
+    m_Value: 100
     m_Unit: 1
-  _actualBossLife: 87
+  _actualBossLife: 300
   _actualPlayerLifePercent:
-    m_Value: 29.5
+    m_Value: 30
     m_Unit: 1
   _previewPlayerLifePercent:
-    m_Value: 28.9
+    m_Value: 30
     m_Unit: 1
-  _actualPlayerHealth: 52
-  _playerActionPoints: 6
+  _actualPlayerHealth: 30
+  _playerActionPoints: 9
   _skill1Cost: 1
   _skill2Cost: 3
   _skill3Cost: 0
+  _skill4Cost: 0
+  _skill5Cost: 0
+  _skill6Cost: 0
+  _skill1Cooldown: 0
+  _skill2Cooldown: 0
+  _skill3Cooldown: 0
+  _skill4Cooldown: 0
+  _skill5Cooldown: 0
+  _skill6Cooldown: 0
   _skill1Name: BaseAbility
   _skill2Name: BaseAbility 1
   _skill3Name: EmptyAbility
+  _skill4Name: 
+  _skill5Name: 
+  _skill6Name: 

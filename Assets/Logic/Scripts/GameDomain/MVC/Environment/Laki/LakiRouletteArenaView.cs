@@ -30,21 +30,7 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 		[Header("Tile Info Canvas")]
 		[SerializeField] private float _canvasScale       = 0.004f;
 		[SerializeField] private float _canvasHeightOffset = 0.12f;
-		[SerializeField] private float _slotSpacing       = 80f;
-		// Populated at runtime via SetTileEffectVisuals – not serialized because
-		// LakiRouletteArenaView is created programmatically (no prefab).
-		private TileEffectSlotDef[] _effectSlotDefs = new TileEffectSlotDef[0];
-
-		/// <summary>Inspector-configurable data for one tile-effect visual slot.</summary>
-		[System.Serializable]
-		public struct TileEffectSlotDef
-		{
-			public RouletteArenaService.TileEffectType EffectType;
-			[Tooltip("Icon shown to the left of the label (null = no image)")]
-			public Sprite Icon;
-			[Tooltip("Label text shown beside the icon")]
-			public string Label;
-		}
+		[SerializeField] private float _slotSpacing = 80f;
 
 		private struct TileInfoCanvas { public Transform SlotsContainer; }
 		private TileInfoCanvas[] _tileCanvases;
@@ -56,38 +42,6 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 		public int TileCount => _sectorCount * _radialBands;
 
 		/// <summary>
-		/// Call this from LakiArenaBossBootstrap after creating the view and before RefreshFrom.
-		/// Builds the slot definition table from the configured effect pools so each tile canvas
-		/// knows which icon+label to show for each possible effect.
-		/// </summary>
-		public void SetTileEffectVisuals(
-			System.Collections.Generic.IList<Logic.Scripts.GameDomain.MVC.Abilitys.AbilityEffect> positiveEffects,
-			System.Collections.Generic.IList<Logic.Scripts.GameDomain.MVC.Abilitys.AbilityEffect> negativeEffects)
-		{
-			var defs = new System.Collections.Generic.List<TileEffectSlotDef>();
-
-			if (positiveEffects != null)
-				foreach (var e in positiveEffects)
-					if (e != null)
-						defs.Add(new TileEffectSlotDef
-						{
-							EffectType = RouletteArenaService.TileEffectType.Positive,
-							Icon       = e.TileIcon,
-							Label      = string.IsNullOrEmpty(e.Name) ? "Efeito Positivo" : e.Name,
-						});
-
-			if (negativeEffects != null)
-				foreach (var e in negativeEffects)
-					if (e != null)
-						defs.Add(new TileEffectSlotDef
-						{
-							EffectType = RouletteArenaService.TileEffectType.Negative,
-							Icon       = e.TileIcon,
-							Label      = string.IsNullOrEmpty(e.Name) ? "Efeito Negativo" : e.Name,
-						});
-
-			_effectSlotDefs = defs.ToArray();
-		}
 
 		private void Awake()
 		{
@@ -351,18 +305,17 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 					_baseColors[i] = c;
 				}
 
-				// Update tile info canvas text and images
-				if (_tileCanvases != null && i < _tileCanvases.Length)
-					RefreshTileCanvas(i, type);
+			// Update tile info canvas using the effects pre-assigned to this tile
+			if (_tileCanvases != null && i < _tileCanvases.Length)
+				RefreshTileCanvas(i, service.GetTileAssignedEffects(i));
 			}
 		}
 
 		/// <summary>
-		/// Clears the tile's slot container and rebuilds one row per matching
-		/// <see cref="TileEffectSlotDef"/> entry. The VLG+ContentSizeFitter centres
-		/// them vertically regardless of how many there are.
+		/// Clears the tile's slot container and rebuilds one row per pre-assigned effect.
+		/// The VLG+ContentSizeFitter centres them vertically regardless of count.
 		/// </summary>
-		private void RefreshTileCanvas(int i, RouletteArenaService.TileEffectType type)
+		private void RefreshTileCanvas(int i, Logic.Scripts.GameDomain.MVC.Abilitys.AbilityEffect[] effects)
 		{
 			var container = _tileCanvases[i].SlotsContainer;
 			if (container == null) return;
@@ -371,15 +324,11 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 			for (int c = container.childCount - 1; c >= 0; c--)
 				Destroy(container.GetChild(c).gameObject);
 
-			if (_effectSlotDefs == null) return;
+			if (effects != null)
+				foreach (var e in effects)
+					if (e != null)
+						AppendSlotRow(container, string.IsNullOrEmpty(e.Name) ? "" : e.Name, e.TileIcon);
 
-			foreach (var def in _effectSlotDefs)
-			{
-				if (def.EffectType != type) continue;
-				AppendSlotRow(container, def.Label, def.Icon);
-			}
-
-			// Force the layout to recalculate immediately so it is correct this frame
 			UnityEngine.UI.LayoutRebuilder.ForceRebuildLayoutImmediate(
 				container.GetComponent<RectTransform>());
 		}
