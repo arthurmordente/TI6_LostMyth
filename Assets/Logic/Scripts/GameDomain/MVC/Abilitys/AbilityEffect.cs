@@ -7,6 +7,8 @@ namespace Logic.Scripts.GameDomain.MVC.Abilitys {
         public string Name;
         public string Description;
         public bool IsAutoCast;
+        [Tooltip("Icon shown on the tile canvas when this effect is one of the possible outcomes for that tile.")]
+        public Sprite TileIcon;
         protected AbilityData Data;
         public virtual void SetUp(Vector3 point) { }
         public virtual void Execute(AbilityData data, IEffectable caster, IEffectable target) { }

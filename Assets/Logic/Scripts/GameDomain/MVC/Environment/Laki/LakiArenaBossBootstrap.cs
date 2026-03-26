@@ -79,6 +79,7 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 			var viewGO = new GameObject("LakiRouletteArena");
 			var view = viewGO.AddComponent<LakiRouletteArenaView>();
 			view.SetGeometry(_centerWorld, _innerRadius, _outerRadius, _radialSplit01, _arcStartDeg, _arcDeg);
+			view.SetTileEffectVisuals(_positiveEffects, _negativeEffects);
 			view.RefreshFrom(arenaService);
 			var casterRelay = GetComponent<Assets.Logic.Scripts.GameDomain.Effects.EffectableRelay>();
 			IEffectable caster = casterRelay != null ? casterRelay as IEffectable : null;
