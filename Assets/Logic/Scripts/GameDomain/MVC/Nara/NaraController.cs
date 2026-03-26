@@ -7,6 +7,7 @@ using Logic.Scripts.Services.UpdateService;
 using UnityEngine;
 using Zenject;
 using Logic.Scripts.Turns;
+using Assets.Logic.Scripts.GameDomain.Effects;
 
 namespace Logic.Scripts.GameDomain.MVC.Nara {
     // INaraController now extends IPlayableUnit, IEffectable and IEffectableAction,
@@ -30,6 +31,8 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
         private bool _canMove;
         private IActionPointsService _actionPointsService;
         private readonly AbilityData[] _abilities;
+
+        private GameObject _activeUnitCircleInstance;
 
         public NaraController(IUpdateSubscriptionService updateSubscriptionService,
             IAudioService audioService, ICommandFactory commandFactory,
@@ -97,12 +100,17 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
             _naraData.ResetData();
             _naraView.SetMoving(false);
             _naraMovementController = movementController;
+
+            EnsureActiveUnitCircleCreated();
+            SetActiveUnitCircleVisible(false);
         }
 
         public void ResetController() {
             UnregisterListeners();
             _naraData.ResetData();
             UnityEngine.Object.Destroy(_naraView.gameObject);
+
+            _activeUnitCircleInstance = null;
         }
 
         public void InitEntryPointGamePlay(IGamePlayUiController gamePlayUiController) {
@@ -141,6 +149,13 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
 
         public void TakeDamage(int damageAmound) {
             if (_cheatController.Imortal == false) _naraData.TakeDamage(damageAmound);
+			// Visual feedback: quick red flash (damage)
+			if (_naraView != null)
+			{
+				var flash = _naraView.GetComponent<DamageFlashPresenter>();
+				if (flash == null) flash = _naraView.gameObject.AddComponent<DamageFlashPresenter>();
+				flash.TriggerFlash();
+			}
             _audioService?.PlayAudio(AudioClipType.AbilityPrep2SFX, AudioChannelType.Fx);
             _gamePlayUiController.OnActualPlayerHealthChange(_naraData.ActualHealth);
             _gamePlayUiController.OnActualPlayerLifePercentChange(_naraData.ActualHealth);
@@ -283,11 +298,34 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
         public void OnBecomeActive() {
             if (_naraMovementController is NaraTurnMovementController ntm)
                 ntm.LineHandlerController.SetVisible(true);
+
+            EnsureActiveUnitCircleCreated();
+            SetActiveUnitCircleVisible(true);
         }
 
         public void OnBecomeInactive() {
             if (_naraMovementController is NaraTurnMovementController ntm)
                 ntm.LineHandlerController.SetVisible(false);
+
+            SetActiveUnitCircleVisible(false);
+        }
+
+        private void EnsureActiveUnitCircleCreated()
+        {
+            if (_activeUnitCircleInstance != null) return;
+            if (_naraView == null) return;
+            if (_naraView.ActiveUnitCirclePrefab == null) return;
+
+            _activeUnitCircleInstance = Object.Instantiate(_naraView.ActiveUnitCirclePrefab, _naraView.transform);
+            _activeUnitCircleInstance.name = "ActiveUnitCircle";
+            _activeUnitCircleInstance.transform.localPosition = new Vector3(0f, 0.2f, 0f);
+            _activeUnitCircleInstance.transform.localRotation = Quaternion.identity;
+        }
+
+        private void SetActiveUnitCircleVisible(bool visible)
+        {
+            if (_activeUnitCircleInstance == null) return;
+            _activeUnitCircleInstance.SetActive(visible);
         }
 
         public IActionPointsService GetActionPoints() => EnsureApService();

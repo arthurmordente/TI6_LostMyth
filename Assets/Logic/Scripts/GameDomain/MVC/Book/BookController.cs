@@ -5,6 +5,7 @@ using Logic.Scripts.Services.CommandFactory;
 using Logic.Scripts.Services.UpdateService;
 using Logic.Scripts.Turns;
 using UnityEngine;
+using Assets.Logic.Scripts.GameDomain.Effects;
 
 namespace Logic.Scripts.GameDomain.MVC.Book
 {
@@ -27,6 +28,8 @@ namespace Logic.Scripts.GameDomain.MVC.Book
         private BookActionPoints _bookActionPoints;
         private bool _canMove;
         private bool _isDeployed;
+
+        private GameObject _activeUnitCircleInstance;
 
         public bool IsDeployed => _isDeployed;
         public GameObject UnitViewGO => _bookView != null ? _bookView.gameObject : null;
@@ -95,6 +98,9 @@ namespace Logic.Scripts.GameDomain.MVC.Book
             _isDeployed = true;
             _canMove = true;
 
+            EnsureActiveUnitCircleCreated();
+            SetActiveUnitCircleVisible(false);
+
             _updateSubscriptionService.RegisterFixedUpdatable(this);
         }
 
@@ -117,6 +123,8 @@ namespace Logic.Scripts.GameDomain.MVC.Book
                 Object.Destroy(_bookView.gameObject);
                 _bookView = null;
             }
+
+            _activeUnitCircleInstance = null;
 
             _movementController = null;
             _bookData = null;
@@ -184,12 +192,35 @@ namespace Logic.Scripts.GameDomain.MVC.Book
         {
             if (_movementController != null)
                 _movementController.LineHandlerController.SetVisible(true);
+
+            EnsureActiveUnitCircleCreated();
+            SetActiveUnitCircleVisible(true);
         }
 
         public void OnBecomeInactive()
         {
             if (_movementController != null)
                 _movementController.LineHandlerController.SetVisible(false);
+
+            SetActiveUnitCircleVisible(false);
+        }
+
+        private void EnsureActiveUnitCircleCreated()
+        {
+            if (_activeUnitCircleInstance != null) return;
+            if (_bookView == null) return;
+            if (_bookView.ActiveUnitCirclePrefab == null) return;
+
+            _activeUnitCircleInstance = Object.Instantiate(_bookView.ActiveUnitCirclePrefab, _bookView.transform);
+            _activeUnitCircleInstance.name = "ActiveUnitCircle";
+            _activeUnitCircleInstance.transform.localPosition = new Vector3(0f, 0.2f, 0f);
+            _activeUnitCircleInstance.transform.localRotation = Quaternion.identity;
+        }
+
+        private void SetActiveUnitCircleVisible(bool visible)
+        {
+            if (_activeUnitCircleInstance == null) return;
+            _activeUnitCircleInstance.SetActive(visible);
         }
 
         #endregion
@@ -217,6 +248,13 @@ namespace Logic.Scripts.GameDomain.MVC.Book
         {
             if (_bookData == null) return;
             _bookData.TakeDamage(amount);
+			// Visual feedback: quick red flash (damage)
+			if (_bookView != null)
+			{
+				var flash = _bookView.GetComponent<DamageFlashPresenter>();
+				if (flash == null) flash = _bookView.gameObject.AddComponent<DamageFlashPresenter>();
+				flash.TriggerFlash();
+			}
         }
 
         public void TakeDamagePerTurn(int damageAmount, int duration) { }
