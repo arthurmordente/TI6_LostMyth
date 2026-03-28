@@ -11,6 +11,11 @@ namespace Logic.Scripts.GameDomain.MVC.Nara
         [SerializeField] private Collider _collider;
         [SerializeField] private Animator _animator;
 
+        [Header("Active Unit Circle")]
+        [SerializeField] private GameObject _activeUnitCirclePrefab;
+
+        public GameObject ActiveUnitCirclePrefab => _activeUnitCirclePrefab;
+
         public Rigidbody GetRigidbody()
         {
             return _rigidbody;

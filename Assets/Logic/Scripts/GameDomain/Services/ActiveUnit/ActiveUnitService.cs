@@ -35,11 +35,19 @@ namespace Logic.Scripts.GameDomain.Services.ActiveUnit
 
         public void SetNaraAsActiveUnit()
         {
-            if (ActiveUnit == _naraController as IPlayableUnit) return;
+            var naraPlayable = _naraController as IPlayableUnit;
+            if (ActiveUnit == naraPlayable)
+            {
+                // Active unit already is Nara: still refresh visual state (circle/line).
+                ActiveUnit?.SetMovementActive(true);
+                ActiveUnit?.OnBecomeActive();
+                FollowActiveUnit();
+                return;
+            }
 
             ActiveUnit?.SetMovementActive(false);
             ActiveUnit?.OnBecomeInactive();
-            ActiveUnit = _naraController as IPlayableUnit;
+            ActiveUnit = naraPlayable;
             ActiveUnit?.SetMovementActive(true);
             ActiveUnit?.OnBecomeActive();
 

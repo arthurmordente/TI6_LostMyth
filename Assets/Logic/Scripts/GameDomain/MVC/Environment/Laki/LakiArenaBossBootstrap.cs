@@ -21,8 +21,21 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 		[SerializeField] private float _arcStartDeg = 180f;
 		[SerializeField] private float _arcDeg = 180f;
 
-		[SerializeReference] private System.Collections.Generic.List<Logic.Scripts.GameDomain.MVC.Abilitys.AbilityEffect> _positiveEffects;
-		[SerializeReference] private System.Collections.Generic.List<Logic.Scripts.GameDomain.MVC.Abilitys.AbilityEffect> _negativeEffects;
+		[Header("Tile Effect Pools")]
+		[SerializeReference] private System.Collections.Generic.List<Logic.Scripts.GameDomain.MVC.Abilitys.AbilityEffect> _largePositiveEffects;
+		[SerializeReference] private System.Collections.Generic.List<Logic.Scripts.GameDomain.MVC.Abilitys.AbilityEffect> _smallPositiveEffects;
+		[SerializeReference] private System.Collections.Generic.List<Logic.Scripts.GameDomain.MVC.Abilitys.AbilityEffect> _largeNegativeEffects;
+		[SerializeReference] private System.Collections.Generic.List<Logic.Scripts.GameDomain.MVC.Abilitys.AbilityEffect> _smallNegativeEffects;
+
+		[Header("Tile Layout Configs")]
+		[Tooltip("Weighted layouts for GREEN (positive) tiles.")]
+		[SerializeField] private TileTypeLayoutConfig _positiveTileConfig;
+		[Tooltip("Weighted layouts for GREY (neutral) tiles.")]
+		[SerializeField] private TileTypeLayoutConfig _neutralTileConfig;
+		[Tooltip("Weighted layouts for RED (negative) tiles.")]
+		[SerializeField] private TileTypeLayoutConfig _negativeTileConfig;
+
+		[Header("Chips")]
 		[SerializeField] private int _initialPlayerChips = 3;
 		[SerializeField] private int _initialBossChips = 3;
 		[SerializeField] private Logic.Scripts.GameDomain.MVC.Boss.Laki.Chips.ChipUiSkin _chipUiSkin;
@@ -75,7 +88,12 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 			}
 
 			var arenaService = new RouletteArenaService(_innerRadius, _outerRadius, _radialSplit01, _arcStartDeg, _arcDeg);
-			arenaService.SetEffectPools(_positiveEffects, _negativeEffects);
+			arenaService.SetLayoutConfigs(
+				_positiveTileConfig, _neutralTileConfig, _negativeTileConfig,
+				_largePositiveEffects, _smallPositiveEffects,
+				_largeNegativeEffects, _smallNegativeEffects);
+			// Initial roll so the canvas already shows effects when the scene loads
+			arenaService.RerollTiles(0, new System.Random(17));
 			var viewGO = new GameObject("LakiRouletteArena");
 			var view = viewGO.AddComponent<LakiRouletteArenaView>();
 			view.SetGeometry(_centerWorld, _innerRadius, _outerRadius, _radialSplit01, _arcStartDeg, _arcDeg);

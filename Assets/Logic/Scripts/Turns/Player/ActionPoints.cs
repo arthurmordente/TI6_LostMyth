@@ -6,6 +6,7 @@ namespace Logic.Scripts.Turns
     public class ActionPointsService : IActionPointsService
     {
         private readonly TurnStateService _turnStateService;
+        private IGamePlayUiController _gamePlayUiController;
 
         private int _current;
         private int _max;
@@ -86,6 +87,25 @@ namespace Logic.Scripts.Turns
         {
 			UnityEngine.Debug.Log($"[AP] {_current}/{_max} (gain/turn={_gainPerTurn})");
             _turnStateService.UpdateActionPoints(_current, _max);
+            EnsureGamePlayUiController()?.OnPlayerActionPointsChange(_current);
+        }
+
+        private IGamePlayUiController EnsureGamePlayUiController()
+        {
+            if (_gamePlayUiController != null) return _gamePlayUiController;
+            var sceneCtxs = UnityEngine.Object.FindObjectsByType<SceneContext>(UnityEngine.FindObjectsSortMode.None);
+            for (int i = 0; i < sceneCtxs.Length; i++)
+            {
+                var sc = sceneCtxs[i];
+                if (sc == null) continue;
+                try
+                {
+                    _gamePlayUiController = sc.Container.Resolve<IGamePlayUiController>();
+                    if (_gamePlayUiController != null) return _gamePlayUiController;
+                }
+                catch { }
+            }
+            return null;
         }
     }
 }

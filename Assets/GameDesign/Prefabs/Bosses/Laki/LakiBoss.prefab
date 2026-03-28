@@ -2409,12 +2409,56 @@ MonoBehaviour:
   _radialSplit01: 0.5
   _arcStartDeg: 180
   _arcDeg: 180
-  _positiveEffects:
-  - rid: 9037664587430232238
-  - rid: 9037664587430232239
-  _negativeEffects:
-  - rid: 9037664587430232235
-  - rid: 9037664587430232240
+  _largePositiveEffects:
+  - rid: 5387295318499655771
+  - rid: 5387295318499655772
+  _smallPositiveEffects:
+  - rid: 5387295318499655773
+  _largeNegativeEffects:
+  - rid: 5387295318499655774
+  - rid: 5387295318499655776
+  _smallNegativeEffects:
+  - rid: 5387295318499655777
+  _positiveTileConfig:
+    Layouts:
+    - Weight: 50
+      Slots:
+      - Pool: 1
+    - Weight: 25
+      Slots:
+      - Pool: 0
+      - Pool: 3
+    - Weight: 25
+      Slots:
+      - Pool: 1
+      - Pool: 2
+  _neutralTileConfig:
+    Layouts:
+    - Weight: 50
+      Slots:
+      - Pool: 1
+    - Weight: 50
+      Slots:
+      - Pool: 3
+  _negativeTileConfig:
+    Layouts:
+    - Weight: 30
+      Slots:
+      - Pool: 0
+      - Pool: 2
+    - Weight: 20
+      Slots:
+      - Pool: 0
+      - Pool: 2
+      - Pool: 3
+    - Weight: 25
+      Slots:
+      - Pool: 1
+      - Pool: 3
+    - Weight: 0
+      Slots:
+      - Pool: 1
+      - Pool: 2
   _initialPlayerChips: 3
   _initialBossChips: 3
   _chipUiSkin: {fileID: 11400000, guid: ec8de1247115d25429b31db6450311fa, type: 2}
@@ -2422,34 +2466,54 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 9037664587430232235
+    - rid: 5387295318499655771
+      type: {class: HealAbilityEffect, ns: Logic.Scripts.GameDomain.Effects, asm: Assembly-CSharp}
+      data:
+        Name: +20HP
+        Description: 
+        IsAutoCast: 0
+        TileIcon: {fileID: 21300000, guid: fe2ff39912b25c14993d92230da23d02, type: 3}
+        amount: 20
+    - rid: 5387295318499655772
+      type: {class: AddActionPointsAbilityEffect, ns: Logic.Scripts.GameDomain.Effects, asm: Assembly-CSharp}
+      data:
+        Name: +3AP
+        Description: 
+        IsAutoCast: 0
+        TileIcon: {fileID: 21300000, guid: 14bfd7c1966307e46b95697a232fbc53, type: 3}
+        amount: 3
+    - rid: 5387295318499655773
+      type: {class: HealAbilityEffect, ns: Logic.Scripts.GameDomain.Effects, asm: Assembly-CSharp}
+      data:
+        Name: +10HP
+        Description: 
+        IsAutoCast: 0
+        TileIcon: {fileID: 21300000, guid: fe2ff39912b25c14993d92230da23d02, type: 3}
+        amount: 5
+    - rid: 5387295318499655774
+      type: {class: DamageEffect, ns: Assets.Logic.Scripts.GameDomain.Effects, asm: Assembly-CSharp}
+      data:
+        Name: -20HP
+        Description: 
+        IsAutoCast: 0
+        TileIcon: {fileID: 21300000, guid: f237d9b9db422b84fa7deba6d9252049, type: 3}
+        amount: 20
+    - rid: 5387295318499655776
+      type: {class: RemoveActionPointsAbilityEffect, ns: Logic.Scripts.GameDomain.Effects, asm: Assembly-CSharp}
+      data:
+        Name: -3AP
+        Description: 
+        IsAutoCast: 0
+        TileIcon: {fileID: 21300000, guid: 995624d19f0faec47ae51b40b76485de, type: 3}
+        amount: 3
+    - rid: 5387295318499655777
       type: {class: DamageEffect, ns: Assets.Logic.Scripts.GameDomain.Effects, asm: Assembly-CSharp}
       data:
         Name: -10HP
-        Description: -10HP
+        Description: 
         IsAutoCast: 0
+        TileIcon: {fileID: 21300000, guid: f237d9b9db422b84fa7deba6d9252049, type: 3}
         amount: 10
-    - rid: 9037664587430232238
-      type: {class: AddActionPointsAbilityEffect, ns: Logic.Scripts.GameDomain.Effects, asm: Assembly-CSharp}
-      data:
-        Name: +1AP
-        Description: +1AP
-        IsAutoCast: 0
-        amount: 1
-    - rid: 9037664587430232239
-      type: {class: HealAbilityEffect, ns: Logic.Scripts.GameDomain.Effects, asm: Assembly-CSharp}
-      data:
-        Name: +5HP
-        Description: +5HP
-        IsAutoCast: 0
-        amount: 5
-    - rid: 9037664587430232240
-      type: {class: RemoveActionPointsAbilityEffect, ns: Logic.Scripts.GameDomain.Effects, asm: Assembly-CSharp}
-      data:
-        Name: -1AP
-        Description: -1AP
-        IsAutoCast: 0
-        amount: 1
 --- !u!114 &8695215367175580558
 MonoBehaviour:
   m_ObjectHideFlags: 0

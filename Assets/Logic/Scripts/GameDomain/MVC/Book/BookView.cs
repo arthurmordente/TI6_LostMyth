@@ -11,6 +11,11 @@ namespace Logic.Scripts.GameDomain.MVC.Book
         [SerializeField] private Rigidbody _rigidbody;
         [SerializeField] private Animator _animator;
 
+        [Header("Active Unit Circle")]
+        [SerializeField] private GameObject _activeUnitCirclePrefab;
+
+        public GameObject ActiveUnitCirclePrefab => _activeUnitCirclePrefab;
+
         public Rigidbody GetRigidbody() => _rigidbody;
 
         public void SetMoving(bool isMoving)

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 {
@@ -26,11 +27,21 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 		[SerializeField] private float _angularGapDeg = 2f;
 		[SerializeField] private float _radialGap = 0.05f;
 
+		[Header("Tile Info Canvas")]
+		[SerializeField] private float _canvasScale       = 0.004f;
+		[SerializeField] private float _canvasHeightOffset = 0.12f;
+		[SerializeField] private float _slotSpacing = 80f;
+
+		private struct TileInfoCanvas { public Transform SlotsContainer; }
+		private TileInfoCanvas[] _tileCanvases;
+
 		private readonly List<MeshRenderer> _renderers = new List<MeshRenderer>(16);
 		private readonly List<Color> _baseColors = new List<Color>(16);
 		private Material _matTemplate;
 
 		public int TileCount => _sectorCount * _radialBands;
+
+		/// <summary>
 
 		private void Awake()
 		{
@@ -61,6 +72,9 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 			for (int i = transform.childCount - 1; i >= 0; i--) Destroy(transform.GetChild(i).gameObject);
 			_renderers.Clear();
 			_baseColors.Clear();
+
+			int total = _sectorCount * _radialBands;
+			_tileCanvases = new TileInfoCanvas[total];
 
 			float sectorAngle = _arcDeg / _sectorCount;
 			float split = _innerRadius + _radialSplit01 * (_outerRadius - _innerRadius);
@@ -98,9 +112,114 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 
 					_renderers.Add(mr);
 					_baseColors.Add(Color.clear);
+					_tileCanvases[tileIndex] = BuildTileCanvas(go.transform, tileCenter, band);
 					tileIndex++;
 				}
 			}
+		}
+
+		/// <summary>
+		/// Creates the world-space canvas for one tile. Slots are NOT created here –
+		/// they are rebuilt dynamically by <see cref="RefreshTileCanvas"/> whenever effects change.
+		/// band 0 = inner ring, band 1 = outer ring (affects VLG spacing).
+		/// </summary>
+		private TileInfoCanvas BuildTileCanvas(Transform tileTr, Vector3 tileCenter, int band)
+		{
+			var canvasGO = new GameObject("TileInfoCanvas");
+			canvasGO.transform.SetParent(tileTr, false);
+			canvasGO.transform.localPosition = new Vector3(0f, _canvasHeightOffset, 0f);
+
+			// Lie flat on the arena plane, facing radially outward (same as suit labels)
+			Vector3 outward = tileCenter - _centerWorld;
+			outward.y = 0f;
+			float yAngle = outward.sqrMagnitude > 0.001f
+				? Mathf.Atan2(outward.x, outward.z) * Mathf.Rad2Deg + 180f
+				: 0f;
+			canvasGO.transform.localRotation = Quaternion.Euler(90f, yAngle, 0f);
+
+			var canvas = canvasGO.AddComponent<Canvas>();
+			canvas.renderMode = RenderMode.WorldSpace;
+			var canvasRt = canvasGO.GetComponent<RectTransform>();
+			canvasRt.sizeDelta = new Vector2(1400f, 900f);
+			float s = _canvasScale > 0f ? _canvasScale : 0.004f;
+			canvasGO.transform.localScale = new Vector3(s, s, s);
+
+			// Container anchored to canvas centre, shifted right (+X) to sit over the tile
+			var containerGO = new GameObject("SlotsContainer");
+			containerGO.transform.SetParent(canvasGO.transform, false);
+			var containerRt = containerGO.AddComponent<RectTransform>();
+			containerRt.anchorMin = new Vector2(0.5f, 0.5f);
+			containerRt.anchorMax = new Vector2(0.5f, 0.5f);
+			containerRt.pivot     = new Vector2(0.5f, 0.5f);
+			containerRt.anchoredPosition = new Vector2(250f, 0f);
+			containerRt.sizeDelta = new Vector2(1380f, 0f); // height driven by ContentSizeFitter
+
+			var vlg = containerGO.AddComponent<VerticalLayoutGroup>();
+			vlg.childAlignment        = TextAnchor.MiddleCenter;
+			vlg.childControlWidth     = false;
+			vlg.childControlHeight    = false;
+			vlg.childForceExpandWidth = false;
+			vlg.childForceExpandHeight= false;
+			// Inner tiles (band 0) are narrower radially → more vertical spacing needed
+			vlg.spacing = band == 0 ? 300f : 200f;
+
+			var csf = containerGO.AddComponent<ContentSizeFitter>();
+			csf.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+			csf.verticalFit   = ContentSizeFitter.FitMode.PreferredSize;
+
+			return new TileInfoCanvas { SlotsContainer = containerGO.transform };
+		}
+
+		/// <summary>
+		/// Appends a single image+text row into the slots container.
+		/// Icon is hidden (transparent) when <paramref name="icon"/> is null.
+		/// </summary>
+		private static void AppendSlotRow(Transform container, string label, Sprite icon)
+		{
+			const float rowW   = 1380f;
+			const float rowH   = 320f;
+			const float iconSz = 320f;
+			const float gap    = 180f;
+			const float pad    = 12f;
+
+			var rowGO = new GameObject("Slot");
+			rowGO.transform.SetParent(container, false);
+			var rowRt = rowGO.AddComponent<RectTransform>();
+			rowRt.sizeDelta = new Vector2(rowW, rowH);
+
+			var hlg = rowGO.AddComponent<HorizontalLayoutGroup>();
+			hlg.childAlignment        = TextAnchor.MiddleLeft;
+			hlg.childControlWidth     = false;
+			hlg.childControlHeight    = false;
+			hlg.childForceExpandWidth = false;
+			hlg.childForceExpandHeight= false;
+			hlg.spacing               = gap;
+			hlg.padding               = new RectOffset((int)pad, (int)pad, 0, 0);
+
+			// Icon (hidden when no sprite)
+			var imgGO = new GameObject("Icon");
+			imgGO.transform.SetParent(rowGO.transform, false);
+			var imgRt = imgGO.AddComponent<RectTransform>();
+			imgRt.sizeDelta = new Vector2(iconSz, iconSz);
+			var img = imgGO.AddComponent<Image>();
+			img.sprite        = icon;
+			img.preserveAspect= true;
+			img.color         = icon != null ? Color.white : Color.clear;
+
+			// Label — single line, fills remaining row width
+			float textWidth = rowW - iconSz - gap - pad * 2f;
+			var txtGO = new GameObject("Label");
+			txtGO.transform.SetParent(rowGO.transform, false);
+			var txtRt = txtGO.AddComponent<RectTransform>();
+			txtRt.sizeDelta = new Vector2(textWidth, rowH);
+			var tmp = txtGO.AddComponent<TextMeshProUGUI>();
+			tmp.text               = label ?? "";
+			tmp.fontSize           = 120f;
+			tmp.color              = Color.black;
+			tmp.alignment          = TextAlignmentOptions.MidlineLeft;
+			tmp.enableAutoSizing   = false;
+			tmp.enableWordWrapping = false;
+			tmp.overflowMode       = TextOverflowModes.Ellipsis;
 		}
 
 		/// <param name="pivotOffset">Subtracted from every vertex so that (0,0,0) in local space is the tile's geometric centre.</param>
@@ -185,7 +304,33 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 					else if (mat.HasProperty("_Color")) mat.color = c;
 					_baseColors[i] = c;
 				}
+
+			// Update tile info canvas using the effects pre-assigned to this tile
+			if (_tileCanvases != null && i < _tileCanvases.Length)
+				RefreshTileCanvas(i, service.GetTileAssignedEffects(i));
 			}
+		}
+
+		/// <summary>
+		/// Clears the tile's slot container and rebuilds one row per pre-assigned effect.
+		/// The VLG+ContentSizeFitter centres them vertically regardless of count.
+		/// </summary>
+		private void RefreshTileCanvas(int i, Logic.Scripts.GameDomain.MVC.Abilitys.AbilityEffect[] effects)
+		{
+			var container = _tileCanvases[i].SlotsContainer;
+			if (container == null) return;
+
+			// Remove previous slots
+			for (int c = container.childCount - 1; c >= 0; c--)
+				Destroy(container.GetChild(c).gameObject);
+
+			if (effects != null)
+				foreach (var e in effects)
+					if (e != null)
+						AppendSlotRow(container, string.IsNullOrEmpty(e.Name) ? "" : e.Name, e.TileIcon);
+
+			UnityEngine.UI.LayoutRebuilder.ForceRebuildLayoutImmediate(
+				container.GetComponent<RectTransform>());
 		}
 
 		public void SetEmphasis(System.Collections.Generic.ICollection<int> tileIndices, float t01, float extraIntensity = 0.75f)
