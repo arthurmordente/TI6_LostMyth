@@ -150,86 +150,6 @@ MonoBehaviour:
   m_UIInfos: {fileID: 114340500867371532}
   m_CustomAttributes: []
   m_ParameterInfo:
-  - name: Delay
-    path: Delay
-    tooltip: 
-    space: -1
-    spaceable: 0
-    sheetType: m_Float
-    realType: Single
-    defaultValue:
-      m_Type:
-        m_SerializableType: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
-          PublicKeyToken=b77a5c561934e089
-      m_SerializableObject: 0
-    min: -Infinity
-    max: Infinity
-    enumValues: []
-    descendantCount: 0
-  - name: MainMesh
-    path: MainMesh
-    tooltip: 
-    space: -1
-    spaceable: 0
-    sheetType: m_NamedObject
-    realType: Mesh
-    defaultValue:
-      m_Type:
-        m_SerializableType: UnityEngine.Mesh, UnityEngine.CoreModule, Version=0.0.0.0,
-          Culture=neutral, PublicKeyToken=null
-      m_SerializableObject: '{"obj":{"fileID":-3556240187359686432,"guid":"23aba39a91715e84ba6bfb165c7527c0","type":3}}'
-    min: -Infinity
-    max: Infinity
-    enumValues: []
-    descendantCount: 0
-  - name: Scale
-    path: Scale
-    tooltip: 
-    space: -1
-    spaceable: 0
-    sheetType: m_Vector3f
-    realType: Vector3
-    defaultValue:
-      m_Type:
-        m_SerializableType: UnityEngine.Vector3, UnityEngine.CoreModule, Version=0.0.0.0,
-          Culture=neutral, PublicKeyToken=null
-      m_SerializableObject: '{"x":10.0,"y":20.0,"z":10.0}'
-    min: -Infinity
-    max: Infinity
-    enumValues: []
-    descendantCount: 0
-  - name: MainColor
-    path: MainColor
-    tooltip: 
-    space: -1
-    spaceable: 0
-    sheetType: m_Vector4f
-    realType: Color
-    defaultValue:
-      m_Type:
-        m_SerializableType: UnityEngine.Color, UnityEngine.CoreModule, Version=0.0.0.0,
-          Culture=neutral, PublicKeyToken=null
-      m_SerializableObject: '{"r":1.0,"g":1.0,"b":1.0,"a":1.0}'
-    min: -Infinity
-    max: Infinity
-    enumValues: []
-    descendantCount: 0
-  - name: Lifetime
-    path: Lifetime
-    tooltip: 
-    space: -1
-    spaceable: 0
-    sheetType: m_Float
-    realType: Single
-    defaultValue:
-      m_Type:
-        m_SerializableType: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
-          PublicKeyToken=b77a5c561934e089
-      m_SerializableObject: 1
-    min: -Infinity
-    max: Infinity
-    enumValues: []
-    descendantCount: 0
   - name: VoronolVelocity
     path: VoronolVelocity
     tooltip: 
@@ -262,6 +182,38 @@ MonoBehaviour:
     max: Infinity
     enumValues: []
     descendantCount: 0
+  - name: Scale
+    path: Scale
+    tooltip: 
+    space: -1
+    spaceable: 0
+    sheetType: m_Vector3f
+    realType: Vector3
+    defaultValue:
+      m_Type:
+        m_SerializableType: UnityEngine.Vector3, UnityEngine.CoreModule, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+      m_SerializableObject: '{"x":10.0,"y":20.0,"z":10.0}'
+    min: -Infinity
+    max: Infinity
+    enumValues: []
+    descendantCount: 0
+  - name: Lifetime
+    path: Lifetime
+    tooltip: 
+    space: -1
+    spaceable: 0
+    sheetType: m_Float
+    realType: Single
+    defaultValue:
+      m_Type:
+        m_SerializableType: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
+          PublicKeyToken=b77a5c561934e089
+      m_SerializableObject: 1
+    min: -Infinity
+    max: Infinity
+    enumValues: []
+    descendantCount: 0
   - name: VoronolOffset
     path: VoronolOffset
     tooltip: 
@@ -290,6 +242,54 @@ MonoBehaviour:
         m_SerializableType: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
           PublicKeyToken=b77a5c561934e089
       m_SerializableObject: 5
+    min: -Infinity
+    max: Infinity
+    enumValues: []
+    descendantCount: 0
+  - name: MainColor
+    path: MainColor
+    tooltip: 
+    space: -1
+    spaceable: 0
+    sheetType: m_Vector4f
+    realType: Color
+    defaultValue:
+      m_Type:
+        m_SerializableType: UnityEngine.Color, UnityEngine.CoreModule, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+      m_SerializableObject: '{"r":1.0,"g":1.0,"b":1.0,"a":1.0}'
+    min: -Infinity
+    max: Infinity
+    enumValues: []
+    descendantCount: 0
+  - name: MainMesh
+    path: MainMesh
+    tooltip: 
+    space: -1
+    spaceable: 0
+    sheetType: m_NamedObject
+    realType: Mesh
+    defaultValue:
+      m_Type:
+        m_SerializableType: UnityEngine.Mesh, UnityEngine.CoreModule, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+      m_SerializableObject: '{"obj":{"fileID":-3556240187359686432,"guid":"23aba39a91715e84ba6bfb165c7527c0","type":3}}'
+    min: -Infinity
+    max: Infinity
+    enumValues: []
+    descendantCount: 0
+  - name: AnimationSizeCurveZ
+    path: AnimationSizeCurveZ
+    tooltip: 
+    space: -1
+    spaceable: 0
+    sheetType: m_AnimationCurve
+    realType: AnimationCurve
+    defaultValue:
+      m_Type:
+        m_SerializableType: UnityEngine.AnimationCurve, UnityEngine.CoreModule, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+      m_SerializableObject: '{"frames":[{"time":0.0,"value":0.0,"inTangent":25.997116088867189,"outTangent":25.997116088867189,"tangentMode":0,"leftTangentMode":1,"rightTangentMode":1,"broken":false},{"time":0.03646617382764816,"value":0.9480153322219849,"inTangent":0.875651478767395,"outTangent":0.875651478767395,"tangentMode":0,"leftTangentMode":0,"rightTangentMode":0,"broken":false},{"time":0.21924637258052827,"value":0.8208410143852234,"inTangent":0.0,"outTangent":0.0,"tangentMode":0,"leftTangentMode":0,"rightTangentMode":0,"broken":false},{"time":0.3491266369819641,"value":1.0023846626281739,"inTangent":0.4954356849193573,"outTangent":0.4954356849193573,"tangentMode":0,"leftTangentMode":0,"rightTangentMode":0,"broken":false},{"time":0.5399804711341858,"value":0.8126380443572998,"inTangent":0.15553832054138184,"outTangent":0.15553832054138184,"tangentMode":0,"leftTangentMode":0,"rightTangentMode":0,"broken":false},{"time":0.6598735451698303,"value":1.0143409967422486,"inTangent":0.08152398467063904,"outTangent":0.08152398467063904,"tangentMode":0,"leftTangentMode":0,"rightTangentMode":0,"broken":false},{"time":0.8030235767364502,"value":0.8140453100204468,"inTangent":-0.16117653250694276,"outTangent":-0.16117653250694276,"tangentMode":0,"leftTangentMode":0,"rightTangentMode":0,"broken":false},{"time":0.9564996957778931,"value":0.9364959001541138,"inTangent":-4.729475975036621,"outTangent":-4.729475975036621,"tangentMode":0,"leftTangentMode":0,"rightTangentMode":0,"broken":false},{"time":1.0,"value":0.0,"inTangent":-21.52849006652832,"outTangent":-21.52849006652832,"tangentMode":0,"leftTangentMode":1,"rightTangentMode":1,"broken":false}],"preWrapMode":8,"postWrapMode":8,"version":1}'
     min: -Infinity
     max: Infinity
     enumValues: []
@@ -342,18 +342,18 @@ MonoBehaviour:
     max: Infinity
     enumValues: []
     descendantCount: 0
-  - name: AnimationSizeCurveZ
-    path: AnimationSizeCurveZ
+  - name: Delay
+    path: Delay
     tooltip: 
     space: -1
     spaceable: 0
-    sheetType: m_AnimationCurve
-    realType: AnimationCurve
+    sheetType: m_Float
+    realType: Single
     defaultValue:
       m_Type:
-        m_SerializableType: UnityEngine.AnimationCurve, UnityEngine.CoreModule, Version=0.0.0.0,
-          Culture=neutral, PublicKeyToken=null
-      m_SerializableObject: '{"frames":[{"time":0.0,"value":0.0,"inTangent":25.997116088867189,"outTangent":25.997116088867189,"tangentMode":0,"leftTangentMode":1,"rightTangentMode":1,"broken":false},{"time":0.03646617382764816,"value":0.9480153322219849,"inTangent":0.875651478767395,"outTangent":0.875651478767395,"tangentMode":0,"leftTangentMode":0,"rightTangentMode":0,"broken":false},{"time":0.21924637258052827,"value":0.8208410143852234,"inTangent":0.0,"outTangent":0.0,"tangentMode":0,"leftTangentMode":0,"rightTangentMode":0,"broken":false},{"time":0.3491266369819641,"value":1.0023846626281739,"inTangent":0.4954356849193573,"outTangent":0.4954356849193573,"tangentMode":0,"leftTangentMode":0,"rightTangentMode":0,"broken":false},{"time":0.5399804711341858,"value":0.8126380443572998,"inTangent":0.15553832054138184,"outTangent":0.15553832054138184,"tangentMode":0,"leftTangentMode":0,"rightTangentMode":0,"broken":false},{"time":0.6598735451698303,"value":1.0143409967422486,"inTangent":0.08152398467063904,"outTangent":0.08152398467063904,"tangentMode":0,"leftTangentMode":0,"rightTangentMode":0,"broken":false},{"time":0.8030235767364502,"value":0.8140453100204468,"inTangent":-0.16117653250694276,"outTangent":-0.16117653250694276,"tangentMode":0,"leftTangentMode":0,"rightTangentMode":0,"broken":false},{"time":0.9564996957778931,"value":0.9364959001541138,"inTangent":-4.729475975036621,"outTangent":-4.729475975036621,"tangentMode":0,"leftTangentMode":0,"rightTangentMode":0,"broken":false},{"time":1.0,"value":0.0,"inTangent":-21.52849006652832,"outTangent":-21.52849006652832,"tangentMode":0,"leftTangentMode":1,"rightTangentMode":1,"broken":false}],"preWrapMode":8,"postWrapMode":8,"version":1}'
+        m_SerializableType: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
+          PublicKeyToken=b77a5c561934e089
+      m_SerializableObject: 0
     min: -Infinity
     max: Infinity
     enumValues: []
@@ -375,7 +375,7 @@ MonoBehaviour:
     enumValues: []
     descendantCount: 0
   m_ImportDependencies: []
-  m_GraphVersion: 18
+  m_GraphVersion: 19
   m_ResourceVersion: 1
   m_SubgraphDependencies: []
   m_CategoryPath: 
@@ -760,10 +760,6 @@ VisualEffectResource:
     m_RendererSettings:
       motionVectorGenerationMode: 0
       shadowCastingMode: 1
-      rayTracingMode: 0
-      receiveShadows: 0
-      reflectionProbeUsage: 0
-      lightProbeUsage: 0
     m_CullingFlags: 3
     m_UpdateMode: 0
     m_PreWarmDeltaTime: 0.05
@@ -977,6 +973,7 @@ MonoBehaviour:
   sortingPriority: 0
   m_SubOutputs:
   - {fileID: 8926484042661614543}
+  useBaseColorMap: 3
   colorMapping: 0
   uvMode: 0
   flipbookLayout: 0
@@ -2036,7 +2033,7 @@ MonoBehaviour:
   - {fileID: 8926484042661614669}
   m_ExposedName: VoronolVelocity
   m_Exposed: 1
-  m_Order: 5
+  m_Order: 0
   m_Category: 
   m_Min:
     m_Type:
@@ -2185,7 +2182,7 @@ MonoBehaviour:
   - {fileID: 8926484042661614673}
   m_ExposedName: VoronolTilling
   m_Exposed: 1
-  m_Order: 6
+  m_Order: 1
   m_Category: 
   m_Min:
     m_Type:
@@ -2517,7 +2514,7 @@ MonoBehaviour:
   - {fileID: 8926484042661614682}
   m_ExposedName: Lifetime
   m_Exposed: 1
-  m_Order: 4
+  m_Order: 3
   m_Category: 
   m_Min:
     m_Type:
@@ -2598,7 +2595,7 @@ MonoBehaviour:
   - {fileID: 8926484042661614684}
   m_ExposedName: VoronolOffset
   m_Exposed: 1
-  m_Order: 7
+  m_Order: 4
   m_Category: 
   m_Min:
     m_Type:
@@ -2679,7 +2676,7 @@ MonoBehaviour:
   - {fileID: 8926484042661614686}
   m_ExposedName: VoronolDensity
   m_Exposed: 1
-  m_Order: 8
+  m_Order: 5
   m_Category: 
   m_Min:
     m_Type:
@@ -2760,7 +2757,7 @@ MonoBehaviour:
   - {fileID: 8926484042661614688}
   m_ExposedName: MainColor
   m_Exposed: 1
-  m_Order: 3
+  m_Order: 6
   m_Category: 
   m_Min:
     m_Type:
@@ -2977,7 +2974,7 @@ MonoBehaviour:
   - {fileID: 8926484042661614694}
   m_ExposedName: MainMesh
   m_Exposed: 1
-  m_Order: 1
+  m_Order: 7
   m_Category: 
   m_Min:
     m_Type:
@@ -3058,7 +3055,7 @@ MonoBehaviour:
   - {fileID: 8926484042661614696}
   m_ExposedName: AnimationSizeCurveZ
   m_Exposed: 1
-  m_Order: 12
+  m_Order: 8
   m_Category: 
   m_Min:
     m_Type:
@@ -3553,7 +3550,7 @@ MonoBehaviour:
   - {fileID: 8926484042661614709}
   m_ExposedName: Delay
   m_Exposed: 1
-  m_Order: 0
+  m_Order: 12
   m_Category: 
   m_Min:
     m_Type:

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 8132596679988974190}
   - component: {fileID: 4186014056851435051}
   m_Layer: 0
-  m_Name: VFX_BossHitbox
+  m_Name: VFX_PlayerHitbox
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -27,8 +27,8 @@ Transform:
   m_GameObject: {fileID: 5384479416049557084}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.1, z: 0}
-  m_LocalScale: {x: 0.25, y: 0.25, z: 0.25}
+  m_LocalPosition: {x: 0, y: 0.05, z: 0}
+  m_LocalScale: {x: 0.2, y: 0.2, z: 0.2}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 1284063276030319211}
@@ -66,7 +66,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 09305194ebe68aa428200ad7e24c6a2e, type: 2}
+  - {fileID: 2100000, guid: 9edec279b4a0a5743b66fadb8ba9011d, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -100,7 +100,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1284063276030319211}
   m_Layer: 0
-  m_Name: VFX_BossHitbox
+  m_Name: VFX_PlayerHitbox
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
