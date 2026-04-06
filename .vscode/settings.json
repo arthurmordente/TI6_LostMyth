@@ -56,5 +56,5 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "Ti-5-MicroRPG.sln"
+    "dotnet.defaultSolution": "TI6_LostMyth.slnx"
 }
