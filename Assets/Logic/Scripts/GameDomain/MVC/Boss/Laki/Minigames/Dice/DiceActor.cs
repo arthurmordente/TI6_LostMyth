@@ -13,6 +13,8 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Dice
 		[SerializeField] private bool _incrementOnDamage;
 
 		private IDiceCallbacks _callbacks;
+		private bool _reportRollOnEnvironmentExecute = true;
+		private int _rollSlotIndex;
 		private int _value;
 		private Logic.Scripts.GameDomain.MVC.Environment.Laki.LakiRouletteArenaView _arena;
 		private int _tileIndex;
@@ -22,10 +24,17 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Dice
 		private bool _labelsCreated;
 		public bool RemoveAfterRun => true;
 
+		/// <param name="reportRollOnEnvironmentExecute">
+		/// When true (default), <see cref="OnDiceRolled"/> runs in <see cref="ExecuteAsync"/> (Environment phase).
+		/// When false, it runs at spawn so HUD can show totals during Boss/Player turns (DiceAttack flow).
+		/// </param>
 		public void Init(IDiceCallbacks callbacks, bool isBoss, int maxValue, int hp, int initialValue,
-			Logic.Scripts.GameDomain.MVC.Environment.Laki.LakiRouletteArenaView arena, int targetTileIndex, Vector3 spawnPosition)
+			Logic.Scripts.GameDomain.MVC.Environment.Laki.LakiRouletteArenaView arena, int targetTileIndex, Vector3 spawnPosition,
+			int rollSlotIndex = 0, bool reportRollOnEnvironmentExecute = true)
 		{
 			_callbacks = callbacks;
+			_rollSlotIndex = rollSlotIndex;
+			_reportRollOnEnvironmentExecute = reportRollOnEnvironmentExecute;
 			_isBoss = isBoss;
 			_maxValue = maxValue > 0 ? maxValue : 6;
 			_hp = hp > 0 ? hp : 99;
@@ -40,12 +49,18 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Dice
 				Vector3 target = _arena.GetTileWorldCenter(_tileIndex);
 				StartMove(target, 2.0f);
 			}
+			if (!_reportRollOnEnvironmentExecute)
+			{
+				UnityEngine.Debug.Log($"[Laki][Die] Roll committed at spawn value={_value} isBoss={_isBoss}");
+				_callbacks?.OnDiceRolled(_isBoss, _rollSlotIndex, _value);
+			}
 		}
 
 		public async Task ExecuteAsync()
 		{
 			UnityEngine.Debug.Log($"[Laki][Die] Execute roll value={_value} isBoss={_isBoss}");
-			_callbacks?.OnDiceRolled(_isBoss, _value);
+			if (_reportRollOnEnvironmentExecute)
+				_callbacks?.OnDiceRolled(_isBoss, _rollSlotIndex, _value);
 			Destroy(gameObject);
 			await Task.CompletedTask;
 		}
@@ -70,7 +85,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Dice
 				_value = Random.Range(1, _maxValue + 1);
 			}
 			UnityEngine.Debug.Log($"[Laki][Die] Reroll value={_value} isBoss={_isBoss}");
-			_callbacks?.OnDieValueChanged(_isBoss, _value);
+			_callbacks?.OnDieValueChanged(_isBoss, _rollSlotIndex, _value);
 
 			// Move to adjacent tile with tumble
 			if (_arena != null)
@@ -145,7 +160,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Dice
 			transform.position = target;
 			// ensure final rotation is zeroed
 			transform.rotation = Quaternion.identity;
-			_callbacks?.OnDieAnimationComplete(_isBoss, _value);
+			_callbacks?.OnDieAnimationComplete(_isBoss, _rollSlotIndex, _value);
 			// restore actual value on labels
 			UpdateFaceLabels(_value);
 		}

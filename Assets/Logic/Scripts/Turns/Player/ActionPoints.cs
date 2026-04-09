@@ -87,7 +87,7 @@ namespace Logic.Scripts.Turns
         {
 			UnityEngine.Debug.Log($"[AP] {_current}/{_max} (gain/turn={_gainPerTurn})");
             _turnStateService.UpdateActionPoints(_current, _max);
-            EnsureGamePlayUiController()?.OnPlayerActionPointsChange(_current);
+            EnsureGamePlayUiController()?.OnPlayerActionPointsChange(_current, _max);
         }
 
         private IGamePlayUiController EnsureGamePlayUiController()

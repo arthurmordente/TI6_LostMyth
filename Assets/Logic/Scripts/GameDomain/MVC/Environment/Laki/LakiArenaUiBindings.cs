@@ -4,7 +4,7 @@ using TMPro;
 
 namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 {
-	// Attach this to the Laki UI Canvas prefab and wire references in the inspector.
+	// Used by standalone Laki feedback prefabs (e.g. UI_LakiFeedbacks). Not used for DiceAttack prompt.
 	public class LakiArenaUiBindings : MonoBehaviour
 	{
 		[Header("Header Panel")]

@@ -88,24 +88,15 @@ namespace Logic.Scripts.Turns {
             _naraController?.FreezeInputs();
             _naraController?.Freeeze();
             _naraController?.StopMovingAnim();
-            try { _chipService?.Refresh(); UnityEngine.Debug.Log("[Laki][ChipsUI] Turn start -> Refresh chips"); } catch { }
-            if (Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.MinigameRuntimeService.IsActive) {
-                LogService.Log("[Laki] Minigame ativo - boss pausado (apenas resolução/arena)");
-                var sp = Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.MinigameRuntimeService.StatusProvider;
+            if (Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.IsActive) {
+                LogService.Log("[Laki] DiceAttack ativo - aguardando resolução no turno da boss");
+                var sp = Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.StatusProvider;
                 if (sp != null) LogService.Log("[Laki] " + sp.GetStatus());
-                Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.MinigameResult tfResult;
-                Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.IMinigameResolver tfResolver;
-                if (Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.MinigameRuntimeService.TryResolveAnyAtBossTurn(out tfResult, out tfResolver)) {
-                    UnityEngine.Debug.Log($"[Laki] Resolved at TurnFlow begin. PlayerWon={tfResult.PlayerWon} Chips: P+={tfResult.PlayerChipsDelta}, B+={tfResult.BossChipsDelta}");
-                    try {
-                        int pot = (tfResult.PlayerChipsDelta > 0 ? tfResult.PlayerChipsDelta : tfResult.BossChipsDelta);
-                        try { _chipService?.OnPotResolve?.Invoke(tfResult.PlayerWon, pot); } catch { }
-                        await System.Threading.Tasks.Task.Delay(2000);
-                        _chipService?.ApplyMinigameResult(tfResult);
-                        _chipService?.Refresh();
-                        UnityEngine.Debug.Log("[Laki][ChipsUI] TurnFlow animated result (3s), applied, and refreshed UI");
-                    } catch { }
-                    try { tfResolver?.DestroyMinigameRoot(); } catch { }
+                Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackResult tfResult;
+                Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.IResolver tfResolver;
+                if (Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.TryResolveAnyAtBossTurn(out tfResult, out tfResolver)) {
+                    UnityEngine.Debug.Log($"[Laki] DiceAttack resolved at TurnFlow begin. PlayerWon={tfResult.PlayerWon}");
+                    try { tfResolver?.DestroyDiceAttackRoot(); } catch { }
                     try { Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Dice.DiceUiRuntime.Reset(); } catch { }
                 }
             }
@@ -121,11 +112,13 @@ namespace Logic.Scripts.Turns {
             StartPlayerPhase();
         }
 
-        private void StartPlayerPhase() {
+        private async void StartPlayerPhase() {
             _actionPointsService.GainTurnPoints();
             _phase = TurnPhase.PlayerAct;
             _turnMovement.ResetMovementArea();
             _turnStateService.AdvanceTurn(_turnNumber, _phase);
+            // Minigame gates run before player inputs are unlocked, so gate input is never consumed as gameplay action.
+            try { await Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.RunPlayerTurnGatesAsync(); } catch { }
             // Unlock player controls and animations on PlayerAct
             _naraController?.UnfreezeInputs();
             _naraController?.Unfreeeze();

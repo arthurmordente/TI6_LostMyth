@@ -5,6 +5,9 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
     [CreateAssetMenu(fileName = "BossConfiguration", menuName = "Scriptable Objects/BossConfiguration")]
     public class BossConfigurationSO : ScriptableObject
     {
+        [Tooltip("Shown in the fight HUD (e.g. Laki, Hokari).")]
+        [field: SerializeField] public string BossDisplayName { get; private set; } = "Laki";
+
         [field: SerializeField] public int MaxHealth { get; private set; }
         [field: SerializeField] public int InitialMovementDistance { get; private set; }
         [field: SerializeField] public float MoveSpeed { get; private set; }

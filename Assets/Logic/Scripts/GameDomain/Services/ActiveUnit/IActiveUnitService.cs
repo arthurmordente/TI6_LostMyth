@@ -12,5 +12,8 @@ namespace Logic.Scripts.GameDomain.Services.ActiveUnit
         void ToggleActiveUnit();
         void RegisterBook(IPlayableUnit book);
         void UnregisterBook();
+
+        /// <summary>Updates the four skill mana labels from the active unit's abilities.</summary>
+        void RefreshHudAbilityCosts();
     }
 }

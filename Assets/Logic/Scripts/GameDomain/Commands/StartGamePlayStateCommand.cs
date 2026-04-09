@@ -3,6 +3,7 @@ using Logic.Scripts.Core.Mvc.WorldCamera;
 using Logic.Scripts.GameDomain.GameInputActions;
 using Logic.Scripts.GameDomain.MVC.Nara;
 using Logic.Scripts.GameDomain.MVC.Ui;
+using Logic.Scripts.GameDomain.Services.ActiveUnit;
 using Logic.Scripts.Services.AudioService;
 using Logic.Scripts.Services.CommandFactory;
 using System.Threading;
@@ -16,6 +17,7 @@ namespace Logic.Scripts.GameDomain.Commands {
         private ICommandFactory _commandFactory;
         private IWorldCameraController _worldCameraController;
         private IGameInputActionsController _gameInputActionsController;
+        private IActiveUnitService _activeUnitService;
 
         private GamePlayInitatorEnterData _enterData;
 
@@ -31,6 +33,7 @@ namespace Logic.Scripts.GameDomain.Commands {
             _commandFactory = _diContainer.Resolve<ICommandFactory>();
             _worldCameraController = _diContainer.Resolve<IWorldCameraController>();
             _gameInputActionsController = _diContainer.Resolve<IGameInputActionsController>();
+            _activeUnitService = _diContainer.Resolve<IActiveUnitService>();
         }
 
         public async Awaitable Execute(CancellationTokenSource cancellationTokenSource) {
@@ -39,6 +42,7 @@ namespace Logic.Scripts.GameDomain.Commands {
             _naraController.InitEntryPointGamePlay(_gamePlayUiController);
             _audioService.PlayAudio(AudioClipType.BossTheme, AudioChannelType.Music, AudioPlayType.Loop);
             _gamePlayUiController.InitEntryPoint();
+            _activeUnitService.RefreshHudAbilityCosts();
         }
     }
 }

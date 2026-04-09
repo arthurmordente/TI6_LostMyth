@@ -1,6 +1,7 @@
 using Logic.Scripts.Core.Mvc.WorldCamera;
 using Logic.Scripts.GameDomain.MVC.Nara;
 using Logic.Scripts.GameDomain.MVC.Shared;
+using Logic.Scripts.GameDomain.MVC.Ui;
 using UnityEngine;
 
 namespace Logic.Scripts.GameDomain.Services.ActiveUnit
@@ -9,16 +10,29 @@ namespace Logic.Scripts.GameDomain.Services.ActiveUnit
     {
         private readonly INaraController _naraController;
         private readonly IWorldCameraController _worldCamera;
+        private readonly IGamePlayUiController _gamePlayUiController;
         private IPlayableUnit _bookUnit;
 
         public IPlayableUnit ActiveUnit { get; private set; }
         public bool IsBookDeployed => _bookUnit != null;
 
-        public ActiveUnitService(INaraController naraController, IWorldCameraController worldCameraController)
+        public ActiveUnitService(INaraController naraController, IWorldCameraController worldCameraController,
+            IGamePlayUiController gamePlayUiController)
         {
             _naraController = naraController;
             _worldCamera = worldCameraController;
+            _gamePlayUiController = gamePlayUiController;
             ActiveUnit = naraController as IPlayableUnit;
+        }
+
+        public void RefreshHudAbilityCosts() => PushAbilityCostsToHud();
+
+        private void PushAbilityCostsToHud()
+        {
+            if (_gamePlayUiController == null || ActiveUnit == null) return;
+            var abs = ActiveUnit.GetAbilities();
+            int c(int i) => abs != null && i < abs.Length && abs[i] != null ? abs[i].GetCost() : 0;
+            _gamePlayUiController.SetAbilityManaCosts(c(0), c(1), c(2), c(3));
         }
 
         public void RegisterBook(IPlayableUnit book)
@@ -41,6 +55,7 @@ namespace Logic.Scripts.GameDomain.Services.ActiveUnit
                 // Active unit already is Nara: still refresh visual state (circle/line).
                 ActiveUnit?.SetMovementActive(true);
                 ActiveUnit?.OnBecomeActive();
+                PushAbilityCostsToHud();
                 FollowActiveUnit();
                 return;
             }
@@ -51,6 +66,7 @@ namespace Logic.Scripts.GameDomain.Services.ActiveUnit
             ActiveUnit?.SetMovementActive(true);
             ActiveUnit?.OnBecomeActive();
 
+            PushAbilityCostsToHud();
             FollowActiveUnit();
         }
 
@@ -64,6 +80,7 @@ namespace Logic.Scripts.GameDomain.Services.ActiveUnit
             ActiveUnit?.SetMovementActive(true);
             ActiveUnit?.OnBecomeActive();
 
+            PushAbilityCostsToHud();
             FollowActiveUnit();
         }
 
