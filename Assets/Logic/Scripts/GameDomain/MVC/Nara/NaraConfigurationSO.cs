@@ -7,6 +7,7 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
         [field: SerializeField] public int InitialMovementDistance { get; private set; }
         [field: SerializeField] public int MaxActionPoints { get; private set; }
         [field: SerializeField] public int ActionPointsTurnGain { get; private set; }
+        [field: SerializeField] public int Defense { get; private set; }
         [field: SerializeField] public float MoveSpeed { get; private set; }
         [field: SerializeField] public float RotationSpeed { get; private set; }
         [field: SerializeField] public float MaxMovementRadius { get; private set; }

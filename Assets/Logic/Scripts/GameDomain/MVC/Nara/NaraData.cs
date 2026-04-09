@@ -22,7 +22,10 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
         }
 
         public void TakeDamage(int damageAmound) {
-                ActualHealth -= damageAmound;
+            //if (_naraSO.Defense > damageAmound) return;
+            //else if (_naraSO.Defense < 0) ActualHealth -= damageAmound;
+            //else (ActualHealth -= (damageAmound - _naraSO.Defense));
+            ActualHealth -= damageAmound;
         }
 
         public void Heal(int healAmount) {

@@ -9,18 +9,19 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d0dd1da5e44110f4bbf08410042f7ee3, type: 3}
+  m_Script: {fileID: 11500000, guid: 5face0ceaf854d74b92894dc88360f94, type: 3}
   m_Name: BolaDeFogo
-  m_EditorClassIdentifier: Assembly-CSharp::DanoEmArea
+  m_EditorClassIdentifier: 
   CoolDown: 0
   CastTime: 0
-  Range: 0
-  AreaOfEffect: 5
-  Power: 100
+  Range: 8
+  AreaOfEffect: 3
+  Power: 40
+  Cost: 0
   Icon: {fileID: 0}
   SkillName: 
   Description: 
-  AoEPrefab: {fileID: 8461423453677537197, guid: b236d3557ccd0c443927f125e8166036, type: 3}
-  AttackPrefab: {fileID: 0}
+  AoEPrefab: {fileID: 8272950397043843596, guid: ee009495287ae5d4783af56ee11704d3, type: 3}
+  AttackPrefab: {fileID: 6187688091634270428, guid: 392dec83ad4af6a4f9cb63204ae025b1, type: 3}
   animationOverride: {fileID: 0}
   AnimationID: 

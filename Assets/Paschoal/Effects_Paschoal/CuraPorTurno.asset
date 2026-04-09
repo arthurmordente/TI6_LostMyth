@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9bdb1625bc769a845abf0e375ef10875, type: 3}
+  m_Name: CuraPorTurno
+  m_EditorClassIdentifier: Assembly-CSharp::CuraPorTurno_Effect
+  duration: 5
+  power: 5
+  repetitive: 0
+  secondaryEffect: {fileID: 0}

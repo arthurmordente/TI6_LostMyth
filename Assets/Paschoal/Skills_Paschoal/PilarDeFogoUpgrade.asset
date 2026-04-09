@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d9fd66185c5b67c41bdc922f8ac3eab8, type: 3}
+  m_Name: PilarDeFogoUpgrade
+  m_EditorClassIdentifier: Assembly-CSharp::PilarDeFogo2
+  CoolDown: 0
+  CastTime: 0
+  Range: 6
+  AreaOfEffect: 3.5
+  Power: 100
+  Cost: 0
+  Icon: {fileID: 0}
+  SkillName: 
+  Description: 
+  AoEPrefab: {fileID: 8461423453677537197, guid: b236d3557ccd0c443927f125e8166036, type: 3}
+  AttackPrefab: {fileID: 0}
+  Upgrade: {fileID: 0}

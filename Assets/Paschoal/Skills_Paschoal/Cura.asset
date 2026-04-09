@@ -9,19 +9,19 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5face0ceaf854d74b92894dc88360f94, type: 3}
-  m_Name: Faca
-  m_EditorClassIdentifier: 
+  m_Script: {fileID: 11500000, guid: a990058a02a87bc4f81190e8fdaef02f, type: 3}
+  m_Name: Cura
+  m_EditorClassIdentifier: Assembly-CSharp::Cura
   CoolDown: 0
   CastTime: 0
-  Range: 18
+  Range: 0
   AreaOfEffect: 0
-  Power: 6
+  Power: 20
   Cost: 0
   Icon: {fileID: 0}
   SkillName: 
   Description: 
-  AoEPrefab: {fileID: 8272950397043843596, guid: 8058bca71956f704e915ec3e0b22aabd, type: 3}
-  AttackPrefab: {fileID: 6187688091634270428, guid: f9decb4e26d5d33499daee3404a56f1d, type: 3}
+  AoEPrefab: {fileID: 0}
+  AttackPrefab: {fileID: 0}
   animationOverride: {fileID: 0}
   AnimationID: 

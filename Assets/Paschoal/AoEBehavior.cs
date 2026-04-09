@@ -2,15 +2,16 @@ using UnityEngine;
 
 public class AoEBehavior : MonoBehaviour
 {
-    Vector3 position;
+    public Vector3 position;
     private Vector3 t;
+    public SkillDataSO skill;
     enum Type {CenteredOnPlayer, FreeMove}
 
     [SerializeField] Type type;
 
     private void Awake()
     {
-        //transform.position = position;
+        position = transform.position;
     }
     void Update()
     {
@@ -27,7 +28,7 @@ public class AoEBehavior : MonoBehaviour
         RaycastHit hit;
         if(Physics.Raycast(r, out hit))
         {
-            t = new Vector3 (hit.point.x,0, hit.point.z);
+            t = new Vector3 (Mathf.Clamp(hit.point.x,position.x - skill.Range, position.x + skill.Range),0, Mathf.Clamp(hit.point.z, position.z - skill.Range,position.z + skill.Range));
         }
         return t;
     }

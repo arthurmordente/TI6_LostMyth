@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 6873404163939787078}
   - component: {fileID: -6223201297680937132}
   m_Layer: 0
-  m_Name: Cylinder
+  m_Name: AreaDeFogo_AoE
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -103,4 +103,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8e3ce973d871b654397314e8d71ba8a5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AoEBehavior
+  skill: {fileID: 11400000, guid: f04b6d566fe365747b24eb078d7282b3, type: 2}
   type: 0

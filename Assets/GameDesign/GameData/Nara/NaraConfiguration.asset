@@ -16,6 +16,7 @@ MonoBehaviour:
   <InitialMovementDistance>k__BackingField: 10
   <MaxActionPoints>k__BackingField: 10
   <ActionPointsTurnGain>k__BackingField: 4
+  <Defense>k__BackingField: 30
   <MoveSpeed>k__BackingField: 15
   <RotationSpeed>k__BackingField: 10
   <MaxMovementRadius>k__BackingField: 30
