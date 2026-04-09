@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Object = UnityEngine.Object;
 using Logic.Scripts.GameDomain.MVC.Ui;
 using Assets.Logic.Scripts.GameDomain.Effects;
+using Logic.Scripts.GameDomain.VisualFeedback;
 
 namespace Logic.Scripts.GameDomain.MVC.Boss {
     [Serializable]
@@ -643,13 +644,11 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
 
         public void TakeDamage(int amount) {
             _bossData.TakeDamage(amount);
-			// Visual feedback: quick red flash (damage)
-			if (_bossView != null)
-			{
-				var flash = _bossView.GetComponent<DamageFlashPresenter>();
-				if (flash == null) flash = _bossView.gameObject.AddComponent<DamageFlashPresenter>();
-				flash.TriggerFlash();
-			}
+            if (_bossView != null) {
+                var flash = _bossView.GetComponent<DamageFlashPresenter>();
+                if (flash == null) flash = _bossView.gameObject.AddComponent<DamageFlashPresenter>();
+                flash.TriggerFlash();
+            }
             Debug.Log("Tomou dano!!!!!!!!!!!!!!!!");
             int maxHp = _bossConfiguration != null ? _bossConfiguration.MaxHealth : Mathf.Max(1, _bossData.ActualHealth);
             Debug.Log($"[Boss] Damage: -{amount} -> HP={_bossData.ActualHealth}/{maxHp}");

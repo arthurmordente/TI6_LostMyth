@@ -2304,6 +2304,7 @@ GameObject:
   - component: {fileID: 6143116250716774284}
   - component: {fileID: 3114752621752471854}
   - component: {fileID: 8695215367175580558}
+  - component: {fileID: 8235568759756076123}
   m_Layer: 0
   m_Name: LakiBoss
   m_TagString: Untagged
@@ -2528,6 +2529,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _uiCanvasPrefab: {fileID: 303414991133466283, guid: 2f759b6be58c38c45830f2a5a3e6ce0d, type: 3}
   _uiScale: 1
+--- !u!114 &8235568759756076123
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3694188558464357575}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7355599d50ba4584cb4a1604d97628e2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Logic.Scripts.GameDomain.VisualFeedback.DamageFlashPresenter
+  _flashSeconds: 0.2
+  _flashColor: {r: 1, g: 0, b: 0, a: 1}
+  _modelRoot: {fileID: 3266209239940564646}
 --- !u!1 &3714948367433055870
 GameObject:
   m_ObjectHideFlags: 0

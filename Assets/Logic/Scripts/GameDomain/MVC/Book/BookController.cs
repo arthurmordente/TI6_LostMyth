@@ -5,7 +5,7 @@ using Logic.Scripts.Services.CommandFactory;
 using Logic.Scripts.Services.UpdateService;
 using Logic.Scripts.Turns;
 using UnityEngine;
-using Assets.Logic.Scripts.GameDomain.Effects;
+using Logic.Scripts.GameDomain.VisualFeedback;
 
 namespace Logic.Scripts.GameDomain.MVC.Book
 {
@@ -248,13 +248,12 @@ namespace Logic.Scripts.GameDomain.MVC.Book
         {
             if (_bookData == null) return;
             _bookData.TakeDamage(amount);
-			// Visual feedback: quick red flash (damage)
-			if (_bookView != null)
-			{
-				var flash = _bookView.GetComponent<DamageFlashPresenter>();
-				if (flash == null) flash = _bookView.gameObject.AddComponent<DamageFlashPresenter>();
-				flash.TriggerFlash();
-			}
+            if (_bookView != null)
+            {
+                var flash = _bookView.GetComponent<DamageFlashPresenter>();
+                if (flash == null) flash = _bookView.gameObject.AddComponent<DamageFlashPresenter>();
+                flash.TriggerFlash();
+            }
         }
 
         public void TakeDamagePerTurn(int damageAmount, int duration) { }

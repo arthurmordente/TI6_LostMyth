@@ -7,7 +7,7 @@ using Logic.Scripts.Services.UpdateService;
 using UnityEngine;
 using Zenject;
 using Logic.Scripts.Turns;
-using Assets.Logic.Scripts.GameDomain.Effects;
+using Logic.Scripts.GameDomain.VisualFeedback;
 
 namespace Logic.Scripts.GameDomain.MVC.Nara {
     // INaraController now extends IPlayableUnit, IEffectable and IEffectableAction,
@@ -149,13 +149,11 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
 
         public void TakeDamage(int damageAmound) {
             if (_cheatController.Imortal == false) _naraData.TakeDamage(damageAmound);
-			// Visual feedback: quick red flash (damage)
-			if (_naraView != null)
-			{
-				var flash = _naraView.GetComponent<DamageFlashPresenter>();
-				if (flash == null) flash = _naraView.gameObject.AddComponent<DamageFlashPresenter>();
-				flash.TriggerFlash();
-			}
+            if (_naraView != null) {
+                var flash = _naraView.GetComponent<DamageFlashPresenter>();
+                if (flash == null) flash = _naraView.gameObject.AddComponent<DamageFlashPresenter>();
+                flash.TriggerFlash();
+            }
             _audioService?.PlayAudio(AudioClipType.AbilityPrep2SFX, AudioChannelType.Fx);
             _gamePlayUiController.OnActualPlayerHealthChange(_naraData.ActualHealth);
             _gamePlayUiController.OnActualPlayerLifePercentChange(_naraData.ActualHealth);
