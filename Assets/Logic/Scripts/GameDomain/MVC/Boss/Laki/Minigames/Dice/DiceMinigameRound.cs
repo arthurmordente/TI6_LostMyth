@@ -92,7 +92,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Dice
 			Destroy(gameObject);
 		}
 
-		public void OnDiceRolled(bool isBoss, int value)
+		public void OnDiceRolled(bool isBoss, int rollSlotIndex, int value)
 		{
 			if (isBoss) { _bossScore += value; _bossRolled = true; _bossRolls.Add(value); _curBossValue = 0; }
 			else { _playerScore += value; _playerRolled = true; _playerRolls.Add(value); _curPlayerValue = 0; }
@@ -203,15 +203,38 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Dice
 			return true;
 		}
 
-		public void OnDieValueChanged(bool isBoss, int value)
+		public void OnDieValueChanged(bool isBoss, int rollSlotIndex, int value)
 		{
-			if (isBoss) _curBossValue = value; else _curPlayerValue = value;
-			// Do not update UI here to avoid spoiling the roll; wait for animation complete
+			if (isBoss)
+			{
+				if (_bossRolls.Count > 0)
+				{
+					int oldV = _bossRolls[_bossRolls.Count - 1];
+					_bossRolls[_bossRolls.Count - 1] = value;
+					_bossScore += value - oldV;
+				}
+				_curBossValue = 0;
+			}
+			else
+			{
+				if (_playerRolls.Count > 0)
+				{
+					int oldV = _playerRolls[_playerRolls.Count - 1];
+					_playerRolls[_playerRolls.Count - 1] = value;
+					_playerScore += value - oldV;
+				}
+				_curPlayerValue = 0;
+			}
+			ReportUiProgress();
 		}
 
-		public void OnDieAnimationComplete(bool isBoss, int value)
+		public void OnDieAnimationComplete(bool isBoss, int rollSlotIndex, int value)
 		{
-			if (isBoss) _curBossValue = value; else _curPlayerValue = value;
+			// Evita somar o mesmo valor duas vezes quando o roll já entrou na lista (ExecuteAsync).
+			if (isBoss)
+				_curBossValue = _bossRolled ? 0 : value;
+			else
+				_curPlayerValue = _playerRolled ? 0 : value;
 			ReportUiProgress();
 		}
 

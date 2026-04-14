@@ -16,7 +16,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
     {
         [SerializeReference] private List<AbilityEffect> _effects;
 
-        private enum AttackType { ProteanCones, FeatherLines, WingSlash, Orb, HookAwakening, SkySwords, Minigame, Circle }
+        private enum AttackType { ProteanCones, FeatherLines, WingSlash, Orb, HookAwakening, SkySwords, Minigame, Circle, GenericPlayerFootCircle, DiceAttack }
         [SerializeField] private AttackType _attackType = AttackType.ProteanCones;
 
         [SerializeField] private int _displacementPriority = 0;
@@ -75,8 +75,15 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
         [Zenject.Inject(Optional = true)] private Logic.Scripts.GameDomain.MVC.Boss.Telegraph.ITelegraphMaterialProvider _telegraphProvider;
 
         private IAudioService _audio;
-        [Header("Laki Minigame")]
+        [Header("Laki Minigame (legacy)")]
         public GameObject _minigameRoundPrefab;
+        [Header("Dice Attack (Laki — no round prefab)")]
+        [SerializeField] private string _diceAttackDisplayName = "DiceAttack";
+        [SerializeField] private GameObject _diceAttackPlayerDiePrefab;
+        [SerializeField] private GameObject _diceAttackBossDiePrefab;
+        [SerializeField] private int _diceAttackDieHp = 99;
+        [SerializeField] private float _diceAttackPlayerRollInputConsumeDelay = 0.1f;
+        [SerializeField] private GameObject _diceAttackPlayerRollPromptPrefab;
 
         public int GetDisplacementPriority() { return _displacementPriority; }
         public void SetDisplacementEnabled(bool enabled) { _displacementEnabled = enabled; }
@@ -100,6 +107,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
             return false;
         }
         public bool IsMinigameAttack() => _attackType == AttackType.Minigame;
+        public bool IsDiceAttack() => _attackType == AttackType.DiceAttack;
         public int GetAnimationId() { return (int)_attackType; }
         public object GetAttackTypeBoxed() { return _attackType; } // for external mapping without exposing enum type
 
@@ -195,6 +203,17 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
                 {
                     _executing = true;
                     TrySpawnOrb();
+                    CleanupAndComplete();
+                }
+                return _executeTcs.Task;
+            }
+            if (_attackType == AttackType.DiceAttack)
+            {
+                if (_executeTcs == null) _executeTcs = new System.Threading.Tasks.TaskCompletionSource<bool>();
+                if (!_executing)
+                {
+                    _executing = true;
+                    TryStartDiceAttack();
                     CleanupAndComplete();
                 }
                 return _executeTcs.Task;
@@ -325,6 +344,15 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
                         meshBase);
                     break;
                 }
+                case AttackType.GenericPlayerFootCircle:
+                {
+                    _handler = new Logic.Scripts.GameDomain.MVC.Boss.Attacks.Circle.PlayerFootCircleAttackHandler(
+                        _circle.radius,
+                        _circle.ringWidth,
+                        lineBase ?? meshBase,
+                        meshBase);
+                    break;
+                }
                 case AttackType.FeatherLines:
                 {
                     _handler = new FeatherLinesHandler(_feather, _featherIsPull, lineBase ?? meshBase, lineDisp ?? meshDisp, meshBase, meshDisp);
@@ -409,7 +437,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
                 Destroy(go);
                 return;
             }
-			try { Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.MinigameRuntimeService.SetActiveName(round.MinigameName); } catch { }
+            try { Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.MinigameRuntimeService.SetActiveName(round.MinigameName); } catch { }
             Logic.Scripts.Turns.TurnStateService turnSvc = null;
             Logic.Scripts.Turns.IEnvironmentActorsRegistry envReg = null;
             Assets.Logic.Scripts.GameDomain.Effects.EffectableRelay bossRelay = null;
@@ -434,31 +462,63 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
             try { arenaView = FindFirstObjectByType<Logic.Scripts.GameDomain.MVC.Environment.Laki.LakiRouletteArenaView>(); } catch { }
             try { if (sceneContainer != null) nara = sceneContainer.Resolve<Logic.Scripts.GameDomain.MVC.Nara.INaraController>(); } catch { }
             try { if (sceneContainer != null) bossCtrl = sceneContainer.Resolve<Logic.Scripts.GameDomain.MVC.Boss.IBossController>(); } catch { }
-            // Pay chip cost from both sides before starting the minigame round (convert HP if needed)
+            // DiceAttack no longer uses chips/pot. Legacy minigames keep the previous chip flow.
+            if (_attackType != AttackType.DiceAttack)
+            {
+                try
+                {
+                    var chipSvc = sceneContainer != null ? sceneContainer.Resolve<Logic.Scripts.GameDomain.MVC.Boss.Laki.Chips.IChipService>() : null;
+                    if (chipSvc != null && round != null)
+                    {
+                        if (nara != null)
+                        {
+                            int convertedPlayer;
+                            bool okP = chipSvc.TryPayPlayer(nara, round.ChipCost, out convertedPlayer);
+                            Debug.Log($"[Laki][Chips] Pay player cost={round.ChipCost} convertedHP={convertedPlayer} ok={okP}");
+                        }
+                        if (bossCtrl != null)
+                        {
+                            int convertedBoss;
+                            bool okB = chipSvc.TryPayBoss(bossCtrl, round.ChipCost, out convertedBoss);
+                            Debug.Log($"[Laki][Chips] Pay boss cost={round.ChipCost} convertedHP={convertedBoss} ok={okB}");
+                        }
+                        try { chipSvc.OnBetPlaced?.Invoke(round.ChipCost, round.ChipCost); } catch { }
+                        chipSvc.Refresh();
+                    }
+                }
+                catch { }
+            }
+            _ = round.StartAsync(turnSvc, envReg, bossRelay, arenaView, nara, bossCtrl);
+        }
+
+        private void TryStartDiceAttack()
+        {
+            Zenject.DiContainer sceneContainer = null;
             try
             {
-                var chipSvc = sceneContainer != null ? sceneContainer.Resolve<Logic.Scripts.GameDomain.MVC.Boss.Laki.Chips.IChipService>() : null;
-                if (chipSvc != null && round != null)
+                var sceneCtxs = Object.FindObjectsByType<Zenject.SceneContext>(FindObjectsSortMode.None);
+                for (int i = 0; i < sceneCtxs.Length; i++)
                 {
-                    if (nara != null)
-                    {
-                        int convertedPlayer;
-                        bool okP = chipSvc.TryPayPlayer(nara, round.ChipCost, out convertedPlayer);
-                        Debug.Log($"[Laki][Chips] Pay player cost={round.ChipCost} convertedHP={convertedPlayer} ok={okP}");
-                    }
-                    if (bossCtrl != null)
-                    {
-                        int convertedBoss;
-                        bool okB = chipSvc.TryPayBoss(bossCtrl, round.ChipCost, out convertedBoss);
-                        Debug.Log($"[Laki][Chips] Pay boss cost={round.ChipCost} convertedHP={convertedBoss} ok={okB}");
-                    }
-                    // After ensuring chips exist (including purchases), place the bet into the pot
-                    try { chipSvc.OnBetPlaced?.Invoke(round.ChipCost, round.ChipCost); } catch { }
-                    chipSvc.Refresh();
+                    var sc = sceneCtxs[i];
+                    if (sc != null && sc.gameObject.scene == gameObject.scene) { sceneContainer = sc.Container; break; }
                 }
             }
             catch { }
-            _ = round.StartAsync(turnSvc, envReg, bossRelay, arenaView, nara, bossCtrl);
+            if (sceneContainer == null)
+            {
+                Debug.LogWarning("[BossAttack][DiceAttack] No SceneContext — cannot resolve player/boss.");
+                return;
+            }
+            var settings = new Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackSettings
+            {
+                DisplayName = _diceAttackDisplayName,
+                PlayerDiePrefab = _diceAttackPlayerDiePrefab,
+                BossDiePrefab = _diceAttackBossDiePrefab,
+                DieHp = _diceAttackDieHp,
+                PlayerRollInputConsumeDelay = _diceAttackPlayerRollInputConsumeDelay,
+                PlayerRollPromptPrefab = _diceAttackPlayerRollPromptPrefab
+            };
+            Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackSession.Start(settings, sceneContainer);
         }
 
         private Material ResolveTelegraphMaterial()

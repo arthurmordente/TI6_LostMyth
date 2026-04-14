@@ -16,7 +16,7 @@ public class GamePlayInstaller : MonoInstaller {
     [SerializeField] private NaraView _naraViewPrefab;
     [SerializeField] private NaraConfigurationSO _naraConfiguration;
 
-    [SerializeField] private GamePlayUiView _gamePlayUiView;
+    [SerializeField] private GamePlayUiCanvasView _gamePlayHud;
     [SerializeField] private PauseUiView _pauseUiView;
     [SerializeField] private GameOverUIView _gameOverUIView;
 
@@ -70,7 +70,8 @@ public class GamePlayInstaller : MonoInstaller {
 
     private void BindControllers() {
         Container.BindInterfacesTo<GameInputActionsController>().AsSingle().NonLazy();
-        Container.BindInterfacesTo<GamePlayUiController>().AsSingle().WithArguments(_gamePlayUiView, _pauseUiView, _gameOverUIView).NonLazy();
+        Container.Bind<Logic.Scripts.GameDomain.MVC.Ui.IGamePlayHudView>().FromInstance(_gamePlayHud).AsSingle();
+        Container.BindInterfacesTo<GamePlayUiController>().AsSingle().WithArguments(_pauseUiView, _gameOverUIView).NonLazy();
         Container.BindInterfacesTo<LevelScenarioController>().AsSingle().NonLazy();
         Container.BindInterfacesTo<NaraController>().AsSingle().WithArguments(_naraViewPrefab, _naraConfiguration, _skills).NonLazy();
         Container.BindInterfacesTo<CastController>().AsSingle().NonLazy();

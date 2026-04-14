@@ -65,7 +65,9 @@ public class LoadLevelCommand : BaseCommand, ICommandAsync {
         LevelTurnData levelTurnData = (LevelTurnData)_levelsDataService.GetLevelData(levelNumber);
         _diContainer.BindInstance(levelTurnData.BossPhases);
         _diContainer.BindInterfacesTo<BossAbilityController>().AsSingle().WithArguments((BossBehaviorSO)null).NonLazy();
-        _diContainer.BindInterfacesTo<BossController>().AsSingle().WithArguments(levelTurnData.BossPrefab, levelTurnData.BossConfiguration, levelTurnData.BossPhases).NonLazy();
+        _diContainer.BindInterfacesTo<BossController>().AsSingle()
+            .WithArguments(levelTurnData.BossPrefab, levelTurnData.BossConfiguration, levelTurnData.BossPhases, levelTurnData.GetEffectiveBossHudDisplayName())
+            .NonLazy();
         _diContainer.BindInterfacesAndSelfTo<BossActionService>().AsSingle().NonLazy();
         return this;
     }
