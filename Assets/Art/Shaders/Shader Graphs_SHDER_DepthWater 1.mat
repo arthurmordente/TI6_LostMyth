@@ -52,15 +52,16 @@ Material:
     m_Ints: []
     m_Floats:
     - _Depth: 5
-    - _FoamAmount: 100
+    - _Float: 0
+    - _FoamAmount: 400
     - _FoamCut: 150
     - _NoiseScale: 20
     - _NormalStreght: 0.1
     - _QueueControl: 0
     - _QueueOffset: 0
-    - _RefractionScale: 20
+    - _RefractionScale: 100
     - _RefractionlStreght: 2
-    - _WaterDepth: 1
+    - _WaterDepth: 28
     m_Colors:
     - _BaseDeepColor: {r: 0.024919897, g: 0.07751573, b: 1.0566038, a: 0.5019608}
     - _BaseSurfaceColor: {r: 0.049839832, g: 1.3589678, b: 1.509434, a: 0.2509804}

@@ -1956,7 +1956,7 @@
     "m_Title": "DepthWater Color",
     "m_Position": {
         "x": -2015.0,
-        "y": 318.00006103515627
+        "y": 318.0
     }
 }
 
@@ -2459,8 +2459,8 @@
     "m_ObjectId": "492412b9ebd9444ea37ba4886bf97abe",
     "m_Title": "WaterRefraction",
     "m_Position": {
-        "x": -3577.000244140625,
-        "y": -809.0000610351563
+        "x": -3577.0,
+        "y": -809.0
     }
 }
 
