@@ -333,9 +333,57 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 45351029430546638, guid: d857bfaae8f614d43b4a29d9534f89f9, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 45351029430546638, guid: d857bfaae8f614d43b4a29d9534f89f9, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 45351029430546638, guid: d857bfaae8f614d43b4a29d9534f89f9, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 45351029430546638, guid: d857bfaae8f614d43b4a29d9534f89f9, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 299332331888778197, guid: d857bfaae8f614d43b4a29d9534f89f9, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 299332331888778197, guid: d857bfaae8f614d43b4a29d9534f89f9, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 299332331888778197, guid: d857bfaae8f614d43b4a29d9534f89f9, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 299332331888778197, guid: d857bfaae8f614d43b4a29d9534f89f9, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 334516827420486568, guid: d857bfaae8f614d43b4a29d9534f89f9, type: 3}
       propertyPath: m_Name
       value: Canvas_Gameplay
+      objectReference: {fileID: 0}
+    - target: {fileID: 2120132591217960473, guid: d857bfaae8f614d43b4a29d9534f89f9, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2120132591217960473, guid: d857bfaae8f614d43b4a29d9534f89f9, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2120132591217960473, guid: d857bfaae8f614d43b4a29d9534f89f9, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2120132591217960473, guid: d857bfaae8f614d43b4a29d9534f89f9, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3419372007265188146, guid: d857bfaae8f614d43b4a29d9534f89f9, type: 3}
       propertyPath: m_Pivot.x
@@ -415,6 +463,22 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3419372007265188146, guid: d857bfaae8f614d43b4a29d9534f89f9, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5000538994373165105, guid: d857bfaae8f614d43b4a29d9534f89f9, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5000538994373165105, guid: d857bfaae8f614d43b4a29d9534f89f9, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5000538994373165105, guid: d857bfaae8f614d43b4a29d9534f89f9, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5000538994373165105, guid: d857bfaae8f614d43b4a29d9534f89f9, type: 3}
+      propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
@@ -631,6 +695,11 @@ MonoBehaviour:
   - {fileID: 11400000, guid: d774261d7df73ed4fa8f08149dc4b81f, type: 2}
   - {fileID: 11400000, guid: 72ba9ea640b863144836fdfdc9469bd6, type: 2}
   - {fileID: 11400000, guid: f4ae99592295ab4438105fcbb1c1ae10, type: 2}
+  _paschoalSkillCatalog:
+  - {fileID: 11400000, guid: 3af4d3ba230376e4a8175ed9712ae967, type: 2}
+  - {fileID: 11400000, guid: a79b564f3dd9e054383f221dcdba53d2, type: 2}
+  - {fileID: 11400000, guid: 98358369edb6eaa4babca2b2e157e400, type: 2}
+  - {fileID: 11400000, guid: 0d0dfdef8e136854d8d6e0b258cfc4df, type: 2}
   _bookSkills:
   - {fileID: 11400000, guid: 4c82f2d9bc2cf09418a437c668996e07, type: 2}
   - {fileID: 11400000, guid: d9d52de431f81e94c97467c811060a54, type: 2}

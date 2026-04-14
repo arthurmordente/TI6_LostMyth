@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using DG.Tweening;
 using Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack;
 using Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames;
@@ -43,6 +44,24 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
         [SerializeField] private TMP_Text _skill3CostText;
         [SerializeField] private TMP_Text _skill4CostText;
 
+        [Header("Skills Theme Roots")]
+        [Tooltip("Background completo das skills da Nara/Erza. O codigo resolve o filho 'container' e os 4 botoes.")]
+        [SerializeField] private GameObject _erzaSkillsBackground;
+        [Tooltip("Background completo das skills do Book. O codigo resolve o filho 'container' e os 4 botoes.")]
+        [SerializeField] private GameObject _bookSkillsBackground;
+
+        [Header("Skill Buttons (Optional Inspector Lists)")]
+        [Tooltip("Botoes de skill da Nara/Erza. Lista colapsavel para evitar poluicao.")]
+        [SerializeField] private List<Button> _erzaSkillButtons = new List<Button>(4);
+        [Tooltip("Botoes de skill do Book. Lista colapsavel para evitar poluicao.")]
+        [SerializeField] private List<Button> _bookSkillButtons = new List<Button>(4);
+
+        [Header("Skill Cost Labels (Optional Inspector Lists)")]
+        [Tooltip("Custos das 4 skills da Nara/Erza.")]
+        [SerializeField] private List<TMP_Text> _erzaSkillCostTexts = new List<TMP_Text>(4);
+        [Tooltip("Custos das 4 skills do Book.")]
+        [SerializeField] private List<TMP_Text> _bookSkillCostTexts = new List<TMP_Text>(4);
+
         [Header("Buttons")]
         [SerializeField] private Button _nextTurnButton;
         [SerializeField] private Button _skill1Button;
@@ -59,6 +78,11 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
         private float _playerApDisplayFloat;
 
         private GamePlayDiceAttackPanelView _dicePanelResolved;
+        private Action _onSkill1;
+        private Action _onSkill2;
+        private Action _onSkill3;
+        private Action _onSkill4;
+        private bool _showBookSkillsTheme;
 
         private void Awake()
         {
@@ -118,6 +142,17 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
         public void RegisterCallbacks(Action onNextTurn, Action onSkill1, Action onSkill2, Action onSkill3, Action onSkill4)
         {
             Bind(_nextTurnButton, onNextTurn);
+            _onSkill1 = onSkill1;
+            _onSkill2 = onSkill2;
+            _onSkill3 = onSkill3;
+            _onSkill4 = onSkill4;
+
+            BindOptionalButtons(_erzaSkillButtons, _onSkill1, _onSkill2, _onSkill3, _onSkill4);
+            BindOptionalButtons(_bookSkillButtons, _onSkill1, _onSkill2, _onSkill3, _onSkill4);
+            BindResolvedSkillButtons(_erzaSkillsBackground, _onSkill1, _onSkill2, _onSkill3, _onSkill4);
+            BindResolvedSkillButtons(_bookSkillsBackground, _onSkill1, _onSkill2, _onSkill3, _onSkill4);
+
+            // Fallback to old direct references if backgrounds are not assigned.
             Bind(_skill1Button, onSkill1);
             Bind(_skill2Button, onSkill2);
             Bind(_skill3Button, onSkill3);
@@ -233,17 +268,83 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
             }, current, _tweenDuration).SetEase(_tweenEase).SetTarget(target);
         }
 
-        public void OnSkill1CostChange(int cost) => SetIntText(_skill1CostText, cost);
+        public void OnSkill1CostChange(int cost) => SetIntText(GetActiveCostText(0) ?? _skill1CostText, cost);
 
-        public void OnSkill2CostChange(int cost) => SetIntText(_skill2CostText, cost);
+        public void OnSkill2CostChange(int cost) => SetIntText(GetActiveCostText(1) ?? _skill2CostText, cost);
 
-        public void OnSkill3CostChange(int cost) => SetIntText(_skill3CostText, cost);
+        public void OnSkill3CostChange(int cost) => SetIntText(GetActiveCostText(2) ?? _skill3CostText, cost);
 
-        public void OnSkill4CostChange(int cost) => SetIntText(_skill4CostText, cost);
+        public void OnSkill4CostChange(int cost) => SetIntText(GetActiveCostText(3) ?? _skill4CostText, cost);
 
         public void OnSkill1NameChange(string name) { }
 
         public void OnSkill2NameChange(string name) { }
+
+        public void ShowBookSkillsTheme(bool showBookSkillsTheme)
+        {
+            _showBookSkillsTheme = showBookSkillsTheme;
+            if (_erzaSkillsBackground != null) _erzaSkillsBackground.SetActive(!showBookSkillsTheme);
+            if (_bookSkillsBackground != null) _bookSkillsBackground.SetActive(showBookSkillsTheme);
+        }
+
+        private static void BindResolvedSkillButtons(GameObject skillsBackground, Action onSkill1, Action onSkill2, Action onSkill3, Action onSkill4)
+        {
+            if (skillsBackground == null) return;
+            Transform container = ResolveContainer(skillsBackground.transform);
+            if (container == null) return;
+
+            BindSlot(container, 0, onSkill1);
+            BindSlot(container, 1, onSkill2);
+            BindSlot(container, 2, onSkill3);
+            BindSlot(container, 3, onSkill4);
+        }
+
+        private static void BindOptionalButtons(List<Button> buttons, Action onSkill1, Action onSkill2, Action onSkill3, Action onSkill4)
+        {
+            if (buttons == null || buttons.Count == 0) return;
+            Bind(At(buttons, 0), onSkill1);
+            Bind(At(buttons, 1), onSkill2);
+            Bind(At(buttons, 2), onSkill3);
+            Bind(At(buttons, 3), onSkill4);
+        }
+
+        private static void BindSlot(Transform container, int slotIndex, Action callback)
+        {
+            if (callback == null) return;
+            if (slotIndex < 0 || slotIndex >= container.childCount) return;
+            var button = container.GetChild(slotIndex).GetComponent<Button>();
+            Bind(button, callback);
+        }
+
+        private TMP_Text GetActiveCostText(int slotIndex)
+        {
+            var configuredList = _showBookSkillsTheme ? _bookSkillCostTexts : _erzaSkillCostTexts;
+            var configured = At(configuredList, slotIndex);
+            if (configured != null) return configured;
+
+            GameObject activeBg = _showBookSkillsTheme ? _bookSkillsBackground : _erzaSkillsBackground;
+            if (activeBg == null) return null;
+
+            Transform container = ResolveContainer(activeBg.transform);
+            if (container == null) return null;
+            if (slotIndex < 0 || slotIndex >= container.childCount) return null;
+
+            return container.GetChild(slotIndex).GetComponentInChildren<TMP_Text>(true);
+        }
+
+        private static Transform ResolveContainer(Transform backgroundTransform)
+        {
+            if (backgroundTransform == null) return null;
+            Transform namedContainer = backgroundTransform.Find("container");
+            return namedContainer != null ? namedContainer : backgroundTransform;
+        }
+
+        private static T At<T>(List<T> list, int index) where T : class
+        {
+            if (list == null) return null;
+            if (index < 0 || index >= list.Count) return null;
+            return list[index];
+        }
 
         private void TweenFillPercent(Image img, int percent0To100)
         {

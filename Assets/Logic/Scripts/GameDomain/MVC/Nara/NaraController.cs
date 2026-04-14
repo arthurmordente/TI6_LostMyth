@@ -8,6 +8,7 @@ using UnityEngine;
 using Zenject;
 using Logic.Scripts.Turns;
 using Logic.Scripts.GameDomain.VisualFeedback;
+using Logic.Scripts.GameDomain.Services.Skills;
 
 namespace Logic.Scripts.GameDomain.MVC.Nara {
     // INaraController now extends IPlayableUnit, IEffectable and IEffectableAction,
@@ -20,6 +21,7 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
         private readonly NaraData _naraData;
         private readonly NaraConfigurationSO _naraConfiguration;
         private readonly ICheatController _cheatController;
+        private readonly IPaschoalSkillLoadoutService _paschoalSkillLoadoutService;
         public GameObject NaraViewGO => _naraView.gameObject;
         public Transform NaraSkillSpotTransform => _naraView.transform;
         public NaraMovementController NaraMove => _naraMovementController;
@@ -38,7 +40,7 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
             IAudioService audioService, ICommandFactory commandFactory,
             IResourcesLoaderService resourcesLoaderService, NaraView naraViewPrefab,
             NaraConfigurationSO naraConfiguration, ICheatController cheatController,
-            AbilityData[] abilities) {
+            AbilityData[] abilities, [InjectOptional] IPaschoalSkillLoadoutService paschoalSkillLoadoutService = null) {
             _naraData = new NaraData(naraConfiguration);
             _naraConfiguration = naraConfiguration;
             _updateSubscriptionService = updateSubscriptionService;
@@ -47,6 +49,7 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
             _commandFactory = commandFactory;
             _cheatController = cheatController;
             _abilities = abilities ?? System.Array.Empty<AbilityData>();
+            _paschoalSkillLoadoutService = paschoalSkillLoadoutService;
         }
 
         public void RegisterListeners() {
@@ -97,6 +100,7 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
 
         public void CreateNara(NaraMovementController movementController) {
             _naraView = Object.Instantiate(_naraViewPrefab);
+            InstallPaschoalSkillComponents();
             _naraData.ResetData();
             _naraView.SetMoving(false);
             _naraMovementController = movementController;
@@ -322,6 +326,19 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
         {
             if (_activeUnitCircleInstance == null) return;
             _activeUnitCircleInstance.SetActive(visible);
+        }
+
+        private void InstallPaschoalSkillComponents()
+        {
+            if (_naraView == null) return;
+
+            var toggle = _naraView.GetComponent<LegacySkillSystemToggle>();
+            if (toggle == null) _naraView.gameObject.AddComponent<LegacySkillSystemToggle>();
+
+            var loadout = _naraView.GetComponent<PaschoalSkillLoadout>();
+            if (loadout == null) loadout = _naraView.gameObject.AddComponent<PaschoalSkillLoadout>();
+            if (_paschoalSkillLoadoutService != null)
+                loadout.SetSkills(_paschoalSkillLoadoutService.BuildRuntimeSlotsArray());
         }
 
         public IActionPointsService GetActionPoints() => EnsureApService();

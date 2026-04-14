@@ -1,4 +1,3 @@
-using Logic.Scripts.GameDomain.MVC.Abilitys;
 using Logic.Scripts.GameDomain.MVC.Nara;
 using Logic.Scripts.GameDomain.MVC.Shared;
 using Logic.Scripts.Services.AudioService;
@@ -16,14 +15,17 @@ public class CastController : ICastController {
     // resolved yet on the very first ability use.
     private readonly IActionPointsService _naraActionPointsService;
 
-    private AbilityData _currentAbility;
     private IPlayableUnit _currentCaster;
+    private ISkillCastFlow _activeFlow;
     private bool _canUseAbility;
     private int _currentAbilityIndex = -1;
+    private int _currentAbilityCost = 0;
 
     public Transform PlayerTransform;
 
     private IAudioService _audio;
+    private readonly LegacySkillCastFlow _legacyFlow;
+    private readonly PaschoalDefaultSkillCastFlow _paschoalFlow;
 
     public CastController(IUpdateSubscriptionService updateSubscriptionService, ICommandFactory commandFactory,
         IActionPointsService actionPointsService, ICheatController cheatController) {
@@ -31,76 +33,74 @@ public class CastController : ICastController {
         _commandFactory = commandFactory;
         _naraActionPointsService = actionPointsService;
         _cheatController = cheatController;
+        _legacyFlow = new LegacySkillCastFlow(_subscriptionService, _commandFactory);
+        _paschoalFlow = new PaschoalDefaultSkillCastFlow();
         try { _audio = ProjectContext.Instance.Container.Resolve<IAudioService>(); } catch { _audio = null; }
     }
 
     public void InitEntryPoint(INaraController naraController) {
         PlayerTransform = naraController.NaraViewGO.transform;
-        // Set up Nara's abilities.  The Book shares the same AbilityData instances initially
-        // so there is no need to call SetUp twice (it is already handled here).
-        foreach (AbilityData ability in naraController.GetAbilities())
-            ability.SetUp(_subscriptionService, _commandFactory);
+        _legacyFlow.InitEntryPoint(naraController);
+        _paschoalFlow.InitEntryPoint(naraController);
     }
 
     public bool TryUseAbility(int index, IPlayableUnit caster) {
         Debug.Log($"[CastController] TryUseAbility — caster: {caster?.GetType().Name ?? "NULL"}, index: {index}");
-
-        var abilities = caster?.GetAbilities();
-        if (abilities == null) {
-            Debug.LogWarning($"[CastController] TryUseAbility — caster.GetAbilities() returned NULL.");
-            return false;
-        }
-        if (index < 0 || index >= abilities.Length) {
-            Debug.LogWarning($"[CastController] TryUseAbility — index {index} out of range (abilities.Length={abilities.Length}).");
+        ISkillCastFlow selectedFlow = SelectFlow(caster);
+        if (selectedFlow == null) {
+            Debug.LogWarning("[CastController] TryUseAbility — no cast flow available for caster.");
             return false;
         }
 
-        // Use the caster's own AP.  For Nara the lazy EnsureApService() is the primary path;
-        // _naraActionPointsService is an injected fallback in case it hasn't resolved yet.
-        // Book returns its own BookActionPoints directly.
+        if (!selectedFlow.TryPrepareCast(index, caster, out SkillCastPrepareResult prepareResult)) {
+            Debug.LogWarning($"[CastController] TryUseAbility — flow {selectedFlow.GetType().Name} rejected ability index {index}.");
+            return false;
+        }
+
         var ap = caster.GetActionPoints() ?? _naraActionPointsService;
-        int cost = abilities[index].GetCost();
+        int cost = prepareResult.Cost;
         bool canAfford = (ap == null || ap.CanSpend(cost)) || _cheatController.InfinityCast;
-        Debug.Log($"[CastController] TryUseAbility — ability: {abilities[index].name}, cost: {cost}, AP: {(ap == null ? "NULL (free)" : ap.Current.ToString())}, canAfford: {canAfford}, InfinityCast: {_cheatController.InfinityCast}");
+        Debug.Log($"[CastController] TryUseAbility — flow: {selectedFlow.GetType().Name}, cost: {cost}, AP: {(ap == null ? "NULL (free)" : ap.Current.ToString())}, canAfford: {canAfford}, InfinityCast: {_cheatController.InfinityCast}");
         if (!canAfford) {
             Debug.LogWarning($"[CastController] TryUseAbility — cannot afford ability (cost {cost}, AP {ap?.Current}).");
+            selectedFlow.CancelPreparedCast(caster);
             return false;
         }
 
-        Debug.Log($"[CastController] TryUseAbility — calling Aim on {abilities[index].name} with caster {caster.GetType().Name}");
-        abilities[index].Aim(caster);
-        _currentAbility = abilities[index];
+        _activeFlow = selectedFlow;
         _currentCaster = caster;
-        _currentAbilityIndex = index;
+        _currentAbilityIndex = prepareResult.AbilityIndex;
+        _currentAbilityCost = prepareResult.Cost;
 
-        int attackType = abilities[index].AnimatorAttackType;
+        int attackType = prepareResult.AnimatorAttackType;
         caster.PlayAttackType(attackType);
         return true;
     }
 
     public void CancelAbilityUse() {
         _currentCaster?.TriggerCancel();
-        _currentAbility?.Cancel();
-        _currentAbility = null;
+        _activeFlow?.CancelPreparedCast(_currentCaster);
+        _activeFlow = null;
         _currentCaster = null;
         _currentAbilityIndex = -1;
+        _currentAbilityCost = 0;
     }
 
     public void UseAbility(IPlayableUnit caster) {
-        Debug.Log($"[CastController] UseAbility — caster: {caster?.GetType().Name ?? "NULL"}, currentAbility: {(_currentAbility != null ? _currentAbility.name : "NULL")}");
-        if (_currentAbility == null) return;
+        Debug.Log($"[CastController] UseAbility — caster: {caster?.GetType().Name ?? "NULL"}, flow: {(_activeFlow != null ? _activeFlow.GetType().Name : "NULL")}");
+        if (_activeFlow == null) return;
 
         _canUseAbility = true;
 
         if (_cheatController.InfinityCast == false) {
             // Deduct from whichever AP pool this caster owns (Nara's or Book's).
             var ap = caster?.GetActionPoints() ?? _naraActionPointsService;
-            ap?.Spend(_currentAbility.GetCost());
+            ap?.Spend(_currentAbilityCost);
         }
 
         caster?.TriggerExecute();
         PlayUsedSfxByIndex(_currentAbilityIndex);
-        _currentAbility.Cast(caster);
+        _activeFlow.ExecutePreparedCast(caster);
         CancelAbilityUse();
     }
 
@@ -121,5 +121,11 @@ public class CastController : ICastController {
             case 3: return AudioClipType.AbilityUsed4SFX;
             default: return AudioClipType.AbilityUsed5SFX;
         }
+    }
+
+    private ISkillCastFlow SelectFlow(IPlayableUnit caster) {
+        if (_legacyFlow.CanHandleCaster(caster)) return _legacyFlow;
+        if (_paschoalFlow.CanHandleCaster(caster)) return _paschoalFlow;
+        return _legacyFlow;
     }
 }
