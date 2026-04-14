@@ -1,0 +1,77 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-6198435264536306579
+MonoBehaviour:
+  m_ObjectHideFlags: 11
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Editor::UnityEditor.Rendering.Universal.AssetVersion
+  version: 10
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Shader Graphs_SHDER_DepthWater 1
+  m_Shader: {fileID: -6465566751694194690, guid: 4502c6454bf8e5a42836e99ae28a4fca, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses:
+  - MOTIONVECTORS
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - unity_Lightmaps:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_LightmapsInd:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_ShadowMasks:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _Depth: 5
+    - _FoamAmount: 100
+    - _FoamCut: 150
+    - _NoiseScale: 20
+    - _NormalStreght: 0.1
+    - _QueueControl: 0
+    - _QueueOffset: 0
+    - _RefractionScale: 20
+    - _RefractionlStreght: 2
+    - _WaterDepth: 1
+    m_Colors:
+    - _BaseDeepColor: {r: 0.024919897, g: 0.07751573, b: 1.0566038, a: 0.5019608}
+    - _BaseSurfaceColor: {r: 0.049839832, g: 1.3589678, b: 1.509434, a: 0.2509804}
+    - _DeepColor: {r: 0.021359876, g: 0.12361019, b: 1.509434, a: 0.5019608}
+    - _FoamColor: {r: 1, g: 1, b: 1, a: 1}
+    - _FoamSpeed: {r: 0.001, g: 0.001, b: 0, a: 0}
+    - _FoamTiling: {r: 1, g: 1, b: 0, a: 0}
+    - _RefractionSpeed: {r: 0.01, g: 0.01, b: 0, a: 0}
+    - _RefractionTiling: {r: 1, g: 1, b: 0, a: 0}
+    - _SurfaceColor: {r: 0.44459772, g: 0.75976384, b: 0.9150943, a: 0.2509804}
+    - _TilingScale: {r: 2, g: 0.5, b: 0, a: 0}
+    - _TilingSpeed: {r: 0, g: 0.5, b: 0, a: 0}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1
