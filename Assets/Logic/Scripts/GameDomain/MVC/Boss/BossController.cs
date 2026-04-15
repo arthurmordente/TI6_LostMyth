@@ -26,6 +26,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
         private readonly BossData _bossData;
         private readonly BossConfigurationSO _bossConfiguration;
         private readonly BossPhasesSO _bossPhases;
+        private readonly string _fightBossHudDisplayName;
         private readonly IBossAbilityController _bossAbilityController;
         private ArenaPosReference _arenaReference;
         private BossBehaviorSO _activeBehavior;
@@ -66,7 +67,8 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
             IAudioService audioService, ICommandFactory commandFactory,
             IResourcesLoaderService resourcesLoaderService, BossView bossViewPrefab,
             BossConfigurationSO bossConfiguration, BossPhasesSO bossPhases,
-            IBossAbilityController bossAbilityController, IGamePlayUiController gamePlayUiController) {
+            IBossAbilityController bossAbilityController, IGamePlayUiController gamePlayUiController,
+            string fightBossHudDisplayName) {
             _updateSubscriptionService = updateSubscriptionService;
             _audioService = audioService;
             _commandFactory = commandFactory;
@@ -76,6 +78,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
             _bossPhases = bossPhases;
             _bossAbilityController = bossAbilityController;
             _gamePlayUiController = gamePlayUiController;
+            _fightBossHudDisplayName = fightBossHudDisplayName ?? string.Empty;
             _bossData = new BossData(_bossConfiguration);
         }
 
@@ -90,9 +93,10 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
             // Initialize UI with correct percentages and absolute values
             int maxHp = _bossConfiguration != null ? _bossConfiguration.MaxHealth : Mathf.Max(1, _bossData.ActualHealth);
             int pct = maxHp > 0 ? Mathf.RoundToInt((float)_bossData.ActualHealth / maxHp * 100f) : 0;
-            _gamePlayUiController.OnActualBossHealthChange(pct);
+            _gamePlayUiController.SnapBossHealth(_bossData.ActualHealth, maxHp);
             _gamePlayUiController.OnPreviewBossHealthChange(pct);
-            _gamePlayUiController.OnActualBossLifeChange(_bossData.ActualHealth);
+            if (!string.IsNullOrEmpty(_fightBossHudDisplayName))
+                _gamePlayUiController.OnBossDisplayNameChange(_fightBossHudDisplayName);
             if (_bossView != null) {
                 _bossView.SetMoving(false);
             }
@@ -228,8 +232,17 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
         public async Task ExecuteTurnAsync() {
             bool resolvedThisTurn = false;
             bool pauseThisTurn = false;
-            // Tentativa de resolução de minigame no início do turno do boss
-            if (Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.MinigameRuntimeService.TryResolveAnyAtBossTurn(
+            // Dedicated DiceAttack resolution first (new Laki flow).
+            if (Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.TryResolveAnyAtBossTurn(
+                out Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackResult diceResult,
+                out Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.IResolver diceResolver))
+            {
+                Debug.Log($"[Laki] DiceAttack resolved at Boss turn. PlayerWon={diceResult.PlayerWon}");
+                try { diceResolver?.DestroyDiceAttackRoot(); } catch { }
+                resolvedThisTurn = true;
+            }
+            // Legacy minigame resolution path remains for old rounds.
+            if (!resolvedThisTurn && Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.MinigameRuntimeService.TryResolveAnyAtBossTurn(
                 out Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.MinigameResult mgResult,
                 out Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.IMinigameResolver mgResolver))
             {
@@ -237,12 +250,17 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
                 try { mgResolver?.DestroyMinigameRoot(); } catch { }
                 resolvedThisTurn = true;
             }
-            pauseThisTurn = Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.MinigameRuntimeService.ConsumePauseBossThisTurn();
-            if (Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.MinigameRuntimeService.IsActive || resolvedThisTurn || pauseThisTurn) {
+            bool pauseDice = Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.ConsumePauseBossThisTurn();
+            bool pauseLegacy = Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.MinigameRuntimeService.ConsumePauseBossThisTurn();
+            pauseThisTurn = pauseDice || pauseLegacy;
+            bool anyMinigameActive =
+                Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.IsActive ||
+                Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.MinigameRuntimeService.IsActive;
+            if (anyMinigameActive || resolvedThisTurn || pauseThisTurn) {
                 Debug.Log("[Laki] Minigame active/resolved - boss attacks paused this turn");
             }
             ResolvePendingCasts();
-            if (!Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.MinigameRuntimeService.IsActive && !resolvedThisTurn && !pauseThisTurn) {
+            if (!anyMinigameActive && !resolvedThisTurn && !pauseThisTurn) {
                 await ExecutePreparedActionAsync();
             }
             // After executing the previously prepared action, evaluate phase change for this turn
@@ -420,9 +438,11 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
 
         private async System.Threading.Tasks.Task PrepareNextActionAsync() {
             // Se há minigame ativo, não agendar novo ataque
+            if (Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.IsActive) return;
             if (Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.MinigameRuntimeService.IsActive) return;
             // Se a última rodada de um minigame acabou de sinalizar resolução no turno da Laki,
             // pulamos UMA preparação neste turno
+            if (Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.ConsumeSkipOnBossTurn()) return;
             if (Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.MinigameRuntimeService.ConsumeSkipOnBossTurn()) return;
             await QueuePreparedAttackFromBehaviorAsync();
         }
@@ -485,9 +505,9 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
 					attackInstance.Setup(_arenaReference, this);
 				}
 				Debug.Log($"Boss attack instantiated: {attackInstance.name} | index={attackIndex}");
-				int delay = attackInstance != null && attackInstance.IsMinigameAttack() ? 0 : 1;
+                int delay = attackInstance != null && attackInstance.IsDiceAttack() ? 0 : 1;
 				_pendingCasts.Add(new PendingCast { Attack = attackInstance, TurnsRemaining = delay });
-				if (delay == 0) Debug.Log($"[Laki] Minigame queued to execute this turn");
+                if (delay == 0) Debug.Log($"[Laki] Dice attack queued to execute this turn");
 				else Debug.Log($"Boss prepared attack index: {attackIndex} (executes next turn)");
 			}
 
@@ -542,7 +562,8 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
         }
 
         private void ConfigureTurnMovement() {
-            if (Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.MinigameRuntimeService.IsActive) {
+            if (Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.IsActive ||
+                Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.MinigameRuntimeService.IsActive) {
                 _turnMoveDistanceBudget = 0f;
                 Debug.Log("[Laki] Minigame active - boss movement disabled this turn");
                 return;
@@ -654,8 +675,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
             Debug.Log($"[Boss] Damage: -{amount} -> HP={_bossData.ActualHealth}/{maxHp}");
             // Update UI with percentage and absolute
             int pct = maxHp > 0 ? Mathf.RoundToInt((float)_bossData.ActualHealth / maxHp * 100f) : 0;
-            _gamePlayUiController.OnActualBossHealthChange(pct);
-            _gamePlayUiController.OnActualBossLifeChange(_bossData.ActualHealth);
+            _gamePlayUiController.OnBossHealthUpdate(_bossData.ActualHealth, maxHp);
             _gamePlayUiController.OnPreviewBossHealthChange(pct);
             // Handle death immediately
             if (_bossData.ActualHealth <= 0) {
@@ -684,8 +704,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
             int maxHp = _bossConfiguration != null ? _bossConfiguration.MaxHealth : Mathf.Max(1, _bossData.ActualHealth);
             Debug.Log($"[Boss] Heal: +{amount} -> HP={_bossData.ActualHealth}/{maxHp}");
             int pct = maxHp > 0 ? Mathf.RoundToInt((float)_bossData.ActualHealth / maxHp * 100f) : 0;
-            _gamePlayUiController.OnActualBossHealthChange(pct);
-            _gamePlayUiController.OnActualBossLifeChange(_bossData.ActualHealth);
+            _gamePlayUiController.OnBossHealthUpdate(_bossData.ActualHealth, maxHp);
             _gamePlayUiController.OnPreviewBossHealthChange(pct);
         }
 

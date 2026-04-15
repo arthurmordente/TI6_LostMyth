@@ -115,7 +115,7 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
 
         public void InitEntryPointGamePlay(IGamePlayUiController gamePlayUiController) {
             _gamePlayUiController = gamePlayUiController;
-            _gamePlayUiController.SetPlayerValues(_naraData.ActualHealth, _naraData.PreviewHealth);
+            _gamePlayUiController.SetPlayerValues(_naraData.PreviewHealth, _naraData.ActualHealth, _naraConfiguration.MaxHealth);
             _naraMovementController.InitEntryPoint(_naraView.GetRigidbody(), _naraView.GetCamera());
         }
 
@@ -139,12 +139,12 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
         }
         public void PreviewDamage(int damageAmound) {
             _naraData.TakeDamage(damageAmound);
-            _gamePlayUiController.OnPreviewPlayerLifePercentChange(_naraData.ActualHealth);
+            _gamePlayUiController.OnPreviewPlayerHealthUpdate(_naraData.ActualHealth, _naraConfiguration.MaxHealth);
         }
 
         public void PreviewHeal(int damageAmound) {
             _naraData.TakeDamage(damageAmound);
-            _gamePlayUiController.OnPreviewPlayerLifePercentChange(_naraData.ActualHealth);
+            _gamePlayUiController.OnPreviewPlayerHealthUpdate(_naraData.ActualHealth, _naraConfiguration.MaxHealth);
         }
 
         public void TakeDamage(int damageAmound) {
@@ -155,9 +155,8 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
                 flash.TriggerFlash();
             }
             _audioService?.PlayAudio(AudioClipType.AbilityPrep2SFX, AudioChannelType.Fx);
-            _gamePlayUiController.OnActualPlayerHealthChange(_naraData.ActualHealth);
-            _gamePlayUiController.OnActualPlayerLifePercentChange(_naraData.ActualHealth);
-            _gamePlayUiController.OnPreviewPlayerLifePercentChange(_naraData.ActualHealth);
+            _gamePlayUiController.OnPlayerHealthUpdate(_naraData.ActualHealth, _naraConfiguration.MaxHealth);
+            _gamePlayUiController.OnPreviewPlayerHealthUpdate(_naraData.ActualHealth, _naraConfiguration.MaxHealth);
             if (_naraData.IsAlive()) {
                 _naraView?.PlayDeath();
                 _commandFactory.CreateCommandVoid<GameOverCommand>().SetData(new GameOverCommandData(false)).Execute();
@@ -174,8 +173,7 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
 
         public void Heal(int healAmount) {
             _naraData.Heal(healAmount);
-            _gamePlayUiController.OnActualPlayerHealthChange(_naraData.ActualHealth);
-            _gamePlayUiController.OnActualPlayerLifePercentChange(_naraData.ActualHealth);
+            _gamePlayUiController.OnPlayerHealthUpdate(_naraData.ActualHealth, _naraConfiguration.MaxHealth);
         }
 
         public void TriggerExecute() {
