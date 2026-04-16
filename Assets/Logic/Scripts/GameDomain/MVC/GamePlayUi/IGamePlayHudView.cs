@@ -32,5 +32,6 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
         void OnSkill4CostChange(int cost);
         void OnSkill1NameChange(string name);
         void OnSkill2NameChange(string name);
+        void ShowBookSkillsTheme(bool showBookSkillsTheme);
     }
 }

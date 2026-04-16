@@ -1,11 +1,13 @@
 using Logic.Scripts.GameDomain.MVC.Abilitys;
 using Logic.Scripts.GameDomain.MVC.Nara;
 using Logic.Scripts.GameDomain.MVC.Shared;
+using Logic.Scripts.GameDomain.Services.Skills;
 using Logic.Scripts.Services.CommandFactory;
 using Logic.Scripts.Services.UpdateService;
 using Logic.Scripts.Turns;
 using UnityEngine;
 using Logic.Scripts.GameDomain.VisualFeedback;
+using Zenject;
 
 namespace Logic.Scripts.GameDomain.MVC.Book
 {
@@ -17,6 +19,7 @@ namespace Logic.Scripts.GameDomain.MVC.Book
         private readonly IUpdateSubscriptionService _updateSubscriptionService;
         private readonly ICommandFactory _commandFactory;
         private readonly ICheatController _cheatController;
+        private readonly IPaschoalSkillLoadoutService _paschoalSkillLoadoutService;
         // The Book's own ability set — configured separately in the inspector.
         // Initially points to the same abilities as Nara; swap to a dedicated array to diverge.
         private readonly AbilityData[] _abilities;
@@ -42,7 +45,8 @@ namespace Logic.Scripts.GameDomain.MVC.Book
             global::GameInputActions gameInputActions,
             IUpdateSubscriptionService updateSubscriptionService,
             ICommandFactory commandFactory,
-            ICheatController cheatController)
+            ICheatController cheatController,
+            [InjectOptional] IPaschoalSkillLoadoutService paschoalSkillLoadoutService = null)
         {
             _bookViewPrefab = bookViewPrefab;
             _config = config;
@@ -51,6 +55,7 @@ namespace Logic.Scripts.GameDomain.MVC.Book
             _updateSubscriptionService = updateSubscriptionService;
             _commandFactory = commandFactory;
             _cheatController = cheatController;
+            _paschoalSkillLoadoutService = paschoalSkillLoadoutService;
         }
 
         public void CreateBook(Vector3 position)
@@ -60,6 +65,7 @@ namespace Logic.Scripts.GameDomain.MVC.Book
             // after a plain Instantiate() only moves the Transform; the Rigidbody's position
             // stays at the spawn origin and the physics loop snaps the object back next FixedUpdate.
             _bookView = Object.Instantiate(_bookViewPrefab, position, Quaternion.identity);
+            InstallPaschoalSkillComponents();
 
             // Extra guarantee: zero out any velocity the prefab might carry and lock the
             // Rigidbody position so physics doesn't drift before DeactivateNaraGravity runs.
@@ -221,6 +227,19 @@ namespace Logic.Scripts.GameDomain.MVC.Book
         {
             if (_activeUnitCircleInstance == null) return;
             _activeUnitCircleInstance.SetActive(visible);
+        }
+
+        private void InstallPaschoalSkillComponents()
+        {
+            if (_bookView == null) return;
+
+            var toggle = _bookView.GetComponent<LegacySkillSystemToggle>();
+            if (toggle == null) _bookView.gameObject.AddComponent<LegacySkillSystemToggle>();
+
+            var loadout = _bookView.GetComponent<PaschoalSkillLoadout>();
+            if (loadout == null) loadout = _bookView.gameObject.AddComponent<PaschoalSkillLoadout>();
+            if (_paschoalSkillLoadoutService != null)
+                loadout.SetSkills(_paschoalSkillLoadoutService.BuildRuntimeSlotsArray());
         }
 
         #endregion

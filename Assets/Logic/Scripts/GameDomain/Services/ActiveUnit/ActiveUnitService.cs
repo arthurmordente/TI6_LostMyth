@@ -2,7 +2,9 @@ using Logic.Scripts.Core.Mvc.WorldCamera;
 using Logic.Scripts.GameDomain.MVC.Nara;
 using Logic.Scripts.GameDomain.MVC.Shared;
 using Logic.Scripts.GameDomain.MVC.Ui;
+using Logic.Scripts.GameDomain.Services.Skills;
 using UnityEngine;
+using Zenject;
 
 namespace Logic.Scripts.GameDomain.Services.ActiveUnit
 {
@@ -11,17 +13,19 @@ namespace Logic.Scripts.GameDomain.Services.ActiveUnit
         private readonly INaraController _naraController;
         private readonly IWorldCameraController _worldCamera;
         private readonly IGamePlayUiController _gamePlayUiController;
+        private readonly IPaschoalSkillLoadoutService _paschoalSkillLoadoutService;
         private IPlayableUnit _bookUnit;
 
         public IPlayableUnit ActiveUnit { get; private set; }
         public bool IsBookDeployed => _bookUnit != null;
 
         public ActiveUnitService(INaraController naraController, IWorldCameraController worldCameraController,
-            IGamePlayUiController gamePlayUiController)
+            IGamePlayUiController gamePlayUiController, [InjectOptional] IPaschoalSkillLoadoutService paschoalSkillLoadoutService = null)
         {
             _naraController = naraController;
             _worldCamera = worldCameraController;
             _gamePlayUiController = gamePlayUiController;
+            _paschoalSkillLoadoutService = paschoalSkillLoadoutService;
             ActiveUnit = naraController as IPlayableUnit;
         }
 
@@ -30,9 +34,32 @@ namespace Logic.Scripts.GameDomain.Services.ActiveUnit
         private void PushAbilityCostsToHud()
         {
             if (_gamePlayUiController == null || ActiveUnit == null) return;
+            ReloadPaschoalLoadoutForUnit(ActiveUnit);
+
+            var unitView = ActiveUnit.UnitViewGO;
+            if (unitView != null)
+            {
+                var legacyToggle = unitView.GetComponent<LegacySkillSystemToggle>();
+                bool useLegacy = legacyToggle != null && legacyToggle.UseLegacySkillSystem;
+                if (!useLegacy)
+                {
+                    var paschoalLoadout = unitView.GetComponent<PaschoalSkillLoadout>();
+                    if (paschoalLoadout != null)
+                    {
+                        int paschoalCostAt(int i)
+                        {
+                            if (!paschoalLoadout.TryGetSkill(i, out SkillDataSO skill) || skill == null) return 0;
+                            return Mathf.Max(0, skill.Cost);
+                        }
+                        _gamePlayUiController.SetAbilityManaCosts(paschoalCostAt(0), paschoalCostAt(1), paschoalCostAt(2), paschoalCostAt(3));
+                        return;
+                    }
+                }
+            }
+
             var abs = ActiveUnit.GetAbilities();
-            int c(int i) => abs != null && i < abs.Length && abs[i] != null ? abs[i].GetCost() : 0;
-            _gamePlayUiController.SetAbilityManaCosts(c(0), c(1), c(2), c(3));
+            int legacyCostAt(int i) => abs != null && i < abs.Length && abs[i] != null ? abs[i].GetCost() : 0;
+            _gamePlayUiController.SetAbilityManaCosts(legacyCostAt(0), legacyCostAt(1), legacyCostAt(2), legacyCostAt(3));
         }
 
         public void RegisterBook(IPlayableUnit book)
@@ -55,6 +82,7 @@ namespace Logic.Scripts.GameDomain.Services.ActiveUnit
                 // Active unit already is Nara: still refresh visual state (circle/line).
                 ActiveUnit?.SetMovementActive(true);
                 ActiveUnit?.OnBecomeActive();
+                _gamePlayUiController.ShowBookSkillsTheme(false);
                 PushAbilityCostsToHud();
                 FollowActiveUnit();
                 return;
@@ -66,6 +94,7 @@ namespace Logic.Scripts.GameDomain.Services.ActiveUnit
             ActiveUnit?.SetMovementActive(true);
             ActiveUnit?.OnBecomeActive();
 
+            _gamePlayUiController.ShowBookSkillsTheme(false);
             PushAbilityCostsToHud();
             FollowActiveUnit();
         }
@@ -80,6 +109,7 @@ namespace Logic.Scripts.GameDomain.Services.ActiveUnit
             ActiveUnit?.SetMovementActive(true);
             ActiveUnit?.OnBecomeActive();
 
+            _gamePlayUiController.ShowBookSkillsTheme(true);
             PushAbilityCostsToHud();
             FollowActiveUnit();
         }
@@ -102,6 +132,18 @@ namespace Logic.Scripts.GameDomain.Services.ActiveUnit
             var target = ActiveUnit.UnitViewGO?.transform;
             if (target != null)
                 _worldCamera.StartFollowTarget(target);
+        }
+
+        private void ReloadPaschoalLoadoutForUnit(IPlayableUnit unit)
+        {
+            if (unit == null || _paschoalSkillLoadoutService == null) return;
+            var unitView = unit.UnitViewGO;
+            if (unitView == null) return;
+
+            var paschoalLoadout = unitView.GetComponent<PaschoalSkillLoadout>();
+            if (paschoalLoadout == null) return;
+
+            paschoalLoadout.SetSkills(_paschoalSkillLoadoutService.BuildRuntimeSlotsArray());
         }
     }
 }
