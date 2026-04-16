@@ -25,6 +25,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Feather
             public MeshFilter MeshFilter;
             public MeshRenderer MeshRenderer;
             public Mesh Mesh;
+            public GameObject ColumnPrefabInstance;
         }
 
         private FeatherSubView[] _views;
@@ -67,6 +68,10 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Feather
         private float _yOffset = 0.05f;
         private int _rqAdd = 0;
         private IAudioService _audio;
+
+        private GameObject _columnPrefabNormal;
+        private GameObject _columnPrefabPull;
+        private GameObject _columnPrefabPush;
 
         public FeatherLinesHandler(FeatherLinesParams p, IUpdateSubscriptionService updateSubscriptionService)
         {
@@ -116,7 +121,8 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Feather
 			_meshDisp = displacementMaterial;
 		}
 
-		public FeatherLinesHandler(FeatherLinesParams p, bool isPull, Material lineBase, Material lineDisp, Material meshBase, Material meshDisp)
+		public FeatherLinesHandler(FeatherLinesParams p, bool isPull, Material lineBase, Material lineDisp, Material meshBase, Material meshDisp,
+			GameObject columnNormalPrefab = null, GameObject columnPullPrefab = null, GameObject columnPushPrefab = null)
 		{
 			_params = p;
 			_updateSvc = TryFindUpdateServiceInScene();
@@ -127,6 +133,9 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Feather
 			_lineDisp = lineDisp;
 			_meshBase = meshBase;
 			_meshDisp = meshDisp;
+			_columnPrefabNormal = columnNormalPrefab;
+			_columnPrefabPull = columnPullPrefab;
+			_columnPrefabPush = columnPushPrefab;
 		}
 
         public void SetAudio(IAudioService audio) { _audio = audio; }
@@ -295,6 +304,18 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Feather
             return false;
         }
 
+        private GameObject ResolveColumnPrefabForIndex(int i)
+        {
+            if (_columnPrefabNormal == null && _columnPrefabPull == null && _columnPrefabPush == null) return null;
+            if (_telegraphDisplacementEnabled && i == _specialIndex)
+            {
+                if (_isPushMode)
+                    return _columnPrefabPush != null ? _columnPrefabPush : _columnPrefabNormal;
+                return _columnPrefabPull != null ? _columnPrefabPull : _columnPrefabNormal;
+            }
+            return _columnPrefabNormal;
+        }
+
         private void UpdateTelegraphGeometryAtCenter(Vector3 center)
         {
             float spacing = Mathf.Max(0.1f, _params.margin);
@@ -355,20 +376,47 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Feather
                 _views[i].Line.positionCount = vertsWorld.Length;
                 _views[i].Line.SetPositions(vertsWorld);
 
-                Transform mT = _views[i].MeshFilter.transform;
-                mT.localPosition = new Vector3(0f, _yOffset, 0f);
-                mT.localRotation = Quaternion.identity;
+                GameObject colPrefab = ResolveColumnPrefabForIndex(i);
+                if (colPrefab != null)
+                {
+                    if (_views[i].ColumnPrefabInstance != null)
+                        Object.Destroy(_views[i].ColumnPrefabInstance);
+                    _views[i].ColumnPrefabInstance = Object.Instantiate(colPrefab, _parentTransform, false);
+                    Vector3 a = new Vector3(start.x, _yOffset, start.z);
+                    Vector3 b = new Vector3(end.x, _yOffset, end.z);
+                    Vector3 ab = b - a;
+                    float len = ab.magnitude;
+                    Vector3 hdir = len > 1e-6f ? new Vector3(ab.x, 0f, ab.z).normalized : Vector3.right;
+                    Vector3 mid = (a + b) * 0.5f;
+                    var ct = _views[i].ColumnPrefabInstance.transform;
+                    ct.SetPositionAndRotation(mid, Quaternion.FromToRotation(Vector3.right, hdir));
+                    ct.localScale = new Vector3(Mathf.Max(0.001f, len) / 8f, 1f, Mathf.Max(0.001f, _params.width) / 1f);
+                    _views[i].MeshRenderer.enabled = false;
+                    _views[i].Mesh.Clear();
+                }
+                else
+                {
+                    if (_views[i].ColumnPrefabInstance != null)
+                    {
+                        Object.Destroy(_views[i].ColumnPrefabInstance);
+                        _views[i].ColumnPrefabInstance = null;
+                    }
+                    _views[i].MeshRenderer.enabled = true;
+                    Transform mT = _views[i].MeshFilter.transform;
+                    mT.localPosition = new Vector3(0f, _yOffset, 0f);
+                    mT.localRotation = Quaternion.identity;
 
-                Vector3 v0L = mT.InverseTransformPoint(vertsWorld[0]);
-                Vector3 v1L = mT.InverseTransformPoint(vertsWorld[1]);
-                Vector3 v2L = mT.InverseTransformPoint(vertsWorld[2]);
-                Vector3 v3L = mT.InverseTransformPoint(vertsWorld[3]);
+                    Vector3 v0L = mT.InverseTransformPoint(vertsWorld[0]);
+                    Vector3 v1L = mT.InverseTransformPoint(vertsWorld[1]);
+                    Vector3 v2L = mT.InverseTransformPoint(vertsWorld[2]);
+                    Vector3 v3L = mT.InverseTransformPoint(vertsWorld[3]);
 
-                _views[i].Mesh.Clear();
-                _views[i].Mesh.vertices = new Vector3[] { v0L, v1L, v2L, v3L };
-                _views[i].Mesh.triangles = new int[] { 0, 1, 2, 0, 2, 3 };
-                _views[i].Mesh.RecalculateNormals();
-                _views[i].Mesh.RecalculateBounds();
+                    _views[i].Mesh.Clear();
+                    _views[i].Mesh.vertices = new Vector3[] { v0L, v1L, v2L, v3L };
+                    _views[i].Mesh.triangles = new int[] { 0, 1, 2, 0, 2, 3 };
+                    _views[i].Mesh.RecalculateNormals();
+                    _views[i].Mesh.RecalculateBounds();
+                }
             }
         }
 
@@ -499,15 +547,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Feather
                     }
                 }
 
-                Mesh mesh = _views[i].Mesh;
-                Transform mT = _views[i].MeshFilter.transform;
-                Vector3[] mv = mesh.vertices;
-                Vector3[] verts = new Vector3[4];
-                verts[0] = mT.TransformPoint(mv[0]);
-                verts[1] = mT.TransformPoint(mv[1]);
-                verts[2] = mT.TransformPoint(mv[2]);
-                verts[3] = mT.TransformPoint(mv[3]);
-
+                Vector3[] verts = StripMath.GenerateStripVertices(start, end, _params.width);
                 if (PointInQuad(playerWorld, verts)) return true;
             }
             return false;
@@ -571,6 +611,8 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Feather
             if (sLr != null) sLr.enabled = false;
             var sMr = (_views != null && _specialIndex >= 0 && _specialIndex < _views.Length) ? _views[_specialIndex].MeshRenderer : null;
             if (sMr != null) sMr.enabled = false;
+            var sCol = (_views != null && _specialIndex >= 0 && _specialIndex < _views.Length) ? _views[_specialIndex].ColumnPrefabInstance : null;
+            if (sCol != null) sCol.SetActive(false);
 
             yield return new WaitForSeconds(0.5f);
 
@@ -748,7 +790,14 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Feather
             if (_views != null)
             {
                 for (int i = 0; i < _views.Length; i++)
+                {
+                    if (_views[i]?.ColumnPrefabInstance != null)
+                    {
+                        Object.Destroy(_views[i].ColumnPrefabInstance);
+                        _views[i].ColumnPrefabInstance = null;
+                    }
                     if (_views[i]?.Line != null) Object.Destroy(_views[i].Line.gameObject);
+                }
             }
 
             if (_singleArrow != null)
@@ -769,7 +818,8 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Feather
                 {
                     var v = _views[i];
                     if (v?.Line != null) v.Line.enabled = visible;
-                    if (v?.MeshRenderer != null) v.MeshRenderer.enabled = visible;
+                    if (v?.ColumnPrefabInstance != null) v.ColumnPrefabInstance.SetActive(visible);
+                    else if (v?.MeshRenderer != null) v.MeshRenderer.enabled = visible;
                 }
             }
             if (_singleArrow != null) _singleArrow.enabled = visible;

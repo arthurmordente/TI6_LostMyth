@@ -60,8 +60,10 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
                     EditorGUILayout.PropertyField(minigameRoundPrefab, new GUIContent("Minigame Round Prefab"));
                     break;
                 case 7: // Circle
-                case 8: // GenericPlayerFootCircle
                     EditorGUILayout.PropertyField(circle, true);
+                    break;
+                case 8: // Deprecated_PlayerFootCircle (keeps serialized enum values stable)
+                    EditorGUILayout.HelpBox("Deprecated_PlayerFootCircle is unused. Switch attack type to Circle.", MessageType.Warning);
                     break;
                 case 9: // DiceAttack
                     EditorGUILayout.PropertyField(diceDisplayName, new GUIContent("Display Name"));

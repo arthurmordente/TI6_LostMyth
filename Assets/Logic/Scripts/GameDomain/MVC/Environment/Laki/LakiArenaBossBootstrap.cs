@@ -4,6 +4,10 @@ using Logic.Scripts.Turns;
 using Logic.Scripts.Services.CommandFactory;
 using Logic.Scripts.GameDomain.MVC.Nara;
 using Logic.Scripts.GameDomain.MVC.Boss.Laki.Chips;
+using Logic.Scripts.GameDomain.MVC.Boss.Visuals;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 {
@@ -37,6 +41,10 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 		[Header("Chips (service only — no HUD)")]
 		[SerializeField] private int _initialPlayerChips = 3;
 		[SerializeField] private int _initialBossChips = 3;
+
+		[Header("Arena visuals")]
+		[Tooltip("Optional override for tile prefabs. When null, uses CombatAttackVisualCatalogSO from the scene Zenject container (same binding as GamePlayInstaller).")]
+		[SerializeField] private CombatAttackVisualCatalogSO _combatAttackVisualCatalog;
 
 		private void Start()
 		{
@@ -87,6 +95,19 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 			arenaService.RerollTiles(0, new System.Random(17));
 			var viewGO = new GameObject("LakiRouletteArena");
 			var view = viewGO.AddComponent<LakiRouletteArenaView>();
+			var catalog = _combatAttackVisualCatalog;
+			if (catalog == null)
+			{
+				try { catalog = container.Resolve<CombatAttackVisualCatalogSO>(); } catch { catalog = null; }
+			}
+#if UNITY_EDITOR
+			if (catalog == null)
+			{
+				catalog = AssetDatabase.LoadAssetAtPath<CombatAttackVisualCatalogSO>(
+					"Assets/Logic/Scripts/GameDomain/MVC/Boss/Visuals/CombatAttackVisualCatalog.asset");
+			}
+#endif
+			view.SetAttackVisualCatalog(catalog);
 			view.SetGeometry(_centerWorld, _innerRadius, _outerRadius, _radialSplit01, _arcStartDeg, _arcDeg);
 			view.RefreshFrom(arenaService);
 			var casterRelay = GetComponent<Assets.Logic.Scripts.GameDomain.Effects.EffectableRelay>();

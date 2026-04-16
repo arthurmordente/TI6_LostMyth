@@ -239,7 +239,7 @@ namespace Logic.Scripts.GameDomain.MVC.Book
             var loadout = _bookView.GetComponent<PaschoalSkillLoadout>();
             if (loadout == null) loadout = _bookView.gameObject.AddComponent<PaschoalSkillLoadout>();
             if (_paschoalSkillLoadoutService != null)
-                loadout.SetSkills(_paschoalSkillLoadoutService.BuildRuntimeSlotsArray());
+                loadout.SetSkills(_paschoalSkillLoadoutService.BuildRuntimeSlotsArray(SkillLoadoutUnitType.Book));
         }
 
         #endregion

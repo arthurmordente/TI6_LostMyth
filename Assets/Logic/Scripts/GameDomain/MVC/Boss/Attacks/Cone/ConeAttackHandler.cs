@@ -13,17 +13,15 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Cone
         private readonly float[] _yaws;
 		private class ConeSubView
         {
-            public LineRenderer Line;
-            public MeshFilter MeshFilter;
-            public MeshRenderer MeshRenderer;
-            public Mesh Mesh;
+            public GameObject Root;
         }
 		private ConeSubView[] _views;
 		private readonly Material _lineMaterial;
 		private readonly Material _meshMaterial;
+		private readonly GameObject _telegraphPrefab;
 		private Logic.Scripts.GameDomain.MVC.Boss.Telegraph.ITelegraphLayeringService.TelegraphLayer _layer;
 
-		public ConeAttackHandler(float radius, float angleDeg, int sides, float[] yaws, Material lineMaterial, Material meshMaterial)
+		public ConeAttackHandler(float radius, float angleDeg, int sides, float[] yaws, Material lineMaterial, Material meshMaterial, GameObject telegraphPrefab = null)
         {
             _radius = radius;
             _angleDeg = angleDeg;
@@ -31,6 +29,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Cone
             _yaws = yaws;
 			_lineMaterial = lineMaterial;
 			_meshMaterial = meshMaterial;
+			_telegraphPrefab = telegraphPrefab;
         }
 
         public void PrepareTelegraph(Transform parentTransform)
@@ -42,66 +41,25 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Cone
             _views = new ConeSubView[_yaws.Length];
             for (int i = 0; i < _yaws.Length; i++)
             {
-                GameObject go = new GameObject("ConeSubActionView");
-                go.transform.SetParent(parentTransform, false);
-
                 ConeSubView v = new ConeSubView();
-                v.Line = go.AddComponent<LineRenderer>();
-				var lineMat = _lineMaterial != null ? new Material(_lineMaterial) : new Material(Shader.Find("Sprites/Default"));
-				lineMat.renderQueue += _layer.QueueAdd;
-				v.Line.material = lineMat;
-                v.Line.useWorldSpace = true;
-                v.Line.loop = true;
-                v.Line.widthMultiplier = 0.1f;
-				// Deixe a cor/controlar via material do ShaderGraph
-
-                v.MeshFilter = go.AddComponent<MeshFilter>();
-                v.MeshRenderer = go.AddComponent<MeshRenderer>();
-				var meshMat = _meshMaterial != null ? new Material(_meshMaterial) : new Material(Shader.Find("Sprites/Default"));
-				meshMat.renderQueue += _layer.QueueAdd;
-				v.MeshRenderer.material = meshMat;
-                v.Mesh = new Mesh();
-                v.Mesh.name = "ConeMesh";
-                v.MeshFilter.sharedMesh = v.Mesh;
 
                 Vector3 origin = parentTransform.position;
                 Vector3 parentFwd = new Vector3(parentTransform.forward.x, 0f, parentTransform.forward.z);
                 if (parentFwd.sqrMagnitude < 1e-6f) parentFwd = Vector3.forward;
                 Vector3 forward = Quaternion.Euler(0f, _yaws[i], 0f) * parentFwd;
-
-                Vector3[] outline = ConeArea.GenerateConeOutlinePolygon(origin, forward, _radius, _angleDeg, _sides);
-				for (int p = 0; p < outline.Length; p++) outline[p].y = _layer.Y;
-                v.Line.positionCount = outline.Length;
-                v.Line.SetPositions(outline);
-
-                Vector3[] arc = ConeArea.GenerateConeArcVertices(origin, forward, _radius, _angleDeg, _sides);
-				for (int p = 0; p < arc.Length; p++) arc[p].y = _layer.Y;
-
-                Transform mT = v.MeshFilter.transform;
-				mT.localPosition = new Vector3(0f, _layer.Y, 0f);
-                mT.localRotation = Quaternion.identity;
-
-                // Build triangle fan: vertex 0 = origin, then arc points
-                Vector3[] worldVerts = new Vector3[arc.Length + 1];
-				worldVerts[0] = new Vector3(origin.x, _layer.Y, origin.z);
-                for (int a = 0; a < arc.Length; a++) worldVerts[a + 1] = arc[a];
-
-                Vector3[] localVerts = new Vector3[worldVerts.Length];
-                for (int a = 0; a < worldVerts.Length; a++) localVerts[a] = mT.InverseTransformPoint(worldVerts[a]);
-
-                int triCount = (worldVerts.Length - 1) * 3;
-                int[] tris = new int[triCount];
-                int t = 0;
-                for (int a = 1; a < worldVerts.Length - 1; a++)
-                {
-                    tris[t++] = 0; tris[t++] = a; tris[t++] = a + 1;
-                }
-
-                v.Mesh.Clear();
-                v.Mesh.vertices = localVerts;
-                v.Mesh.triangles = tris;
-                v.Mesh.RecalculateNormals();
-                v.Mesh.RecalculateBounds();
+				Quaternion rotation = Quaternion.LookRotation(forward.normalized, Vector3.up);
+				if (_telegraphPrefab != null)
+				{
+					v.Root = Object.Instantiate(_telegraphPrefab, new Vector3(origin.x, _layer.Y, origin.z), rotation, parentTransform);
+					float scale = Mathf.Max(0.001f, _radius);
+					v.Root.transform.localScale = new Vector3(scale, 1f, scale);
+				}
+				else
+				{
+					v.Root = new GameObject("ConeTelegraphPlaceholder");
+					v.Root.transform.SetParent(parentTransform, false);
+					v.Root.transform.SetPositionAndRotation(new Vector3(origin.x, _layer.Y, origin.z), rotation);
+				}
 
                 _views[i] = v;
             }
@@ -159,9 +117,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Cone
             for (int i = 0; i < _views.Length; i++)
             {
                 if (_views[i] != null)
-                {
-                    Object.Destroy(_views[i].Line?.gameObject);
-                }
+                    Object.Destroy(_views[i].Root);
             }
             _views = null;
 
@@ -176,8 +132,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Cone
             for (int i = 0; i < _views.Length; i++)
             {
                 var v = _views[i];
-                if (v?.Line != null) v.Line.enabled = visible;
-                if (v?.MeshRenderer != null) v.MeshRenderer.enabled = visible;
+                if (v?.Root != null) v.Root.SetActive(visible);
             }
         }
     }

@@ -5,55 +5,123 @@ namespace Logic.Scripts.GameDomain.Services.Skills
 {
     public class PaschoalSkillLoadoutService : IPaschoalSkillLoadoutService
     {
+        private const string PlayerPrefsPlayerPrefix = "PaschoalLoadout_Player_";
+        private const string PlayerPrefsBookPrefix = "PaschoalLoadout_Book_";
+
         private readonly SkillDataSO[] _catalog;
-        private readonly SkillDataSO[] _selectedSlots;
+        private readonly SkillDataSO[] _selectedPlayerSlots;
+        private readonly SkillDataSO[] _selectedBookSlots;
 
         public IReadOnlyList<SkillDataSO> AllSkills => _catalog;
-        public int SlotCount => _selectedSlots.Length;
-        public event Action OnLoadoutChanged;
+        public int SlotCount => _selectedPlayerSlots.Length;
+        public event Action<SkillLoadoutUnitType> OnLoadoutChanged;
 
         public PaschoalSkillLoadoutService(SkillDataSO[] allSkills, int slotCount)
         {
             _catalog = allSkills ?? Array.Empty<SkillDataSO>();
             int safeSlotCount = Math.Max(1, slotCount);
-            _selectedSlots = new SkillDataSO[safeSlotCount];
-            InitializeDefaultSelection();
+            _selectedPlayerSlots = new SkillDataSO[safeSlotCount];
+            _selectedBookSlots = new SkillDataSO[safeSlotCount];
+            InitializeDefaultSelection(_selectedPlayerSlots);
+            InitializeDefaultSelection(_selectedBookSlots);
+            LoadFromPlayerPrefs();
         }
 
-        public bool TryGetSelectedSkill(int slotIndex, out SkillDataSO skill)
+        public bool TryGetSelectedSkill(SkillLoadoutUnitType unitType, int slotIndex, out SkillDataSO skill)
         {
             skill = null;
-            if (slotIndex < 0 || slotIndex >= _selectedSlots.Length) return false;
-            skill = _selectedSlots[slotIndex];
+            SkillDataSO[] selectedSlots = ResolveSlots(unitType);
+            if (slotIndex < 0 || slotIndex >= selectedSlots.Length) return false;
+            skill = selectedSlots[slotIndex];
             return skill != null;
         }
 
-        public SkillDataSO[] BuildRuntimeSlotsArray()
+        public SkillDataSO[] BuildRuntimeSlotsArray(SkillLoadoutUnitType unitType)
         {
-            var clone = new SkillDataSO[_selectedSlots.Length];
-            Array.Copy(_selectedSlots, clone, _selectedSlots.Length);
+            SkillDataSO[] selectedSlots = ResolveSlots(unitType);
+            EnsureSlotsFilledWithDefaults(selectedSlots);
+            var clone = new SkillDataSO[selectedSlots.Length];
+            Array.Copy(selectedSlots, clone, selectedSlots.Length);
             return clone;
         }
 
-        public bool SetSlotSkill(int slotIndex, SkillDataSO skill)
+        public bool SetSlotSkill(SkillLoadoutUnitType unitType, int slotIndex, SkillDataSO skill)
         {
-            if (slotIndex < 0 || slotIndex >= _selectedSlots.Length) return false;
-            _selectedSlots[slotIndex] = skill;
-            OnLoadoutChanged?.Invoke();
+            SkillDataSO[] selectedSlots = ResolveSlots(unitType);
+            if (slotIndex < 0 || slotIndex >= selectedSlots.Length) return false;
+            selectedSlots[slotIndex] = skill;
+            SaveToPlayerPrefs(unitType, selectedSlots);
+            OnLoadoutChanged?.Invoke(unitType);
             return true;
         }
 
-        public bool SetSlotSkillFromCatalogIndex(int slotIndex, int catalogIndex)
+        public bool SetSlotSkillFromCatalogIndex(SkillLoadoutUnitType unitType, int slotIndex, int catalogIndex)
         {
             if (catalogIndex < 0 || catalogIndex >= _catalog.Length) return false;
-            return SetSlotSkill(slotIndex, _catalog[catalogIndex]);
+            return SetSlotSkill(unitType, slotIndex, _catalog[catalogIndex]);
         }
 
-        private void InitializeDefaultSelection()
+        private SkillDataSO[] ResolveSlots(SkillLoadoutUnitType unitType)
         {
-            int count = Math.Min(_selectedSlots.Length, _catalog.Length);
+            return unitType == SkillLoadoutUnitType.Book ? _selectedBookSlots : _selectedPlayerSlots;
+        }
+
+        private void InitializeDefaultSelection(SkillDataSO[] target)
+        {
+            int count = Math.Min(target.Length, _catalog.Length);
             for (int i = 0; i < count; i++)
-                _selectedSlots[i] = _catalog[i];
+                target[i] = _catalog[i];
+        }
+
+        private void EnsureSlotsFilledWithDefaults(SkillDataSO[] target)
+        {
+            int count = Math.Min(target.Length, _catalog.Length);
+            for (int i = 0; i < count; i++)
+            {
+                if (target[i] == null)
+                    target[i] = _catalog[i];
+            }
+        }
+
+        private void SaveToPlayerPrefs(SkillLoadoutUnitType unitType, SkillDataSO[] slots)
+        {
+            string prefix = unitType == SkillLoadoutUnitType.Book ? PlayerPrefsBookPrefix : PlayerPrefsPlayerPrefix;
+            for (int i = 0; i < slots.Length; i++)
+            {
+                int catalogIndex = IndexOfInCatalog(slots[i]);
+                UnityEngine.PlayerPrefs.SetInt(prefix + i, catalogIndex);
+            }
+            UnityEngine.PlayerPrefs.Save();
+        }
+
+        private void LoadFromPlayerPrefs()
+        {
+            LoadUnitFromPlayerPrefs(SkillLoadoutUnitType.Player, _selectedPlayerSlots);
+            LoadUnitFromPlayerPrefs(SkillLoadoutUnitType.Book, _selectedBookSlots);
+        }
+
+        private void LoadUnitFromPlayerPrefs(SkillLoadoutUnitType unitType, SkillDataSO[] target)
+        {
+            string prefix = unitType == SkillLoadoutUnitType.Book ? PlayerPrefsBookPrefix : PlayerPrefsPlayerPrefix;
+            for (int i = 0; i < target.Length; i++)
+            {
+                string key = prefix + i;
+                if (!UnityEngine.PlayerPrefs.HasKey(key)) continue;
+                int idx = UnityEngine.PlayerPrefs.GetInt(key, -1);
+                if (idx >= 0 && idx < _catalog.Length)
+                    target[i] = _catalog[idx];
+            }
+            EnsureSlotsFilledWithDefaults(target);
+        }
+
+        private int IndexOfInCatalog(SkillDataSO skill)
+        {
+            if (skill == null) return -1;
+            for (int i = 0; i < _catalog.Length; i++)
+            {
+                if (_catalog[i] == skill) return i;
+            }
+            return -1;
         }
     }
 }

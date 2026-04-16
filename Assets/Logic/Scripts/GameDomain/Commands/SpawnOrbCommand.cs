@@ -17,6 +17,8 @@ namespace Logic.Scripts.GameDomain.Commands
         public float MaxRadius;
         public int BaseDamage;
         public int InitialHp;
+        /// <summary>Optional: CombatAttackVisualCatalog telegraph prefab for the orb AoE ring (OrbView). If null, disc is procedural.</summary>
+        public GameObject OrbAreaVisualPrefab;
     }
 
     public class SpawnOrbCommand : BaseCommand, ICommandVoid
@@ -46,7 +48,7 @@ namespace Logic.Scripts.GameDomain.Commands
             var controller = orbGo.GetComponent<Logic.Scripts.GameDomain.MVC.Environment.Orb.OrbController>();
             if (controller != null)
             {
-                controller.Initialize(_data.Arena, _registry, _data.MoveStep, _data.GrowStep, _data.InitialRadius, _data.MaxRadius, _data.BaseDamage, _data.InitialHp);
+                controller.Initialize(_data.Arena, _registry, _data.MoveStep, _data.GrowStep, _data.InitialRadius, _data.MaxRadius, _data.BaseDamage, _data.InitialHp, _data.OrbAreaVisualPrefab);
                 // Registrar no registro único publicado via serviço estático.
                 // Padrão oficial: qualquer ator criado em runtime deve ser adicionado via EnvironmentActorsRegistryService.Instance.
                 var envReg = EnvironmentActorsRegistryService.Instance;

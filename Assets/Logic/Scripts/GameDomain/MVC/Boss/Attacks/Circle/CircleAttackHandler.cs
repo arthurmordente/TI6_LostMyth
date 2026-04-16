@@ -15,17 +15,20 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Circle
 		private LineRenderer _ring;
 		private MeshFilter _discFilter;
 		private MeshRenderer _discRenderer;
+		private GameObject _telegraphRoot;
 		private float _yOffset = 0.05f;
 		private int _rqAdd = 0;
 		private Material _lineMaterial;
 		private Material _meshMaterial;
+		private readonly GameObject _telegraphPrefab;
 
-		public CircleAttackHandler(float radius, float ringWidth, Material lineMaterial, Material meshMaterial)
+		public CircleAttackHandler(float radius, float ringWidth, Material lineMaterial, Material meshMaterial, GameObject telegraphPrefab = null)
 		{
 			_radius = Mathf.Max(0.1f, radius);
 			_ringWidth = Mathf.Max(0.02f, ringWidth);
 			_lineMaterial = lineMaterial;
 			_meshMaterial = meshMaterial;
+			_telegraphPrefab = telegraphPrefab;
 		}
 
 		public void PrepareTelegraph(Transform parentTransform)
@@ -33,9 +36,16 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Circle
 			_parent = parentTransform;
 			_arena = Object.FindFirstObjectByType<ArenaPosReference>(FindObjectsInactive.Exclude);
 
-			var go = new GameObject("Circle_Ring");
-			go.transform.SetParent(parentTransform, false);
-			_ring = go.AddComponent<LineRenderer>();
+			if (_telegraphPrefab != null)
+			{
+				_telegraphRoot = Object.Instantiate(_telegraphPrefab, parentTransform.position, parentTransform.rotation, parentTransform);
+				_telegraphRoot.transform.localScale = new Vector3(_radius, 1f, _radius);
+			}
+			else
+			{
+				var go = new GameObject("Circle_Ring");
+				go.transform.SetParent(parentTransform, false);
+				_ring = go.AddComponent<LineRenderer>();
 
 			var layering = Logic.Scripts.GameDomain.MVC.Boss.Telegraph.TelegraphLayeringLocator.Service;
 			var layer = layering != null ? layering.Register(preferTop: false) : default;
@@ -49,18 +59,19 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Circle
 			_ring.loop = true;
 			_ring.widthMultiplier = _ringWidth;
 
-			DrawCircle(_parent.position, _radius, 64);
+				DrawCircle(_parent.position, _radius, 64);
 
-			var discGo = new GameObject("Circle_Fill");
-			discGo.transform.SetParent(parentTransform, false);
-			_discFilter = discGo.AddComponent<MeshFilter>();
-			_discRenderer = discGo.AddComponent<MeshRenderer>();
-			var discMat = _meshMaterial != null ? new Material(_meshMaterial) : new Material(Shader.Find("Sprites/Default"));
-			discMat.renderQueue += _rqAdd;
-			_discRenderer.material = discMat;
-			float effectiveRadius = Mathf.Max(0.01f, _radius - _ringWidth * 0.5f);
-			_discFilter.sharedMesh = BuildFilledDisc(effectiveRadius, 64);
-			_discFilter.transform.position = new Vector3(_parent.position.x, _yOffset, _parent.position.z);
+				var discGo = new GameObject("Circle_Fill");
+				discGo.transform.SetParent(parentTransform, false);
+				_discFilter = discGo.AddComponent<MeshFilter>();
+				_discRenderer = discGo.AddComponent<MeshRenderer>();
+				var discMat = _meshMaterial != null ? new Material(_meshMaterial) : new Material(Shader.Find("Sprites/Default"));
+				discMat.renderQueue += _rqAdd;
+				_discRenderer.material = discMat;
+				float effectiveRadius = Mathf.Max(0.01f, _radius - _ringWidth * 0.5f);
+				_discFilter.sharedMesh = BuildFilledDisc(effectiveRadius, 64);
+				_discFilter.transform.position = new Vector3(_parent.position.x, _yOffset, _parent.position.z);
+			}
 
 			// Start hidden; boss controller will reveal at mid prep
 			SetTelegraphVisible(false);
@@ -104,6 +115,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Circle
 		{
 			if (_ring != null) { Object.Destroy(_ring.gameObject); _ring = null; }
 			if (_discFilter != null) { Object.Destroy(_discFilter.gameObject); _discFilter = null; _discRenderer = null; }
+			if (_telegraphRoot != null) { Object.Destroy(_telegraphRoot); _telegraphRoot = null; }
 			Logic.Scripts.GameDomain.MVC.Boss.Telegraph.TelegraphVisibilityRegistry.Unregister(this);
 		}
 
@@ -111,6 +123,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Circle
 		{
 			if (_ring != null) _ring.enabled = visible;
 			if (_discRenderer != null) _discRenderer.enabled = visible;
+			if (_telegraphRoot != null) _telegraphRoot.SetActive(visible);
 		}
 
 		private void DrawCircle(Vector3 center, float radius, int segments)

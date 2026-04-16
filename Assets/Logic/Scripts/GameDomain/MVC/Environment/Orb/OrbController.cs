@@ -35,7 +35,7 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Orb
 
         [SerializeReference] private List<AbilityEffect> _effects;
 
-        public void Initialize(ArenaPosReference arena, OrbRegistry registry, float moveStep, float growStep, float initialRadius, float maxRadius, int baseDamage, int initialHp)
+        public void Initialize(ArenaPosReference arena, OrbRegistry registry, float moveStep, float growStep, float initialRadius, float maxRadius, int baseDamage, int initialHp, GameObject orbAreaVisualPrefab = null)
         {
             _arena = arena;
             _nara = arena != null ? arena.NaraController : null;
@@ -52,6 +52,7 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Orb
             _view = GetComponent<OrbView>();
             if (_view != null)
             {
+                _view.ConfigureAreaVisualPrefab(orbAreaVisualPrefab);
                 _view.PrepareTelegraph();
                 _view.UpdateRadius(_radius);
             }
