@@ -54,7 +54,7 @@ Material:
     m_Floats:
     - _AlphaClip: 0
     - _CloudIntensity: 1.6
-    - _CloudScale: 150
+    - _CloudScale: 100
     - _CloudsAlpha: 10
     - _DistortScale: 60
     - _QueueControl: 0
@@ -63,7 +63,7 @@ Material:
     - _WindPower: 50
     m_Colors:
     - _CloudSpeed: {r: 0.003, g: 0.003, b: 0, a: 0}
-    - _CloudsColor: {r: 84.36339, g: 98.49323, b: 123.3451, a: 1}
+    - _CloudsColor: {r: 63.44604, g: 74.57454, b: 114.96206, a: 1}
     - _DistortSpeed: {r: 0.02, g: 0.03, b: 0, a: 0}
     - _WindSpeed: {r: 0.003, g: 0.003, b: 0, a: 0}
   m_BuildTextureStacks: []

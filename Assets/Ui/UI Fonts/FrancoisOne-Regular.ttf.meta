@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 9b434f4ca13f72143a59d20545e90f9d
+guid: 607e3521b18dcce4cbb4c5efad1d7a77
 TrueTypeFontImporter:
   externalObjects: {}
   serializedVersion: 4
@@ -9,7 +9,7 @@ TrueTypeFontImporter:
   characterPadding: 1
   includeFontData: 1
   fontNames:
-  - IM FELL English SC
+  - Francois One
   fallbackFontReferences: []
   customCharacters: 
   fontRenderingMode: 0
