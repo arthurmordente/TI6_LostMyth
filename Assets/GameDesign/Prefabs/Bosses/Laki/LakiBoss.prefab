@@ -2321,7 +2321,7 @@ Transform:
   m_GameObject: {fileID: 3694188558464357575}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 12, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -2462,8 +2462,7 @@ MonoBehaviour:
       - Pool: 2
   _initialPlayerChips: 3
   _initialBossChips: 3
-  _chipUiSkin: {fileID: 11400000, guid: ec8de1247115d25429b31db6450311fa, type: 2}
-  _uiScale: 2
+  _combatAttackVisualCatalog: {fileID: 0}
   references:
     version: 2
     RefIds:

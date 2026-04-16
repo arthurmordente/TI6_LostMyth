@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Logic.Scripts.GameDomain.MVC.Boss.Visuals;
 using Logic.Scripts.GameDomain.MVC.Environment.Laki;
 using UnityEditor;
@@ -22,6 +23,29 @@ public static class CombatVisualPrefabGenerator
     private const float WingSlashConeMeshUnitRadius = 1f;
     private const float WingSlashConeMeshAngleDeg = 215f;
     private const int WingSlashConeMeshSides = 48;
+
+    /// <summary>Regenerates only Laki roulette mesh assets, tile prefabs, materials/Laki, and catalog Laki slots (same layout math as <see cref="LakiRouletteArenaView"/> procedural path).</summary>
+    [MenuItem("Tools/Boss/Generate Laki Arena Roulette Meshes & Prefabs Only")]
+    public static void GenerateLakiArenaOnly()
+    {
+        EnsureFolder("Assets/Logic/Scripts/GameDomain/MVC/Boss", "Visuals");
+        EnsureFolder(BaseFolder, "GeneratedPrefabs");
+        EnsureFolder(GeneratedFolder, "LakiArenaTiles");
+        EnsureFolder(GeneratedFolder, "Meshes");
+        EnsureFolder(GeneratedFolder, "Materials");
+        EnsureFolder(MatFolder, "Laki");
+
+        Material lakiPositive = CreateOrGetLitMaterial(LakiMatFolder, "Mat_Laki_Positive", new Color(0.2f, 1f, 0.25f, 1f));
+        Material lakiNeutral = CreateOrGetLitMaterial(LakiMatFolder, "Mat_Laki_Neutral", new Color(0.88f, 0.88f, 0.9f, 1f));
+        Material lakiNegative = CreateOrGetLitMaterial(LakiMatFolder, "Mat_Laki_Negative", new Color(1f, 0.22f, 0.22f, 1f));
+
+        GameObject[] lakiTiles = BuildLakiRouletteCanonicalTilePrefabs(lakiNeutral, lakiPositive, lakiNegative);
+        TryAssignCatalogLakiTilesOnly(lakiTiles);
+
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
+        Debug.Log("[CombatVisualPrefabGenerator] Regenerated Laki arena meshes, prefabs (LakiArenaTiles/), Materials/Laki, and catalog Laki tile slots.");
+    }
 
     [MenuItem("Tools/Boss/Generate Combat Visual Prefabs (Telegraphs + Laki tiles)")]
     public static void Generate()
@@ -101,35 +125,23 @@ public static class CombatVisualPrefabGenerator
 
     private static GameObject[] BuildLakiRouletteCanonicalTilePrefabs(Material matNeutral, Material matPositive, Material matNegative)
     {
-        const float innerRadius = RouletteArenaService.INNER_RADIUS_DEFAULT;
-        const float outerRadius = RouletteArenaService.OUTER_RADIUS_DEFAULT;
-        const float radialSplit01 = 0.6f;
+        float innerRadius = RouletteArenaService.INNER_RADIUS_DEFAULT;
+        float outerRadius = RouletteArenaService.OUTER_RADIUS_DEFAULT;
         const float arcStartDeg = 180f;
         const float arcDeg = 180f;
         const int sectorCount = 8;
-        const float angularGapDeg = 2f;
         const float radialGap = 0.05f;
         const int angularSmooth = 8;
         Vector3 centerWorld = Vector3.zero;
 
         float sectorAngle = arcDeg / sectorCount;
-        float split = innerRadius + radialSplit01 * (outerRadius - innerRadius);
-        float halfGap = Mathf.Max(0f, angularGapDeg) * 0.5f;
+        float halfGap = RouletteArenaService.ComputeTileAngularHalfGapDeg(arcDeg, sectorCount);
         int s = 0;
         float a0 = arcStartDeg + s * sectorAngle + halfGap;
         float a1 = arcStartDeg + (s + 1) * sectorAngle - halfGap;
 
-        float r0Inner = innerRadius;
-        float r1Inner = split;
-        float rMinInner = Mathf.Min(r0Inner, r1Inner) + Mathf.Max(0f, radialGap);
-        float rMaxInner = Mathf.Max(r0Inner, r1Inner) - Mathf.Max(0f, radialGap);
-        if (rMaxInner <= rMinInner) rMaxInner = rMinInner + 0.005f;
-
-        float r0Outer = split;
-        float r1Outer = outerRadius;
-        float rMinOuter = Mathf.Min(r0Outer, r1Outer) + Mathf.Max(0f, radialGap);
-        float rMaxOuter = Mathf.Max(r0Outer, r1Outer) - Mathf.Max(0f, radialGap);
-        if (rMaxOuter <= rMinOuter) rMaxOuter = rMinOuter + 0.005f;
+        RouletteArenaService.ComputeBandRadialExtents(innerRadius, outerRadius, 0, radialGap, out float rMinInner, out float rMaxInner);
+        RouletteArenaService.ComputeBandRadialExtents(innerRadius, outerRadius, 1, radialGap, out float rMinOuter, out float rMaxOuter);
 
         float midAngleInner = (a0 + a1) * 0.5f * Mathf.Deg2Rad;
         float midRInner = (rMinInner + rMaxInner) * 0.5f;
@@ -143,9 +155,10 @@ public static class CombatVisualPrefabGenerator
             Mathf.Cos(midAngleOuter) * midROuter, 0f, Mathf.Sin(midAngleOuter) * midROuter);
         Vector3 pivotOuter = tileCenterOuter - centerWorld;
 
-        Mesh innerMesh = CreateOrGetMesh("Mesh_LakiTile_Inner_Canonical_S0",
+        // Pivot = tileCentre − arenaCentre in XZ (arena at origin here); matches LakiRouletteArenaView.ComputeTileLayoutForIndex + BuildRingSectorMesh.
+        Mesh innerMesh = CreateOrOverwriteMesh("Mesh_LakiTile_Inner_Canonical_S0",
             LakiRouletteSectorMeshBuilder.BuildRingSectorMesh(rMinInner, rMaxInner, a0, a1, angularSmooth, pivotInner));
-        Mesh outerMesh = CreateOrGetMesh("Mesh_LakiTile_Outer_Canonical_S0",
+        Mesh outerMesh = CreateOrOverwriteMesh("Mesh_LakiTile_Outer_Canonical_S0",
             LakiRouletteSectorMeshBuilder.BuildRingSectorMesh(rMinOuter, rMaxOuter, a0, a1, angularSmooth, pivotOuter));
 
         string[] innerNames = { "LakiRoulette_Inner_Neutral", "LakiRoulette_Inner_Positive", "LakiRoulette_Inner_Negative" };
@@ -216,6 +229,61 @@ public static class CombatVisualPrefabGenerator
 
         so.ApplyModifiedPropertiesWithoutUndo();
         EditorUtility.SetDirty(catalogObj);
+    }
+
+    private static void TryAssignCatalogLakiTilesOnly(GameObject[] lakiTiles)
+    {
+        string[] guids = AssetDatabase.FindAssets("t:CombatAttackVisualCatalogSO");
+        if (guids == null || guids.Length == 0) return;
+
+        string path = AssetDatabase.GUIDToAssetPath(guids[0]);
+        Object catalogObj = AssetDatabase.LoadAssetAtPath<Object>(path);
+        if (catalogObj == null) return;
+
+        SerializedObject so = new SerializedObject(catalogObj);
+        SerializedProperty lakiInner = so.FindProperty("_lakiRouletteInnerTilePrefabs");
+        SerializedProperty lakiOuter = so.FindProperty("_lakiRouletteOuterTilePrefabs");
+        if (lakiInner != null && lakiInner.isArray && lakiTiles != null && lakiTiles.Length >= 6)
+        {
+            lakiInner.arraySize = 3;
+            for (int i = 0; i < 3; i++)
+                lakiInner.GetArrayElementAtIndex(i).objectReferenceValue = lakiTiles[i];
+        }
+        if (lakiOuter != null && lakiOuter.isArray && lakiTiles != null && lakiTiles.Length >= 6)
+        {
+            lakiOuter.arraySize = 3;
+            for (int i = 0; i < 3; i++)
+                lakiOuter.GetArrayElementAtIndex(i).objectReferenceValue = lakiTiles[3 + i];
+        }
+
+        so.ApplyModifiedPropertiesWithoutUndo();
+        EditorUtility.SetDirty(catalogObj);
+    }
+
+    /// <summary>Overwrites existing mesh assets so regenerated geometry matches current arena math (CreateOrGetMesh would leave stale triangles).</summary>
+    private static Mesh CreateOrOverwriteMesh(string name, Mesh source)
+    {
+        string path = $"{MeshFolder}/{name}.asset";
+        source.name = name;
+        Mesh existing = AssetDatabase.LoadAssetAtPath<Mesh>(path);
+        if (existing != null)
+        {
+            existing.Clear(false);
+            existing.vertices = source.vertices;
+            existing.triangles = source.triangles;
+            var uv = new List<Vector2>(source.vertexCount);
+            source.GetUVs(0, uv);
+            existing.SetUVs(0, uv);
+            existing.indexFormat = source.indexFormat;
+            existing.RecalculateBounds();
+            existing.RecalculateNormals();
+            Object.DestroyImmediate(source);
+            EditorUtility.SetDirty(existing);
+            return existing;
+        }
+
+        AssetDatabase.CreateAsset(source, path);
+        return source;
     }
 
     private static void SetDisplacementVisuals(SerializedProperty prop,

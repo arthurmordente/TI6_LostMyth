@@ -17,10 +17,11 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 		private INaraController _naraController;
 		private ICommandFactory _commandFactory;
 
-		[SerializeField] private Vector3 _centerWorld = new Vector3(0f, 7f, 0f);
+		[SerializeField] private Vector3 _centerWorld = new Vector3(0f, 0.5f, -4f);
 		[SerializeField] private float _innerRadius = RouletteArenaService.INNER_RADIUS_DEFAULT;
 		[SerializeField] private float _outerRadius = RouletteArenaService.OUTER_RADIUS_DEFAULT;
-		[SerializeField, Range(0f, 1f)] private float _radialSplit01 = 0.6f;
+		[SerializeField, Range(0f, 1f), Tooltip("Unused. Split uses TILE_RADIAL_DEPTH + 2.5% outer gap (see RouletteArenaService).")]
+		private float _radialSplit01 = 0.6f;
 		[SerializeField] private float _arcStartDeg = 180f;
 		[SerializeField] private float _arcDeg = 180f;
 
@@ -67,24 +68,6 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 			catch { Debug.LogError("[LakiArenaBossBootstrap] INaraController not bound."); return; }
 			try { _commandFactory = container.Resolve<ICommandFactory>(); }
 			catch { Debug.LogError("[LakiArenaBossBootstrap] ICommandFactory not bound."); return; }
-
-			// Set arena Y from BossConfiguration.InitialPlayerPosition.y (try multiple sources)
-			bool ySet = false;
-			try {
-				var bossCfg = container.Resolve<Logic.Scripts.GameDomain.MVC.Boss.BossConfigurationSO>();
-				_centerWorld = new Vector3(_centerWorld.x, bossCfg.InitialPlayerPosition.y, _centerWorld.z);
-				ySet = true;
-			} catch { }
-			if (!ySet) {
-				try {
-					var levelTurnData = container.Resolve<LevelTurnData>();
-					if (levelTurnData != null && levelTurnData.BossConfiguration != null) {
-						float y = levelTurnData.BossConfiguration.InitialPlayerPosition.y;
-						_centerWorld = new Vector3(_centerWorld.x, y, _centerWorld.z);
-						ySet = true;
-					}
-				} catch { }
-			}
 
 			var arenaService = new RouletteArenaService(_innerRadius, _outerRadius, _radialSplit01, _arcStartDeg, _arcDeg);
 			arenaService.SetLayoutConfigs(

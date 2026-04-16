@@ -24,8 +24,62 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 
 		public enum TileEffectType { Neutral = 0, Positive = 1, Negative = 2 }
 
-		public const float INNER_RADIUS_DEFAULT = 6f;
-		public const float OUTER_RADIUS_DEFAULT = 12f;
+		/// <summary>Inside edge of the annulus (hole). Each band extends <see cref="TILE_RADIAL_DEPTH"/> outward from here (inner) or after the gap (outer).</summary>
+		public const float INNER_RADIUS_DEFAULT = 8.5f;
+
+		/// <summary>Radial length of inner and outer tile meshes (same as the cube scale reference 8.5).</summary>
+		public const float TILE_RADIAL_DEPTH = 8.5f;
+
+		/// <summary>Radial gap between inner and outer bands = this × outer radius (2.5% reserved for divisória).</summary>
+		public const float BAND_DIVIDER_FRACTION_OF_OUTER = 0.025f;
+
+		/// <summary>Default outer rim: <c>(hole + 2×<see cref="TILE_RADIAL_DEPTH"/>) / (1 − <see cref="BAND_DIVIDER_FRACTION_OF_OUTER"/>)</c>. Must stay a <c>const</c> for default ctor params.</summary>
+		public const float OUTER_RADIUS_DEFAULT =
+			(INNER_RADIUS_DEFAULT + 2f * TILE_RADIAL_DEPTH) / (1f - BAND_DIVIDER_FRACTION_OF_OUTER);
+
+		/// <summary>Each tile mesh spans (arc/sectors)×this angle; the rest is left for angular dividers (0.95 ⇒ 5% removed from uniform opening).</summary>
+		public const float TILE_ANGULAR_OPENING_KEEP = 0.95f;
+
+		public static float BandDividerGap(float outerRadius) =>
+			BAND_DIVIDER_FRACTION_OF_OUTER * Mathf.Max(0.01f, outerRadius);
+
+		public static float OuterRadiusForHole(float holeInnerRadius) =>
+			(holeInnerRadius + 2f * TILE_RADIAL_DEPTH) / (1f - BAND_DIVIDER_FRACTION_OF_OUTER);
+
+		/// <summary>Mid-gap radius between inner and outer bands (for <c>r &lt; split</c> ⇒ inner tile).</summary>
+		public static float ComputeSplitRadius(float holeInnerRadius, float outerRadius) =>
+			holeInnerRadius + TILE_RADIAL_DEPTH + 0.5f * BandDividerGap(outerRadius);
+
+		public static float ComputeTileAngularHalfGapDeg(float arcDeg, int sectorCount)
+		{
+			float slot = arcDeg / Mathf.Max(1, sectorCount);
+			return 0.5f * slot * (1f - TILE_ANGULAR_OPENING_KEEP);
+		}
+
+		/// <param name="radialInset">Extra inset on both edges of the band (e.g. <c>_radialGap</c> on the view).</param>
+		public static void ComputeBandRadialExtents(
+			float holeInnerRadius,
+			float outerRadius,
+			int band,
+			float radialInset,
+			out float rMin,
+			out float rMax)
+		{
+			float g = BandDividerGap(outerRadius);
+			float rInnerEnd = holeInnerRadius + TILE_RADIAL_DEPTH;
+			float inset = Mathf.Max(0f, radialInset);
+			if (band == 0)
+			{
+				rMin = holeInnerRadius + inset;
+				rMax = rInnerEnd - inset;
+			}
+			else
+			{
+				rMin = rInnerEnd + g + inset;
+				rMax = outerRadius - inset;
+			}
+			if (rMax <= rMin) rMax = rMin + 0.005f;
+		}
 
 		private const int SECTOR_COUNT  = 8;
 		private const int RADIAL_BANDS  = 2;
@@ -65,7 +119,7 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 		public int   TileCount   => TILE_COUNT;
 		public float InnerRadius => _innerRadius;
 		public float OuterRadius => _outerRadius;
-		public float SplitRadius => _innerRadius + _radialSplit01 * (_outerRadius - _innerRadius);
+		public float SplitRadius => ComputeSplitRadius(_innerRadius, _outerRadius);
 
 		// ─── Configuration ────────────────────────────────────────────────────────
 

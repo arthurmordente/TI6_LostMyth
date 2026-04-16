@@ -96,6 +96,7 @@ namespace Logic.Scripts.Turns {
                 Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.IResolver tfResolver;
                 if (Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.TryResolveAnyAtBossTurn(out tfResult, out tfResolver)) {
                     UnityEngine.Debug.Log($"[Laki] DiceAttack resolved at TurnFlow begin. PlayerWon={tfResult.PlayerWon}");
+                    Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.ApplyLakiDiceLossDamageIfPlayerWon(tfResult);
                     try { tfResolver?.DestroyDiceAttackRoot(); } catch { }
                     try { Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Dice.DiceUiRuntime.Reset(); } catch { }
                 }

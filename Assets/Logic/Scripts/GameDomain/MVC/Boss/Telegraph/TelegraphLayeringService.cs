@@ -4,7 +4,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Telegraph
 {
 	public class TelegraphLayeringService : ITelegraphLayeringService
 	{
-		private readonly float _baseY = 0.05f;
+		private readonly float _baseY = 0.1f;
 		private readonly float _stepY = 0.01f;
 		private readonly int _stepQueue = 5;
 
