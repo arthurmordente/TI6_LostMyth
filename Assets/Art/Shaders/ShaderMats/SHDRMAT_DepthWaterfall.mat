@@ -20,7 +20,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Shader Graphs_SHDER_DepthWater 1
+  m_Name: SHDRMAT_DepthWaterfall
   m_Shader: {fileID: -6465566751694194690, guid: 4502c6454bf8e5a42836e99ae28a4fca, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -54,39 +54,39 @@ Material:
     - _CellsSpeed: 5
     - _Depth: 5
     - _Float: 0
-    - _FoamAmount: 20
-    - _FoamCut: 1
-    - _HightFrequency: 1.1
+    - _FoamAmount: 10
+    - _FoamCut: 1.5
+    - _HightFrequency: 1
     - _Metalic: 0
     - _NoiseScale: 20
     - _NormalStreght: 0.1
-    - _NormalStrenght: 1
+    - _NormalStrenght: 20
     - _QueueControl: 0
     - _QueueOffset: 0
-    - _RefractionScale: 20
-    - _RefractionlStreght: 0
+    - _RefractionScale: 10
+    - _RefractionlStreght: 2
     - _Smooth: 1
     - _Smoothness: 1
-    - _VertexDisplace: 0
-    - _VoronolDensity: 10
+    - _VertexDisplace: 2
+    - _VoronolDensity: 2
     - _VoronolPower: 10
-    - _WaterDepth: 10
-    - _WaveAmplitude: 0.2
-    - _WaveSpeed: 1
+    - _WaterDepth: 5
+    - _WaveAmplitude: 1
+    - _WaveSpeed: 5
     m_Colors:
     - _BaseDeepColor: {r: 0.027634395, g: 0.03913226, b: 0.254717, a: 0.5019608}
     - _BaseSurfaceColor: {r: 0.049839832, g: 1.3589678, b: 1.509434, a: 0.22745098}
     - _DeepColor: {r: 0.021359876, g: 0.12361019, b: 1.509434, a: 0.5019608}
     - _FoamColor: {r: 0.9066462, g: 0.88394445, b: 0.9811321, a: 0.78039217}
-    - _FoamSpeed: {r: 0, g: 0, b: 0, a: 0}
-    - _FoamTiling: {r: 1, g: 1, b: 0, a: 0}
-    - _RefractionSpeed: {r: 0.1, g: 0.1, b: 0, a: 0}
-    - _RefractionTiling: {r: 1, g: 1, b: 0, a: 0}
+    - _FoamSpeed: {r: 0.5, g: 1, b: 0, a: 0}
+    - _FoamTiling: {r: 10, g: 0.8, b: 0, a: 0}
+    - _RefractionSpeed: {r: 0.1, g: 1, b: 0, a: 0}
+    - _RefractionTiling: {r: 5, g: 0.1, b: 0, a: 0}
     - _SurfaceColor: {r: 0.44459772, g: 0.75976384, b: 0.9150943, a: 0.2509804}
     - _TilingScale: {r: 2, g: 0.5, b: 0, a: 0}
     - _TilingSpeed: {r: 0, g: 0.5, b: 0, a: 0}
     - _VoronolColor: {r: 0.81998724, g: 0.86735064, b: 1.6877406, a: 1}
-    - _VoronolSpeed: {r: 0.1, g: 0.1, b: 0, a: 0}
-    - _VoronolTiling: {r: 1, g: 1, b: 0, a: 0}
+    - _VoronolSpeed: {r: 0, g: 2, b: 0, a: 0}
+    - _VoronolTiling: {r: 10, g: 0.1, b: 0, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

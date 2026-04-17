@@ -64,7 +64,7 @@ Material:
     - _FresnelPower: 3
     - _GradientPower: 2
     - _NoiseScale: 15
-    - _Power: 20
+    - _Power: 10
     - _QueueControl: 0
     - _QueueOffset: 50
     m_Colors:
