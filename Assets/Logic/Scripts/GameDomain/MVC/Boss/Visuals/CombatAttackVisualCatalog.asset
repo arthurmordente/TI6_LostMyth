@@ -1,0 +1,78 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ef637330d5a28b44b076f1b00b8bd45, type: 3}
+  m_Name: CombatAttackVisualCatalog
+  m_EditorClassIdentifier: Assembly-CSharp::Logic.Scripts.GameDomain.MVC.Boss.Visuals.CombatAttackVisualCatalogSO
+  _proteanCones:
+    NormalTelegraphPrefab: {fileID: 8742677292157219105, guid: e11551f48d2db2643b01cfb6fdd05c3a, type: 3}
+    PullTelegraphPrefab: {fileID: 2899438486769804250, guid: 3639c9dc599294d4abe23932be3f7cbf, type: 3}
+    PushTelegraphPrefab: {fileID: 7208288196115947727, guid: b2f355603b3bf564faa25bac370e871f, type: 3}
+    NormalAreaPrefab: {fileID: 0}
+    PullAreaPrefab: {fileID: 0}
+    PushAreaPrefab: {fileID: 0}
+  _wingSlash:
+    NormalTelegraphPrefab: {fileID: 5436002829695318441, guid: c375fe1def32b894f92fa3d9359919bb, type: 3}
+    PullTelegraphPrefab: {fileID: 2436443255089009225, guid: 51a6f5f2c8a87eb418938ed44e8941e3, type: 3}
+    PushTelegraphPrefab: {fileID: 8273591137805646803, guid: f5a49d9a46aadd647b3548648c994d2a, type: 3}
+    NormalAreaPrefab: {fileID: 0}
+    PullAreaPrefab: {fileID: 0}
+    PushAreaPrefab: {fileID: 0}
+  _skySwords:
+    NormalTelegraphPrefab: {fileID: 8309577336712847930, guid: 708bfeeaf4149914ab1869d97f88d519, type: 3}
+    PullTelegraphPrefab: {fileID: 3401634229088548534, guid: 561d950cba923214b84e86ab3da4f23b, type: 3}
+    PushTelegraphPrefab: {fileID: 8571049703692601611, guid: 953bfe515974a7648a94f1f80a22c2ac, type: 3}
+    NormalAreaPrefab: {fileID: 0}
+    PullAreaPrefab: {fileID: 0}
+    PushAreaPrefab: {fileID: 0}
+  _circle:
+    NormalTelegraphPrefab: {fileID: 7017811765489133595, guid: 4cf4467f0c989564eb47680e45d6aecd, type: 3}
+    PullTelegraphPrefab: {fileID: 5479118454338380538, guid: c766e7e0e062fd042bef8a31ae6e0b31, type: 3}
+    PushTelegraphPrefab: {fileID: 7146869031834311083, guid: 786f2922530c7064fb682783aa31e60c, type: 3}
+    NormalAreaPrefab: {fileID: 0}
+    PullAreaPrefab: {fileID: 0}
+    PushAreaPrefab: {fileID: 0}
+  _featherLines:
+    NormalTelegraphPrefab: {fileID: 2323805912775172875, guid: fd8ab984f97ebe74899511b3172b09dc, type: 3}
+    PullTelegraphPrefab: {fileID: 8086804202185163898, guid: 0cf910486a6c7e744802f77902ec355c, type: 3}
+    PushTelegraphPrefab: {fileID: 2590079439278276704, guid: 2830ccaf179555c4ebfef24e6bb01e1c, type: 3}
+    NormalAreaPrefab: {fileID: 0}
+    PullAreaPrefab: {fileID: 0}
+    PushAreaPrefab: {fileID: 0}
+  _orb:
+    NormalTelegraphPrefab: {fileID: 4118072648259618641, guid: 530c738dffe99714f8f3af43274b6dd3, type: 3}
+    PullTelegraphPrefab: {fileID: 1555578647163771703, guid: 6f9e97388972e844088fbf109aa32eb8, type: 3}
+    PushTelegraphPrefab: {fileID: 2449098030668112977, guid: 64a2c9e6d1f85b94dab6e923b01b615c, type: 3}
+    NormalAreaPrefab: {fileID: 0}
+    PullAreaPrefab: {fileID: 0}
+    PushAreaPrefab: {fileID: 0}
+  _bigOrb:
+    NormalTelegraphPrefab: {fileID: 5319278691725652227, guid: b420d0cb48ac38241b6f7aded63dc235, type: 3}
+    PullTelegraphPrefab: {fileID: 91001733766656672, guid: 9c6a4837e73c7e24488011316ba88ddc, type: 3}
+    PushTelegraphPrefab: {fileID: 4585286713098937258, guid: d51dabcd7e9aa3841b2bba25f5ddd0ea, type: 3}
+    NormalAreaPrefab: {fileID: 0}
+    PullAreaPrefab: {fileID: 0}
+    PushAreaPrefab: {fileID: 0}
+  _featherColumns:
+    ColumnNormalPrefab: {fileID: 654932336814616789, guid: f20764d688db4974f8de6740fc9a2e13, type: 3}
+    ColumnPullPrefab: {fileID: 4921830948649764014, guid: 88dfce176372425479edfb7763913132, type: 3}
+    ColumnPushPrefab: {fileID: 6868361093710891171, guid: 5c8e51dae6ec9cd48883ec6655f346e0, type: 3}
+    ColumnNormalAreaPrefab: {fileID: 0}
+    ColumnPullAreaPrefab: {fileID: 0}
+    ColumnPushAreaPrefab: {fileID: 0}
+  _lakiRouletteInnerTilePrefabs:
+  - {fileID: 342947753085768622, guid: 05b22af6fe05c3247b367a3c7342f824, type: 3}
+  - {fileID: 150762638911987631, guid: 001460e9f8907fa4e930743feeadefa7, type: 3}
+  - {fileID: 2480189279154488174, guid: df85fa1caea83c944800791e455b659b, type: 3}
+  _lakiRouletteOuterTilePrefabs:
+  - {fileID: 1205299661540397943, guid: ac8515f63beaeaf41a41a8b887ddddcf, type: 3}
+  - {fileID: 6049677088633991014, guid: 1781e080121cfb34ba4aaffbee609cc6, type: 3}
+  - {fileID: 4710542007057214257, guid: a4229f257db5e7f49a4b0c797d3dc9d5, type: 3}

@@ -34,8 +34,10 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.SkySwords
 
 		private readonly Material _lineMaterial;
 		private readonly Material _meshMaterial;
+		private readonly GameObject _telegraphDiscPrefab;
+		private GameObject _catalogDiscInstance;
 
-		public SkySwordsHandler(float radius, float ringWidth, bool isPull, bool telegraphDisplacementEnabled, Material lineMaterial, Material meshMaterial)
+		public SkySwordsHandler(float radius, float ringWidth, bool isPull, bool telegraphDisplacementEnabled, Material lineMaterial, Material meshMaterial, GameObject telegraphDiscPrefab = null)
 		{
 			_radius = Mathf.Max(0.1f, radius);
 			_ringWidth = Mathf.Max(0.02f, ringWidth);
@@ -43,6 +45,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.SkySwords
 			_telegraphDisplacementEnabled = telegraphDisplacementEnabled;
 			_lineMaterial = lineMaterial;
 			_meshMaterial = meshMaterial;
+			_telegraphDiscPrefab = telegraphDiscPrefab;
 		}
 
 		public void PrepareTelegraph(Transform parentTransform)
@@ -59,26 +62,43 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.SkySwords
 					_nextIsPull = null;
 				}
 
-			var go = new GameObject("SkySwords_Ring");
-			go.transform.SetParent(parentTransform, false);
-			_ring = go.AddComponent<LineRenderer>();
 			var layering = Logic.Scripts.GameDomain.MVC.Boss.Telegraph.TelegraphLayeringLocator.Service;
 			var layer = layering != null ? layering.Register(preferTop: _telegraphDisplacementEnabled) : default;
 			_yOffset = layer.Y;
 			_rqAdd = layer.QueueAdd;
-			var ringMat = _lineMaterial != null ? new Material(_lineMaterial) : new Material(Shader.Find("Sprites/Default"));
-			ringMat.renderQueue += _rqAdd;
-			_ring.material = ringMat;
-			_ring.useWorldSpace = true;
-			_ring.loop = true;
-			_ring.widthMultiplier = _ringWidth;
-			// Cor: amarelo para ataques normais; vermelho para ataques com deslocamento
-			_ring.startColor = _telegraphDisplacementEnabled ? new Color(1f, 0f, 0f, 0.8f) : new Color(1f, 1f, 0f, 0.8f);
-			_ring.endColor = _ring.startColor;
 
-			DrawCircle(_centerWorld, _radius, 64);
+			if (_telegraphDiscPrefab != null)
+			{
+				_catalogDiscInstance = Object.Instantiate(_telegraphDiscPrefab, parentTransform);
+				_catalogDiscInstance.name = "SkySwords_TelegraphFromCatalog";
+				_catalogDiscInstance.transform.SetPositionAndRotation(
+					new Vector3(_centerWorld.x, _yOffset, _centerWorld.z),
+					Quaternion.identity);
+				float r = Mathf.Max(0.001f, _radius);
+				_catalogDiscInstance.transform.localScale = new Vector3(r, 1f, r);
+				var mrs = _catalogDiscInstance.GetComponentsInChildren<MeshRenderer>(true);
+				for (int mi = 0; mi < mrs.Length; mi++)
+				{
+					if (mrs[mi] == null) continue;
+					var dm = mrs[mi].material;
+					if (dm != null) dm.renderQueue += _rqAdd;
+				}
+			}
+			else
+			{
+				var go = new GameObject("SkySwords_Ring");
+				go.transform.SetParent(parentTransform, false);
+				_ring = go.AddComponent<LineRenderer>();
+				var ringMat = _lineMaterial != null ? new Material(_lineMaterial) : new Material(Shader.Find("Sprites/Default"));
+				ringMat.renderQueue += _rqAdd;
+				_ring.material = ringMat;
+				_ring.useWorldSpace = true;
+				_ring.loop = true;
+				_ring.widthMultiplier = _ringWidth;
+				_ring.startColor = _telegraphDisplacementEnabled ? new Color(1f, 0f, 0f, 0.8f) : new Color(1f, 1f, 0f, 0.8f);
+				_ring.endColor = _ring.startColor;
+				DrawCircle(_centerWorld, _radius, 64);
 
-				// Disc fill
 				var discGo = new GameObject("SkySwords_Fill");
 				discGo.transform.SetParent(parentTransform, false);
 				_discFilter = discGo.AddComponent<MeshFilter>();
@@ -88,8 +108,8 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.SkySwords
 				_discRenderer.material = discMat;
 				float effectiveRadius = Mathf.Max(0.01f, _radius - _ringWidth * 0.5f);
 				_discFilter.sharedMesh = BuildFilledDisc(effectiveRadius, 64);
-				// Posiciona o fill no centro do círculo, em y offset (plano)
 				_discFilter.transform.position = new Vector3(_centerWorld.x, _yOffset, _centerWorld.z);
+			}
 
 				// Arrow (player direction), similar ao feather quando deslocamento habilitado
 				if (_telegraphDisplacementEnabled)
@@ -186,6 +206,11 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.SkySwords
 
 		public void Cleanup()
 		{
+			if (_catalogDiscInstance != null)
+			{
+				Object.Destroy(_catalogDiscInstance);
+				_catalogDiscInstance = null;
+			}
 			if (_ring != null)
 			{
 				Object.Destroy(_ring.gameObject);
@@ -213,6 +238,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.SkySwords
 
 		public void SetTelegraphVisible(bool visible)
 		{
+			if (_catalogDiscInstance != null) _catalogDiscInstance.SetActive(visible);
 			if (_ring != null) _ring.enabled = visible;
 			if (_discRenderer != null) _discRenderer.enabled = visible;
 			if (_arrow != null) _arrow.enabled = visible && _telegraphDisplacementEnabled;

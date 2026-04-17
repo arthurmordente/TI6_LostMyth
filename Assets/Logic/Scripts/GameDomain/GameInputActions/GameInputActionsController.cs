@@ -13,6 +13,7 @@ namespace Logic.Scripts.GameDomain.GameInputActions {
 
         // TAB key programmatic binding — added without modifying the Input Actions asset
         private InputAction _switchUnitTabAction;
+        private InputAction _toggleLoadoutQAction;
 
         public GameInputActionsController(global::GameInputActions gameInputActions, ICommandFactory commandFactory) {
             _gameInputActions = gameInputActions;
@@ -185,6 +186,9 @@ namespace Logic.Scripts.GameDomain.GameInputActions {
             _gameInputActions.Exploration.Pause.started += OnPauseExplorationStarted;
             _gameInputActions.Exploration.RotateCam.started += OnRotateCamStarted;
             _gameInputActions.Exploration.Zoom.started += OnZoomPerformed;
+            _toggleLoadoutQAction = new InputAction(type: InputActionType.Button, binding: "<Keyboard>/q");
+            _toggleLoadoutQAction.started += OnToggleLoadoutStarted;
+            _toggleLoadoutQAction.Enable();
         }
 
         public void UnregisterExplorationInputListeners() {
@@ -197,6 +201,12 @@ namespace Logic.Scripts.GameDomain.GameInputActions {
             _gameInputActions.Exploration.Pause.started -= OnPauseExplorationStarted;
             _gameInputActions.Exploration.RotateCam.started -= OnRotateCamStarted;
             _gameInputActions.Exploration.Zoom.started -= OnZoomPerformed;
+            if (_toggleLoadoutQAction != null) {
+                _toggleLoadoutQAction.started -= OnToggleLoadoutStarted;
+                _toggleLoadoutQAction.Disable();
+                _toggleLoadoutQAction.Dispose();
+                _toggleLoadoutQAction = null;
+            }
         }
 
         private void OnActivateCamStarted(InputAction.CallbackContext obj) {
@@ -212,6 +222,10 @@ namespace Logic.Scripts.GameDomain.GameInputActions {
         }
         private void OnPauseExplorationStarted(InputAction.CallbackContext obj) {
             _commandFactory.CreateCommandVoid<PauseExplorationInputCommand>().Execute();
+        }
+
+        private void OnToggleLoadoutStarted(InputAction.CallbackContext obj) {
+            _commandFactory.CreateCommandVoid<ToggleExplorationLoadoutUICommand>().Execute();
         }
         #endregion
 

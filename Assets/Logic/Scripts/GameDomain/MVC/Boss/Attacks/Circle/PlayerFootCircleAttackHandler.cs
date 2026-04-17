@@ -17,15 +17,18 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Circle
         private LineRenderer _ring;
         private MeshFilter _discFilter;
         private MeshRenderer _discRenderer;
+        private GameObject _telegraphRoot;
         private float _yOffset = 0.05f;
         private int _rqAdd;
+        private readonly GameObject _telegraphPrefab;
 
-        public PlayerFootCircleAttackHandler(float radius, float ringWidth, Material lineMaterial, Material meshMaterial)
+        public PlayerFootCircleAttackHandler(float radius, float ringWidth, Material lineMaterial, Material meshMaterial, GameObject telegraphPrefab = null)
         {
             _radius = Mathf.Max(0.1f, radius);
             _ringWidth = Mathf.Max(0.02f, ringWidth);
             _lineMaterial = lineMaterial;
             _meshMaterial = meshMaterial;
+            _telegraphPrefab = telegraphPrefab;
         }
 
         public void PrepareTelegraph(Transform parentTransform)
@@ -36,27 +39,35 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Circle
             _yOffset = layer.Y;
             _rqAdd = layer.QueueAdd;
 
-            var ringGo = new GameObject("PlayerFootCircle_Ring");
-            ringGo.transform.SetParent(parentTransform, false);
-            _ring = ringGo.AddComponent<LineRenderer>();
+            if (_telegraphPrefab != null)
+            {
+                _telegraphRoot = Object.Instantiate(_telegraphPrefab, center, Quaternion.identity, parentTransform);
+                _telegraphRoot.transform.localScale = new Vector3(_radius, 1f, _radius);
+            }
+            else
+            {
+                var ringGo = new GameObject("PlayerFootCircle_Ring");
+                ringGo.transform.SetParent(parentTransform, false);
+                _ring = ringGo.AddComponent<LineRenderer>();
             var ringMat = _lineMaterial != null ? new Material(_lineMaterial) : new Material(Shader.Find("Sprites/Default"));
             ringMat.renderQueue += _rqAdd;
             _ring.material = ringMat;
             _ring.useWorldSpace = true;
             _ring.loop = true;
             _ring.widthMultiplier = _ringWidth;
-            DrawCircle(center, _radius, 64);
+                DrawCircle(center, _radius, 64);
 
-            var discGo = new GameObject("PlayerFootCircle_Fill");
-            discGo.transform.SetParent(parentTransform, false);
-            _discFilter = discGo.AddComponent<MeshFilter>();
-            _discRenderer = discGo.AddComponent<MeshRenderer>();
-            var discMat = _meshMaterial != null ? new Material(_meshMaterial) : new Material(Shader.Find("Sprites/Default"));
-            discMat.renderQueue += _rqAdd;
-            _discRenderer.material = discMat;
-            var effectiveRadius = Mathf.Max(0.01f, _radius - _ringWidth * 0.5f);
-            _discFilter.sharedMesh = BuildFilledDisc(effectiveRadius, 64);
-            _discFilter.transform.position = new Vector3(center.x, _yOffset, center.z);
+                var discGo = new GameObject("PlayerFootCircle_Fill");
+                discGo.transform.SetParent(parentTransform, false);
+                _discFilter = discGo.AddComponent<MeshFilter>();
+                _discRenderer = discGo.AddComponent<MeshRenderer>();
+                var discMat = _meshMaterial != null ? new Material(_meshMaterial) : new Material(Shader.Find("Sprites/Default"));
+                discMat.renderQueue += _rqAdd;
+                _discRenderer.material = discMat;
+                var effectiveRadius = Mathf.Max(0.01f, _radius - _ringWidth * 0.5f);
+                _discFilter.sharedMesh = BuildFilledDisc(effectiveRadius, 64);
+                _discFilter.transform.position = new Vector3(center.x, _yOffset, center.z);
+            }
 
             SetTelegraphVisible(false);
             Logic.Scripts.GameDomain.MVC.Boss.Telegraph.TelegraphVisibilityRegistry.Register(this);
@@ -91,6 +102,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Circle
         {
             if (_ring != null) { Object.Destroy(_ring.gameObject); _ring = null; }
             if (_discFilter != null) { Object.Destroy(_discFilter.gameObject); _discFilter = null; _discRenderer = null; }
+            if (_telegraphRoot != null) { Object.Destroy(_telegraphRoot); _telegraphRoot = null; }
             Logic.Scripts.GameDomain.MVC.Boss.Telegraph.TelegraphVisibilityRegistry.Unregister(this);
         }
 
@@ -98,6 +110,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Circle
         {
             if (_ring != null) _ring.enabled = visible;
             if (_discRenderer != null) _discRenderer.enabled = visible;
+            if (_telegraphRoot != null) _telegraphRoot.SetActive(visible);
         }
 
         private Vector3 ResolvePlayerWorldPosition()

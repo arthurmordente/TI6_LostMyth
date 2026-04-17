@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 using System.Collections.Generic;
 using Logic.Scripts.GameDomain.MVC.Abilitys;
 using Logic.Scripts.GameDomain.MVC.Boss.Attacks.Core;
@@ -8,7 +9,11 @@ using Logic.Scripts.GameDomain.MVC.Boss.Attacks.Orb;
 using Logic.Scripts.GameDomain.Commands;
 using Logic.Scripts.Services.CommandFactory;
 using Logic.Scripts.Services.AudioService;
+using Logic.Scripts.GameDomain.MVC.Boss.Visuals;
 using Zenject;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace Logic.Scripts.GameDomain.MVC.Boss
 {
@@ -16,7 +21,19 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
     {
         [SerializeReference] private List<AbilityEffect> _effects;
 
-        private enum AttackType { ProteanCones, FeatherLines, WingSlash, Orb, HookAwakening, SkySwords, Minigame, Circle, GenericPlayerFootCircle, DiceAttack }
+        private enum AttackType
+        {
+            ProteanCones = 0,
+            FeatherLines = 1,
+            WingSlash = 2,
+            Orb = 3,
+            HookAwakening = 4,
+            SkySwords = 5,
+            Minigame = 6,
+            Circle = 7,
+            Deprecated_PlayerFootCircle = 8,
+            DiceAttack = 9
+        }
         [SerializeField] private AttackType _attackType = AttackType.ProteanCones;
 
         [SerializeField] private int _displacementPriority = 0;
@@ -66,6 +83,11 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
         [Header("Circle AoE")]
         [SerializeField] private CircleParams _circle = new CircleParams { radius = 3.5f, ringWidth = 0.25f };
 
+        [Header("Combat visual catalog (Hokari)")]
+        [Tooltip("Row in CombatAttackVisualCatalog. None = infer from Attack Type (Protean / Wing / Sky / Circle). Normal/Pull/Push telegraphs follow Grapple & Knockback on this attack.")]
+        [FormerlySerializedAs("_hocariAttackVisualId")]
+        [SerializeField] private HokariBossAttackVisualId _hokariAttackVisualId;
+
         private ArenaPosReference _arena;
         private IEffectable _caster;
         private IBossAttackHandler _handler;
@@ -73,6 +95,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
         private System.Threading.Tasks.TaskCompletionSource<bool> _executeTcs;
         private ICommandFactory _commandFactory;
         [Zenject.Inject(Optional = true)] private Logic.Scripts.GameDomain.MVC.Boss.Telegraph.ITelegraphMaterialProvider _telegraphProvider;
+        [Zenject.Inject(Optional = true)] private CombatAttackVisualCatalogSO _attackVisualCatalog;
 
         private IAudioService _audio;
         [Header("Laki Minigame (legacy)")]
@@ -133,6 +156,13 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
             _caster = caster;
             try { _commandFactory = ProjectContext.Instance.Container.Resolve<ICommandFactory>(); } catch { _commandFactory = null; }
             try { _audio = ProjectContext.Instance.Container.Resolve<IAudioService>(); } catch { _audio = null; }
+            if (_attackVisualCatalog == null) _attackVisualCatalog = Resources.Load<CombatAttackVisualCatalogSO>("CombatAttackVisualCatalog");
+#if UNITY_EDITOR
+            if (_attackVisualCatalog == null) {
+                _attackVisualCatalog = AssetDatabase.LoadAssetAtPath<CombatAttackVisualCatalogSO>(
+                    "Assets/Logic/Scripts/GameDomain/MVC/Boss/Visuals/CombatAttackVisualCatalog.asset");
+            }
+#endif
 
             SelectAndBuildHandler();
             Transform parentForTelegraph = transform;
@@ -295,7 +325,8 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
                     InitialRadius = _orb.initialRadius,
                     MaxRadius = _orb.maxRadiusCap,
                     BaseDamage = _orb.baseDamage,
-                    InitialHp = _orb.initialHp
+                    InitialHp = _orb.initialHp,
+                    OrbAreaVisualPrefab = ResolveOrbAreaVisualPrefabFromCatalog()
                 });
                 UnityEngine.Debug.Log($"[BossAttack][Orb] Spawning via CommandFactory at {transform.position}");
                 spawnByFactory.Execute();
@@ -313,7 +344,8 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
                 InitialRadius = _orb.initialRadius,
                 MaxRadius = _orb.maxRadiusCap,
                 BaseDamage = _orb.baseDamage,
-                InitialHp = _orb.initialHp
+                InitialHp = _orb.initialHp,
+                OrbAreaVisualPrefab = ResolveOrbAreaVisualPrefabFromCatalog()
             });
             UnityEngine.Debug.Log($"[BossAttack][Orb] Spawning via fallback at {transform.position}");
             spawn.Execute();
@@ -332,7 +364,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
                 case AttackType.ProteanCones:
                 {
                     float[] yaws = new float[] { 0f, 90f, 180f, 270f };
-                    _handler = new ConeAttackHandler(_protean.radius, _protean.angleDeg, _protean.sides, yaws, lineBase ?? meshBase, meshBase);
+                    _handler = new ConeAttackHandler(_protean.radius, _protean.angleDeg, _protean.sides, yaws, lineBase ?? meshBase, meshBase, ResolveVisualPrefabForDisplacement(false));
                     break;
                 }
                 case AttackType.Circle:
@@ -341,21 +373,26 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
                         _circle.radius,
                         _circle.ringWidth,
                         lineBase ?? meshBase,
-                        meshBase);
+                        meshBase,
+                        ResolveVisualPrefabForDisplacement(false));
                     break;
                 }
-                case AttackType.GenericPlayerFootCircle:
+                case AttackType.Deprecated_PlayerFootCircle:
                 {
-                    _handler = new Logic.Scripts.GameDomain.MVC.Boss.Attacks.Circle.PlayerFootCircleAttackHandler(
-                        _circle.radius,
-                        _circle.ringWidth,
-                        lineBase ?? meshBase,
-                        meshBase);
+                    Debug.LogWarning("[BossAttack] Deprecated_PlayerFootCircle is no longer supported — use Circle. Attack will not run.");
+                    _handler = null;
                     break;
                 }
                 case AttackType.FeatherLines:
                 {
-                    _handler = new FeatherLinesHandler(_feather, _featherIsPull, lineBase ?? meshBase, lineDisp ?? meshDisp, meshBase, meshDisp);
+                    GameObject colN = null, colPull = null, colPush = null;
+                    if (_attackVisualCatalog != null)
+                    {
+                        colN = _attackVisualCatalog.GetFeatherColumnPrefab(false, false);
+                        colPull = _attackVisualCatalog.GetFeatherColumnPrefab(true, false);
+                        colPush = _attackVisualCatalog.GetFeatherColumnPrefab(false, true);
+                    }
+                    _handler = new FeatherLinesHandler(_feather, _featherIsPull, lineBase ?? meshBase, lineDisp ?? meshDisp, meshBase, meshDisp, colN, colPull, colPush);
                     break;
                 }
                 case AttackType.WingSlash:
@@ -386,7 +423,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
                     }
                     catch { yawBase = -90f; }
                     float[] yaws = new float[] { yawBase };
-                    _handler = new ConeAttackHandler(_wingSlash.radius, angleAbs, _wingSlash.sides, yaws, lineBase ?? meshBase, meshBase);
+                    _handler = new ConeAttackHandler(_wingSlash.radius, angleAbs, _wingSlash.sides, yaws, lineBase ?? meshBase, meshBase, ResolveVisualPrefabForDisplacement(_telegraphDisplacementEnabled));
                     break;
                 }
                 case AttackType.Orb:
@@ -405,7 +442,8 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
                         _skySwordsIsPull,
                         _telegraphDisplacementEnabled,
                         ssLine,
-                        ssMesh);
+                        ssMesh,
+                        ResolveVisualPrefabForDisplacement(_telegraphDisplacementEnabled));
                     break;
                 }
                 default:
@@ -579,6 +617,63 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
             {
                 tv.SetTelegraphVisible(visible);
             }
+        }
+
+        /// <summary>Telegraph prefab from catalog row Orb or BigOrb (Pull/Push from effects when telegraph displacement is enabled). Used as <see cref="OrbView"/> AoE mesh; if null, disc stays procedural.</summary>
+        private GameObject ResolveOrbAreaVisualPrefabFromCatalog()
+        {
+            if (_attackVisualCatalog == null) return null;
+            bool hasGrapple = false;
+            bool hasKnock = false;
+            if (_telegraphDisplacementEnabled && _effects != null)
+            {
+                for (int i = 0; i < _effects.Count; i++)
+                {
+                    var fx = _effects[i];
+                    if (fx == null) continue;
+                    if (fx is Logic.Scripts.GameDomain.Effects.GrappleEffect) hasGrapple = true;
+                    else if (fx is Logic.Scripts.GameDomain.Effects.KnockbackEffect) hasKnock = true;
+                }
+            }
+            var row = _hokariAttackVisualId == HokariBossAttackVisualId.BigOrb
+                ? HokariBossAttackVisualId.BigOrb
+                : HokariBossAttackVisualId.Orb;
+            return _attackVisualCatalog.GetTelegraph(row, hasGrapple, hasKnock);
+        }
+
+        private HokariBossAttackVisualId ResolveCatalogVisualId()
+        {
+            if (_hokariAttackVisualId != HokariBossAttackVisualId.None)
+                return _hokariAttackVisualId;
+            return _attackType switch
+            {
+                AttackType.ProteanCones => HokariBossAttackVisualId.ProteanCones,
+                AttackType.WingSlash => HokariBossAttackVisualId.WingSlash,
+                AttackType.SkySwords => HokariBossAttackVisualId.SkySwords,
+                AttackType.Circle => HokariBossAttackVisualId.Circle,
+                _ => HokariBossAttackVisualId.None,
+            };
+        }
+
+        private GameObject ResolveVisualPrefabForDisplacement(bool displacementEnabled)
+        {
+            if (_attackVisualCatalog == null) return null;
+            bool hasGrapple = false;
+            bool hasKnock = false;
+            if (displacementEnabled && _effects != null)
+            {
+                for (int i = 0; i < _effects.Count; i++)
+                {
+                    var fx = _effects[i];
+                    if (fx == null) continue;
+                    if (fx is Logic.Scripts.GameDomain.Effects.GrappleEffect) hasGrapple = true;
+                    else if (fx is Logic.Scripts.GameDomain.Effects.KnockbackEffect) hasKnock = true;
+                }
+            }
+
+            var vid = ResolveCatalogVisualId();
+            if (vid == HokariBossAttackVisualId.None) return null;
+            return _attackVisualCatalog.GetTelegraph(vid, hasGrapple, hasKnock);
         }
     }
 }

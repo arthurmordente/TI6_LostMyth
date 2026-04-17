@@ -4,6 +4,10 @@ using Logic.Scripts.Turns;
 using Logic.Scripts.Services.CommandFactory;
 using Logic.Scripts.GameDomain.MVC.Nara;
 using Logic.Scripts.GameDomain.MVC.Boss.Laki.Chips;
+using Logic.Scripts.GameDomain.MVC.Boss.Visuals;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 {
@@ -13,10 +17,11 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 		private INaraController _naraController;
 		private ICommandFactory _commandFactory;
 
-		[SerializeField] private Vector3 _centerWorld = new Vector3(0f, 7f, 0f);
+		[SerializeField] private Vector3 _centerWorld = new Vector3(0f, 0.5f, -4f);
 		[SerializeField] private float _innerRadius = RouletteArenaService.INNER_RADIUS_DEFAULT;
 		[SerializeField] private float _outerRadius = RouletteArenaService.OUTER_RADIUS_DEFAULT;
-		[SerializeField, Range(0f, 1f)] private float _radialSplit01 = 0.6f;
+		[SerializeField, Range(0f, 1f), Tooltip("Unused. Split uses TILE_RADIAL_DEPTH + 2.5% outer gap (see RouletteArenaService).")]
+		private float _radialSplit01 = 0.6f;
 		[SerializeField] private float _arcStartDeg = 180f;
 		[SerializeField] private float _arcDeg = 180f;
 
@@ -37,6 +42,10 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 		[Header("Chips (service only — no HUD)")]
 		[SerializeField] private int _initialPlayerChips = 3;
 		[SerializeField] private int _initialBossChips = 3;
+
+		[Header("Arena visuals")]
+		[Tooltip("Optional override for tile prefabs. When null, uses CombatAttackVisualCatalogSO from the scene Zenject container (same binding as GamePlayInstaller).")]
+		[SerializeField] private CombatAttackVisualCatalogSO _combatAttackVisualCatalog;
 
 		private void Start()
 		{
@@ -60,24 +69,6 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 			try { _commandFactory = container.Resolve<ICommandFactory>(); }
 			catch { Debug.LogError("[LakiArenaBossBootstrap] ICommandFactory not bound."); return; }
 
-			// Set arena Y from BossConfiguration.InitialPlayerPosition.y (try multiple sources)
-			bool ySet = false;
-			try {
-				var bossCfg = container.Resolve<Logic.Scripts.GameDomain.MVC.Boss.BossConfigurationSO>();
-				_centerWorld = new Vector3(_centerWorld.x, bossCfg.InitialPlayerPosition.y, _centerWorld.z);
-				ySet = true;
-			} catch { }
-			if (!ySet) {
-				try {
-					var levelTurnData = container.Resolve<LevelTurnData>();
-					if (levelTurnData != null && levelTurnData.BossConfiguration != null) {
-						float y = levelTurnData.BossConfiguration.InitialPlayerPosition.y;
-						_centerWorld = new Vector3(_centerWorld.x, y, _centerWorld.z);
-						ySet = true;
-					}
-				} catch { }
-			}
-
 			var arenaService = new RouletteArenaService(_innerRadius, _outerRadius, _radialSplit01, _arcStartDeg, _arcDeg);
 			arenaService.SetLayoutConfigs(
 				_positiveTileConfig, _neutralTileConfig, _negativeTileConfig,
@@ -87,6 +78,19 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 			arenaService.RerollTiles(0, new System.Random(17));
 			var viewGO = new GameObject("LakiRouletteArena");
 			var view = viewGO.AddComponent<LakiRouletteArenaView>();
+			var catalog = _combatAttackVisualCatalog;
+			if (catalog == null)
+			{
+				try { catalog = container.Resolve<CombatAttackVisualCatalogSO>(); } catch { catalog = null; }
+			}
+#if UNITY_EDITOR
+			if (catalog == null)
+			{
+				catalog = AssetDatabase.LoadAssetAtPath<CombatAttackVisualCatalogSO>(
+					"Assets/Logic/Scripts/GameDomain/MVC/Boss/Visuals/CombatAttackVisualCatalog.asset");
+			}
+#endif
+			view.SetAttackVisualCatalog(catalog);
 			view.SetGeometry(_centerWorld, _innerRadius, _outerRadius, _radialSplit01, _arcStartDeg, _arcDeg);
 			view.RefreshFrom(arenaService);
 			var casterRelay = GetComponent<Assets.Logic.Scripts.GameDomain.Effects.EffectableRelay>();

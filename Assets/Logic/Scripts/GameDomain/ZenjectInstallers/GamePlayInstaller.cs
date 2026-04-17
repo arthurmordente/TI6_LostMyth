@@ -11,6 +11,10 @@ using UnityEngine;
 using Logic.Scripts.GameDomain.MVC.Ui;
 using Logic.Scripts.GameDomain.MVC.Echo;
 using Logic.Scripts.GameDomain.MVC.Boss.Telegraph;
+using Logic.Scripts.GameDomain.MVC.Boss.Visuals;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 public class GamePlayInstaller : MonoInstaller {
 
@@ -43,6 +47,10 @@ public class GamePlayInstaller : MonoInstaller {
     [Header("Telegraph Materials")]
     [SerializeField] private TelegraphMaterialConfig _telegraphMaterials;
 
+    [Header("Boss combat visuals")]
+    [Tooltip("Telegraphs / Laki tiles catalog for Hokari. If empty in builds, assign here; in Editor, defaults to CombatAttackVisualCatalog.asset under Boss/Visuals.")]
+    [SerializeField] private CombatAttackVisualCatalogSO _combatAttackVisualCatalog;
+
     public override void InstallBindings() {
         BindServices();
         BindControllers();
@@ -71,6 +79,21 @@ public class GamePlayInstaller : MonoInstaller {
         else {
             Debug.LogWarning("[GamePlayInstaller] TelegraphMaterialConfig is NULL. Telegraphs will fallback to Sprites/Default.");
             Container.BindInterfacesTo<TelegraphMaterialProviderBootstrap>().AsSingle().NonLazy();
+        }
+
+        var catalog = _combatAttackVisualCatalog;
+#if UNITY_EDITOR
+        if (catalog == null) {
+            catalog = AssetDatabase.LoadAssetAtPath<CombatAttackVisualCatalogSO>(
+                "Assets/Logic/Scripts/GameDomain/MVC/Boss/Visuals/CombatAttackVisualCatalog.asset");
+        }
+#endif
+        if (catalog != null) {
+            Container.Bind<CombatAttackVisualCatalogSO>().FromInstance(catalog).AsSingle();
+            Debug.Log($"[GamePlayInstaller] Bound CombatAttackVisualCatalogSO: {catalog.name}");
+        }
+        else {
+            Debug.LogWarning("[GamePlayInstaller] CombatAttackVisualCatalogSO is NULL — boss telegraphs from catalog will not resolve (placeholders / procedural fallbacks). Assign _combatAttackVisualCatalog for builds.");
         }
     }
 

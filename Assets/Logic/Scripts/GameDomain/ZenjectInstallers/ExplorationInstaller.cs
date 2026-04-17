@@ -1,5 +1,6 @@
 using Logic.Scripts.GameDomain.GameInputActions;
 using Logic.Scripts.GameDomain.MVC.Nara;
+using Logic.Scripts.GameDomain.Services.Skills;
 using UnityEngine;
 using Zenject;
 
@@ -7,6 +8,8 @@ public class ExplorationInstaller : MonoInstaller {
     [SerializeField] private NaraView _naraViewPrefab;
     [SerializeField] private NaraConfigurationSO _naraConfiguration;
     [SerializeField] private CustomizeUIView _customizeUiView;
+    [SerializeField] private ExplorationLoadoutUIView _explorationLoadoutUiView;
+    [SerializeField] private SkillDataSO[] _paschoalSkillCatalog;
 
     public override void InstallBindings() {
         BindServices();
@@ -18,6 +21,8 @@ public class ExplorationInstaller : MonoInstaller {
         Container.BindInterfacesTo<LevelCancellationTokenService>().AsSingle().NonLazy();
         Container.Bind<INaraMovementControllerFactory>().To<NaraMovementControllerFactory>().AsSingle();
         Container.BindInterfacesTo<GamePlayDataService>().AsSingle().NonLazy();
+        Container.Bind<IPaschoalSkillLoadoutService>().To<PaschoalSkillLoadoutService>().AsSingle()
+            .WithArguments(_paschoalSkillCatalog, 4);
     }
 
     private void BindControllers() {
@@ -27,5 +32,7 @@ public class ExplorationInstaller : MonoInstaller {
         Container.BindInterfacesTo<PortalController>().AsSingle().NonLazy();
         Container.BindInterfacesTo<InteractableObjectsController>().AsSingle().NonLazy();
         Container.BindInterfacesTo<CustomizeUIController>().AsSingle().WithArguments(_customizeUiView).NonLazy();
+        Container.Bind<ExplorationLoadoutUIView>().FromInstance(_explorationLoadoutUiView).AsSingle();
+        Container.BindInterfacesTo<ExplorationLoadoutUIController>().AsSingle().NonLazy();
     }
 }

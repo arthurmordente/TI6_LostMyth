@@ -338,7 +338,7 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
             var loadout = _naraView.GetComponent<PaschoalSkillLoadout>();
             if (loadout == null) loadout = _naraView.gameObject.AddComponent<PaschoalSkillLoadout>();
             if (_paschoalSkillLoadoutService != null)
-                loadout.SetSkills(_paschoalSkillLoadoutService.BuildRuntimeSlotsArray());
+                loadout.SetSkills(_paschoalSkillLoadoutService.BuildRuntimeSlotsArray(SkillLoadoutUnitType.Player));
         }
 
         public IActionPointsService GetActionPoints() => EnsureApService();

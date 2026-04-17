@@ -238,6 +238,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
                 out Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.IResolver diceResolver))
             {
                 Debug.Log($"[Laki] DiceAttack resolved at Boss turn. PlayerWon={diceResult.PlayerWon}");
+                Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.ApplyLakiDiceLossDamageIfPlayerWon(diceResult);
                 try { diceResolver?.DestroyDiceAttackRoot(); } catch { }
                 resolvedThisTurn = true;
             }

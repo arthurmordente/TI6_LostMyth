@@ -11,6 +11,7 @@ public class StartExplorationStateCommand : BaseCommand, ICommandAsync {
     private ICommandFactory _commandFactory;
     private IGameInputActionsController _gameInputActionsController;
     private ICustomizeUIController _customizeUIController;
+    private IExplorationLoadoutUIController _explorationLoadoutUIController;
 
     private ExplorationInitiatorEnterData _enterData;
 
@@ -25,6 +26,7 @@ public class StartExplorationStateCommand : BaseCommand, ICommandAsync {
         _commandFactory = _diContainer.Resolve<ICommandFactory>();
         _gameInputActionsController = _diContainer.Resolve<IGameInputActionsController>();
         _customizeUIController = _diContainer.Resolve<ICustomizeUIController>();
+        _explorationLoadoutUIController = _diContainer.Resolve<IExplorationLoadoutUIController>();
     }
 
     public async Awaitable Execute(CancellationTokenSource cancellationTokenSource) {
@@ -32,5 +34,6 @@ public class StartExplorationStateCommand : BaseCommand, ICommandAsync {
         await _commandFactory.CreateCommandAsync<StartLevelCommand>().Execute(cancellationTokenSource);
         _naraController.InitEntryPointExploration();
         _customizeUIController.InitEntryPoint();
+        _explorationLoadoutUIController.InitEntryPoint();
     }
 }

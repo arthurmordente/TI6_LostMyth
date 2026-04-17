@@ -25,7 +25,7 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 			_visual = visual;
 			_caster = caster;
 			_bookEffectable = bookEffectable;
-			_centerWorld = centerWorld ?? new Vector3(0f, 7f, 0f);
+			_centerWorld = centerWorld ?? new Vector3(0f, 0.5f, -4f);
 
 			int t = _turnState != null ? _turnState.TurnNumber : 0;
 			_arena.RerollTiles(t, new System.Random(t * 7919 + 17));

@@ -12,9 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5a9864f9802f4794f8e6ae5d748c17fb, type: 3}
   m_Name: LakiBossConfiguration
   m_EditorClassIdentifier: 
+  <BossDisplayName>k__BackingField: Laki
   <MaxHealth>k__BackingField: 300
   <InitialMovementDistance>k__BackingField: 8
   <MoveSpeed>k__BackingField: 8
   <RotationSpeed>k__BackingField: 20
-  <InitialBossPosition>k__BackingField: {x: 0, y: 4.5, z: 0}
+  <InitialBossPosition>k__BackingField: {x: 0, y: 0.5, z: -4}
   <InitialPlayerPosition>k__BackingField: {x: 0, y: 0, z: -20}

@@ -1,8 +1,12 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Logic.Scripts.GameDomain.MVC.Boss.Visuals;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 {
@@ -10,21 +14,24 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 	public sealed class LakiRouletteArenaView : MonoBehaviour, IRouletteArenaVisual
 	{
 		[Header("Donut Geometry (visual)")]
-		[SerializeField] private Vector3 _centerWorld = new Vector3(0f, 7f, 0f);
+		[SerializeField] private Vector3 _centerWorld = new Vector3(0f, 0.5f, -4f);
 		[SerializeField] private float _innerRadius = RouletteArenaService.INNER_RADIUS_DEFAULT;
 		[SerializeField] private float _outerRadius = RouletteArenaService.OUTER_RADIUS_DEFAULT;
 		[SerializeField] private int _sectorCount = 8;
 		[SerializeField] private int _radialBands = 2;
-		[SerializeField, Range(0f, 1f)] private float _radialSplit01 = 0.6f;
+		[SerializeField, Range(0f, 1f), Tooltip("Unused. Split uses TILE_RADIAL_DEPTH + 2.5% outer gap (see RouletteArenaService).")]
+		private float _radialSplit01 = 0.6f;
 		[SerializeField] private float _arcStartDeg = 180f;
 		[SerializeField] private float _arcDeg = 180f;
+
+		[Header("Tile prefabs (optional)")]
+		[SerializeField] private CombatAttackVisualCatalogSO _attackVisualCatalog;
 
 		[Header("Rendering")]
 		[SerializeField] private int _angularSmooth = 8;
 		[SerializeField] private float _alphaPositive = 0.65f;
 		[SerializeField] private float _alphaNegative = 0.65f;
 		[SerializeField] private float _alphaNeutral = 0.35f;
-		[SerializeField] private float _angularGapDeg = 2f;
 		[SerializeField] private float _radialGap = 0.05f;
 
 		[Header("Tile Info Canvas")]
@@ -32,16 +39,47 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 		[SerializeField] private float _canvasHeightOffset = 0.12f;
 		[SerializeField] private float _slotSpacing = 80f;
 
+		/// <summary>Base layout factor (post −33%); multiplied by <see cref="TileCanvasSizeBoost"/> for effective UI size.</summary>
+		private const float TileCanvasLayoutScale = 0.67f;
+		/// <summary>+50% vs current scaled layout (1.5× on top of <see cref="TileCanvasLayoutScale"/>).</summary>
+		private const float TileCanvasSizeBoost = 1.5f;
+		private const float TileCanvasEulerX = 90f;
+		private const float TileCanvasEulerY = 0f;
+		private const float TileCanvasEulerZ = -80f;
+		private const float OuterTileSurfaceLocalX = 0.5f;
+
 		private struct TileInfoCanvas { public Transform SlotsContainer; }
 		private TileInfoCanvas[] _tileCanvases;
 
 		private readonly List<MeshRenderer> _renderers = new List<MeshRenderer>(16);
 		private readonly List<Color> _baseColors = new List<Color>(16);
+		private readonly List<bool> _surfaceFromCatalog = new List<bool>(16);
 		private Material _matTemplate;
+		private CombatAttackVisualCatalogSO _resolvedCatalog;
+		private Transform[] _tileRoots;
+		private RouletteArenaService.TileEffectType[] _lastVisualTileTypes;
 
 		public int TileCount => _sectorCount * _radialBands;
 
-		/// <summary>
+		/// <summary>Call before <see cref="SetGeometry"/> when the view is created at runtime (e.g. <see cref="LakiArenaBossBootstrap"/>). Inspector-assigned <see cref="_attackVisualCatalog"/> is used automatically when present.</summary>
+		public void SetAttackVisualCatalog(CombatAttackVisualCatalogSO catalog)
+		{
+			_attackVisualCatalog = catalog;
+			_resolvedCatalog = ResolveCatalog();
+		}
+
+		private CombatAttackVisualCatalogSO ResolveCatalog()
+		{
+			if (_attackVisualCatalog != null) return _attackVisualCatalog;
+			var fromResources = Resources.Load<CombatAttackVisualCatalogSO>("CombatAttackVisualCatalog");
+			if (fromResources != null) return fromResources;
+#if UNITY_EDITOR
+			return AssetDatabase.LoadAssetAtPath<CombatAttackVisualCatalogSO>(
+				"Assets/Logic/Scripts/GameDomain/MVC/Boss/Visuals/CombatAttackVisualCatalog.asset");
+#else
+			return null;
+#endif
+		}
 
 		private void Awake()
 		{
@@ -53,7 +91,10 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 
 			Shader lit = Shader.Find("Universal Render Pipeline/Lit");
 			_matTemplate = new Material(lit) { enableInstancing = true };
-			BuildTiles();
+			_resolvedCatalog = ResolveCatalog();
+			// Do not BuildTiles here: bootstrap calls SetAttackVisualCatalog then SetGeometry.
+			// An Awake build runs before catalog is injected and uses procedural meshes; deferred Destroy
+			// would leave both procedural and catalog visible for a frame (or longer).
 		}
 
 		public void SetGeometry(Vector3 centerWorld, float innerRadius, float outerRadius, float radialSplit01 = 0.6f, float arcStartDeg = 0f, float arcDeg = 180f)
@@ -67,52 +108,217 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 			BuildTiles();
 		}
 
+		private const float TileRootWorldY = -0.05f;
+
+		/// <summary>World position of the tile root: layout centre with fixed Y (outer mesh shift is on TileSurface local X).</summary>
+		private Vector3 TileRootWorldFromLayout(Vector3 layoutCenter)
+		{
+			Vector3 p = layoutCenter;
+			p.y = TileRootWorldY;
+			return p;
+		}
+
+		private float ReferenceSectorMidDegrees()
+		{
+			float sectorAngle = _arcDeg / Mathf.Max(1, _sectorCount);
+			float halfGap = RouletteArenaService.ComputeTileAngularHalfGapDeg(_arcDeg, _sectorCount);
+			float a0 = _arcStartDeg + halfGap;
+			float a1 = _arcStartDeg + sectorAngle - halfGap;
+			return 0.5f * (a0 + a1);
+		}
+
+		private void ComputeTileLayoutForIndex(int tileIndex, out int band, out float a0, out float a1, out float rMin, out float rMax, out Vector3 pivotOffset, out float midDeg, out Vector3 tileCenter)
+		{
+			int sector = tileIndex / Mathf.Max(1, _radialBands);
+			band = tileIndex % Mathf.Max(1, _radialBands);
+			float sectorAngle = _arcDeg / Mathf.Max(1, _sectorCount);
+			float halfGap = RouletteArenaService.ComputeTileAngularHalfGapDeg(_arcDeg, _sectorCount);
+			a0 = _arcStartDeg + sector * sectorAngle + halfGap;
+			a1 = _arcStartDeg + (sector + 1) * sectorAngle - halfGap;
+			RouletteArenaService.ComputeBandRadialExtents(
+				_innerRadius, _outerRadius, band, _radialGap, out rMin, out rMax);
+			float midAngle = (a0 + a1) * 0.5f * Mathf.Deg2Rad;
+			float midR = (rMin + rMax) * 0.5f;
+			tileCenter = _centerWorld + new Vector3(Mathf.Cos(midAngle) * midR, 0f, Mathf.Sin(midAngle) * midR);
+			pivotOffset = tileCenter - _centerWorld;
+			midDeg = 0.5f * (a0 + a1);
+		}
+
+		/// <summary>Outer radial band (last band index when there are at least two rings).</summary>
+		private bool IsOuterTileBand(int band) => _radialBands >= 2 && band == _radialBands - 1;
+
+		private Vector3 TileSurfaceLocalPosition(int band) =>
+			IsOuterTileBand(band) ? new Vector3(OuterTileSurfaceLocalX, 0f, 0f) : Vector3.zero;
+
+		/// <summary>Creates TileSurface under <paramref name="tileRoot"/> (anchored at tile centre). Catalog prefabs are canonical sector-0 wedges; tileRoot Y rotation aligns them per sector.</summary>
+		private MeshRenderer BuildTileSurface(Transform tileRoot, int band, RouletteArenaService.TileEffectType effectType, float a0, float a1, float rMin, float rMax, Vector3 pivotOffset, float midDeg, out bool usesCatalogPrefab)
+		{
+			usesCatalogPrefab = false;
+			Transform old = tileRoot.Find("TileSurface");
+			if (old != null) DestroyImmediate(old.gameObject);
+
+			var surfaceGo = new GameObject("TileSurface");
+			surfaceGo.transform.SetParent(tileRoot, false);
+			Vector3 surfaceLocalPos = TileSurfaceLocalPosition(band);
+			surfaceGo.transform.localPosition = surfaceLocalPos;
+			surfaceGo.transform.localRotation = Quaternion.identity;
+			surfaceGo.transform.localScale = Vector3.one;
+			var surfaceTr = surfaceGo.transform;
+
+			bool inner = band == 0;
+			bool catalogTilesAvailable = HasAnyLakiRouletteCatalogPrefab();
+			GameObject tilePrefab = ResolveLakiRouletteTilePrefab(inner, effectType);
+
+			if (tilePrefab != null)
+			{
+				tileRoot.localRotation = Quaternion.Euler(0f, ReferenceSectorMidDegrees() - midDeg, 0f);
+				var inst = Instantiate(tilePrefab, surfaceTr, false);
+				inst.name = "MeshPrefab";
+				inst.transform.localPosition = Vector3.zero;
+				inst.transform.localRotation = Quaternion.identity;
+				inst.transform.localScale = Vector3.one;
+				var mrs = inst.GetComponentsInChildren<MeshRenderer>(true);
+				MeshRenderer mr = null;
+				for (int i = 0; i < mrs.Length; i++)
+				{
+					var mfInst = mrs[i].GetComponent<MeshFilter>();
+					if (mfInst != null && mfInst.sharedMesh != null)
+					{
+						mr = mrs[i];
+						break;
+					}
+				}
+				if (mr == null && mrs.Length > 0) mr = mrs[0];
+				if (mr != null)
+				{
+					for (int i = 0; i < mrs.Length; i++)
+						mrs[i].enabled = (mrs[i] == mr);
+					if (mr.sharedMaterial != null)
+						mr.sharedMaterial = new Material(mr.sharedMaterial);
+					// Instantiate must not override TileSurface transform; re-apply after prefab setup.
+					surfaceTr.localPosition = surfaceLocalPos;
+					surfaceTr.localRotation = Quaternion.identity;
+					surfaceTr.localScale = Vector3.one;
+					usesCatalogPrefab = true;
+					return mr;
+				}
+				Destroy(inst);
+			}
+
+			tileRoot.localRotation = Quaternion.identity;
+			if (catalogTilesAvailable)
+				return null;
+
+			var mf = surfaceGo.AddComponent<MeshFilter>();
+			var mrProc = surfaceGo.AddComponent<MeshRenderer>();
+			mrProc.sharedMaterial = new Material(_matTemplate);
+			mf.sharedMesh = LakiRouletteSectorMeshBuilder.BuildRingSectorMesh(rMin, rMax, a0, a1, _angularSmooth, pivotOffset);
+			surfaceGo.transform.localPosition = surfaceLocalPos;
+			return mrProc;
+		}
+
+		private bool HasAnyLakiRouletteCatalogPrefab()
+		{
+			if (_resolvedCatalog == null) return false;
+			for (int t = 0; t < CombatAttackVisualCatalogSO.LakiRouletteTileTypes; t++)
+			{
+				var te = (RouletteArenaService.TileEffectType)t;
+				if (_resolvedCatalog.TryGetLakiRouletteTilePrefab(true, te, out var p) && p != null) return true;
+				if (_resolvedCatalog.TryGetLakiRouletteTilePrefab(false, te, out p) && p != null) return true;
+			}
+			return false;
+		}
+
+		private GameObject ResolveLakiRouletteTilePrefab(bool inner, RouletteArenaService.TileEffectType effectType)
+		{
+			if (_resolvedCatalog == null) return null;
+			if (_resolvedCatalog.TryGetLakiRouletteTilePrefab(inner, effectType, out var prefab) && prefab != null)
+				return prefab;
+			if (_resolvedCatalog.TryGetLakiRouletteTilePrefab(inner, RouletteArenaService.TileEffectType.Neutral, out prefab) && prefab != null)
+				return prefab;
+			for (int t = 0; t < CombatAttackVisualCatalogSO.LakiRouletteTileTypes; t++)
+			{
+				var te = (RouletteArenaService.TileEffectType)t;
+				if (_resolvedCatalog.TryGetLakiRouletteTilePrefab(inner, te, out prefab) && prefab != null)
+					return prefab;
+			}
+			return null;
+		}
+
+		private static Color ReadRendererBaseColor(MeshRenderer mr)
+		{
+			if (mr == null) return Color.white;
+			var mat = mr.sharedMaterial;
+			if (mat == null) return Color.white;
+			if (mat.HasProperty("_BaseColor")) return mat.GetColor("_BaseColor");
+			if (mat.HasProperty("_Color")) return mat.color;
+			return Color.white;
+		}
+
+		private void CacheTileBaseColor(int tileIndex, MeshRenderer mr, bool usesCatalogPrefab, RouletteArenaService.TileEffectType type)
+		{
+			Color c;
+			if (usesCatalogPrefab)
+				c = ReadRendererBaseColor(mr);
+			else
+			{
+				switch (type)
+				{
+					case RouletteArenaService.TileEffectType.Positive:
+						c = new Color(0.2f, 1f, 0.2f, _alphaPositive);
+						break;
+					case RouletteArenaService.TileEffectType.Negative:
+						c = new Color(1f, 0.2f, 0.2f, _alphaNegative);
+						break;
+					default:
+						c = new Color(0.82f, 0.82f, 0.82f, _alphaNeutral);
+						break;
+				}
+			}
+			while (_baseColors.Count <= tileIndex) _baseColors.Add(Color.clear);
+			_baseColors[tileIndex] = c;
+		}
+
 		private void BuildTiles()
 		{
-			for (int i = transform.childCount - 1; i >= 0; i--) Destroy(transform.GetChild(i).gameObject);
+			while (transform.childCount > 0)
+				DestroyImmediate(transform.GetChild(0).gameObject);
 			_renderers.Clear();
 			_baseColors.Clear();
+			_surfaceFromCatalog.Clear();
 
 			int total = _sectorCount * _radialBands;
 			_tileCanvases = new TileInfoCanvas[total];
-
-			float sectorAngle = _arcDeg / _sectorCount;
-			float split = _innerRadius + _radialSplit01 * (_outerRadius - _innerRadius);
-			float halfGap = Mathf.Max(0f, _angularGapDeg) * 0.5f;
+			_tileRoots = new Transform[total];
+			_lastVisualTileTypes = new RouletteArenaService.TileEffectType[total];
+			for (int t = 0; t < total; t++)
+				_lastVisualTileTypes[t] = RouletteArenaService.TileEffectType.Neutral;
 
 			int tileIndex = 0;
 			for (int s = 0; s < _sectorCount; s++)
 			{
-				float a0 = _arcStartDeg + s * sectorAngle + halfGap;
-				float a1 = _arcStartDeg + (s + 1) * sectorAngle - halfGap;
-
 				for (int band = 0; band < _radialBands; band++)
 				{
-					float r0 = band == 0 ? _innerRadius : split;
-					float r1 = band == 0 ? split : _outerRadius;
-					float rMin = Mathf.Min(r0, r1) + Mathf.Max(0f, _radialGap);
-					float rMax = Mathf.Max(r0, r1) - Mathf.Max(0f, _radialGap);
-					if (rMax <= rMin) rMax = rMin + 0.005f;
-
-					// Place each tile's pivot at its own geometric centre so that
-					// scaling localScale.x produces a flip around the tile itself.
-					float midAngle = (a0 + a1) * 0.5f * Mathf.Deg2Rad;
-					float midR     = (rMin + rMax) * 0.5f;
-					Vector3 tileCenter = _centerWorld + new Vector3(
-						Mathf.Cos(midAngle) * midR, 0f, Mathf.Sin(midAngle) * midR);
-					Vector3 pivotOffset = tileCenter - _centerWorld;
+					ComputeTileLayoutForIndex(tileIndex, out int b, out float a0, out float a1, out float rMin, out float rMax, out _, out float midDeg, out Vector3 layoutCenter);
+					Vector3 rootWorld = TileRootWorldFromLayout(layoutCenter);
+					Vector3 meshPivotOffset = rootWorld - _centerWorld;
 
 					GameObject go = new GameObject($"Tile_{tileIndex:D2}_S{s}_B{band}");
 					go.transform.SetParent(transform, false);
-					go.transform.position = tileCenter;
-					var mf = go.AddComponent<MeshFilter>();
-					var mr = go.AddComponent<MeshRenderer>();
-					mr.sharedMaterial = new Material(_matTemplate);
-					mf.sharedMesh = GenerateRingSectorMesh(rMin, rMax, a0, a1, _angularSmooth, pivotOffset);
+					go.transform.position = rootWorld;
+					go.transform.localRotation = Quaternion.identity;
+					_tileRoots[tileIndex] = go.transform;
+
+					var startType = RouletteArenaService.TileEffectType.Neutral;
+					MeshRenderer mr = BuildTileSurface(go.transform, b, startType, a0, a1, rMin, rMax, meshPivotOffset, midDeg, out bool fromCatalog);
+					_lastVisualTileTypes[tileIndex] = startType;
 
 					_renderers.Add(mr);
-					_baseColors.Add(Color.clear);
-					_tileCanvases[tileIndex] = BuildTileCanvas(go.transform, tileCenter, band);
+					_surfaceFromCatalog.Add(fromCatalog);
+					CacheTileBaseColor(tileIndex, mr, fromCatalog, startType);
+					if (!fromCatalog)
+						ApplyProceduralTileTint(mr, startType);
+					_tileCanvases[tileIndex] = BuildTileCanvas(go.transform, b);
 					tileIndex++;
 				}
 			}
@@ -122,27 +328,20 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 		/// Creates the world-space canvas for one tile. Slots are NOT created here –
 		/// they are rebuilt dynamically by <see cref="RefreshTileCanvas"/> whenever effects change.
 		/// band 0 = inner ring, band 1 = outer ring (affects VLG spacing).
+		/// Child of <paramref name="tileTr"/>; after layout, <see cref="RectTransform.localEulerAngles"/> is forced to (90, 0, −80).
 		/// </summary>
-		private TileInfoCanvas BuildTileCanvas(Transform tileTr, Vector3 tileCenter, int band)
+		private TileInfoCanvas BuildTileCanvas(Transform tileTr, int band)
 		{
+			float k = TileCanvasLayoutScale * TileCanvasSizeBoost;
 			var canvasGO = new GameObject("TileInfoCanvas");
 			canvasGO.transform.SetParent(tileTr, false);
 			canvasGO.transform.localPosition = new Vector3(0f, _canvasHeightOffset, 0f);
 
-			// Lie flat on the arena plane, facing radially outward (same as suit labels)
-			Vector3 outward = tileCenter - _centerWorld;
-			outward.y = 0f;
-			float yAngle = outward.sqrMagnitude > 0.001f
-				? Mathf.Atan2(outward.x, outward.z) * Mathf.Rad2Deg + 180f
-				: 0f;
-			canvasGO.transform.localRotation = Quaternion.Euler(90f, yAngle, 0f);
-
 			var canvas = canvasGO.AddComponent<Canvas>();
 			canvas.renderMode = RenderMode.WorldSpace;
 			var canvasRt = canvasGO.GetComponent<RectTransform>();
-			canvasRt.sizeDelta = new Vector2(1400f, 900f);
-			float s = _canvasScale > 0f ? _canvasScale : 0.004f;
-			canvasGO.transform.localScale = new Vector3(s, s, s);
+			canvasRt.sizeDelta = new Vector2(1400f * k, 900f * k);
+			float s = (_canvasScale > 0f ? _canvasScale : 0.004f) * k;
 
 			// Container anchored to canvas centre, shifted right (+X) to sit over the tile
 			var containerGO = new GameObject("SlotsContainer");
@@ -151,8 +350,8 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 			containerRt.anchorMin = new Vector2(0.5f, 0.5f);
 			containerRt.anchorMax = new Vector2(0.5f, 0.5f);
 			containerRt.pivot     = new Vector2(0.5f, 0.5f);
-			containerRt.anchoredPosition = new Vector2(250f, 0f);
-			containerRt.sizeDelta = new Vector2(1380f, 0f); // height driven by ContentSizeFitter
+			containerRt.anchoredPosition = new Vector2(250f * k, 0f);
+			containerRt.sizeDelta = new Vector2(1380f * k, 0f); // height driven by ContentSizeFitter
 
 			var vlg = containerGO.AddComponent<VerticalLayoutGroup>();
 			vlg.childAlignment        = TextAnchor.MiddleCenter;
@@ -161,11 +360,14 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 			vlg.childForceExpandWidth = false;
 			vlg.childForceExpandHeight= false;
 			// Inner tiles (band 0) are narrower radially → more vertical spacing needed
-			vlg.spacing = band == 0 ? 300f : 200f;
+			vlg.spacing = band == 0 ? 300f * k : 200f * k;
 
 			var csf = containerGO.AddComponent<ContentSizeFitter>();
 			csf.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
 			csf.verticalFit   = ContentSizeFitter.FitMode.PreferredSize;
+
+			canvasGO.transform.localScale = new Vector3(s, s, s);
+			canvasRt.localEulerAngles = new Vector3(TileCanvasEulerX, TileCanvasEulerY, TileCanvasEulerZ);
 
 			return new TileInfoCanvas { SlotsContainer = containerGO.transform };
 		}
@@ -176,11 +378,12 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 		/// </summary>
 		private static void AppendSlotRow(Transform container, string label, Sprite icon)
 		{
-			const float rowW   = 1380f;
-			const float rowH   = 320f;
-			const float iconSz = 320f;
-			const float gap    = 180f;
-			const float pad    = 12f;
+			float k = TileCanvasLayoutScale * TileCanvasSizeBoost;
+			float rowW   = 1380f * k;
+			float rowH   = 320f * k;
+			float iconSz = 320f * k;
+			float gap    = 180f * k;
+			float pad    = 12f * k;
 
 			var rowGO = new GameObject("Slot");
 			rowGO.transform.SetParent(container, false);
@@ -194,7 +397,8 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 			hlg.childForceExpandWidth = false;
 			hlg.childForceExpandHeight= false;
 			hlg.spacing               = gap;
-			hlg.padding               = new RectOffset((int)pad, (int)pad, 0, 0);
+			int padI = Mathf.Max(0, Mathf.RoundToInt(pad));
+			hlg.padding               = new RectOffset(padI, padI, 0, 0);
 
 			// Icon (hidden when no sprite)
 			var imgGO = new GameObject("Icon");
@@ -214,66 +418,12 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 			txtRt.sizeDelta = new Vector2(textWidth, rowH);
 			var tmp = txtGO.AddComponent<TextMeshProUGUI>();
 			tmp.text               = label ?? "";
-			tmp.fontSize           = 120f;
+			tmp.fontSize           = 120f * k;
 			tmp.color              = Color.black;
 			tmp.alignment          = TextAlignmentOptions.MidlineLeft;
 			tmp.enableAutoSizing   = false;
 			tmp.enableWordWrapping = false;
 			tmp.overflowMode       = TextOverflowModes.Ellipsis;
-		}
-
-		/// <param name="pivotOffset">Subtracted from every vertex so that (0,0,0) in local space is the tile's geometric centre.</param>
-		private static Mesh GenerateRingSectorMesh(float innerR, float outerR, float degStart, float degEnd, int arcSegments, Vector3 pivotOffset = default)
-		{
-			arcSegments = Mathf.Max(1, arcSegments);
-			int vertsPerRing = arcSegments + 1;
-			int vertexCount = vertsPerRing * 2;
-			int triCount = arcSegments * 2;
-
-			var verts = new Vector3[vertexCount];
-			var tris = new int[triCount * 3];
-			var uvs = new Vector2[vertexCount];
-
-			float a0 = degStart * Mathf.Deg2Rad;
-			float a1 = degEnd * Mathf.Deg2Rad;
-			float da = (a1 - a0) / arcSegments;
-
-			int vi = 0;
-			for (int i = 0; i < vertsPerRing; i++)
-			{
-				float a = a0 + da * i;
-				float ca = Mathf.Cos(a);
-				float sa = Mathf.Sin(a);
-				verts[vi + 0] = new Vector3(ca * innerR, 0f, sa * innerR) - pivotOffset;
-				verts[vi + 1] = new Vector3(ca * outerR, 0f, sa * outerR) - pivotOffset;
-				uvs[vi + 0] = new Vector2((float)i / arcSegments, 0f);
-				uvs[vi + 1] = new Vector2((float)i / arcSegments, 1f);
-				vi += 2;
-			}
-
-			int ti = 0;
-			for (int i = 0; i < arcSegments; i++)
-			{
-				int i0 = i * 2;
-				int i1 = i0 + 1;
-				int i2 = i0 + 2;
-				int i3 = i0 + 3;
-				// Winding adjusted to ensure normals point upwards
-				tris[ti++] = i0; tris[ti++] = i3; tris[ti++] = i1;
-				tris[ti++] = i0; tris[ti++] = i2; tris[ti++] = i3;
-			}
-
-			var mesh = new Mesh
-			{
-				name = "RingSector",
-				indexFormat = vertexCount > 65000 ? UnityEngine.Rendering.IndexFormat.UInt32 : UnityEngine.Rendering.IndexFormat.UInt16
-			};
-			mesh.SetVertices(verts);
-			mesh.SetUVs(0, uvs);
-			mesh.SetTriangles(tris, 0);
-			mesh.RecalculateBounds();
-			mesh.RecalculateNormals();
-			return mesh;
 		}
 
 		public void RefreshFrom(RouletteArenaService service)
@@ -284,30 +434,64 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 			for (int i = 0; i < _renderers.Count && i < tiles; i++)
 			{
 				var type = service.GetTileEffect(i);
-				Color c;
-				switch (type)
+				if (_tileRoots != null && i < _tileRoots.Length && _tileRoots[i] != null
+				    && (_lastVisualTileTypes == null || i >= _lastVisualTileTypes.Length || _lastVisualTileTypes[i] != type))
 				{
-					case RouletteArenaService.TileEffectType.Positive:
-						c = new Color(0.2f, 1f, 0.2f, _alphaPositive);
-						break;
-					case RouletteArenaService.TileEffectType.Negative:
-						c = new Color(1f, 0.2f, 0.2f, _alphaNegative);
-						break;
-					default:
-						c = new Color(0.82f, 0.82f, 0.82f, _alphaNeutral);
-						break;
+					if (_suitLabels != null && i < _suitLabels.Length && _suitLabels[i] != null)
+					{
+						Destroy(_suitLabels[i].gameObject);
+						_suitLabels[i] = null;
+					}
+					ComputeTileLayoutForIndex(i, out int band, out float a0, out float a1, out float rMin, out float rMax, out _, out float midDeg, out Vector3 layoutCenter);
+					Vector3 rootWorld = TileRootWorldFromLayout(layoutCenter);
+					_tileRoots[i].position = rootWorld;
+					Vector3 meshPivotOffset = rootWorld - _centerWorld;
+					var mr = BuildTileSurface(_tileRoots[i], band, type, a0, a1, rMin, rMax, meshPivotOffset, midDeg, out bool fromCatalog);
+					_renderers[i] = mr;
+					while (_surfaceFromCatalog.Count <= i) _surfaceFromCatalog.Add(false);
+					_surfaceFromCatalog[i] = fromCatalog;
+					if (_lastVisualTileTypes != null && i < _lastVisualTileTypes.Length)
+						_lastVisualTileTypes[i] = type;
+					CacheTileBaseColor(i, mr, fromCatalog, type);
+					if (!fromCatalog)
+						ApplyProceduralTileTint(mr, type);
 				}
-				var mat = _renderers[i].sharedMaterial;
-				if (mat != null)
+				else
 				{
-					if (mat.HasProperty("_BaseColor")) mat.SetColor("_BaseColor", c);
-					else if (mat.HasProperty("_Color")) mat.color = c;
-					_baseColors[i] = c;
+					bool fromCatalog = i < _surfaceFromCatalog.Count && _surfaceFromCatalog[i];
+					if (!fromCatalog)
+					{
+						ApplyProceduralTileTint(_renderers[i], type);
+						CacheTileBaseColor(i, _renderers[i], false, type);
+					}
 				}
 
-			// Update tile info canvas using the effects pre-assigned to this tile
-			if (_tileCanvases != null && i < _tileCanvases.Length)
-				RefreshTileCanvas(i, service.GetTileAssignedEffects(i));
+				if (_tileCanvases != null && i < _tileCanvases.Length)
+					RefreshTileCanvas(i, service.GetTileAssignedEffects(i));
+			}
+		}
+
+		private void ApplyProceduralTileTint(MeshRenderer mr, RouletteArenaService.TileEffectType type)
+		{
+			if (mr == null) return;
+			Color c;
+			switch (type)
+			{
+				case RouletteArenaService.TileEffectType.Positive:
+					c = new Color(0.2f, 1f, 0.2f, _alphaPositive);
+					break;
+				case RouletteArenaService.TileEffectType.Negative:
+					c = new Color(1f, 0.2f, 0.2f, _alphaNegative);
+					break;
+				default:
+					c = new Color(0.82f, 0.82f, 0.82f, _alphaNeutral);
+					break;
+			}
+			var mat = mr.sharedMaterial;
+			if (mat != null)
+			{
+				if (mat.HasProperty("_BaseColor")) mat.SetColor("_BaseColor", c);
+				else if (mat.HasProperty("_Color")) mat.color = c;
 			}
 		}
 
@@ -339,6 +523,7 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 			float k = Mathf.Clamp01(t01);
 			for (int i = 0; i < _renderers.Count; i++)
 			{
+				if (_renderers[i] == null) continue;
 				Color baseC = (i < _baseColors.Count) ? _baseColors[i] : Color.white;
 				bool isEmphasized = tileIndices.Contains(i);
 				Color c;
@@ -379,7 +564,7 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 			float r = rel.magnitude;
 			if (r < _innerRadius || r > _outerRadius) return -1;
 
-			float split = _innerRadius + _radialSplit01 * (_outerRadius - _innerRadius);
+			float split = RouletteArenaService.ComputeSplitRadius(_innerRadius, _outerRadius);
 			float theta = Mathf.Atan2(rel.y, rel.x);
 			if (theta < 0f) theta += 2f * Mathf.PI;
 
@@ -542,8 +727,7 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 			tileIndex = tileIndex % max;
 
 			float sectorAngle = _arcDeg / _sectorCount;
-			float split = _innerRadius + _radialSplit01 * (_outerRadius - _innerRadius);
-			float halfGap = Mathf.Max(0f, _angularGapDeg) * 0.5f;
+			float halfGap = RouletteArenaService.ComputeTileAngularHalfGapDeg(_arcDeg, _sectorCount);
 
 			int sector = tileIndex / _radialBands;
 			int band = tileIndex % _radialBands;
@@ -552,16 +736,14 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 			float amidDeg = 0.5f * (a0 + a1);
 			float amid = amidDeg * Mathf.Deg2Rad;
 
-			float r0 = band == 0 ? _innerRadius : split;
-			float r1 = band == 0 ? split : _outerRadius;
-			float rMin = Mathf.Min(r0, r1) + Mathf.Max(0f, _radialGap);
-			float rMax = Mathf.Max(r0, r1) - Mathf.Max(0f, _radialGap);
-			if (rMax <= rMin) rMax = rMin + 0.005f;
+			RouletteArenaService.ComputeBandRadialExtents(
+				_innerRadius, _outerRadius, band, _radialGap, out float rMin, out float rMax);
 			float rMid = 0.5f * (rMin + rMax);
 
 			float cx = _centerWorld.x + Mathf.Cos(amid) * rMid;
 			float cz = _centerWorld.z + Mathf.Sin(amid) * rMid;
-			return new Vector3(cx, _centerWorld.y, cz);
+			var layoutCenter = new Vector3(cx, _centerWorld.y, cz);
+			return TileRootWorldFromLayout(layoutCenter);
 		}
 	}
 }

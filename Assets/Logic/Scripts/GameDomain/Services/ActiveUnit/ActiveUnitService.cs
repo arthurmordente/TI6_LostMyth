@@ -143,7 +143,15 @@ namespace Logic.Scripts.GameDomain.Services.ActiveUnit
             var paschoalLoadout = unitView.GetComponent<PaschoalSkillLoadout>();
             if (paschoalLoadout == null) return;
 
-            paschoalLoadout.SetSkills(_paschoalSkillLoadoutService.BuildRuntimeSlotsArray());
+            var unitType = ResolveUnitType(unit);
+            paschoalLoadout.SetSkills(_paschoalSkillLoadoutService.BuildRuntimeSlotsArray(unitType));
+        }
+
+        private SkillLoadoutUnitType ResolveUnitType(IPlayableUnit unit)
+        {
+            if (unit == null) return SkillLoadoutUnitType.Player;
+            var naraPlayable = _naraController as IPlayableUnit;
+            return unit == naraPlayable ? SkillLoadoutUnitType.Player : SkillLoadoutUnitType.Book;
         }
     }
 }

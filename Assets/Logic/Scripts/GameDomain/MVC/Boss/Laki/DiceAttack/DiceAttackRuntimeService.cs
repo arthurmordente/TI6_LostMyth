@@ -1,7 +1,26 @@
+using Logic.Scripts.GameDomain.MVC.Boss;
+using UnityEngine;
+
 namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack
 {
     public static class DiceAttackRuntimeService
     {
+        /// <summary>HP Laki loses when the player wins the dice contest (strict win: player sum &gt; boss).</summary>
+        public const int LakiHpLossOnPlayerDiceWin = 30;
+
+        /// <summary>Applies <see cref="LakiHpLossOnPlayerDiceWin"/> via <see cref="BossView"/> as <see cref="IEffectable"/> (same path as combat damage from abilities).</summary>
+        public static void ApplyLakiDiceLossDamageIfPlayerWon(in DiceAttackResult result)
+        {
+            if (!result.Completed || !result.PlayerWon) return;
+            var bossView = Object.FindFirstObjectByType<BossView>(FindObjectsInactive.Exclude);
+            if (bossView == null)
+            {
+                Debug.LogWarning("[Laki][DiceAttack] BossView not found; cannot apply dice loss HP.");
+                return;
+            }
+            ((IEffectable)bossView).TakeDamage(LakiHpLossOnPlayerDiceWin);
+        }
+
         public interface IStatusProvider { string GetStatus(); }
         public interface IResolver
         {
