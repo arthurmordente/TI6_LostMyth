@@ -76,6 +76,21 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
         [SerializeField] private float _tweenDuration = 0.35f;
         [SerializeField] private Ease _tweenEase = Ease.OutQuad;
 
+        [Header("Anúncio de turno (PlayerAct)")]
+        [Tooltip("Opcional. Desativado no fim da sequência.")]
+        [SerializeField] private GameObject _turnAnnouncementRoot;
+        [Tooltip("Controla o alpha do painel (obrigatório para o fade).")]
+        [SerializeField] private CanvasGroup _turnAnnouncementCanvasGroup;
+        [SerializeField] private TMP_Text _turnAnnouncementText;
+        [Tooltip("Rect que escala no abrir/fechar; se vazio, usa o RectTransform do texto.")]
+        [SerializeField] private RectTransform _turnAnnouncementScaleTarget;
+        [SerializeField] private float _turnAnnouncementOpenDuration = 0.35f;
+        [SerializeField] private float _turnAnnouncementHoldDuration = 1.25f;
+        [SerializeField] private float _turnAnnouncementCloseDuration = 0.3f;
+        [SerializeField] private float _turnAnnouncementScaleFrom = 0.75f;
+        [SerializeField] private Ease _turnAnnouncementOpenEase = Ease.OutBack;
+        [SerializeField] private Ease _turnAnnouncementCloseEase = Ease.InQuad;
+
         private float _playerHpDisplayFloat;
         private float _playerPreviewHpDisplayFloat;
         private float _bossHpDisplayFloat;
@@ -87,6 +102,7 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
         private Action _onSkill3;
         private Action _onSkill4;
         private bool _showBookSkillsTheme;
+        private Sequence _turnAnnouncementSequence;
 
         private void Awake()
         {
@@ -96,7 +112,11 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
                 _diceSlidablePanel.SetExpanded(false, true);
             else
                 SetDiceScoreAreaActive(false);
+
+            ResetTurnAnnouncementHiddenImmediate();
         }
+
+        private void OnDestroy() => KillTurnAnnouncementSequence();
 
         private void OnEnable()
         {
@@ -313,6 +333,69 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
         /// <inheritdoc />
         public void SetSkillsSlidableExpanded(bool expanded, bool instant = false) =>
             _skillsSlidablePanel?.SetExpanded(expanded, instant);
+
+        /// <inheritdoc />
+        public void PlayPlayerTurnAnnouncement(int turnNumber)
+        {
+            if (_turnAnnouncementCanvasGroup == null || _turnAnnouncementText == null) return;
+
+            KillTurnAnnouncementSequence();
+
+            _turnAnnouncementText.SetText($"Turno {turnNumber}");
+            if (_turnAnnouncementRoot != null)
+                _turnAnnouncementRoot.SetActive(true);
+
+            RectTransform scaleRt = _turnAnnouncementScaleTarget != null
+                ? _turnAnnouncementScaleTarget
+                : _turnAnnouncementText.rectTransform;
+
+            float s0 = Mathf.Max(0.01f, _turnAnnouncementScaleFrom);
+            _turnAnnouncementCanvasGroup.alpha = 0f;
+            scaleRt.localScale = Vector3.one * s0;
+
+            Sequence seq = DOTween.Sequence();
+            _turnAnnouncementSequence = seq;
+
+            seq.Append(_turnAnnouncementCanvasGroup.DOFade(1f, _turnAnnouncementOpenDuration));
+            seq.Join(scaleRt.DOScale(1f, _turnAnnouncementOpenDuration).SetEase(_turnAnnouncementOpenEase));
+            seq.AppendInterval(_turnAnnouncementHoldDuration);
+            seq.Append(_turnAnnouncementCanvasGroup.DOFade(0f, _turnAnnouncementCloseDuration));
+            seq.Join(scaleRt.DOScale(s0, _turnAnnouncementCloseDuration).SetEase(_turnAnnouncementCloseEase));
+            seq.OnComplete(() =>
+            {
+                _turnAnnouncementSequence = null;
+                if (_turnAnnouncementRoot != null)
+                    _turnAnnouncementRoot.SetActive(false);
+            });
+        }
+
+        private void ResetTurnAnnouncementHiddenImmediate()
+        {
+            KillTurnAnnouncementSequence();
+            if (_turnAnnouncementCanvasGroup != null)
+                _turnAnnouncementCanvasGroup.alpha = 0f;
+            RectTransform scaleRt = _turnAnnouncementScaleTarget;
+            if (scaleRt == null && _turnAnnouncementText != null)
+                scaleRt = _turnAnnouncementText.rectTransform;
+            if (scaleRt != null)
+                scaleRt.localScale = Vector3.one * Mathf.Max(0.01f, _turnAnnouncementScaleFrom);
+            if (_turnAnnouncementRoot != null)
+                _turnAnnouncementRoot.SetActive(false);
+        }
+
+        private void KillTurnAnnouncementSequence()
+        {
+            if (_turnAnnouncementSequence != null && _turnAnnouncementSequence.IsActive())
+                _turnAnnouncementSequence.Kill();
+            _turnAnnouncementSequence = null;
+            if (_turnAnnouncementCanvasGroup != null)
+                DOTween.Kill(_turnAnnouncementCanvasGroup);
+            RectTransform scaleRt = _turnAnnouncementScaleTarget;
+            if (scaleRt == null && _turnAnnouncementText != null)
+                scaleRt = _turnAnnouncementText.rectTransform;
+            if (scaleRt != null)
+                DOTween.Kill(scaleRt);
+        }
 
         private static void BindResolvedSkillButtons(GameObject skillsBackground, Action onSkill1, Action onSkill2, Action onSkill3, Action onSkill4)
         {

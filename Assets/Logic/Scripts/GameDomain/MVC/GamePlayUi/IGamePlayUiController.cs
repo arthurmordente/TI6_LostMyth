@@ -40,5 +40,8 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
 
         /// <inheritdoc cref="IGamePlayHudView.SetSkillsSlidableExpanded"/>
         void SetSkillsSlidableExpanded(bool expanded, bool instant = false);
+
+        /// <inheritdoc cref="IGamePlayHudView.PlayPlayerTurnAnnouncement"/>
+        void PlayPlayerTurnAnnouncement(int turnNumber);
     }
 }

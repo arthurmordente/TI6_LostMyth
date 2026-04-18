@@ -744,6 +744,16 @@ MonoBehaviour:
   _skill4Button: {fileID: 0}
   _tweenDuration: 0.35
   _tweenEase: 6
+  _turnAnnouncementRoot: {fileID: 1815574968332215010}
+  _turnAnnouncementCanvasGroup: {fileID: 620967857753708290}
+  _turnAnnouncementText: {fileID: 6373576248415381267}
+  _turnAnnouncementScaleTarget: {fileID: 6099471867965227371}
+  _turnAnnouncementOpenDuration: 0.35
+  _turnAnnouncementHoldDuration: 1.25
+  _turnAnnouncementCloseDuration: 0.3
+  _turnAnnouncementScaleFrom: 0.75
+  _turnAnnouncementOpenEase: 27
+  _turnAnnouncementCloseEase: 5
 --- !u!1 &394500162716462677
 GameObject:
   m_ObjectHideFlags: 0
@@ -2759,6 +2769,7 @@ GameObject:
   - component: {fileID: 6099471867965227371}
   - component: {fileID: 9190269028569745052}
   - component: {fileID: 4583024416301692909}
+  - component: {fileID: 620967857753708290}
   m_Layer: 5
   m_Name: TurnChange
   m_TagString: Untagged
@@ -2824,6 +2835,18 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!225 &620967857753708290
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1815574968332215010}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &1870510227763305381
 GameObject:
   m_ObjectHideFlags: 0

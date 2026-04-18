@@ -127,6 +127,7 @@ namespace Logic.Scripts.Turns {
             // Minigame gates run before player inputs are unlocked, so gate input is never consumed as gameplay action.
             try { await Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.RunPlayerTurnGatesAsync(); } catch { }
             _gamePlayUiController?.SetSkillsSlidableExpanded(true);
+            _gamePlayUiController?.PlayPlayerTurnAnnouncement(_turnNumber);
             // Unlock player controls and animations on PlayerAct
             _naraController?.UnfreezeInputs();
             _naraController?.Unfreeeze();

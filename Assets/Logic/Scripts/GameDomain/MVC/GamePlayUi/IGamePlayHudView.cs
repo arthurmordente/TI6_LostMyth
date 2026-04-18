@@ -39,5 +39,8 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
         /// fecha ao concluir / saltar o turno do jogador e nas outras fases. <paramref name="instant"/> ignora o tween.
         /// </summary>
         void SetSkillsSlidableExpanded(bool expanded, bool instant = false);
+
+        /// <summary>Anúncio “Turno N” no centro: abre (alpha 0→1 + escala), mantém, fecha (alpha 1→0 + escala).</summary>
+        void PlayPlayerTurnAnnouncement(int turnNumber);
     }
 }
