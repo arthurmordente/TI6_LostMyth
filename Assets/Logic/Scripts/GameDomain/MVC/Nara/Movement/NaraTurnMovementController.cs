@@ -62,11 +62,13 @@ public class NaraTurnMovementController : NaraMovementController {
     }
 
     public void ResetMovementArea() {
+        if (LineHandlerController == null || NaraTransform == null) return;
         ResetMovementRadius();
         SetMovementRadiusCenter();
         LineHandlerController.Refresh(_movementCenter, _movementRadius, NaraTransform.position);
     }
     public void Refresh() {
+        if (LineHandlerController == null || NaraTransform == null) return;
         LineHandlerController.Refresh(_movementCenter, _movementRadius, NaraTransform.position);
     }
 
@@ -154,11 +156,13 @@ public class NaraTurnMovementController : NaraMovementController {
     }
 
     public void ActivateNaraGravity() {
+        if (NaraRigidbody == null) return;
         NaraRigidbody.useGravity = true;
         NaraRigidbody.constraints &= ~RigidbodyConstraints.FreezePositionY;
     }
 
     public void DeactivateNaraGravity() {
+        if (NaraRigidbody == null) return;
         NaraRigidbody.useGravity = false;
         NaraRigidbody.constraints |= RigidbodyConstraints.FreezePositionY;
     }

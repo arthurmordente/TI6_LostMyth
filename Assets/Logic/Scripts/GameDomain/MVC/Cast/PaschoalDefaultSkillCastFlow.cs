@@ -1,12 +1,19 @@
+using Logic.Scripts.GameDomain.MVC.Cast.Paschoal;
 using Logic.Scripts.GameDomain.MVC.Nara;
 using Logic.Scripts.GameDomain.MVC.Shared;
 using UnityEngine;
 
 public class PaschoalDefaultSkillCastFlow : ISkillCastFlow
 {
+    private readonly IPaschoalSkillTargetingPreviewService _targetingPreview;
+
     private SkillDataSO _currentSkill;
     private GameObject _currentPreview;
     private Transform _fallbackTarget;
+
+    public PaschoalDefaultSkillCastFlow(IPaschoalSkillTargetingPreviewService targetingPreview) {
+        _targetingPreview = targetingPreview;
+    }
 
     public bool CanHandleCaster(IPlayableUnit caster)
     {
@@ -46,6 +53,8 @@ public class PaschoalDefaultSkillCastFlow : ISkillCastFlow
         EnsureFallbackTarget(caster);
         UpdateFallbackTarget(caster);
 
+        _targetingPreview?.Begin(_currentSkill, caster);
+
         prepareResult = new SkillCastPrepareResult
         {
             AbilityIndex = index,
@@ -60,6 +69,7 @@ public class PaschoalDefaultSkillCastFlow : ISkillCastFlow
         if (_currentSkill == null || caster == null) return;
 
         UpdateFallbackTarget(caster);
+        _targetingPreview?.End();
         Transform castTarget = _currentPreview != null ? _currentPreview.transform : _fallbackTarget;
         _currentSkill.OnCast(caster, castTarget);
         CleanupPreviewAndTarget();
@@ -68,6 +78,7 @@ public class PaschoalDefaultSkillCastFlow : ISkillCastFlow
 
     public void CancelPreparedCast(IPlayableUnit caster)
     {
+        _targetingPreview?.End();
         CleanupPreviewAndTarget();
         _currentSkill = null;
     }

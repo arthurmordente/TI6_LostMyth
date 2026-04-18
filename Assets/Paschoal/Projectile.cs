@@ -8,6 +8,14 @@ public class Projectile : MonoBehaviour
     Collider[] hits;
     [SerializeField]SkillDataSO skill;
     Vector3 startPos = new Vector3();
+
+    /// <summary>
+    /// Used by Paschoal aim preview: line highlight includes every hittable target along the ray
+    /// (piercing / area-on-destroy). Single-target projectiles only preview the first target.
+    /// </summary>
+    public bool PaschoalAimUsesPiercingLineHighlight =>
+        type == Type.Pircer || type == Type.AreaDamage;
+
     private void Start()
     {
         startPos = transform.position;

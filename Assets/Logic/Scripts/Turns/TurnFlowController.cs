@@ -51,8 +51,10 @@ namespace Logic.Scripts.Turns {
             IEnviromentActionService enviromentActionService, NaraTurnMovementController naraTurnMovement) {
             _bossActionService = bossActionService;
             _enviromentActionService = enviromentActionService;
-            StartTurns();
+            // Must assign before StartTurns: AdvanceTurnAsync may resume synchronously after await and
+            // reach StartPlayerPhase before this method would otherwise assign _turnMovement (Laki/dice path).
             _turnMovement = naraTurnMovement;
+            StartTurns();
         }
 
         public void Dispose() {
@@ -122,7 +124,7 @@ namespace Logic.Scripts.Turns {
         private async void StartPlayerPhase() {
             _actionPointsService.GainTurnPoints();
             _phase = TurnPhase.PlayerAct;
-            _turnMovement.ResetMovementArea();
+            _turnMovement?.ResetMovementArea();
             _turnStateService.AdvanceTurn(_turnNumber, _phase);
             // Minigame gates run before player inputs are unlocked, so gate input is never consumed as gameplay action.
             try { await Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.RunPlayerTurnGatesAsync(); } catch { }
@@ -140,7 +142,7 @@ namespace Logic.Scripts.Turns {
             _waitingPlayer = true;
             _commandFactory.CreateCommandVoid<Logic.Scripts.GameDomain.Commands.RecenterNaraMovementOnPlayerTurnCommand>().Execute();
             _turnMovement?.LineHandlerController.SetVisible(true);
-            _turnMovement.DeactivateNaraGravity();
+            _turnMovement?.DeactivateNaraGravity();
             _turnStateService.RequestPlayerAction();
         }
 
@@ -157,7 +159,7 @@ namespace Logic.Scripts.Turns {
             _waitingPlayer = false;
             _gamePlayUiController?.SetSkillsSlidableExpanded(false);
             _divideAbilityHandler?.OnPlayerTurnEnd();
-            _turnMovement.ActivateNaraGravity();
+            _turnMovement?.ActivateNaraGravity();
             StartEchoPhaseAsync();
         }
 

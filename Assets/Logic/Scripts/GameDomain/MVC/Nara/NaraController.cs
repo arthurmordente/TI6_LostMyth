@@ -202,6 +202,10 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
 
         }
 
+        public void SetSkillTargetingHighlight(bool active) {
+            SkillTargetingHighlightBridge.SetHighlighted(this, active);
+        }
+
         public void Stun(int value) {
 
         }

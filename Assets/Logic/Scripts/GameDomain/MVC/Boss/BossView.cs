@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using System.Threading.Tasks;
+using Logic.Scripts.GameDomain.VisualFeedback;
 
 namespace Logic.Scripts.GameDomain.MVC.Boss {
     public class BossView : MonoBehaviour, IEffectable {
@@ -177,6 +178,10 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
 
         public GameObject GetReferenceTargetPrefab() {
             return gameObject;
+        }
+
+        public void SetSkillTargetingHighlight(bool active) {
+            SkillTargetingHighlightBridge.SetHighlighted(this, active);
         }
     }
 }

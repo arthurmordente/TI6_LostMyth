@@ -28,13 +28,14 @@ public class CastController : ICastController {
     private readonly PaschoalDefaultSkillCastFlow _paschoalFlow;
 
     public CastController(IUpdateSubscriptionService updateSubscriptionService, ICommandFactory commandFactory,
-        IActionPointsService actionPointsService, ICheatController cheatController) {
+        IActionPointsService actionPointsService, ICheatController cheatController,
+        PaschoalDefaultSkillCastFlow paschoalSkillCastFlow) {
         _subscriptionService = updateSubscriptionService;
         _commandFactory = commandFactory;
         _naraActionPointsService = actionPointsService;
         _cheatController = cheatController;
         _legacyFlow = new LegacySkillCastFlow(_subscriptionService, _commandFactory);
-        _paschoalFlow = new PaschoalDefaultSkillCastFlow();
+        _paschoalFlow = paschoalSkillCastFlow;
         try { _audio = ProjectContext.Instance.Container.Resolve<IAudioService>(); } catch { _audio = null; }
     }
 

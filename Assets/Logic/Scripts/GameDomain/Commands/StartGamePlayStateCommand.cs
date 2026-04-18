@@ -38,8 +38,11 @@ namespace Logic.Scripts.GameDomain.Commands {
 
         public async Awaitable Execute(CancellationTokenSource cancellationTokenSource) {
             _gameInputActionsController.RegisterGameplayInputListeners();
-            await _commandFactory.CreateCommandAsync<StartLevelCommand>().StartBoss().Execute(cancellationTokenSource);
+            // Wire rigidbody/camera on the movement controller before EnterTurnMode: Laki's first BossAct
+            // can finish synchronously and reach PlayerAct before this method would otherwise continue,
+            // which left NaraTransform null inside ResetMovementArea (Hokari usually awaits long enough to mask it).
             _naraController.InitEntryPointGamePlay(_gamePlayUiController);
+            await _commandFactory.CreateCommandAsync<StartLevelCommand>().StartBoss().Execute(cancellationTokenSource);
             _audioService.PlayAudio(AudioClipType.BossTheme, AudioChannelType.Music, AudioPlayType.Loop);
             _gamePlayUiController.InitEntryPoint();
             _activeUnitService.RefreshHudAbilityCosts();

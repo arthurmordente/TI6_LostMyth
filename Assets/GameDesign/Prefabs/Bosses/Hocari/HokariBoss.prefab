@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 7540813036317866533}
   - component: {fileID: 8953824343904534656}
   - component: {fileID: 2980076121009688399}
+  - component: {fileID: 5606840884547437125}
   m_Layer: 6
   m_Name: HokariBoss
   m_TagString: Untagged
@@ -139,6 +140,22 @@ MonoBehaviour:
   _flashSeconds: 0.2
   _flashColor: {r: 1, g: 0, b: 0, a: 1}
   _modelRoot: {fileID: 3448328581731096150}
+--- !u!114 &5606840884547437125
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3005417857088838520}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b3f1330c4479db44da2f32f39f69020c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Logic.Scripts.GameDomain.VisualFeedback.SkillTargetingHighlightPresenter
+  _highlightMaterialTemplate: {fileID: 2100000, guid: 8bc147100e393b64bafc3b19463acc6a, type: 2}
+  _modelRoot: {fileID: 3448328581731096150}
+  _overrideMainColor: 0
+  _mainColor: {r: 8, g: 0, b: 0, a: 1}
 --- !u!1 &5860620743470976194
 GameObject:
   m_ObjectHideFlags: 0

@@ -3,6 +3,7 @@ using Logic.Scripts.GameDomain.MVC.Nara;
 using Logic.Scripts.GameDomain.MVC.Abilitys;
 using System.Collections.Generic;
 using Logic.Scripts.GameDomain.MVC.Environment.Orb;
+using Logic.Scripts.GameDomain.VisualFeedback;
 using Logic.Scripts.Turns;
 
 namespace Logic.Scripts.GameDomain.MVC.Environment.Orb
@@ -278,6 +279,10 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Orb
 
         public GameObject GetReferenceTargetPrefab() {
             return gameObject;
+        }
+
+        public void SetSkillTargetingHighlight(bool active) {
+            SkillTargetingHighlightBridge.SetHighlighted(this, active);
         }
     }
 }

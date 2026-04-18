@@ -9,6 +9,7 @@ using System;
 using System.Threading.Tasks;
 using Object = UnityEngine.Object;
 using Logic.Scripts.GameDomain.MVC.Ui;
+using Logic.Scripts.GameDomain.Services.ActiveUnit;
 using Assets.Logic.Scripts.GameDomain.Effects;
 using Logic.Scripts.GameDomain.VisualFeedback;
 
@@ -20,6 +21,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
         private readonly ICommandFactory _commandFactory;
         private readonly IResourcesLoaderService _resourcesLoaderService;
         private readonly IGamePlayUiController _gamePlayUiController;
+        private readonly IActiveUnitService _activeUnitService;
 
         private BossView _bossView;
         private readonly BossView _bossViewPrefab;
@@ -68,7 +70,8 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
             IResourcesLoaderService resourcesLoaderService, BossView bossViewPrefab,
             BossConfigurationSO bossConfiguration, BossPhasesSO bossPhases,
             IBossAbilityController bossAbilityController, IGamePlayUiController gamePlayUiController,
-            string fightBossHudDisplayName) {
+            string fightBossHudDisplayName,
+            [InjectOptional] IActiveUnitService activeUnitService = null) {
             _updateSubscriptionService = updateSubscriptionService;
             _audioService = audioService;
             _commandFactory = commandFactory;
@@ -78,6 +81,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
             _bossPhases = bossPhases;
             _bossAbilityController = bossAbilityController;
             _gamePlayUiController = gamePlayUiController;
+            _activeUnitService = activeUnitService;
             _fightBossHudDisplayName = fightBossHudDisplayName ?? string.Empty;
             _bossData = new BossData(_bossConfiguration);
         }
@@ -693,6 +697,8 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
                 if (_bossView != null) {
                     // Optional: play death animation here if available
                 }
+                // Vitória com o Book/clone ativo deixa a câmara a seguir um alvo que pode ser destruído ou inválido; voltar à Nara antes do Game Over.
+                _activeUnitService?.SetNaraAsActiveUnit();
                 _commandFactory.CreateCommandVoid<GameOverCommand>().SetData(new GameOverCommandData(true)).Execute();
                 return;
             }
@@ -739,6 +745,10 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
 
         public void ResetPreview() {
 
+        }
+
+        public void SetSkillTargetingHighlight(bool active) {
+            SkillTargetingHighlightBridge.SetHighlighted(this, active);
         }
 
         public void Dispose() {

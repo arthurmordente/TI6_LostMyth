@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using UnityEngine;
 using Logic.Scripts.Turns;
+using Logic.Scripts.GameDomain.VisualFeedback;
 using TMPro;
 
 namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Dice
@@ -116,6 +117,10 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Dice
 		public void TakeDamagePerTurn(int damageAmount, int duration) { }
 		public void Heal(int healAmount) { _hp += Mathf.Max(0, healAmount); }
 		public void HealPerTurn(int healAmount, int duration) { }
+
+		public void SetSkillTargetingHighlight(bool active) {
+			SkillTargetingHighlightBridge.SetHighlighted(this, active);
+		}
 
 		private void StartMove(Vector3 target, float duration)
 		{

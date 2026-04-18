@@ -279,6 +279,10 @@ namespace Logic.Scripts.GameDomain.MVC.Book
         public void Heal(int amount) { if (_bookData != null) _bookData.Heal(amount); }
         public void HealPerTurn(int healAmount, int duration) { }
 
+        public void SetSkillTargetingHighlight(bool active) {
+            SkillTargetingHighlightBridge.SetHighlighted(this, active);
+        }
+
         #endregion
 
         #region IEffectableAction

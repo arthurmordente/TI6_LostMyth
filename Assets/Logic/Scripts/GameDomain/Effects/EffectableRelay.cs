@@ -62,6 +62,10 @@ namespace Assets.Logic.Scripts.GameDomain.Effects
         public GameObject GetReferenceTargetPrefab() {
             return _target != null ? _target.GetReferenceTargetPrefab() : gameObject;
         }
+
+        public void SetSkillTargetingHighlight(bool active) {
+            _target?.SetSkillTargetingHighlight(active);
+        }
     }
 }
 
