@@ -37,5 +37,8 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
 
         void OnSkill2NameChange(string newValue);
         void ShowBookSkillsTheme(bool showBookSkillsTheme);
+
+        /// <inheritdoc cref="IGamePlayHudView.SetSkillsSlidableExpanded"/>
+        void SetSkillsSlidableExpanded(bool expanded, bool instant = false);
     }
 }

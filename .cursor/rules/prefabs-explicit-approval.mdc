@@ -1,0 +1,10 @@
+---
+description: Nunca editar prefabs ou cenas Unity sem confirmação explícita do utilizador
+alwaysApply: true
+---
+
+# Prefabs e assets serializados (Unity)
+
+- **Não alterar** ficheiros `.prefab`, `.unity`, `.asset` ou outros YAML serializados pelo Unity **a menos que o utilizador confirme explicitamente** essa alteração no pedido.
+- Preferir mudanças só em **scripts** (`.cs`) e deixar referências, `RectTransform`, valores de inspector e layout para o utilizador no Editor.
+- Se for indispensável tocar num prefab, **pedir confirmação** antes ou listar exatamente o que mudaria e esperar OK.

@@ -150,5 +150,8 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
 
         public void ShowBookSkillsTheme(bool showBookSkillsTheme) => _gamePlayHud.ShowBookSkillsTheme(showBookSkillsTheme);
 
+        public void SetSkillsSlidableExpanded(bool expanded, bool instant = false) =>
+            _gamePlayHud.SetSkillsSlidableExpanded(expanded, instant);
+
     }
 }

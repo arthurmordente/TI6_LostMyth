@@ -33,5 +33,11 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
         void OnSkill1NameChange(string name);
         void OnSkill2NameChange(string name);
         void ShowBookSkillsTheme(bool showBookSkillsTheme);
+
+        /// <summary>
+        /// Barra de skills (<see cref="UiSlidableAnchoredPanel"/>). TurnFlow: abre após os gates no <c>PlayerAct</c>;
+        /// fecha ao concluir / saltar o turno do jogador e nas outras fases. <paramref name="instant"/> ignora o tween.
+        /// </summary>
+        void SetSkillsSlidableExpanded(bool expanded, bool instant = false);
     }
 }

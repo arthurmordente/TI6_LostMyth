@@ -3,6 +3,7 @@ using Logic.Scripts.Services.Logger.Base;
 using Logic.Scripts.Services.CommandFactory;
 using Logic.Scripts.GameDomain.MVC.Nara;
 using Logic.Scripts.GameDomain.MVC.Book.Divide;
+using Logic.Scripts.GameDomain.MVC.Ui;
 
 namespace Logic.Scripts.Turns {
     public class TurnFlowController : System.IDisposable {
@@ -14,6 +15,7 @@ namespace Logic.Scripts.Turns {
 		private readonly Logic.Scripts.GameDomain.MVC.Boss.Laki.Chips.IChipService _chipService;
         private readonly INaraController _naraController;
         private readonly IDivideAbilityHandler _divideAbilityHandler;
+        private readonly IGamePlayUiController _gamePlayUiController;
 
         private IBossActionService _bossActionService;
         private IEnviromentActionService _enviromentActionService;
@@ -32,7 +34,8 @@ namespace Logic.Scripts.Turns {
 			INaraController naraController,
 			Logic.Scripts.GameDomain.MVC.Echo.ICloneUseLimiter cloneUseLimiter,
 			Logic.Scripts.GameDomain.MVC.Boss.Laki.Chips.IChipService chipService,
-            IDivideAbilityHandler divideAbilityHandler) {
+            IDivideAbilityHandler divideAbilityHandler,
+            [InjectOptional] IGamePlayUiController gamePlayUiController) {
             _actionPointsService = actionPointsService;
             _echoService = echoService;
             _turnStateService = turnStateService;
@@ -41,6 +44,7 @@ namespace Logic.Scripts.Turns {
 			_cloneUseLimiter = cloneUseLimiter;
 			_chipService = chipService;
             _divideAbilityHandler = divideAbilityHandler;
+            _gamePlayUiController = gamePlayUiController;
         }
 
         public void Initialize(IBossActionService bossActionService,
@@ -77,6 +81,7 @@ namespace Logic.Scripts.Turns {
             _phase = TurnPhase.None;
             _actionPointsService.Reset();
             _turnStateService.ExitTurnMode();
+            _gamePlayUiController?.SetSkillsSlidableExpanded(false);
         }
 
         private async void AdvanceTurnAsync() {
@@ -84,6 +89,7 @@ namespace Logic.Scripts.Turns {
             _turnNumber += 1;
             _phase = TurnPhase.BossAct;
             _turnStateService.AdvanceTurn(_turnNumber, _phase);
+            _gamePlayUiController?.SetSkillsSlidableExpanded(false);
             // Hard lock player at the beginning of BossAct
             _naraController?.FreezeInputs();
             _naraController?.Freeeze();
@@ -120,6 +126,7 @@ namespace Logic.Scripts.Turns {
             _turnStateService.AdvanceTurn(_turnNumber, _phase);
             // Minigame gates run before player inputs are unlocked, so gate input is never consumed as gameplay action.
             try { await Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.RunPlayerTurnGatesAsync(); } catch { }
+            _gamePlayUiController?.SetSkillsSlidableExpanded(true);
             // Unlock player controls and animations on PlayerAct
             _naraController?.UnfreezeInputs();
             _naraController?.Unfreeeze();
@@ -139,6 +146,7 @@ namespace Logic.Scripts.Turns {
         public void SkipTurn() {
             if (!_active || !_waitingPlayer) return;
             _waitingPlayer = false;
+            _gamePlayUiController?.SetSkillsSlidableExpanded(false);
             _divideAbilityHandler?.OnPlayerTurnEnd();
             StartEchoPhaseAsync();
         }
@@ -146,12 +154,14 @@ namespace Logic.Scripts.Turns {
         public void CompletePlayerAction() {
             if (!_active || !_waitingPlayer) return;
             _waitingPlayer = false;
+            _gamePlayUiController?.SetSkillsSlidableExpanded(false);
             _divideAbilityHandler?.OnPlayerTurnEnd();
             _turnMovement.ActivateNaraGravity();
             StartEchoPhaseAsync();
         }
 
         private async void StartEchoPhaseAsync() {
+            _gamePlayUiController?.SetSkillsSlidableExpanded(false);
             _phase = TurnPhase.EchoesAct;
             _turnStateService.AdvanceTurn(_turnNumber, _phase);
             // Lock during Echoes
@@ -168,6 +178,7 @@ namespace Logic.Scripts.Turns {
         }
 
         private async void StartEnviromentPhaseAsync() {
+            _gamePlayUiController?.SetSkillsSlidableExpanded(false);
             _phase = TurnPhase.EnviromentAct;
             _turnStateService.AdvanceTurn(_turnNumber, _phase);
             // Lock during Environment

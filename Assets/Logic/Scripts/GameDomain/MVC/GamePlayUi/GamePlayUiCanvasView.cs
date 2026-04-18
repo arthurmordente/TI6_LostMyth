@@ -19,9 +19,19 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
         [Header("Root")]
         [SerializeField] private RectTransform _hudRoot;
 
+        [Header("Controls — gaveta (opcional)")]
+        [Tooltip("Painel de controles: use UiSlidableAnchoredPanel no conteúdo que desliza; o botão fica fora do Slide Target.")]
+        [SerializeField] private UiSlidableAnchoredPanel _controlsSlidablePanel;
+
+        [Header("Skills — gaveta (opcional)")]
+        [Tooltip("UiSlidableAnchoredPanel no SkillsRoot (ou equivalente). Arrastar aqui; TurnFlow abre no PlayerAct e fecha ao fim do turno do jogador. Outros sistemas podem usar SetSkillsSlidableExpanded.")]
+        [SerializeField] private UiSlidableAnchoredPanel _skillsSlidablePanel;
+
         [Header("Dice score")]
-        [Tooltip("Painel de pontuação do minigame de dados (ex.: DiceScore_Menu). Ativo só durante DiceAttack.")]
+        [Tooltip("Painel de pontuação do minigame de dados (ex.: DiceScore_Menu). Com Slidable, o root fica ativo e só o slide abre/fecha.")]
         [SerializeField] private GameObject _diceScoreAreaRoot;
+        [Tooltip("Opcional. Se atribuído, mostrar/ocultar dados anima em vez de SetActive no root.")]
+        [SerializeField] private UiSlidableAnchoredPanel _diceSlidablePanel;
         [Tooltip("Opcional. Se vazio, procura GamePlayDiceAttackPanelView dentro de Dice Score Area Root (incl. inativo).")]
         [SerializeField] private GamePlayDiceAttackPanelView _diceAttackPanel;
 
@@ -37,12 +47,6 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
         [SerializeField] private TMP_Text _playerCurrentHealthText;
         [SerializeField] private Image _playerApFillImage;
         [SerializeField] private TMP_Text _playerActionPointsText;
-
-        [Header("Skills — mana cost TMP per slot (4 abilities)")]
-        [SerializeField] private TMP_Text _skill1CostText;
-        [SerializeField] private TMP_Text _skill2CostText;
-        [SerializeField] private TMP_Text _skill3CostText;
-        [SerializeField] private TMP_Text _skill4CostText;
 
         [Header("Skills Theme Roots")]
         [Tooltip("Background completo das skills da Nara/Erza. O codigo resolve o filho 'container' e os 4 botoes.")]
@@ -86,7 +90,12 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
 
         private void Awake()
         {
-            SetDiceScoreAreaActive(false);
+            if (_diceSlidablePanel != null && _diceScoreAreaRoot != null)
+                _diceScoreAreaRoot.SetActive(true);
+            if (_diceSlidablePanel != null)
+                _diceSlidablePanel.SetExpanded(false, true);
+            else
+                SetDiceScoreAreaActive(false);
         }
 
         private void OnEnable()
@@ -131,12 +140,26 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
         /// <summary>Ativa ou desativa o painel de dados (útil se precisares forçar estado a partir de outro fluxo).</summary>
         public void SetDiceScoreAreaActive(bool active)
         {
-            if (_diceScoreAreaRoot != null) _diceScoreAreaRoot.SetActive(active);
+            if (_diceSlidablePanel != null)
+            {
+                if (_diceScoreAreaRoot != null && !_diceScoreAreaRoot.activeSelf)
+                    _diceScoreAreaRoot.SetActive(true);
+                _diceSlidablePanel.SetExpanded(active);
+            }
+            else if (_diceScoreAreaRoot != null)
+                _diceScoreAreaRoot.SetActive(active);
         }
 
         public void InitStartPoint()
         {
             if (_hudRoot == null) _hudRoot = GetComponent<RectTransform>();
+        }
+
+        /// <summary>Abre ou fecha o painel de controles quando o slidable estiver atribuído no inspector.</summary>
+        public void SetControlsPanelExpanded(bool expanded, bool instant = false)
+        {
+            if (_controlsSlidablePanel != null)
+                _controlsSlidablePanel.SetExpanded(expanded, instant);
         }
 
         public void RegisterCallbacks(Action onNextTurn, Action onSkill1, Action onSkill2, Action onSkill3, Action onSkill4)
@@ -268,13 +291,13 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
             }, current, _tweenDuration).SetEase(_tweenEase).SetTarget(target);
         }
 
-        public void OnSkill1CostChange(int cost) => SetIntText(GetActiveCostText(0) ?? _skill1CostText, cost);
+        public void OnSkill1CostChange(int cost) => SetIntText(GetActiveCostText(0), cost);
 
-        public void OnSkill2CostChange(int cost) => SetIntText(GetActiveCostText(1) ?? _skill2CostText, cost);
+        public void OnSkill2CostChange(int cost) => SetIntText(GetActiveCostText(1), cost);
 
-        public void OnSkill3CostChange(int cost) => SetIntText(GetActiveCostText(2) ?? _skill3CostText, cost);
+        public void OnSkill3CostChange(int cost) => SetIntText(GetActiveCostText(2), cost);
 
-        public void OnSkill4CostChange(int cost) => SetIntText(GetActiveCostText(3) ?? _skill4CostText, cost);
+        public void OnSkill4CostChange(int cost) => SetIntText(GetActiveCostText(3), cost);
 
         public void OnSkill1NameChange(string name) { }
 
@@ -286,6 +309,10 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
             if (_erzaSkillsBackground != null) _erzaSkillsBackground.SetActive(!showBookSkillsTheme);
             if (_bookSkillsBackground != null) _bookSkillsBackground.SetActive(showBookSkillsTheme);
         }
+
+        /// <inheritdoc />
+        public void SetSkillsSlidableExpanded(bool expanded, bool instant = false) =>
+            _skillsSlidablePanel?.SetExpanded(expanded, instant);
 
         private static void BindResolvedSkillButtons(GameObject skillsBackground, Action onSkill1, Action onSkill2, Action onSkill3, Action onSkill4)
         {
