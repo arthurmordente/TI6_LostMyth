@@ -821,6 +821,8 @@ MonoBehaviour:
   _toggleButton: {fileID: 8589089100563857199}
   _expandButton: {fileID: 368043804069644084}
   _expandHandleSlidable: {fileID: 7415439781978997783}
+  _multiStateMode: 0
+  _multiStateOffsetsFromOpen: []
 --- !u!1 &456016642120863579
 GameObject:
   m_ObjectHideFlags: 0
@@ -3433,6 +3435,8 @@ MonoBehaviour:
   _toggleButton: {fileID: 8749117640772077912}
   _expandButton: {fileID: 8749117640772077912}
   _expandHandleSlidable: {fileID: 0}
+  _multiStateMode: 0
+  _multiStateOffsetsFromOpen: []
 --- !u!1 &1999373063886694400
 GameObject:
   m_ObjectHideFlags: 0
@@ -5618,6 +5622,15 @@ MonoBehaviour:
   _diceScoreRowsParent: {fileID: 5877211951377391370}
   _lakiSumText: {fileID: 8649089934088609955}
   _playerSumText: {fileID: 7726763141156019110}
+  _diceSumSlidable: {fileID: 2622420101673765043}
+  _diceSumLakiRow: {fileID: 2380090737687695617}
+  _diceSumPlayerRow: {fileID: 2237845612117971873}
+  _diceSumLakiDie1: {fileID: 3524060221486789676}
+  _diceSumLakiDie2: {fileID: 1399142731619150406}
+  _diceSumLakiDie3: {fileID: 4275241120236220981}
+  _diceSumPlayerDie1: {fileID: 3461145952199096088}
+  _diceSumPlayerDie2: {fileID: 762843490336596790}
+  _diceSumPlayerDie3: {fileID: 1041415467176055594}
   _playerPerDieColumn: {fileID: 0}
   _lakiPerDieColumn: {fileID: 0}
   _valuePunchDuration: 0.22
@@ -10347,8 +10360,8 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 5877211951377391370}
   - {fileID: 1520154153397182211}
+  - {fileID: 5877211951377391370}
   m_Father: {fileID: 3419372007265188146}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
@@ -10377,13 +10390,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Logic.Scripts.GameDomain.MVC.Ui.UiSlidableAnchoredPanel
   _target: {fileID: 8430521399689715446}
-  _hiddenOffset: {x: 0, y: 125}
+  _hiddenOffset: {x: 0, y: 140}
   _duration: 0.35
   _ease: 6
   _startExpanded: 0
   _toggleButton: {fileID: 0}
   _expandButton: {fileID: 0}
   _expandHandleSlidable: {fileID: 0}
+  _multiStateMode: 0
+  _multiStateOffsetsFromOpen: []
 --- !u!1 &8221925676941104141
 GameObject:
   m_ObjectHideFlags: 0
@@ -11505,8 +11520,8 @@ GameObject:
   - component: {fileID: 1520154153397182211}
   - component: {fileID: 8934598649766681787}
   - component: {fileID: 4228576974948259531}
-  - component: {fileID: 5042480729738207867}
   - component: {fileID: 311752331470973823}
+  - component: {fileID: 2622420101673765043}
   m_Layer: 5
   m_Name: DiceSum_Menu
   m_TagString: Untagged
@@ -11532,7 +11547,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 196.8, y: -11.8}
+  m_AnchoredPosition: {x: 200, y: -11.8}
   m_SizeDelta: {x: 200, y: 120}
   m_Pivot: {x: 0, y: 1}
 --- !u!222 &8934598649766681787
@@ -11573,24 +11588,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &5042480729738207867
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8786488494829896095}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 55b98c194b50f8a4ea287c28562c9925, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Logic.Scripts.GameDomain.MVC.Ui.GamePlayDiceAttackPanelView
-  _lakiPanelRoot: {fileID: 0}
-  _lakiSumText: {fileID: 0}
-  _lakiFactorsText: {fileID: 0}
-  _playerPanelRoot: {fileID: 0}
-  _playerSumText: {fileID: 0}
-  _playerFactorsText: {fileID: 0}
 --- !u!114 &311752331470973823
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11617,6 +11614,30 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &2622420101673765043
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8786488494829896095}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cb5683db351211b44b80b54a7dd32d3b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Logic.Scripts.GameDomain.MVC.Ui.UiSlidableAnchoredPanel
+  _target: {fileID: 0}
+  _hiddenOffset: {x: 0, y: 0}
+  _duration: 0.35
+  _ease: 6
+  _startExpanded: 1
+  _toggleButton: {fileID: 0}
+  _expandButton: {fileID: 0}
+  _expandHandleSlidable: {fileID: 0}
+  _multiStateMode: 1
+  _multiStateOffsetsFromOpen:
+  - {x: -60, y: 0}
+  - {x: -200, y: 0}
 --- !u!1 &8833037591509321330
 GameObject:
   m_ObjectHideFlags: 0
@@ -11956,6 +11977,8 @@ MonoBehaviour:
   _toggleButton: {fileID: 0}
   _expandButton: {fileID: 0}
   _expandHandleSlidable: {fileID: 0}
+  _multiStateMode: 0
+  _multiStateOffsetsFromOpen: []
 --- !u!1 &9021927026322294326
 GameObject:
   m_ObjectHideFlags: 0

@@ -6,22 +6,20 @@ using UnityEngine.UI;
 namespace Logic.Scripts.GameDomain.MVC.Ui
 {
     /// <summary>
-    /// Dois estados fixos no mesmo <see cref="_target"/>: pose <b>aberta</b> = valor no prefab; <b>fechado</b> = aberto + <see cref="_hiddenOffset"/>.
-    /// Ex.: fechado 700 px à esquerda do aberto → offset (-700, 0).
-    /// <see cref="_startExpanded"/>: após o 1.º frame, manter aberto ou animar para fechado.
-    /// Botões: dois <see cref="Button"/> diferentes (recolher / expandir) ou um só — preencha só um campo, ou o mesmo <see cref="Button"/> em Toggle e Expand; nesse caso o clique alterna e os botões não são desativados.
-    /// Modo dois botões: ao fechar com tween, o controlo de reabrir só é mostrado no fim (slide do painel principal).
-    /// Opcionalmente esse controlo é outro <see cref="UiSlidableAnchoredPanel"/> (desliza para dentro/fora em vez de SetActive).
+    /// Painel que desliza em <see cref="_target"/> por <c>anchoredPosition</c>.
+    /// <b>Modo clássico (padrão):</b> dois estados — aberto = pose do prefab; fechado = aberto + <see cref="_hiddenOffset"/>.
+    /// <b>Modo multi-estado (opcional):</b> N offsets a partir da pose aberta — índice 0 = mais fechado, último = totalmente aberto (offset zero).
+    /// Botões: ver doc do modo clássico; em multi-estado, <see cref="SetExpanded(bool)"/> mapeia só fechado (0) e último índice (aberto).
     /// </summary>
     [DisallowMultipleComponent]
     public sealed class UiSlidableAnchoredPanel : MonoBehaviour
     {
         [SerializeField] private RectTransform _target;
-        [Tooltip("Fechado = aberto + este vetor (ex.: (-700,0) desliza o fechado para a esquerda).")]
+        [Tooltip("Modo clássico: fechado = aberto + este vetor. Ignorado em modo multi-estado (usa primeiro offset da lista).")]
         [SerializeField] private Vector2 _hiddenOffset;
         [SerializeField] private float _duration = 0.35f;
         [SerializeField] private Ease _ease = Ease.OutQuad;
-        [Tooltip("Prefab = pose ABERTA.\nLigado: após o 1.º frame mantém-se aberto.\nDesligado: após o 1.º frame anima para fechado.")]
+        [Tooltip("Prefab = pose ABERTA (último estado em multi-estado).\nLigado: após o 1.º frame mantém-se no estado inicial escolhido.\nDesligado: após o 1.º frame anima para fechado (índice 0).")]
         [SerializeField] private bool _startExpanded = true;
         [Tooltip("Recolher. Se Expand for outro Button: só fecha. Se Expand for o mesmo, só um dos dois, ou vazio com Expand preenchido: um botão alterna abrir/fechar.")]
         [SerializeField] private Button _toggleButton;
@@ -30,19 +28,31 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
         [Tooltip("Só modo 2 botões. Slidable no mesmo objeto (ou pai) do botão de reabrir: entra em tween quando o menu principal fecha; sai quando abre. Vazio = usar SetActive no Expand Button.")]
         [SerializeField] private UiSlidableAnchoredPanel _expandHandleSlidable;
 
+        [Header("Multi-estado (opcional)")]
+        [Tooltip("Se ligado, usa _multiStateOffsetsFromOpen em vez de _hiddenOffset. Comprimento ≥ 2.")]
+        [SerializeField] private bool _multiStateMode;
+        [Tooltip("Pose aberta = prefab. Estado i = aberto + offset[i]. [0] = mais escondido; último = tipicamente (0,0) para totalmente visível.")]
+        [SerializeField] private Vector2[] _multiStateOffsetsFromOpen = new Vector2[0];
+
         private Vector2 _openPos;
-        private Vector2 _closedPos;
         private bool _expanded;
         private bool _ready;
         private bool? _pendingExpanded;
+        private int? _pendingStateIndex;
+        private int _stateIndex;
 
         public bool IsExpanded => _expanded;
 
-        /// <summary>Dois botões distintos: Toggle = recolher, Expand = abrir. Qualquer outra combinação = um único botão que alterna.</summary>
+        /// <summary>Índice do estado atual em modo multi-estado; em modo clássico, 0 = fechado, 1 = aberto.</summary>
+        public int CurrentStateIndex => _multiStateMode && MultiStateCount > 0 ? _stateIndex : (_expanded ? 1 : 0);
+
+        public int StateCount => _multiStateMode && MultiStateCount > 0 ? MultiStateCount : 2;
+
+        private int MultiStateCount => _multiStateOffsetsFromOpen != null ? _multiStateOffsetsFromOpen.Length : 0;
+
         private bool IsDualButtonMode() =>
             _toggleButton != null && _expandButton != null && _toggleButton != _expandButton;
 
-        /// <summary>Botão único para alternar (só Toggle, só Expand, ou o mesmo nos dois campos).</summary>
         private Button ResolveSingleToggleButton()
         {
             if (IsDualButtonMode()) return null;
@@ -57,14 +67,32 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
 
             Vector2 prefabOpen = _target.anchoredPosition;
             _openPos = prefabOpen;
-            _closedPos = prefabOpen + _hiddenOffset;
 
-            _expanded = _startExpanded;
-            // Sempre partir da pose aberta no ecrã; se começarmos fechados, a animação para fechado corre no Start (evita salto sem tween).
+            if (UseMultiStateEffective())
+            {
+                _stateIndex = _startExpanded ? MultiStateCount - 1 : 0;
+                _expanded = _stateIndex >= MultiStateCount - 1;
+            }
+            else
+                _expanded = _startExpanded;
+
+            // Igual ao modo clássico: 1.ª pose = aberto (prefab); Start() anima para fechado se necessário.
             _target.anchoredPosition = _openPos;
 
             WireButtons();
             SyncButtonVisibility(expandHandleInstant: true);
+        }
+
+        private bool UseMultiStateEffective() => _multiStateMode && MultiStateCount >= 2;
+
+        private Vector2 GetAnchoredPosForStateIndex(int index)
+        {
+            if (UseMultiStateEffective())
+            {
+                index = Mathf.Clamp(index, 0, MultiStateCount - 1);
+                return _openPos + _multiStateOffsetsFromOpen[index];
+            }
+            return _expanded ? _openPos : _openPos + _hiddenOffset;
         }
 
         private void WireButtons()
@@ -104,16 +132,27 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
         {
             yield return null;
             _ready = true;
-            if (_pendingExpanded.HasValue)
+            if (_pendingStateIndex.HasValue)
+            {
+                int idx = _pendingStateIndex.Value;
+                _pendingStateIndex = null;
+                SetStateIndex(idx, instant: true);
+            }
+            else if (_pendingExpanded.HasValue)
             {
                 _expanded = _pendingExpanded.Value;
                 _pendingExpanded = null;
-            }
-
-            if (_expanded)
+                if (UseMultiStateEffective())
+                    _stateIndex = _expanded ? MultiStateCount - 1 : 0;
                 Apply(instant: true);
+            }
             else
-                Apply(instant: false);
+            {
+                if (_expanded)
+                    Apply(instant: true);
+                else
+                    Apply(instant: false);
+            }
         }
 
         private void OnDestroy()
@@ -134,10 +173,29 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
                 DOTween.Kill(_target, true);
         }
 
-        public void Toggle() => SetExpanded(!_expanded);
+        public void Toggle()
+        {
+            if (UseMultiStateEffective())
+            {
+                int last = MultiStateCount - 1;
+                SetStateIndex(_stateIndex >= last ? 0 : last);
+            }
+            else
+                SetExpanded(!_expanded);
+        }
 
+        /// <summary>
+        /// Modo clássico: false = fechado, true = aberto.
+        /// Multi-estado: false = índice 0, true = último índice (aberto máximo).
+        /// </summary>
         public void SetExpanded(bool expanded, bool instant = false)
         {
+            if (UseMultiStateEffective())
+            {
+                SetStateIndex(expanded ? MultiStateCount - 1 : 0, instant);
+                return;
+            }
+
             if (!_ready)
             {
                 _pendingExpanded = expanded;
@@ -151,9 +209,37 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
             Apply(instant);
         }
 
+        /// <summary>
+        /// Multi-estado: 0 = mais fechado, <see cref="StateCount"/>-1 = aberto. Modo clássico: 0 = fechado, 1 = aberto (outros valores clampeados).
+        /// </summary>
+        public void SetStateIndex(int stateIndex, bool instant = false)
+        {
+            if (!UseMultiStateEffective())
+            {
+                SetExpanded(stateIndex > 0, instant);
+                return;
+            }
+
+            if (!_ready)
+            {
+                _pendingStateIndex = stateIndex;
+                return;
+            }
+
+            stateIndex = Mathf.Clamp(stateIndex, 0, MultiStateCount - 1);
+            bool changed = _stateIndex != stateIndex;
+            _stateIndex = stateIndex;
+            _expanded = _stateIndex >= MultiStateCount - 1;
+            if (!changed && !instant)
+                return;
+            Apply(instant);
+        }
+
         private void Apply(bool instant)
         {
-            Vector2 dest = _expanded ? _openPos : _closedPos;
+            Vector2 dest = UseMultiStateEffective()
+                ? GetAnchoredPosForStateIndex(_stateIndex)
+                : (_expanded ? _openPos : _openPos + _hiddenOffset);
             DOTween.Kill(_target, true);
 
             if (instant || _duration <= 0f)
@@ -188,7 +274,6 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
             SyncButtonVisibility(expandHandleInstant: false);
         }
 
-        /// <param name="expandHandleInstant">Quando o controlo de expandir usa <see cref="_expandHandleSlidable"/>, define se o slide dele é instantâneo.</param>
         private void SyncButtonVisibility(bool expandHandleInstant)
         {
             if (!IsDualButtonMode())

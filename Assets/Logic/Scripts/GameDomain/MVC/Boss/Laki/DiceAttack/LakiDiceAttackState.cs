@@ -1,5 +1,9 @@
 namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack
 {
+    /// <summary>
+    /// Configuração da ronda de Dice Attack (quantidade de dados e faces), preenchida por <c>BossAttack</c> / bootstrap.
+    /// A UI do sum panel (<see cref="Logic.Scripts.GameDomain.MVC.Ui.GamePlayDiceAttackPanelView"/>) usa estes valores para o slidable multi-estado.
+    /// </summary>
     public static class LakiDiceAttackState
     {
         public static int PlayerDiceCount { get; private set; } = 1;

@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using Logic.Scripts.Turns;
 using Logic.Scripts.GameDomain.VisualFeedback;
+using Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack;
 using TMPro;
 
 namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Dice
@@ -29,6 +30,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Dice
 		private TextMeshPro[] _faceLabels;
 		private bool _labelsCreated;
 		public bool RemoveAfterRun => true;
+		public bool IsBossDie => _isBoss;
 
 		/// <param name="reportRollOnEnvironmentExecute">
 		/// When true (default), <see cref="OnDiceRolled"/> runs in <see cref="ExecuteAsync"/> (Environment phase).
@@ -111,6 +113,8 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Dice
 			if (_moveRoutine != null) StopCoroutine(_moveRoutine);
 			_moveInProgress = true;
 			_moveTargetTileIndex = targetTileIndex;
+			if (!_isBoss)
+				DiceAttackUIRuntime.NotifyPlayerRollIdleHintReset();
 			target.y = target.y + 1f;
 			_moveRoutine = AnimateMove(target, duration);
 			StartCoroutine(_moveRoutine);

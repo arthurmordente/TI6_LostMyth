@@ -1099,7 +1099,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _isBoss: 0
   _maxValue: 6
-  _hp: 99
+  _hp: 999
   _incrementOnDamage: 0
 --- !u!114 &342713015727974407
 MonoBehaviour:

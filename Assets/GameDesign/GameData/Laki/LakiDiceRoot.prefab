@@ -375,7 +375,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _isBoss: 1
   _maxValue: 6
-  _hp: 94
+  _hp: 999
   _incrementOnDamage: 0
 --- !u!114 &-1180686273332732157
 MonoBehaviour:
