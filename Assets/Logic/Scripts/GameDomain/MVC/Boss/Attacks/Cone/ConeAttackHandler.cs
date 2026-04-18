@@ -11,6 +11,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Cone
         private readonly float _angleDeg;
         private readonly int _sides;
         private readonly float[] _yaws;
+        private readonly float _telegraphUniformScale;
 		private class ConeSubView
         {
             public GameObject Root;
@@ -21,12 +22,13 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Cone
 		private readonly GameObject _telegraphPrefab;
 		private Logic.Scripts.GameDomain.MVC.Boss.Telegraph.ITelegraphLayeringService.TelegraphLayer _layer;
 
-		public ConeAttackHandler(float radius, float angleDeg, int sides, float[] yaws, Material lineMaterial, Material meshMaterial, GameObject telegraphPrefab = null)
+		public ConeAttackHandler(float radius, float angleDeg, int sides, float[] yaws, Material lineMaterial, Material meshMaterial, GameObject telegraphPrefab = null, float telegraphUniformScale = 1f)
         {
             _radius = radius;
             _angleDeg = angleDeg;
             _sides = sides;
             _yaws = yaws;
+            _telegraphUniformScale = Mathf.Max(0.001f, telegraphUniformScale);
 			_lineMaterial = lineMaterial;
 			_meshMaterial = meshMaterial;
 			_telegraphPrefab = telegraphPrefab;
@@ -51,7 +53,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Cone
 				if (_telegraphPrefab != null)
 				{
 					v.Root = Object.Instantiate(_telegraphPrefab, new Vector3(origin.x, _layer.Y, origin.z), rotation, parentTransform);
-					float scale = Mathf.Max(0.001f, _radius);
+					float scale = _telegraphUniformScale;
 					v.Root.transform.localScale = new Vector3(scale, 1f, scale);
 				}
 				else

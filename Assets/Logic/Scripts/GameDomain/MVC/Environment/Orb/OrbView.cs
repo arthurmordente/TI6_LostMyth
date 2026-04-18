@@ -18,11 +18,32 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Orb {
         private GameObject _catalogAreaInstance;
         private bool _useCatalogArea;
         private const float CatalogAreaVisualLocalY = -0.1f;
+        private bool _catalogAreaUseRemappedScale;
+        private bool _catalogAreaUseTurnBasedScale;
+        private float _catalogVisualStep = 0.1f;
+        private float _catalogVisualScaleCap = 60f;
+        private int _catalogAreaTurn = 1;
 
         /// <summary>Call before <see cref="PrepareTelegraph"/>. If non-null, telegraph prefab from catalog is scaled as the AoE disc (same convention as circle telegraphs: localScale x/z = radius).</summary>
         public void ConfigureAreaVisualPrefab(GameObject prefabTemplate)
         {
             _catalogAreaPrefabTemplate = prefabTemplate;
+        }
+
+        /// <summary>Call before <see cref="PrepareTelegraph"/>. Catalog AoE scale = <paramref name="visualStepPerTurn"/> × turn (1 = first turn), capped at <paramref name="maxRadius"/>; not driven by gameplay radius.</summary>
+        public void ConfigureCatalogAreaVisualScaleGrowth(float initialRadius, float maxRadius, float visualStepPerTurn = 0.1f)
+        {
+            _catalogAreaUseRemappedScale = true;
+            _catalogAreaUseTurnBasedScale = true;
+            _catalogVisualStep = Mathf.Max(1e-4f, visualStepPerTurn);
+            _catalogVisualScaleCap = Mathf.Max(initialRadius, maxRadius);
+            _catalogAreaTurn = 1;
+        }
+
+        /// <summary>Environment turn index for catalog disc (1 = 0.1× step, 2 = 0.2× step, …).</summary>
+        public void SetCatalogVisualTurn(int turn)
+        {
+            _catalogAreaTurn = Mathf.Max(1, turn);
         }
 
         public void UpdateColor(Color newColor) {
@@ -54,7 +75,12 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Orb {
                 _catalogAreaInstance.name = "OrbAreaFromCatalog";
                 _catalogAreaInstance.transform.localPosition = new Vector3(0f, CatalogAreaVisualLocalY, 0f);
                 _catalogAreaInstance.transform.localRotation = Quaternion.identity;
-                _catalogAreaInstance.transform.localScale = Vector3.one;
+                _catalogAreaInstance.transform.localScale = _catalogAreaUseRemappedScale && _catalogAreaUseTurnBasedScale
+                    ? new Vector3(
+                        Mathf.Min(_catalogVisualStep * _catalogAreaTurn, _catalogVisualScaleCap),
+                        1f,
+                        Mathf.Min(_catalogVisualStep * _catalogAreaTurn, _catalogVisualScaleCap))
+                    : Vector3.one;
                 return;
             }
 
@@ -90,8 +116,12 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Orb {
 
             if (_useCatalogArea && _catalogAreaInstance != null)
             {
-                float r = Mathf.Max(0.001f, radius);
-                _catalogAreaInstance.transform.localScale = new Vector3(r, 1f, r);
+                float scaleXZ;
+                if (_catalogAreaUseRemappedScale && _catalogAreaUseTurnBasedScale)
+                    scaleXZ = Mathf.Min(_catalogVisualStep * _catalogAreaTurn, _catalogVisualScaleCap);
+                else
+                    scaleXZ = Mathf.Max(0.001f, radius);
+                _catalogAreaInstance.transform.localScale = new Vector3(scaleXZ, 1f, scaleXZ);
                 var lp = _catalogAreaInstance.transform.localPosition;
                 lp.y = CatalogAreaVisualLocalY;
                 _catalogAreaInstance.transform.localPosition = lp;
@@ -106,14 +136,14 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Orb {
             _line.positionCount = ring.Length;
             _line.SetPositions(ring);
 
-            Transform t = _meshFilter.transform;
-			t.localPosition = Vector3.zero;
-            t.localRotation = Quaternion.identity;
+            Transform meshTf = _meshFilter.transform;
+			meshTf.localPosition = Vector3.zero;
+            meshTf.localRotation = Quaternion.identity;
 
             int seg = ring.Length;
             Vector3[] verts = new Vector3[seg + 1];
-			verts[0] = t.InverseTransformPoint(center);
-            for (int i = 0; i < seg; i++) verts[i + 1] = t.InverseTransformPoint(ring[i]);
+			verts[0] = meshTf.InverseTransformPoint(center);
+            for (int i = 0; i < seg; i++) verts[i + 1] = meshTf.InverseTransformPoint(ring[i]);
             int[] tris = new int[seg * 3];
             int ti = 0;
             for (int i = 1; i <= seg; i++) {

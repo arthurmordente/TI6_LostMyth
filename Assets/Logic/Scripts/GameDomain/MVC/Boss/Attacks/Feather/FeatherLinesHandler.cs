@@ -11,6 +11,7 @@ using Logic.Scripts.GameDomain.MVC.Nara;
 using Logic.Scripts.Services.AudioService;
 using Object = UnityEngine.Object;
 using Logic.Scripts.GameDomain.MVC.Boss.Telegraph;
+using Assets.Logic.Scripts.GameDomain.Effects;
 
 namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Feather
 {
@@ -21,11 +22,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Feather
 
 		private class FeatherSubView
         {
-            public LineRenderer Line;
-            public MeshFilter MeshFilter;
-            public MeshRenderer MeshRenderer;
-            public Mesh Mesh;
-            public GameObject ColumnPrefabInstance;
+            public GameObject StripRoot;
         }
 
         private FeatherSubView[] _views;
@@ -69,9 +66,165 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Feather
         private int _rqAdd = 0;
         private IAudioService _audio;
 
+        /// <summary>World-space half-length of feather strips from arena center (full span = 2×). When unset (0) in old data, uses 10m as a sane arena default.</summary>
+        private float StripHalfExtent => Mathf.Max(0.1f, _params.stripHalfExtent > 1e-4f ? _params.stripHalfExtent : 10f);
+
+        /// <summary>Perpendicular spacing between strips uses this half-extent (wider than strip length) so lines cover more of the arena.</summary>
+        private float StripSpreadHalfExtent => StripHalfExtent * 1.4f;
+
+        private float StripTelegraphUniformScale =>
+            _params.telegraphStripUniformScale > 1e-4f ? _params.telegraphStripUniformScale : 1f;
+
+        /// <summary>Strip mesh: local +Z along the faixa. X / Z / XZ usam (0.3,1,1) — mesmo local após rotação por eixo.</summary>
+        private const float FeatherStripNarrowAxisScale = 0.3f;
+
+        private Vector3 TelegraphStripLocalScale(float diagonalUniformScale)
+        {
+            if (_params.axisMode == FeatherAxisMode.Diagonal)
+                return new Vector3(diagonalUniformScale, 1f, diagonalUniformScale);
+            return new Vector3(FeatherStripNarrowAxisScale, 1f, 1f);
+        }
+
+        private static float StripSpreadCoordinate(int index, int count, float halfExtent)
+        {
+            if (count <= 1) return 0f;
+            float t = index / (float)(count - 1);
+            return Mathf.Lerp(-halfExtent, halfExtent, t);
+        }
+
+        private void GetStripEndpoints(int i, int n, Vector3 center, out Vector3 start, out Vector3 end)
+        {
+            float y = center.y;
+            float h = StripHalfExtent;
+            float spreadH = StripSpreadHalfExtent;
+
+            switch (_params.axisMode)
+            {
+                case FeatherAxisMode.X:
+                {
+                    // Strips run along ±X; same arena X for all, spread evenly in Z.
+                    float xCenter = center.x;
+                    float z = center.z + StripSpreadCoordinate(i, n, spreadH);
+                    start = new Vector3(xCenter - h, y, z);
+                    end = new Vector3(xCenter + h, y, z);
+                    break;
+                }
+                case FeatherAxisMode.Z:
+                {
+                    // Strips run along ±Z; same arena Z for all, spread evenly in X.
+                    float zCenter = center.z;
+                    float x = center.x + StripSpreadCoordinate(i, n, spreadH);
+                    start = new Vector3(x, y, zCenter - h);
+                    end = new Vector3(x, y, zCenter + h);
+                    break;
+                }
+                case FeatherAxisMode.XZ:
+                {
+                    int nAlongX = (n + 1) / 2;
+                    int nAlongZ = n / 2;
+                    if ((i % 2) == 0)
+                    {
+                        int k = i / 2;
+                        float xCenter = center.x;
+                        float z = center.z + StripSpreadCoordinate(k, nAlongX, spreadH);
+                        start = new Vector3(xCenter - h, y, z);
+                        end = new Vector3(xCenter + h, y, z);
+                    }
+                    else
+                    {
+                        int k = (i - 1) / 2;
+                        float zCenter = center.z;
+                        float x = center.x + StripSpreadCoordinate(k, nAlongZ, spreadH);
+                        start = new Vector3(x, y, zCenter - h);
+                        end = new Vector3(x, y, zCenter + h);
+                    }
+                    break;
+                }
+                case FeatherAxisMode.Diagonal:
+                default:
+                {
+                    Vector3 d = new Vector3(1f, 0f, 1f).normalized;
+                    float along = StripSpreadCoordinate(i, n, spreadH);
+                    Vector3 mid = new Vector3(center.x, y, center.z) + d * along;
+                    start = mid - d * h;
+                    end = mid + d * h;
+                    break;
+                }
+            }
+        }
+
+        /// <summary>Lateral unit (XZ) used by strip width, knockback side, and DisplacementEffect — Cross(tangent, world up).</summary>
+        private static Vector3 FeatherStripLateralNormal(Vector3 stripA, Vector3 stripB)
+        {
+            Vector3 ab = stripB - stripA;
+            ab.y = 0f;
+            if (ab.sqrMagnitude < 1e-8f) return Vector3.right;
+            Vector3 tangent = ab.normalized;
+            Vector3 n = Vector3.Cross(tangent, Vector3.up);
+            n.y = 0f;
+            return n.sqrMagnitude > 1e-8f ? n.normalized : Vector3.right;
+        }
+
+        private void RefreshSpecialStripGlobals(Vector3 arenaCenter, int n)
+        {
+            if (_specialIndex < 0 || _specialIndex >= n || n <= 0) return;
+            GetStripEndpoints(_specialIndex, n, arenaCenter, out _sStart, out _sEnd);
+            _axisUnit = _sEnd - _sStart;
+            _axisUnit.y = 0f;
+            if (_axisUnit.sqrMagnitude > 1e-8f) _axisUnit.Normalize();
+            else _axisUnit = Vector3.zero;
+            CurrentSpecialStart = _sStart;
+            CurrentSpecialEnd = _sEnd;
+            CurrentSpecialAxis = _axisUnit;
+        }
+
+        private static void PatchDisplacementEffectsForFeatherStrip(
+            List<AbilityEffect> effects,
+            Vector3 stripA,
+            Vector3 stripB,
+            Vector3 playerWorld,
+            bool isPushMode)
+        {
+            if (effects == null) return;
+            Vector3 ab = stripB - stripA;
+            ab.y = 0f;
+            if (ab.sqrMagnitude < 1e-8f) return;
+            Vector3 normal = FeatherStripLateralNormal(stripA, stripB);
+            float t = Mathf.Clamp01(Vector3.Dot(playerWorld - stripA, ab) / Mathf.Max(1e-6f, ab.sqrMagnitude));
+            Vector3 closest = stripA + ab * t;
+            Vector3 toPlayer = playerWorld - closest;
+            toPlayer.y = 0f;
+            float side = Mathf.Sign(Vector3.Dot(normal, toPlayer));
+            if (Mathf.Abs(side) < 1e-6f) side = 1f;
+            Vector3 dir = side * normal;
+            for (int i = 0; i < effects.Count; i++)
+            {
+                if (effects[i] is DisplacementEffect disp)
+                {
+                    disp.direction = dir;
+                    disp.isPush = isPushMode;
+                }
+            }
+        }
+
+        private static void BumpRenderQueueOnHierarchy(GameObject root, int add)
+        {
+            if (root == null || add == 0) return;
+            var mrs = root.GetComponentsInChildren<MeshRenderer>(true);
+            for (int mi = 0; mi < mrs.Length; mi++)
+            {
+                if (mrs[mi] == null) continue;
+                var m = mrs[mi].material;
+                if (m != null) m.renderQueue += add;
+            }
+        }
+
         private GameObject _columnPrefabNormal;
         private GameObject _columnPrefabPull;
         private GameObject _columnPrefabPush;
+        private GameObject _featherRowTelegraphNormal;
+        private GameObject _featherRowTelegraphPull;
+        private GameObject _featherRowTelegraphPush;
 
         public FeatherLinesHandler(FeatherLinesParams p, IUpdateSubscriptionService updateSubscriptionService)
         {
@@ -122,7 +275,8 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Feather
 		}
 
 		public FeatherLinesHandler(FeatherLinesParams p, bool isPull, Material lineBase, Material lineDisp, Material meshBase, Material meshDisp,
-			GameObject columnNormalPrefab = null, GameObject columnPullPrefab = null, GameObject columnPushPrefab = null)
+			GameObject columnNormalPrefab = null, GameObject columnPullPrefab = null, GameObject columnPushPrefab = null,
+			GameObject featherRowTelegraphNormal = null, GameObject featherRowTelegraphPull = null, GameObject featherRowTelegraphPush = null)
 		{
 			_params = p;
 			_updateSvc = TryFindUpdateServiceInScene();
@@ -136,6 +290,9 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Feather
 			_columnPrefabNormal = columnNormalPrefab;
 			_columnPrefabPull = columnPullPrefab;
 			_columnPrefabPush = columnPushPrefab;
+			_featherRowTelegraphNormal = featherRowTelegraphNormal;
+			_featherRowTelegraphPull = featherRowTelegraphPull;
+			_featherRowTelegraphPush = featherRowTelegraphPush;
 		}
 
         public void SetAudio(IAudioService audio) { _audio = audio; }
@@ -182,39 +339,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Feather
 			_specialIndex = _telegraphDisplacementEnabled ? UnityEngine.Random.Range(0, n) : -1;
 
             for (int i = 0; i < n; i++)
-            {
-                GameObject go = new GameObject("FeatherSubActionView");
-                go.transform.SetParent(parentTransform, false);
-
-                var v = new FeatherSubView
-                {
-                    Line = go.AddComponent<LineRenderer>(),
-                    MeshFilter = go.AddComponent<MeshFilter>(),
-                    MeshRenderer = go.AddComponent<MeshRenderer>(),
-                    Mesh = new Mesh { name = "FeatherStripMesh" }
-                };
-
-                Material selLine = (_telegraphDisplacementEnabled && i == _specialIndex && _lineDisp != null)
-					? _lineDisp
-					: (_lineBase != null ? _lineBase : (_baseMaterial != null ? _baseMaterial : new Material(Shader.Find("Sprites/Default"))));
-				var lineMat = new Material(selLine);
-				lineMat.renderQueue += _rqAdd;
-				v.Line.material = lineMat;
-                v.Line.useWorldSpace = true;
-                v.Line.loop = true;
-                v.Line.widthMultiplier = 0.1f;
-				// Cor via material (ShaderGraph); removemos tint manual
-
-				Material selMesh = (_telegraphDisplacementEnabled && i == _specialIndex && _meshDisp != null)
-					? _meshDisp
-					: (_meshBase != null ? _meshBase : (_baseMaterial != null ? _baseMaterial : new Material(Shader.Find("Sprites/Default"))));
-				var meshMat = new Material(selMesh);
-				meshMat.renderQueue += _rqAdd;
-				v.MeshRenderer.material = meshMat;
-                v.MeshFilter.sharedMesh = v.Mesh;
-
-                _views[i] = v;
-            }
+                _views[i] = new FeatherSubView();
 
 			if (_telegraphDisplacementEnabled)
 			{
@@ -306,117 +431,68 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Feather
 
         private GameObject ResolveColumnPrefabForIndex(int i)
         {
-            if (_columnPrefabNormal == null && _columnPrefabPull == null && _columnPrefabPush == null) return null;
+            GameObject col = null;
+            bool anyColumn = _columnPrefabNormal != null || _columnPrefabPull != null || _columnPrefabPush != null;
+            if (anyColumn)
+            {
+                if (_telegraphDisplacementEnabled && i == _specialIndex)
+                {
+                    if (_isPushMode)
+                        col = _columnPrefabPush != null ? _columnPrefabPush : _columnPrefabNormal;
+                    else
+                        col = _columnPrefabPull != null ? _columnPrefabPull : _columnPrefabNormal;
+                }
+                else
+                    col = _columnPrefabNormal;
+            }
+            if (col != null) return col;
+
+            bool anyRow = _featherRowTelegraphNormal != null || _featherRowTelegraphPull != null || _featherRowTelegraphPush != null;
+            if (!anyRow) return null;
+
             if (_telegraphDisplacementEnabled && i == _specialIndex)
             {
                 if (_isPushMode)
-                    return _columnPrefabPush != null ? _columnPrefabPush : _columnPrefabNormal;
-                return _columnPrefabPull != null ? _columnPrefabPull : _columnPrefabNormal;
+                    return _featherRowTelegraphPush != null ? _featherRowTelegraphPush : _featherRowTelegraphNormal;
+                return _featherRowTelegraphPull != null ? _featherRowTelegraphPull : _featherRowTelegraphNormal;
             }
-            return _columnPrefabNormal;
+            return _featherRowTelegraphNormal;
         }
 
         private void UpdateTelegraphGeometryAtCenter(Vector3 center)
         {
-            float spacing = Mathf.Max(0.1f, _params.margin);
             int n = _views.Length;
+            float visY = center.y + _yOffset;
 
             for (int i = 0; i < n; i++)
             {
-                Vector3 start, end;
-                switch (_params.axisMode)
-                {
-                    case FeatherAxisMode.X:
-                    {
-                        float offset = (i - (n - 1) * 0.5f) * spacing;
-                        start = new Vector3(center.x - 100f, center.y, center.z + offset);
-                        end = new Vector3(center.x + 100f, center.y, center.z + offset);
-                        break;
-                    }
-                    case FeatherAxisMode.Z:
-                    {
-                        float offset = (i - (n - 1) * 0.5f) * spacing;
-                        start = new Vector3(center.x + offset, center.y, center.z - 100f);
-                        end = new Vector3(center.x + offset, center.y, center.z + 100f);
-                        break;
-                    }
-                    case FeatherAxisMode.XZ:
-                    {
-                        int nX = (n + 1) / 2;
-                        int nZ = n / 2;
-                        if ((i % 2) == 0)
-                        {
-                            int k = i / 2;
-                            float offX = (k - (nX - 1) * 0.5f) * spacing;
-                            start = new Vector3(center.x - 100f, center.y, center.z + offX);
-                            end   = new Vector3(center.x + 100f, center.y, center.z + offX);
-                        }
-                        else
-                        {
-                            int k = (i - 1) / 2;
-                            float offZ = (k - (nZ - 1) * 0.5f) * spacing;
-                            start = new Vector3(center.x + offZ, center.y, center.z - 100f);
-                            end   = new Vector3(center.x + offZ, center.y, center.z + 100f);
-                        }
-                        break;
-                    }
-                    case FeatherAxisMode.Diagonal:
-                    default:
-                    {
-                        float offset = (i - (n - 1) * 0.5f) * spacing;
-                        start = new Vector3(center.x - 100f, center.y, center.z - 100f + offset);
-                        end   = new Vector3(center.x + 100f, center.y, center.z + 100f + offset);
-                        break;
-                    }
-                }
-
-                Vector3[] vertsWorld = StripMath.GenerateStripVertices(start, end, _params.width);
-                for (int p = 0; p < vertsWorld.Length; p++) vertsWorld[p].y = _yOffset;
-
-                _views[i].Line.positionCount = vertsWorld.Length;
-                _views[i].Line.SetPositions(vertsWorld);
+                GetStripEndpoints(i, n, center, out Vector3 start, out Vector3 end);
 
                 GameObject colPrefab = ResolveColumnPrefabForIndex(i);
-                if (colPrefab != null)
+                if (_views[i].StripRoot != null)
                 {
-                    if (_views[i].ColumnPrefabInstance != null)
-                        Object.Destroy(_views[i].ColumnPrefabInstance);
-                    _views[i].ColumnPrefabInstance = Object.Instantiate(colPrefab, _parentTransform, false);
-                    Vector3 a = new Vector3(start.x, _yOffset, start.z);
-                    Vector3 b = new Vector3(end.x, _yOffset, end.z);
-                    Vector3 ab = b - a;
-                    float len = ab.magnitude;
-                    Vector3 hdir = len > 1e-6f ? new Vector3(ab.x, 0f, ab.z).normalized : Vector3.right;
-                    Vector3 mid = (a + b) * 0.5f;
-                    var ct = _views[i].ColumnPrefabInstance.transform;
-                    ct.SetPositionAndRotation(mid, Quaternion.FromToRotation(Vector3.right, hdir));
-                    ct.localScale = new Vector3(Mathf.Max(0.001f, len) / 8f, 1f, Mathf.Max(0.001f, _params.width) / 1f);
-                    _views[i].MeshRenderer.enabled = false;
-                    _views[i].Mesh.Clear();
+                    Object.Destroy(_views[i].StripRoot);
+                    _views[i].StripRoot = null;
                 }
-                else
+
+                if (colPrefab == null)
                 {
-                    if (_views[i].ColumnPrefabInstance != null)
-                    {
-                        Object.Destroy(_views[i].ColumnPrefabInstance);
-                        _views[i].ColumnPrefabInstance = null;
-                    }
-                    _views[i].MeshRenderer.enabled = true;
-                    Transform mT = _views[i].MeshFilter.transform;
-                    mT.localPosition = new Vector3(0f, _yOffset, 0f);
-                    mT.localRotation = Quaternion.identity;
-
-                    Vector3 v0L = mT.InverseTransformPoint(vertsWorld[0]);
-                    Vector3 v1L = mT.InverseTransformPoint(vertsWorld[1]);
-                    Vector3 v2L = mT.InverseTransformPoint(vertsWorld[2]);
-                    Vector3 v3L = mT.InverseTransformPoint(vertsWorld[3]);
-
-                    _views[i].Mesh.Clear();
-                    _views[i].Mesh.vertices = new Vector3[] { v0L, v1L, v2L, v3L };
-                    _views[i].Mesh.triangles = new int[] { 0, 1, 2, 0, 2, 3 };
-                    _views[i].Mesh.RecalculateNormals();
-                    _views[i].Mesh.RecalculateBounds();
+                    Debug.LogWarning(
+                        "[FeatherLinesHandler] No feather telegraph prefab resolved — assign Feather Lines / Feather Columns on CombatAttackVisualCatalogSO.");
+                    continue;
                 }
+
+                _views[i].StripRoot = Object.Instantiate(colPrefab, _parentTransform, false);
+                Vector3 a = new Vector3(start.x, visY, start.z);
+                Vector3 b = new Vector3(end.x, visY, end.z);
+                Vector3 ab = b - a;
+                float len = ab.magnitude;
+                Vector3 hdir = len > 1e-6f ? new Vector3(ab.x, 0f, ab.z).normalized : Vector3.forward;
+                Vector3 mid = (a + b) * 0.5f;
+                var ct = _views[i].StripRoot.transform;
+                ct.SetPositionAndRotation(mid, Quaternion.FromToRotation(Vector3.forward, hdir));
+                ct.localScale = TelegraphStripLocalScale(StripTelegraphUniformScale);
+                BumpRenderQueueOnHierarchy(_views[i].StripRoot, _rqAdd);
             }
         }
 
@@ -427,43 +503,8 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Feather
 			if (_views == null || _views.Length == 0) return;
 			if (_specialIndex < 0 || _specialIndex >= _views.Length) return;
 
-            float spacing = Mathf.Max(0.1f, _params.margin);
-            float specialOffset = (_specialIndex - (_views.Length - 1) * 0.5f) * spacing;
-
-            if (_params.axisMode == FeatherAxisMode.X)
-            {
-                _sStart = new Vector3(center.x - 100f, center.y, center.z + specialOffset);
-                _sEnd   = new Vector3(center.x + 100f, center.y, center.z + specialOffset);
-            }
-            else if (_params.axisMode == FeatherAxisMode.Z)
-            {
-                _sStart = new Vector3(center.x + specialOffset, center.y, center.z - 100f);
-                _sEnd   = new Vector3(center.x + specialOffset, center.y, center.z + 100f);
-            }
-            else if (_params.axisMode == FeatherAxisMode.XZ)
-            {
-                int nX = (_views.Length + 1) / 2;
-                int nZ = _views.Length / 2;
-                if ((_specialIndex % 2) == 0)
-                {
-                    int k = _specialIndex / 2;
-                    float offX = (k - (nX - 1) * 0.5f) * spacing;
-                    _sStart = new Vector3(center.x - 100f, center.y, center.z + offX);
-                    _sEnd   = new Vector3(center.x + 100f, center.y, center.z + offX);
-                }
-                else
-                {
-                    int k = (_specialIndex - 1) / 2;
-                    float offZ = (k - (nZ - 1) * 0.5f) * spacing;
-                    _sStart = new Vector3(center.x + offZ, center.y, center.z - 100f);
-                    _sEnd   = new Vector3(center.x + offZ, center.y, center.z + 100f);
-                }
-            }
-            else
-            {
-                _sStart = new Vector3(center.x - 100f, center.y, center.z - 100f + specialOffset);
-                _sEnd   = new Vector3(center.x + 100f, center.y, center.z + 100f + specialOffset);
-            }
+            int n = _views.Length;
+            GetStripEndpoints(_specialIndex, n, center, out _sStart, out _sEnd);
 
             _axisUnit = (_sEnd - _sStart);
             _axisUnit.y = 0f;
@@ -494,59 +535,11 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Feather
         {
             Vector3 center = arenaReference != null ? arenaReference.transform.position : originTransform.position;
             Vector3 playerWorld = arenaReference.RelativeArenaPositionToRealPosition(arenaReference.GetPlayerArenaPosition());
-            float spacing = Mathf.Max(0.1f, _params.margin);
             int n = _views.Length;
 
             for (int i = 0; i < n; i++)
             {
-                Vector3 start, end;
-
-                switch (_params.axisMode)
-                {
-                    case FeatherAxisMode.X:
-                    {
-                        float offset = (i - (n - 1) * 0.5f) * spacing;
-                        start = new Vector3(center.x - 100f, center.y, center.z + offset);
-                        end   = new Vector3(center.x + 100f, center.y, center.z + offset);
-                        break;
-                    }
-                    case FeatherAxisMode.Z:
-                    {
-                        float offset = (i - (n - 1) * 0.5f) * spacing;
-                        start = new Vector3(center.x + offset, center.y, center.z - 100f);
-                        end   = new Vector3(center.x + offset, center.y, center.z + 100f);
-                        break;
-                    }
-                    case FeatherAxisMode.XZ:
-                    {
-                        int nX = (n + 1) / 2;
-                        int nZ = n / 2;
-                        if ((i % 2) == 0)
-                        {
-                            int k = i / 2;
-                            float offset = (k - (nX - 1) * 0.5f) * spacing;
-                            start = new Vector3(center.x - 100f, center.y, center.z + offset);
-                            end   = new Vector3(center.x + 100f, center.y, center.z + offset);
-                        }
-                        else
-                        {
-                            int k = (i - 1) / 2;
-                            float offset = (k - (nZ - 1) * 0.5f) * spacing;
-                            start = new Vector3(center.x + offset, center.y, center.z - 100f);
-                            end   = new Vector3(center.x + offset, center.y, center.z + 100f);
-                        }
-                        break;
-                    }
-                    case FeatherAxisMode.Diagonal:
-                    default:
-                    {
-                        float offset = (i - (n - 1) * 0.5f) * spacing;
-                        start = new Vector3(center.x - 100f, center.y, center.z - 100f + offset);
-                        end   = new Vector3(center.x + 100f, center.y, center.z + 100f + offset);
-                        break;
-                    }
-                }
-
+                GetStripEndpoints(i, n, center, out Vector3 start, out Vector3 end);
                 Vector3[] verts = StripMath.GenerateStripVertices(start, end, _params.width);
                 if (PointInQuad(playerWorld, verts)) return true;
             }
@@ -604,15 +597,12 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Feather
             if (target == null) yield break;
 
             Vector3 center = arenaReference != null ? arenaReference.transform.position : originTransform.position;
-            float spacing = Mathf.Max(0.1f, _params.margin);
             int n = _views != null ? _views.Length : 0;
 
-            var sLr = (_views != null && _specialIndex >= 0 && _specialIndex < _views.Length) ? _views[_specialIndex].Line : null;
-            if (sLr != null) sLr.enabled = false;
-            var sMr = (_views != null && _specialIndex >= 0 && _specialIndex < _views.Length) ? _views[_specialIndex].MeshRenderer : null;
-            if (sMr != null) sMr.enabled = false;
-            var sCol = (_views != null && _specialIndex >= 0 && _specialIndex < _views.Length) ? _views[_specialIndex].ColumnPrefabInstance : null;
-            if (sCol != null) sCol.SetActive(false);
+            RefreshSpecialStripGlobals(center, n);
+
+            var sStrip = (_views != null && _specialIndex >= 0 && _specialIndex < _views.Length) ? _views[_specialIndex].StripRoot : null;
+            if (sStrip != null) sStrip.SetActive(false);
 
             yield return new WaitForSeconds(0.5f);
 
@@ -621,6 +611,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Feather
 
             int lastIndex = effects.Count - 1;
             Vector3 playerWorld = arenaReference.RelativeArenaPositionToRealPosition(arenaReference.GetPlayerArenaPosition());
+            PatchDisplacementEffectsForFeatherStrip(effects, _sStart, _sEnd, playerWorld, _isPushMode);
             if (lastIndex >= 0 && StripMath.IsPointInsideStrip(_sStart, _sEnd, _stripWidth, playerWorld))
             {
                 for (int ei = 0; ei < lastIndex; ei++)
@@ -660,52 +651,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Feather
             {
                 if (i == _specialIndex) continue;
 
-                Vector3 start, end;
-                switch (_params.axisMode)
-                {
-                    case FeatherAxisMode.X:
-                    {
-                        float offset = (i - (n - 1) * 0.5f) * spacing;
-                        start = new Vector3(center.x - 100f, center.y, center.z + offset);
-                        end   = new Vector3(center.x + 100f, center.y, center.z + offset);
-                        break;
-                    }
-                    case FeatherAxisMode.Z:
-                    {
-                        float offset = (i - (n - 1) * 0.5f) * spacing;
-                        start = new Vector3(center.x + offset, center.y, center.z - 100f);
-                        end   = new Vector3(center.x + offset, center.y, center.z + 100f);
-                        break;
-                    }
-                    case FeatherAxisMode.XZ:
-                    {
-                        int nX = (n + 1) / 2;
-                        int nZ = n / 2;
-                        if ((i % 2) == 0)
-                        {
-                            int k = i / 2;
-                            float offset = (k - (nX - 1) * 0.5f) * spacing;
-                            start = new Vector3(center.x - 100f, center.y, center.z + offset);
-                            end   = new Vector3(center.x + 100f, center.y, center.z + offset);
-                        }
-                        else
-                        {
-                            int k = (i - 1) / 2;
-                            float offset = (k - (nZ - 1) * 0.5f) * spacing;
-                            start = new Vector3(center.x + offset, center.y, center.z - 100f);
-                            end   = new Vector3(center.x + offset, center.y, center.z + 100f);
-                        }
-                        break;
-                    }
-                    case FeatherAxisMode.Diagonal:
-                    default:
-                    {
-                        float offset = (i - (n - 1) * 0.5f) * spacing;
-                        start = new Vector3(center.x - 100f, center.y, center.z - 100f + offset);
-                        end   = new Vector3(center.x + 100f, center.y, center.z + 100f + offset);
-                        break;
-                    }
-                }
+                GetStripEndpoints(i, n, center, out Vector3 start, out Vector3 end);
 
                 Vector3 playerWorld2 = arenaReference.RelativeArenaPositionToRealPosition(arenaReference.GetPlayerArenaPosition());
                 if (StripMath.IsPointInsideStrip(start, end, _params.width, playerWorld2))
@@ -791,12 +737,11 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Feather
             {
                 for (int i = 0; i < _views.Length; i++)
                 {
-                    if (_views[i]?.ColumnPrefabInstance != null)
+                    if (_views[i]?.StripRoot != null)
                     {
-                        Object.Destroy(_views[i].ColumnPrefabInstance);
-                        _views[i].ColumnPrefabInstance = null;
+                        Object.Destroy(_views[i].StripRoot);
+                        _views[i].StripRoot = null;
                     }
-                    if (_views[i]?.Line != null) Object.Destroy(_views[i].Line.gameObject);
                 }
             }
 
@@ -816,10 +761,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Feather
             {
                 for (int i = 0; i < _views.Length; i++)
                 {
-                    var v = _views[i];
-                    if (v?.Line != null) v.Line.enabled = visible;
-                    if (v?.ColumnPrefabInstance != null) v.ColumnPrefabInstance.SetActive(visible);
-                    else if (v?.MeshRenderer != null) v.MeshRenderer.enabled = visible;
+                    if (_views[i]?.StripRoot != null) _views[i].StripRoot.SetActive(visible);
                 }
             }
             if (_singleArrow != null) _singleArrow.enabled = visible;
