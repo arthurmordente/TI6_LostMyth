@@ -1,3 +1,4 @@
+using Logic.Scripts.GameDomain.Exploration;
 using Logic.Scripts.Services.CommandFactory;
 using Logic.Scripts.Services.Logger.Base;
 using Logic.Scripts.Utils;
@@ -218,6 +219,8 @@ namespace Logic.Scripts.GameDomain.GameInputActions {
         }
 
         private void OnInteractStarted(InputAction.CallbackContext obj) {
+            if (obj.action == _gameInputActions.Exploration.Interact && ExplorationInteractInputGate.IsSuppressed)
+                return;
             _commandFactory.CreateCommandVoid<InteractInputCommand>().Execute();
         }
         private void OnPauseExplorationStarted(InputAction.CallbackContext obj) {

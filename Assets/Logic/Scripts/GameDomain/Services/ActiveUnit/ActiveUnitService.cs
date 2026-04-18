@@ -1,4 +1,5 @@
 using Logic.Scripts.Core.Mvc.WorldCamera;
+using Logic.Scripts.GameDomain.MVC.Book;
 using Logic.Scripts.GameDomain.MVC.Nara;
 using Logic.Scripts.GameDomain.MVC.Shared;
 using Logic.Scripts.GameDomain.MVC.Ui;
@@ -35,6 +36,12 @@ namespace Logic.Scripts.GameDomain.Services.ActiveUnit
         {
             if (_gamePlayUiController == null || ActiveUnit == null) return;
             ReloadPaschoalLoadoutForUnit(ActiveUnit);
+
+            if (ActiveUnit is IBookController)
+            {
+                _gamePlayUiController.SetAbilityManaCosts(0, 0, 0, 0);
+                return;
+            }
 
             var unitView = ActiveUnit.UnitViewGO;
             if (unitView != null)

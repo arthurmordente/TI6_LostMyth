@@ -1,3 +1,5 @@
+using Logic.Scripts.GameDomain.MVC.Book;
+using Logic.Scripts.GameDomain.MVC.Echo;
 using Logic.Scripts.GameDomain.MVC.Nara;
 using Logic.Scripts.GameDomain.MVC.Shared;
 using Logic.Scripts.Services.AudioService;
@@ -14,6 +16,7 @@ public class CastController : ICastController {
     // Nara's AP injected directly as a reliable fallback for when EnsureApService() hasn't
     // resolved yet on the very first ability use.
     private readonly IActionPointsService _naraActionPointsService;
+    private readonly ICloneUseLimiter _cloneUseLimiter;
 
     private IPlayableUnit _currentCaster;
     private ISkillCastFlow _activeFlow;
@@ -29,11 +32,13 @@ public class CastController : ICastController {
 
     public CastController(IUpdateSubscriptionService updateSubscriptionService, ICommandFactory commandFactory,
         IActionPointsService actionPointsService, ICheatController cheatController,
-        PaschoalDefaultSkillCastFlow paschoalSkillCastFlow) {
+        PaschoalDefaultSkillCastFlow paschoalSkillCastFlow,
+        [InjectOptional] ICloneUseLimiter cloneUseLimiter = null) {
         _subscriptionService = updateSubscriptionService;
         _commandFactory = commandFactory;
         _naraActionPointsService = actionPointsService;
         _cheatController = cheatController;
+        _cloneUseLimiter = cloneUseLimiter;
         _legacyFlow = new LegacySkillCastFlow(_subscriptionService, _commandFactory);
         _paschoalFlow = paschoalSkillCastFlow;
         try { _audio = ProjectContext.Instance.Container.Resolve<IAudioService>(); } catch { _audio = null; }
@@ -46,6 +51,12 @@ public class CastController : ICastController {
     }
 
     public bool TryUseAbility(int index, IPlayableUnit caster) {
+        bool isBook = caster is IBookController;
+        if (isBook && !_cheatController.InfinityCast && _cloneUseLimiter != null && !_cloneUseLimiter.CanUse()) {
+            Debug.LogWarning("[CastController] TryUseAbility — Book already used its one skill this player turn.");
+            return false;
+        }
+
         ISkillCastFlow selectedFlow = SelectFlow(caster);
         if (selectedFlow == null) {
             Debug.LogWarning("[CastController] TryUseAbility — no cast flow available for caster.");
@@ -59,7 +70,9 @@ public class CastController : ICastController {
 
         var ap = caster.GetActionPoints() ?? _naraActionPointsService;
         int cost = prepareResult.Cost;
-        bool canAfford = (ap == null || ap.CanSpend(cost)) || _cheatController.InfinityCast;
+        bool canAfford = isBook
+            || (ap == null || ap.CanSpend(cost))
+            || _cheatController.InfinityCast;
         if (!canAfford) {
             Debug.LogWarning($"[CastController] TryUseAbility — cannot afford ability (cost {cost}, AP {ap?.Current}).");
             selectedFlow.CancelPreparedCast(caster);
@@ -69,7 +82,7 @@ public class CastController : ICastController {
         _activeFlow = selectedFlow;
         _currentCaster = caster;
         _currentAbilityIndex = prepareResult.AbilityIndex;
-        _currentAbilityCost = prepareResult.Cost;
+        _currentAbilityCost = isBook ? 0 : prepareResult.Cost;
 
         int attackType = prepareResult.AnimatorAttackType;
         caster.PlayAttackType(attackType);
@@ -90,11 +103,13 @@ public class CastController : ICastController {
 
         _canUseAbility = true;
 
-        if (_cheatController.InfinityCast == false) {
-            // Deduct from whichever AP pool this caster owns (Nara's or Book's).
+        if (_cheatController.InfinityCast == false && caster is not IBookController) {
             var ap = caster?.GetActionPoints() ?? _naraActionPointsService;
             ap?.Spend(_currentAbilityCost);
         }
+
+        if (caster is IBookController && !_cheatController.InfinityCast)
+            _cloneUseLimiter?.MarkUsed();
 
         caster?.TriggerExecute();
         PlayUsedSfxByIndex(_currentAbilityIndex);

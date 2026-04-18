@@ -43,5 +43,11 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
 
         /// <inheritdoc cref="IGamePlayHudView.PlayPlayerTurnAnnouncement"/>
         void PlayPlayerTurnAnnouncement(int turnNumber);
+
+        /// <inheritdoc cref="IGamePlayHudView.BeginFirstTurnPassTurnHint"/>
+        void BeginFirstTurnPassTurnHint(int fightTurnNumber);
+
+        /// <inheritdoc cref="IGamePlayHudView.EndFirstTurnPassTurnHint"/>
+        void EndFirstTurnPassTurnHint();
     }
 }

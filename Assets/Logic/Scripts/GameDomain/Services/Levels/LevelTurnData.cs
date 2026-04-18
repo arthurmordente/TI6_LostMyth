@@ -12,7 +12,7 @@ public class LevelTurnData : LevelData {
     [SerializeField] private BossPhasesSO bossPhases;
     public BossPhasesSO BossPhases => bossPhases;
 
-    [Tooltip("Nome exibido no HUD desta luta (ex.: Laki, Hokari). Se vazio, usa BossConfiguration → Boss Display Name.")]
+    [Tooltip("Nome no HUD desta luta (ex.: Laki vs Hokari). Um asset por fight/nível. Se vazio, usa BossConfiguration → Boss Display Name.")]
     [SerializeField] private string bossHudDisplayName;
 
     /// <summary>
