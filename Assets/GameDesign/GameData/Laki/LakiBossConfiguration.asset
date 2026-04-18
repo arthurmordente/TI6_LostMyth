@@ -19,3 +19,4 @@ MonoBehaviour:
   <RotationSpeed>k__BackingField: 20
   <InitialBossPosition>k__BackingField: {x: 0, y: 0.5, z: -4}
   <InitialPlayerPosition>k__BackingField: {x: 0, y: 0, z: -20}
+  <InitialBossEulerAngles>k__BackingField: {x: 0, y: 180, z: 0}

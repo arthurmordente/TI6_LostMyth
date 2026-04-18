@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 using Logic.Scripts.Turns;
@@ -18,7 +19,11 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Dice
 		private int _rollSlotIndex;
 		private int _value;
 		private Logic.Scripts.GameDomain.MVC.Environment.Laki.LakiRouletteArenaView _arena;
+		/// <summary>Committed tile after the last move finished (or spawn tile before first move completes).</summary>
 		private int _tileIndex;
+		/// <summary>While moving: destination tile reserved so other dice cannot pick it in the same frame.</summary>
+		private bool _moveInProgress;
+		private int _moveTargetTileIndex;
 		private System.Collections.IEnumerator _moveRoutine;
 		private readonly System.Random _rng = new System.Random();
 		private TextMeshPro[] _faceLabels;
@@ -42,24 +47,21 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Dice
 			_value = Mathf.Clamp(initialValue, 1, _maxValue);
 			_arena = arena;
 			_tileIndex = Mathf.Max(0, targetTileIndex);
+			_moveInProgress = false;
+			_moveTargetTileIndex = -1;
 			transform.position = spawnPosition;
-			UnityEngine.Debug.Log($"[Laki][Die] Init value={_value} isBoss={_isBoss}");
 			CreateOrUpdateFaceLabels();
 			if (_arena != null)
 			{
 				Vector3 target = _arena.GetTileWorldCenter(_tileIndex);
-				StartMove(target, 2.0f);
+				StartMove(target, 2.0f, _tileIndex);
 			}
 			if (!_reportRollOnEnvironmentExecute)
-			{
-				UnityEngine.Debug.Log($"[Laki][Die] Roll committed at spawn value={_value} isBoss={_isBoss}");
 				_callbacks?.OnDiceRolled(_isBoss, _rollSlotIndex, _value);
-			}
 		}
 
 		public async Task ExecuteAsync()
 		{
-			UnityEngine.Debug.Log($"[Laki][Die] Execute roll value={_value} isBoss={_isBoss}");
 			if (_reportRollOnEnvironmentExecute)
 				_callbacks?.OnDiceRolled(_isBoss, _rollSlotIndex, _value);
 			Destroy(gameObject);
@@ -85,31 +87,13 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Dice
 			{
 				_value = Random.Range(1, _maxValue + 1);
 			}
-			UnityEngine.Debug.Log($"[Laki][Die] Reroll value={_value} isBoss={_isBoss}");
 			_callbacks?.OnDieValueChanged(_isBoss, _rollSlotIndex, _value);
 
-			// Move to adjacent tile with tumble
 			if (_arena != null)
 			{
-				int tileCount = _arena.TileCount;
-				int bands = 2;
-				int sectorCount = tileCount / bands;
-				// estimate nearest tile index to current position
-				int nearest = 0;
-				float best = float.MaxValue;
-				for (int i = 0; i < tileCount; i++)
-				{
-					Vector3 c = _arena.GetTileWorldCenter(i);
-					float d = (c - transform.position).sqrMagnitude;
-					if (d < best) { best = d; nearest = i; }
-				}
-				int band = nearest % bands;
-				int sector = nearest / bands;
-				int dir = (Random.value < 0.5f) ? -1 : 1;
-				int newSector = (sector + dir + sectorCount) % sectorCount;
-				_tileIndex = newSector * bands + band;
-				Vector3 target = _arena.GetTileWorldCenter(_tileIndex);
-				StartMove(target, 1.0f);
+				int newTile = PickRerollTileAvoidingOccupied();
+				Vector3 target = _arena.GetTileWorldCenter(newTile);
+				StartMove(target, 1.0f, newTile);
 			}
 			if (_hp <= 0) Destroy(gameObject);
 			CreateOrUpdateFaceLabels();
@@ -122,10 +106,11 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Dice
 			SkillTargetingHighlightBridge.SetHighlighted(this, active);
 		}
 
-		private void StartMove(Vector3 target, float duration)
+		private void StartMove(Vector3 target, float duration, int targetTileIndex)
 		{
 			if (_moveRoutine != null) StopCoroutine(_moveRoutine);
-			// Keep the arena height from the given target (GetTileWorldCenter supplies correct Y), add +1
+			_moveInProgress = true;
+			_moveTargetTileIndex = targetTileIndex;
 			target.y = target.y + 1f;
 			_moveRoutine = AnimateMove(target, duration);
 			StartCoroutine(_moveRoutine);
@@ -135,13 +120,10 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Dice
 		{
 			Vector3 start = transform.position;
 			float t = 0f;
-			// random tumble axes/speeds
 			Vector3 axis = Vector3.Normalize(new Vector3((float)_rng.NextDouble() - 0.5f, (float)_rng.NextDouble() - 0.5f, (float)_rng.NextDouble() - 0.5f));
 			if (axis == Vector3.zero) axis = Vector3.up;
 			float angSpeed = Random.Range(360f, 900f);
-			// ensure starting rotation is zeroed
 			transform.rotation = Quaternion.identity;
-			// jitter the displayed number while rolling
 			float jitterTimer = 0f;
 			while (t < duration)
 			{
@@ -152,7 +134,6 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Dice
 				pos.y = Mathf.Lerp(start.y, target.y, k) + hop;
 				transform.position = pos;
 				transform.Rotate(axis, angSpeed * Time.deltaTime, Space.World);
-				// randomize label periodically during roll
 				jitterTimer -= Time.deltaTime;
 				if (jitterTimer <= 0f)
 				{
@@ -163,16 +144,105 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Dice
 				yield return null;
 			}
 			transform.position = target;
-			// ensure final rotation is zeroed
 			transform.rotation = Quaternion.identity;
+			_tileIndex = _moveTargetTileIndex;
+			_moveInProgress = false;
+			_moveTargetTileIndex = -1;
 			_callbacks?.OnDieAnimationComplete(_isBoss, _rollSlotIndex, _value);
-			// restore actual value on labels
 			UpdateFaceLabels(_value);
+		}
+
+		private int PickRerollTileAvoidingOccupied()
+		{
+			int tileCount = _arena.TileCount;
+			if (tileCount <= 0) return _tileIndex;
+
+			var blocked = new HashSet<int>();
+			CollectOccupiedTilesFromOtherDice(this, blocked);
+
+			int radialBands = _arena.RadialBands;
+			int nearest = NearestTileIndexToPosition(transform.position, tileCount);
+			int band = nearest % radialBands;
+			int sectorCount = Mathf.Max(1, tileCount / radialBands);
+			int sector = nearest / radialBands;
+
+			for (int pass = 0; pass < 2; pass++)
+			{
+				bool avoidSameTile = pass == 0;
+
+				for (int radius = 1; radius <= sectorCount; radius++)
+				{
+					for (int sign = -1; sign <= 1; sign += 2)
+					{
+						int ns = sector + sign * radius;
+						ns = (ns % sectorCount + sectorCount) % sectorCount;
+						int candidate = ns * radialBands + band;
+						if (IsFreeRerollTile(candidate, blocked, avoidSameTile))
+							return candidate;
+					}
+				}
+
+				for (int s = 0; s < sectorCount; s++)
+				{
+					int candidate = s * radialBands + band;
+					if (IsFreeRerollTile(candidate, blocked, avoidSameTile))
+						return candidate;
+				}
+
+				for (int i = 0; i < tileCount; i++)
+				{
+					if (IsFreeRerollTile(i, blocked, avoidSameTile))
+						return i;
+				}
+			}
+
+			return nearest;
+		}
+
+		private bool IsFreeRerollTile(int candidate, HashSet<int> blockedByOthers, bool avoidSameTileAsSelf)
+		{
+			if (blockedByOthers.Contains(candidate)) return false;
+			if (avoidSameTileAsSelf && candidate == _tileIndex) return false;
+			return true;
+		}
+
+		private int NearestTileIndexToPosition(Vector3 worldPos, int tileCount)
+		{
+			int best = 0;
+			float bestD = float.MaxValue;
+			for (int i = 0; i < tileCount; i++)
+			{
+				Vector3 c = _arena.GetTileWorldCenter(i);
+				float d = (c - worldPos).sqrMagnitude;
+				if (d < bestD) { bestD = d; best = i; }
+			}
+			return best;
+		}
+
+		private void CollectOccupiedTilesFromOtherDice(DiceActor self, HashSet<int> into)
+		{
+			into.Clear();
+			var reg = EnvironmentActorsRegistryService.Instance;
+			if (reg != null)
+			{
+				foreach (var a in reg.Snapshot())
+				{
+					if (a is not DiceActor d || d == self || d._arena != _arena) continue;
+					int t = d._moveInProgress ? d._moveTargetTileIndex : d._tileIndex;
+					if (t >= 0) into.Add(t);
+				}
+				return;
+			}
+			foreach (var d in Object.FindObjectsByType<DiceActor>(FindObjectsSortMode.None))
+			{
+				if (d == self || d._arena != _arena) continue;
+				int t = d._moveInProgress ? d._moveTargetTileIndex : d._tileIndex;
+				if (t >= 0) into.Add(t);
+			}
 		}
 
 		private void CreateOrUpdateFaceLabels()
 		{
-			// Try to pick up existing labels first
 			if ((_faceLabels == null || !_labelsCreated))
 			{
 				var existing = GetComponentsInChildren<TextMeshPro>(true);
@@ -188,21 +258,20 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Dice
 					Vector3 localExt = mf != null && mf.sharedMesh != null ? mf.sharedMesh.bounds.extents : new Vector3(0.5f, 0.5f, 0.5f);
 					float pad = 0.01f;
 					Vector3[] offs = new Vector3[] {
-						new Vector3(+localExt.x + pad, 0f, 0f), // +X
-						new Vector3(-localExt.x - pad, 0f, 0f), // -X
-						new Vector3(0f, +localExt.y + pad, 0f), // +Y
-						new Vector3(0f, -localExt.y - pad, 0f), // -Y
-						new Vector3(0f, 0f, +localExt.z + pad), // +Z
-						new Vector3(0f, 0f, -localExt.z - pad)  // -Z
+						new Vector3(+localExt.x + pad, 0f, 0f),
+						new Vector3(-localExt.x - pad, 0f, 0f),
+						new Vector3(0f, +localExt.y + pad, 0f),
+						new Vector3(0f, -localExt.y - pad, 0f),
+						new Vector3(0f, 0f, +localExt.z + pad),
+						new Vector3(0f, 0f, -localExt.z - pad)
 					};
-					// Final per-face eulers provided by user
 					Vector3[] faceFinalEuler = new Vector3[] {
-						new Vector3(0f, -90f, 0f),  // +X
-						new Vector3(0f,  90f, 0f),  // -X
-						new Vector3(90f,  0f, 0f),  // +Y
-						new Vector3(-90f, 0f, 0f),  // -Y
-						new Vector3(0f, 180f, 0f),  // +Z
-						new Vector3(0f,   0f, 0f)   // -Z
+						new Vector3(0f, -90f, 0f),
+						new Vector3(0f,  90f, 0f),
+						new Vector3(90f,  0f, 0f),
+						new Vector3(-90f, 0f, 0f),
+						new Vector3(0f, 180f, 0f),
+						new Vector3(0f,   0f, 0f)
 					};
 					for (int i = 0; i < 6; i++)
 					{
@@ -236,4 +305,3 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Dice
 		}
 	}
 }
-

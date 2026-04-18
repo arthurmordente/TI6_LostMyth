@@ -53,7 +53,7 @@ public class PaschoalDefaultSkillCastFlow : ISkillCastFlow
         EnsureFallbackTarget(caster);
         UpdateFallbackTarget(caster);
 
-        _targetingPreview?.Begin(_currentSkill, caster);
+        _targetingPreview?.Begin(_currentSkill, caster, _currentPreview != null ? _currentPreview.transform : null);
 
         prepareResult = new SkillCastPrepareResult
         {
@@ -70,7 +70,8 @@ public class PaschoalDefaultSkillCastFlow : ISkillCastFlow
 
         UpdateFallbackTarget(caster);
         _targetingPreview?.End();
-        Transform castTarget = _currentPreview != null ? _currentPreview.transform : _fallbackTarget;
+        // Always use fallback aim transform for damage/decals — AoEPrefab is visual-only and is synced by the preview service.
+        Transform castTarget = _fallbackTarget != null ? _fallbackTarget : _currentPreview != null ? _currentPreview.transform : caster.UnitViewGO.transform;
         _currentSkill.OnCast(caster, castTarget);
         CleanupPreviewAndTarget();
         _currentSkill = null;
@@ -101,8 +102,13 @@ public class PaschoalDefaultSkillCastFlow : ISkillCastFlow
         Vector3 point = TryGetMouseWorldPoint(out Vector3 worldPoint) ? worldPoint : (origin + fallbackForward * 2f);
 
         _fallbackTarget.position = point;
+        // Planar facing matches directed preview / projectiles (avoids tilted knives when cast point is above the mouse hit).
         Vector3 direction = point - origin;
-        if (direction.sqrMagnitude > 0.0001f)
+        direction.y = 0f;
+        if (direction.sqrMagnitude < 1e-6f) {
+            direction = new Vector3(fallbackForward.x, 0f, fallbackForward.z);
+        }
+        if (direction.sqrMagnitude > 1e-6f)
             _fallbackTarget.rotation = Quaternion.LookRotation(direction.normalized, Vector3.up);
     }
 

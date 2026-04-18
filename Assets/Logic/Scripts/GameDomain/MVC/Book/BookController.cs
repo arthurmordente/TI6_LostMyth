@@ -87,7 +87,10 @@ namespace Logic.Scripts.GameDomain.MVC.Book
             if (!_abilitiesSetUp)
             {
                 foreach (var ability in _abilities)
+                {
+                    if (ability == null) continue;
                     ability.SetUp(_updateSubscriptionService, _commandFactory);
+                }
                 _abilitiesSetUp = true;
             }
 

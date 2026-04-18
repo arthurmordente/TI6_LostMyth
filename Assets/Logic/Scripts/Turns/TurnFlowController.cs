@@ -104,7 +104,7 @@ namespace Logic.Scripts.Turns {
                 Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.IResolver tfResolver;
                 if (Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.TryResolveAnyAtBossTurn(out tfResult, out tfResolver)) {
                     UnityEngine.Debug.Log($"[Laki] DiceAttack resolved at TurnFlow begin. PlayerWon={tfResult.PlayerWon}");
-                    Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.ApplyLakiDiceLossDamageIfPlayerWon(tfResult);
+                    Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.NotifyPlayerWonDiceOpensShieldWindow(tfResult, _turnNumber);
                     try { tfResolver?.DestroyDiceAttackRoot(); } catch { }
                     try { Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Dice.DiceUiRuntime.Reset(); } catch { }
                 }
@@ -128,7 +128,10 @@ namespace Logic.Scripts.Turns {
             _turnStateService.AdvanceTurn(_turnNumber, _phase);
             // Minigame gates run before player inputs are unlocked, so gate input is never consumed as gameplay action.
             try { await Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.RunPlayerTurnGatesAsync(); } catch { }
-            _gamePlayUiController?.SetSkillsSlidableExpanded(true);
+            // Skills HUD only after the boss has completed at least one full round (first PlayerAct is turn 1 → stay collapsed).
+            bool expandSkillsHud = _turnNumber > 1;
+            // Collapse: instant avoids slidable Start-order glitches; expand: use default tween (instant false).
+            _gamePlayUiController?.SetSkillsSlidableExpanded(expandSkillsHud, instant: !expandSkillsHud);
             _gamePlayUiController?.PlayPlayerTurnAnnouncement(_turnNumber);
             // Unlock player controls and animations on PlayerAct
             _naraController?.UnfreezeInputs();
@@ -144,6 +147,13 @@ namespace Logic.Scripts.Turns {
             _turnMovement?.LineHandlerController.SetVisible(true);
             _turnMovement?.DeactivateNaraGravity();
             _turnStateService.RequestPlayerAction();
+
+            // UiSlidableAnchoredPanel defers the first SetExpanded until after its Start(); InitEntryPoint can run later — re-assert collapsed on 1st PlayerAct.
+            if (!expandSkillsHud) {
+                await UnityEngine.Awaitable.NextFrameAsync();
+                if (_active && _phase == TurnPhase.PlayerAct && _turnNumber == 1)
+                    _gamePlayUiController?.SetSkillsSlidableExpanded(false, instant: true);
+            }
         }
 
         public void SkipTurn() {

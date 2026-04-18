@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using System.Threading.Tasks;
 using Logic.Scripts.GameDomain.VisualFeedback;
+using Logic.Scripts.GameDomain.MVC.Environment.Laki;
 
 namespace Logic.Scripts.GameDomain.MVC.Boss {
     public class BossView : MonoBehaviour, IEffectable {
@@ -39,6 +40,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
         }
 
         public void PreviewDamage(int damageAmound) {
+            if (LakiBossShieldRuntime.IsLakiShieldBlockingCombatInteraction()) return;
             _onPreviewDamage?.Invoke(damageAmound);
         }
 
@@ -181,6 +183,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
         }
 
         public void SetSkillTargetingHighlight(bool active) {
+            if (active && LakiBossShieldRuntime.IsLakiShieldBlockingCombatInteraction()) return;
             SkillTargetingHighlightBridge.SetHighlighted(this, active);
         }
     }

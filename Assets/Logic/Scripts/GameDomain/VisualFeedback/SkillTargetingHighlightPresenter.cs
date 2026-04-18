@@ -5,13 +5,13 @@ using UnityEngine;
 namespace Logic.Scripts.GameDomain.VisualFeedback
 {
     /// <summary>
-    /// Skill targeting highlight: temporarily replaces each material slot with a runtime clone of
-    /// <see cref="_highlightMaterialTemplate"/> (e.g. team fresnel material). Restores
-    /// <see cref="Renderer.sharedMaterials"/> when highlight ends.
+    /// Skill targeting highlight: appends one runtime clone of <see cref="_highlightMaterialTemplate"/> to each
+    /// mesh renderer's <see cref="Renderer.sharedMaterials"/> while aiming (Unity draws extra materials on the
+    /// same submesh as an additional pass). Restores the previous array and destroys the clone when highlight ends.
     /// </summary>
     public sealed class SkillTargetingHighlightPresenter : MonoBehaviour
     {
-        [Tooltip("Art material to show while aiming (cloned per slot; the asset is never modified).")]
+        [Tooltip("Art material to append while aiming (one clone per renderer; the asset is never modified).")]
         [SerializeField] private Material _highlightMaterialTemplate;
 
         [Tooltip("If null, uses this transform. Set to the imported model root if needed.")]
@@ -22,7 +22,7 @@ namespace Logic.Scripts.GameDomain.VisualFeedback
 
         private readonly List<Renderer> _renderers = new List<Renderer>();
         private Material[][] _backupSharedMaterials;
-        private readonly List<Material> _runtimeMaterialsToDestroy = new List<Material>();
+        private readonly List<Material> _runtimeHighlightInstances = new List<Material>();
         private bool _highlighted;
 
         public void SetHighlighted(bool active)
@@ -48,7 +48,7 @@ namespace Logic.Scripts.GameDomain.VisualFeedback
             if (_renderers.Count == 0)
                 return false;
 
-            DisposeRuntimeMaterials();
+            ClearHighlightInstances();
             if (_backupSharedMaterials == null || _backupSharedMaterials.Length != _renderers.Count)
                 _backupSharedMaterials = new Material[_renderers.Count][];
 
@@ -62,21 +62,19 @@ namespace Logic.Scripts.GameDomain.VisualFeedback
                     ? (Material[])orig.Clone()
                     : Array.Empty<Material>();
 
-                if (orig == null || orig.Length == 0)
-                    continue;
+                Material highlightInstance = new Material(_highlightMaterialTemplate);
+                if (_overrideMainColor && highlightInstance.HasProperty("_MainColor"))
+                    highlightInstance.SetColor("_MainColor", _mainColor);
 
-                var replacement = new Material[orig.Length];
-                for (int m = 0; m < orig.Length; m++)
-                {
-                    Material instance = new Material(_highlightMaterialTemplate);
-                    if (_overrideMainColor && instance.HasProperty("_MainColor"))
-                        instance.SetColor("_MainColor", _mainColor);
+                _runtimeHighlightInstances.Add(highlightInstance);
 
-                    _runtimeMaterialsToDestroy.Add(instance);
-                    replacement[m] = instance;
-                }
+                int n = _backupSharedMaterials[i].Length;
+                var combined = new Material[n + 1];
+                if (n > 0)
+                    Array.Copy(_backupSharedMaterials[i], combined, n);
+                combined[n] = highlightInstance;
 
-                r.sharedMaterials = replacement;
+                r.sharedMaterials = combined;
             }
 
             return true;
@@ -84,8 +82,12 @@ namespace Logic.Scripts.GameDomain.VisualFeedback
 
         private void ExitHighlight()
         {
-            DisposeRuntimeMaterials();
+            RestoreBackedUpMaterials();
+            ClearHighlightInstances();
+        }
 
+        private void RestoreBackedUpMaterials()
+        {
             if (_backupSharedMaterials == null || _renderers.Count == 0) return;
 
             for (int i = 0; i < _renderers.Count; i++)
@@ -99,15 +101,15 @@ namespace Logic.Scripts.GameDomain.VisualFeedback
             }
         }
 
-        private void DisposeRuntimeMaterials()
+        private void ClearHighlightInstances()
         {
-            for (int i = 0; i < _runtimeMaterialsToDestroy.Count; i++)
+            for (int i = 0; i < _runtimeHighlightInstances.Count; i++)
             {
-                Material m = _runtimeMaterialsToDestroy[i];
+                Material m = _runtimeHighlightInstances[i];
                 if (m != null)
                     Destroy(m);
             }
-            _runtimeMaterialsToDestroy.Clear();
+            _runtimeHighlightInstances.Clear();
         }
 
         private void CollectRenderers()
@@ -123,7 +125,12 @@ namespace Logic.Scripts.GameDomain.VisualFeedback
 
         private void OnDestroy()
         {
-            DisposeRuntimeMaterials();
+            if (_highlighted)
+            {
+                _highlighted = false;
+                RestoreBackedUpMaterials();
+            }
+            ClearHighlightInstances();
         }
     }
 }

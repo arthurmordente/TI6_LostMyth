@@ -54,14 +54,15 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Dice
 			if (_playerFactorsText != null) _playerFactorsText.SetText(string.Empty);
 		}
 
-		private void OnProgress(System.Collections.Generic.List<int> pRolls, int pSum, System.Collections.Generic.List<int> bRolls, int bSum)
+		private void OnProgress(DiceUiProgressPayload payload)
 		{
+			if (payload == null) return;
 			if (_lakiPanelRoot != null) _lakiPanelRoot.SetActive(true);
 			if (_playerPanelRoot != null) _playerPanelRoot.SetActive(true);
-			if (_playerSumText != null) _playerSumText.SetText(pSum.ToString());
-			if (_lakiSumText != null) _lakiSumText.SetText(bSum.ToString());
-			if (_playerFactorsText != null) _playerFactorsText.SetText(FormatFactors(pRolls));
-			if (_lakiFactorsText != null) _lakiFactorsText.SetText(FormatFactors(bRolls));
+			if (_playerSumText != null) _playerSumText.SetText(payload.PlayerSum.ToString());
+			if (_lakiSumText != null) _lakiSumText.SetText(payload.BossSum.ToString());
+			if (_playerFactorsText != null) _playerFactorsText.SetText(FormatFactors(payload.PlayerRolls));
+			if (_lakiFactorsText != null) _lakiFactorsText.SetText(FormatFactors(payload.BossRolls));
 		}
 
 		private void OnFinal(int pSum, int bSum)

@@ -61,6 +61,9 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 
 		public int TileCount => _sectorCount * _radialBands;
 
+		/// <summary>Radial band count (inner/outer ring). Matches tile index layout: sector = index / bands, band = index % bands.</summary>
+		public int RadialBands => Mathf.Max(1, _radialBands);
+
 		/// <summary>Call before <see cref="SetGeometry"/> when the view is created at runtime (e.g. <see cref="LakiArenaBossBootstrap"/>). Inspector-assigned <see cref="_attackVisualCatalog"/> is used automatically when present.</summary>
 		public void SetAttackVisualCatalog(CombatAttackVisualCatalogSO catalog)
 		{

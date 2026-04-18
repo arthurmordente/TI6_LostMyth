@@ -11,6 +11,8 @@ namespace Assets.Logic.Scripts.GameDomain.Effects
             _target = target;
         }
 
+        public IEffectable ForwardTarget => _target;
+
         public Transform GetReferenceTransform()
         {
             return _target != null ? _target.GetReferenceTransform() : transform;

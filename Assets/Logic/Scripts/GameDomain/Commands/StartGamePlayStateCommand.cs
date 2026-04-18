@@ -46,6 +46,8 @@ namespace Logic.Scripts.GameDomain.Commands {
             _audioService.PlayAudio(AudioClipType.BossTheme, AudioChannelType.Music, AudioPlayType.Loop);
             _gamePlayUiController.InitEntryPoint();
             _activeUnitService.RefreshHudAbilityCosts();
+            // Skills slidable may still be "open" from prefab / before UiSlidableAnchoredPanel applies pending state; force closed until TurnFlow allows it.
+            _gamePlayUiController.SetSkillsSlidableExpanded(false, instant: true);
         }
     }
 }

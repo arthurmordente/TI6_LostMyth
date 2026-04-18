@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Logic.Scripts.GameDomain.MVC.Environment.Laki;
 using Logic.Scripts.GameDomain.MVC.Shared;
 using Logic.Scripts.Services.UpdateService;
 using UnityEngine;
@@ -11,6 +12,7 @@ namespace Logic.Scripts.GameDomain.MVC.Cast.Paschoal {
         private SkillDataSO _skill;
         private IPlayableUnit _playable;
         private IEffectable _caster;
+        private Transform _aoeVisualRoot;
 
         private readonly HashSet<IEffectable> _highlighted = new HashSet<IEffectable>();
 
@@ -18,7 +20,7 @@ namespace Logic.Scripts.GameDomain.MVC.Cast.Paschoal {
             _subscriptionService = subscriptionService;
         }
 
-        public void Begin(SkillDataSO skill, IPlayableUnit playableCaster) {
+        public void Begin(SkillDataSO skill, IPlayableUnit playableCaster, Transform aoeVisualRoot = null) {
             End();
             if (skill == null || playableCaster == null) return;
             if (PaschoalSkillTargetingRules.GetHighlightKind(skill) == PaschoalAimHighlightKind.None) return;
@@ -26,6 +28,7 @@ namespace Logic.Scripts.GameDomain.MVC.Cast.Paschoal {
             _skill = skill;
             _playable = playableCaster;
             _caster = playableCaster;
+            _aoeVisualRoot = aoeVisualRoot;
             _subscriptionService.RegisterUpdatable(this);
             _registered = true;
         }
@@ -38,6 +41,7 @@ namespace Logic.Scripts.GameDomain.MVC.Cast.Paschoal {
             _skill = null;
             _playable = null;
             _caster = null;
+            _aoeVisualRoot = null;
         }
 
         public void ManagedUpdate() {
@@ -46,6 +50,7 @@ namespace Logic.Scripts.GameDomain.MVC.Cast.Paschoal {
             var next = new HashSet<IEffectable>();
             switch (PaschoalSkillTargetingRules.GetHighlightKind(_skill)) {
                 case PaschoalAimHighlightKind.GroundAreaSphere:
+                    SyncAoeVisualRoot();
                     CollectAreaTargets(next);
                     break;
                 case PaschoalAimHighlightKind.DirectedLine:
@@ -53,6 +58,19 @@ namespace Logic.Scripts.GameDomain.MVC.Cast.Paschoal {
                     break;
             }
             ApplyHighlightDiff(next);
+        }
+
+        private void SyncAoeVisualRoot() {
+            if (_aoeVisualRoot == null || _skill == null || _playable == null) return;
+            Vector3 aim = PaschoalSkillAimWorld.ResolveAimPoint(_playable, out _);
+            Vector3 origin = PaschoalSkillAimWorld.GetSkillOrigin(_playable, _caster);
+            Vector3 direction = aim - origin;
+            _aoeVisualRoot.position = aim;
+            if (direction.sqrMagnitude > 0.0001f)
+                _aoeVisualRoot.rotation = Quaternion.LookRotation(direction.normalized, Vector3.up);
+            float baseR = _skill.AoEPrefabBaseRadius <= 0f ? 1f : _skill.AoEPrefabBaseRadius;
+            float uniform = _skill.AreaOfEffect / Mathf.Max(0.01f, baseR);
+            _aoeVisualRoot.localScale = new Vector3(uniform, uniform, uniform);
         }
 
         private void CollectAreaTargets(HashSet<IEffectable> next) {
@@ -64,9 +82,7 @@ namespace Logic.Scripts.GameDomain.MVC.Cast.Paschoal {
 
         private void CollectDirectedLineTargets(HashSet<IEffectable> next) {
             Vector3 origin = PaschoalSkillAimWorld.GetSkillOrigin(_playable, _caster);
-            Vector3 aim = PaschoalSkillAimWorld.ResolveAimPoint(_playable, out _);
-            float maxDist = PaschoalSkillAimWorld.GetMaxDirectedDistance(_skill);
-            Vector3 end = PaschoalSkillAimWorld.ClampDirectedEnd(origin, aim, maxDist);
+            Vector3 end = PaschoalSkillAimWorld.GetPlanarClampedAimEnd(_playable, _caster, _skill);
             Vector3 dir = end - origin;
             float segLen = dir.magnitude;
             if (segLen < 1e-5f) return;
@@ -96,6 +112,7 @@ namespace Logic.Scripts.GameDomain.MVC.Cast.Paschoal {
             if (ReferenceEquals(effectable, _caster)) return false;
             // Player / Book: not highlighted while aiming Paschoal skills. (Highlighting the player inside allied AoE etc. can use the same IEffectable API later.)
             if (effectable is IPlayableUnit) return false;
+            if (LakiBossShieldRuntime.ShouldSuppressPaschoalHighlightFor(effectable)) return false;
             return true;
         }
 

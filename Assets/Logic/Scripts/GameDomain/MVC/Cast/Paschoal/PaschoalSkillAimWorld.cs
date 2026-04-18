@@ -48,5 +48,37 @@ namespace Logic.Scripts.GameDomain.MVC.Cast.Paschoal {
             if (mag <= maxDistance || mag < 1e-5f) return aimPoint;
             return origin + delta.normalized * maxDistance;
         }
+
+        /// <summary>
+        /// Directed skills use a horizontal aim vector so spawn rotation and line preview stay stable
+        /// (3D look-at from a high cast point to the ground skews <see cref="Quaternion.LookRotation"/>).
+        /// </summary>
+        public static Vector3 GetPlanarDirectionFromOriginToAim(IPlayableUnit playable, IEffectable caster) {
+            Vector3 origin = GetSkillOrigin(playable, caster);
+            Vector3 aim = ResolveAimPoint(playable, out _);
+            Vector3 d = aim - origin;
+            d.y = 0f;
+            if (d.sqrMagnitude < 1e-8f && playable?.UnitViewGO != null) {
+                d = Vector3.ProjectOnPlane(playable.UnitViewGO.transform.forward, Vector3.up);
+            }
+            if (d.sqrMagnitude < 1e-8f)
+                d = Vector3.forward;
+            return d.normalized;
+        }
+
+        /// <summary>End of the directed segment: along planar dir, clamped by skill range and true horizontal distance to aim.</summary>
+        public static Vector3 GetPlanarClampedAimEnd(IPlayableUnit playable, IEffectable caster, SkillDataSO skill) {
+            Vector3 origin = GetSkillOrigin(playable, caster);
+            Vector3 aim = ResolveAimPoint(playable, out _);
+            Vector3 delta = aim - origin;
+            delta.y = 0f;
+            float maxDist = GetMaxDirectedDistance(skill);
+            float mag = delta.magnitude;
+            if (mag < 1e-8f)
+                return origin + GetPlanarDirectionFromOriginToAim(playable, caster) * Mathf.Min(maxDist, 2f);
+            Vector3 dir = delta / mag;
+            float travel = Mathf.Min(maxDist, mag);
+            return origin + dir * travel;
+        }
     }
 }

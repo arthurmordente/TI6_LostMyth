@@ -13,58 +13,58 @@ MonoBehaviour:
   m_Name: CombatAttackVisualCatalog
   m_EditorClassIdentifier: Assembly-CSharp::Logic.Scripts.GameDomain.MVC.Boss.Visuals.CombatAttackVisualCatalogSO
   _proteanCones:
-    NormalTelegraphPrefab: {fileID: 8742677292157219105, guid: e11551f48d2db2643b01cfb6fdd05c3a, type: 3}
-    PullTelegraphPrefab: {fileID: 2899438486769804250, guid: 3639c9dc599294d4abe23932be3f7cbf, type: 3}
-    PushTelegraphPrefab: {fileID: 7208288196115947727, guid: b2f355603b3bf564faa25bac370e871f, type: 3}
+    NormalTelegraphPrefab: {fileID: 2861777750385342635, guid: 8995824a38baa754aaa36503cc9feeb0, type: 3}
+    PullTelegraphPrefab: {fileID: 971059179123634651, guid: 6a99530884911074a8dd390cbad5910b, type: 3}
+    PushTelegraphPrefab: {fileID: 6357586482489218320, guid: 0fa566609a711304fb3bea351f4d6f1e, type: 3}
     NormalAreaPrefab: {fileID: 0}
     PullAreaPrefab: {fileID: 0}
     PushAreaPrefab: {fileID: 0}
   _wingSlash:
-    NormalTelegraphPrefab: {fileID: 5436002829695318441, guid: c375fe1def32b894f92fa3d9359919bb, type: 3}
-    PullTelegraphPrefab: {fileID: 2436443255089009225, guid: 51a6f5f2c8a87eb418938ed44e8941e3, type: 3}
-    PushTelegraphPrefab: {fileID: 8273591137805646803, guid: f5a49d9a46aadd647b3548648c994d2a, type: 3}
+    NormalTelegraphPrefab: {fileID: 5781219803883182224, guid: 7fa567807f20b7942965bbd49c3120f5, type: 3}
+    PullTelegraphPrefab: {fileID: 6350896670546452046, guid: 995a9be047435b34eae741d1fa90e63c, type: 3}
+    PushTelegraphPrefab: {fileID: 5562383811430869951, guid: e22c58c98c78e8c4fa2f67acb0aa3a2c, type: 3}
     NormalAreaPrefab: {fileID: 0}
     PullAreaPrefab: {fileID: 0}
     PushAreaPrefab: {fileID: 0}
   _skySwords:
-    NormalTelegraphPrefab: {fileID: 8309577336712847930, guid: 708bfeeaf4149914ab1869d97f88d519, type: 3}
-    PullTelegraphPrefab: {fileID: 3401634229088548534, guid: 561d950cba923214b84e86ab3da4f23b, type: 3}
-    PushTelegraphPrefab: {fileID: 8571049703692601611, guid: 953bfe515974a7648a94f1f80a22c2ac, type: 3}
+    NormalTelegraphPrefab: {fileID: 4710237548542731963, guid: 43fe33383f8c9854a80931699ba33a9b, type: 3}
+    PullTelegraphPrefab: {fileID: 364233011442291642, guid: e958aea9389341b4a8ae49967672181e, type: 3}
+    PushTelegraphPrefab: {fileID: 1786429136489334847, guid: 3919cd17dc37ff340bf85e4a9b6e8b26, type: 3}
     NormalAreaPrefab: {fileID: 0}
     PullAreaPrefab: {fileID: 0}
     PushAreaPrefab: {fileID: 0}
   _circle:
-    NormalTelegraphPrefab: {fileID: 7017811765489133595, guid: 4cf4467f0c989564eb47680e45d6aecd, type: 3}
-    PullTelegraphPrefab: {fileID: 5479118454338380538, guid: c766e7e0e062fd042bef8a31ae6e0b31, type: 3}
-    PushTelegraphPrefab: {fileID: 7146869031834311083, guid: 786f2922530c7064fb682783aa31e60c, type: 3}
+    NormalTelegraphPrefab: {fileID: 9052048510880525984, guid: 507516c53bfe2fa408a01b7812659467, type: 3}
+    PullTelegraphPrefab: {fileID: 3686458365897575656, guid: 1da9aac78938f324aa32d7622f79df19, type: 3}
+    PushTelegraphPrefab: {fileID: 188726217141058302, guid: 2b3cf4cf39703a14490ff68f60f7936a, type: 3}
     NormalAreaPrefab: {fileID: 0}
     PullAreaPrefab: {fileID: 0}
     PushAreaPrefab: {fileID: 0}
   _featherLines:
-    NormalTelegraphPrefab: {fileID: 2323805912775172875, guid: fd8ab984f97ebe74899511b3172b09dc, type: 3}
-    PullTelegraphPrefab: {fileID: 8086804202185163898, guid: 0cf910486a6c7e744802f77902ec355c, type: 3}
-    PushTelegraphPrefab: {fileID: 2590079439278276704, guid: 2830ccaf179555c4ebfef24e6bb01e1c, type: 3}
+    NormalTelegraphPrefab: {fileID: 7995898569017571027, guid: 70e7a71946dd1b744b039d51757412cf, type: 3}
+    PullTelegraphPrefab: {fileID: 1163041706325822461, guid: d5ed2d93a9b40db459296f10ea3beae9, type: 3}
+    PushTelegraphPrefab: {fileID: 6152727816489860528, guid: ec388e7a9482d8a43b8f49ad98323571, type: 3}
     NormalAreaPrefab: {fileID: 0}
     PullAreaPrefab: {fileID: 0}
     PushAreaPrefab: {fileID: 0}
   _orb:
-    NormalTelegraphPrefab: {fileID: 4118072648259618641, guid: 530c738dffe99714f8f3af43274b6dd3, type: 3}
-    PullTelegraphPrefab: {fileID: 1555578647163771703, guid: 6f9e97388972e844088fbf109aa32eb8, type: 3}
-    PushTelegraphPrefab: {fileID: 2449098030668112977, guid: 64a2c9e6d1f85b94dab6e923b01b615c, type: 3}
+    NormalTelegraphPrefab: {fileID: 298388709292014194, guid: 3ebb9817ba62b3f48b251cc230fd4805, type: 3}
+    PullTelegraphPrefab: {fileID: 4024239381065070989, guid: 36b17ca416134a24eaa6f71cbdf311aa, type: 3}
+    PushTelegraphPrefab: {fileID: 8751055774535490391, guid: ee7f2c3ceef37724eb4962d9fa3d2f6a, type: 3}
     NormalAreaPrefab: {fileID: 0}
     PullAreaPrefab: {fileID: 0}
     PushAreaPrefab: {fileID: 0}
   _bigOrb:
-    NormalTelegraphPrefab: {fileID: 5319278691725652227, guid: b420d0cb48ac38241b6f7aded63dc235, type: 3}
-    PullTelegraphPrefab: {fileID: 91001733766656672, guid: 9c6a4837e73c7e24488011316ba88ddc, type: 3}
-    PushTelegraphPrefab: {fileID: 4585286713098937258, guid: d51dabcd7e9aa3841b2bba25f5ddd0ea, type: 3}
+    NormalTelegraphPrefab: {fileID: 8650237201499205317, guid: 523264d2952d6b34c8a3094f2014af86, type: 3}
+    PullTelegraphPrefab: {fileID: 7931972969975630666, guid: c836ad045aeab6f46a2952588c645c0a, type: 3}
+    PushTelegraphPrefab: {fileID: 7809487508639939860, guid: 174ebaaf28010b24a8093948bbc37b32, type: 3}
     NormalAreaPrefab: {fileID: 0}
     PullAreaPrefab: {fileID: 0}
     PushAreaPrefab: {fileID: 0}
   _featherColumns:
-    ColumnNormalPrefab: {fileID: 654932336814616789, guid: f20764d688db4974f8de6740fc9a2e13, type: 3}
-    ColumnPullPrefab: {fileID: 4921830948649764014, guid: 88dfce176372425479edfb7763913132, type: 3}
-    ColumnPushPrefab: {fileID: 6868361093710891171, guid: 5c8e51dae6ec9cd48883ec6655f346e0, type: 3}
+    ColumnNormalPrefab: {fileID: 9000266076332643726, guid: d805f8616c24d8e45938bbce305e1005, type: 3}
+    ColumnPullPrefab: {fileID: 3071337804242269445, guid: b33ab791d59a13e439bbc1d9b1cd4906, type: 3}
+    ColumnPushPrefab: {fileID: 2193367561018156929, guid: 2d2db739c19e1f1449bd9fa630f88add, type: 3}
     ColumnNormalAreaPrefab: {fileID: 0}
     ColumnPullAreaPrefab: {fileID: 0}
     ColumnPushAreaPrefab: {fileID: 0}

@@ -36,6 +36,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 6214811202298631115}
   - {fileID: 5925520250068082098}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -174,6 +175,7 @@ MonoBehaviour:
   _initialPlayerChips: 3
   _initialBossChips: 3
   _combatAttackVisualCatalog: {fileID: 0}
+  _lakiShieldVfxRoot: {fileID: 9018765071124092488}
   references:
     version: 2
     RefIds:
@@ -268,6 +270,73 @@ MonoBehaviour:
   _modelRoot: {fileID: 5925520250068082098}
   _overrideMainColor: 0
   _mainColor: {r: 8, g: 0, b: 0, a: 1}
+--- !u!1001 &5637148074943660512
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 4694869984257836741}
+    m_Modifications:
+    - target: {fileID: 1730611041725551147, guid: 770c2ddc64f53814784c7807bb925086, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1730611041725551147, guid: 770c2ddc64f53814784c7807bb925086, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0.42
+      objectReference: {fileID: 0}
+    - target: {fileID: 1730611041725551147, guid: 770c2ddc64f53814784c7807bb925086, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -3.38
+      objectReference: {fileID: 0}
+    - target: {fileID: 1730611041725551147, guid: 770c2ddc64f53814784c7807bb925086, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1730611041725551147, guid: 770c2ddc64f53814784c7807bb925086, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1730611041725551147, guid: 770c2ddc64f53814784c7807bb925086, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1730611041725551147, guid: 770c2ddc64f53814784c7807bb925086, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1730611041725551147, guid: 770c2ddc64f53814784c7807bb925086, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1730611041725551147, guid: 770c2ddc64f53814784c7807bb925086, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1730611041725551147, guid: 770c2ddc64f53814784c7807bb925086, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3680069003663251368, guid: 770c2ddc64f53814784c7807bb925086, type: 3}
+      propertyPath: m_Name
+      value: VFX_LakiShield
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 770c2ddc64f53814784c7807bb925086, type: 3}
+--- !u!4 &6214811202298631115 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1730611041725551147, guid: 770c2ddc64f53814784c7807bb925086, type: 3}
+  m_PrefabInstance: {fileID: 5637148074943660512}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &9018765071124092488 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3680069003663251368, guid: 770c2ddc64f53814784c7807bb925086, type: 3}
+  m_PrefabInstance: {fileID: 5637148074943660512}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &6174738797805992537
 PrefabInstance:
   m_ObjectHideFlags: 0

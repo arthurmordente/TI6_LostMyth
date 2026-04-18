@@ -5235,7 +5235,7 @@ GameObject:
   - component: {fileID: 4628153174228609032}
   - component: {fileID: 59958797903560317}
   - component: {fileID: 1593009971923994242}
-  - component: {fileID: 3815425874512727531}
+  - component: {fileID: 2931633049123481513}
   m_Layer: 5
   m_Name: DiceScore_Menu
   m_TagString: Untagged
@@ -5372,7 +5372,7 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
---- !u!114 &3815425874512727531
+--- !u!114 &2931633049123481513
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -5381,15 +5381,23 @@ MonoBehaviour:
   m_GameObject: {fileID: 3770771977234625013}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 55b98c194b50f8a4ea287c28562c9925, type: 3}
+  m_Script: {fileID: 11500000, guid: 7c9e4b2a1d8f4e5b9c0a3d6e2f1b8c7d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Logic.Scripts.GameDomain.MVC.Ui.GamePlayDiceAttackPanelView
-  _lakiPanelRoot: {fileID: 3288889476941496007}
+  _lakiPanelRoot: {fileID: 7170550367290574164}
+  _playerPanelRoot: {fileID: 8165431518866997509}
+  _diceScoreRowsParent: {fileID: 5877211951377391370}
   _lakiSumText: {fileID: 8649089934088609955}
-  _lakiFactorsText: {fileID: 0}
-  _playerPanelRoot: {fileID: 1520558211973310254}
   _playerSumText: {fileID: 7726763141156019110}
-  _playerFactorsText: {fileID: 0}
+  _playerPerDieColumn: {fileID: 0}
+  _lakiPerDieColumn: {fileID: 0}
+  _valuePunchDuration: 0.22
+  _valuePunchStrength: 0.18
+  _valuePunchVibrato: 10
+  _valuePunchElasticity: 0.4
+  _diceRoundStartsWithPlayerOnTop: 1
+  _rankSwapDuration: 0.28
+  _rankSwapEase: 6
 --- !u!1 &3792612745731431117
 GameObject:
   m_ObjectHideFlags: 0
@@ -9469,8 +9477,6 @@ GameObject:
   m_Component:
   - component: {fileID: 8430521399689715446}
   - component: {fileID: 5996838271804699443}
-  - component: {fileID: 4270727560433350566}
-  - component: {fileID: 6872193532527141928}
   - component: {fileID: 7004662515244940905}
   m_Layer: 5
   m_Name: DiceScoreRoot
@@ -9507,80 +9513,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8164520668388897581}
   m_CullTransparentMesh: 1
---- !u!114 &4270727560433350566
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8164520668388897581}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: d2367c330acf13a4ab2492c18c02b706, type: 3}
-  m_Type: 0
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
---- !u!114 &6872193532527141928
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8164520668388897581}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
-  m_Navigation:
-    m_Mode: 3
-    m_WrapAround: 0
-    m_SelectOnUp: {fileID: 0}
-    m_SelectOnDown: {fileID: 0}
-    m_SelectOnLeft: {fileID: 0}
-    m_SelectOnRight: {fileID: 0}
-  m_Transition: 1
-  m_Colors:
-    m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
-    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
-    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
-    m_ColorMultiplier: 1
-    m_FadeDuration: 0.1
-  m_SpriteState:
-    m_HighlightedSprite: {fileID: 0}
-    m_PressedSprite: {fileID: 0}
-    m_SelectedSprite: {fileID: 0}
-    m_DisabledSprite: {fileID: 0}
-  m_AnimationTriggers:
-    m_NormalTrigger: Normal
-    m_HighlightedTrigger: Highlighted
-    m_PressedTrigger: Pressed
-    m_SelectedTrigger: Selected
-    m_DisabledTrigger: Disabled
-  m_Interactable: 1
-  m_TargetGraphic: {fileID: 4270727560433350566}
-  m_OnClick:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!114 &7004662515244940905
 MonoBehaviour:
   m_ObjectHideFlags: 0

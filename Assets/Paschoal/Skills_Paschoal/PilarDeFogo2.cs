@@ -9,7 +9,8 @@ public class PilarDeFogo2 : SkillDataSO
         colliders = Physics.OverlapSphere(target.transform.position, AreaOfEffect);
         foreach (Collider col in colliders)
         {
-            if (col.TryGetComponent<IEffectable>(out IEffectable f))
+            var f = col.GetComponentInParent<IEffectable>();
+            if (f != null)
             {
                 if ((target.position - col.transform.position).magnitude > AreaOfEffect / 2)
                 {
