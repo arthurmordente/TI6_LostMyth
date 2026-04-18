@@ -8,6 +8,7 @@ using Logic.Scripts.GameDomain.Services.ActiveUnit;
 using Logic.Scripts.GameDomain.Services.Skills;
 using Zenject;
 using UnityEngine;
+using Logic.Scripts.GameDomain.MVC.Cast.Paschoal;
 using Logic.Scripts.GameDomain.MVC.Ui;
 using Logic.Scripts.GameDomain.MVC.Echo;
 using Logic.Scripts.GameDomain.MVC.Boss.Telegraph;
@@ -63,6 +64,9 @@ public class GamePlayInstaller : MonoInstaller {
         Container.BindInterfacesTo<GamePlayDataService>().AsSingle().NonLazy();
         Container.Bind<IPaschoalSkillLoadoutService>().To<PaschoalSkillLoadoutService>().AsSingle()
             .WithArguments(_paschoalSkillCatalog, 4);
+
+        Container.Bind<IPaschoalSkillTargetingPreviewService>().To<PaschoalSkillTargetingPreviewService>().AsSingle();
+        Container.Bind<PaschoalDefaultSkillCastFlow>().AsSingle();
 
         // Book system
         Container.Bind<IActiveUnitService>().To<ActiveUnitService>().AsSingle();

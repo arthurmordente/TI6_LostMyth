@@ -1,12 +1,19 @@
+using Logic.Scripts.GameDomain.MVC.Cast.Paschoal;
 using Logic.Scripts.GameDomain.MVC.Nara;
 using Logic.Scripts.GameDomain.MVC.Shared;
 using UnityEngine;
 
 public class PaschoalDefaultSkillCastFlow : ISkillCastFlow
 {
+    private readonly IPaschoalSkillTargetingPreviewService _targetingPreview;
+
     private SkillDataSO _currentSkill;
     private GameObject _currentPreview;
     private Transform _fallbackTarget;
+
+    public PaschoalDefaultSkillCastFlow(IPaschoalSkillTargetingPreviewService targetingPreview) {
+        _targetingPreview = targetingPreview;
+    }
 
     public bool CanHandleCaster(IPlayableUnit caster)
     {
@@ -46,6 +53,8 @@ public class PaschoalDefaultSkillCastFlow : ISkillCastFlow
         EnsureFallbackTarget(caster);
         UpdateFallbackTarget(caster);
 
+        _targetingPreview?.Begin(_currentSkill, caster, _currentPreview != null ? _currentPreview.transform : null);
+
         prepareResult = new SkillCastPrepareResult
         {
             AbilityIndex = index,
@@ -60,7 +69,9 @@ public class PaschoalDefaultSkillCastFlow : ISkillCastFlow
         if (_currentSkill == null || caster == null) return;
 
         UpdateFallbackTarget(caster);
-        Transform castTarget = _currentPreview != null ? _currentPreview.transform : _fallbackTarget;
+        _targetingPreview?.End();
+        // Always use fallback aim transform for damage/decals — AoEPrefab is visual-only and is synced by the preview service.
+        Transform castTarget = _fallbackTarget != null ? _fallbackTarget : _currentPreview != null ? _currentPreview.transform : caster.UnitViewGO.transform;
         _currentSkill.OnCast(caster, castTarget);
         CleanupPreviewAndTarget();
         _currentSkill = null;
@@ -68,6 +79,7 @@ public class PaschoalDefaultSkillCastFlow : ISkillCastFlow
 
     public void CancelPreparedCast(IPlayableUnit caster)
     {
+        _targetingPreview?.End();
         CleanupPreviewAndTarget();
         _currentSkill = null;
     }
@@ -90,8 +102,13 @@ public class PaschoalDefaultSkillCastFlow : ISkillCastFlow
         Vector3 point = TryGetMouseWorldPoint(out Vector3 worldPoint) ? worldPoint : (origin + fallbackForward * 2f);
 
         _fallbackTarget.position = point;
+        // Planar facing matches directed preview / projectiles (avoids tilted knives when cast point is above the mouse hit).
         Vector3 direction = point - origin;
-        if (direction.sqrMagnitude > 0.0001f)
+        direction.y = 0f;
+        if (direction.sqrMagnitude < 1e-6f) {
+            direction = new Vector3(fallbackForward.x, 0f, fallbackForward.z);
+        }
+        if (direction.sqrMagnitude > 1e-6f)
             _fallbackTarget.rotation = Quaternion.LookRotation(direction.normalized, Vector3.up);
     }
 

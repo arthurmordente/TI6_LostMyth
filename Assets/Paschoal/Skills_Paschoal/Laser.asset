@@ -16,12 +16,12 @@ MonoBehaviour:
   CastTime: 0
   Range: 100
   AreaOfEffect: 0
+  AoEPrefabBaseRadius: 1
   Power: 30
-  Cost: 0
+  Cost: 2
   Icon: {fileID: 0}
   SkillName: 
   Description: 
   AoEPrefab: {fileID: 8272950397043843596, guid: 0e69689dea030c945a7ec2597794efa3, type: 3}
   AttackPrefab: {fileID: 6187688091634270428, guid: c855878e1f604374486507f725b2a380, type: 3}
-  animationOverride: {fileID: 0}
-  AnimationID: 
+  Upgrade: {fileID: 0}

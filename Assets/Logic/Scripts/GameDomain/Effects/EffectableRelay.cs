@@ -11,6 +11,8 @@ namespace Assets.Logic.Scripts.GameDomain.Effects
             _target = target;
         }
 
+        public IEffectable ForwardTarget => _target;
+
         public Transform GetReferenceTransform()
         {
             return _target != null ? _target.GetReferenceTransform() : transform;
@@ -61,6 +63,10 @@ namespace Assets.Logic.Scripts.GameDomain.Effects
 
         public GameObject GetReferenceTargetPrefab() {
             return _target != null ? _target.GetReferenceTargetPrefab() : gameObject;
+        }
+
+        public void SetSkillTargetingHighlight(bool active) {
+            _target?.SetSkillTargetingHighlight(active);
         }
     }
 }

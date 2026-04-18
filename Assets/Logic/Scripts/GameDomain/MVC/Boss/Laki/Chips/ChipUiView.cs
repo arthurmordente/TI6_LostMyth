@@ -2,6 +2,7 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 using Zenject;
+using Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Dice;
 
 namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Chips
 {
@@ -136,13 +137,13 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Chips
 			StartCoroutine(AnimateChipPurchase(isPlayer, count));
 		}
 
-		private void OnDiceProgress(System.Collections.Generic.List<int> pRolls, int pSum, System.Collections.Generic.List<int> bRolls, int bSum)
+		private void OnDiceProgress(DiceUiProgressPayload payload)
 		{
-			if (_playerDiceText == null || _bossDiceText == null) return;
+			if (payload == null || _playerDiceText == null || _bossDiceText == null) return;
 			_playerDiceText.gameObject.SetActive(true);
 			_bossDiceText.gameObject.SetActive(true);
-			_playerDiceText.SetText(FormatDice(pRolls, pSum));
-			_bossDiceText.SetText(FormatDice(bRolls, bSum));
+			_playerDiceText.SetText(FormatDice(payload.PlayerRolls, payload.PlayerSum));
+			_bossDiceText.SetText(FormatDice(payload.BossRolls, payload.BossSum));
 		}
 
 		private void OnDiceFinalAnimation(int pSum, int bSum)

@@ -28,13 +28,14 @@ public class CastController : ICastController {
     private readonly PaschoalDefaultSkillCastFlow _paschoalFlow;
 
     public CastController(IUpdateSubscriptionService updateSubscriptionService, ICommandFactory commandFactory,
-        IActionPointsService actionPointsService, ICheatController cheatController) {
+        IActionPointsService actionPointsService, ICheatController cheatController,
+        PaschoalDefaultSkillCastFlow paschoalSkillCastFlow) {
         _subscriptionService = updateSubscriptionService;
         _commandFactory = commandFactory;
         _naraActionPointsService = actionPointsService;
         _cheatController = cheatController;
         _legacyFlow = new LegacySkillCastFlow(_subscriptionService, _commandFactory);
-        _paschoalFlow = new PaschoalDefaultSkillCastFlow();
+        _paschoalFlow = paschoalSkillCastFlow;
         try { _audio = ProjectContext.Instance.Container.Resolve<IAudioService>(); } catch { _audio = null; }
     }
 
@@ -45,7 +46,6 @@ public class CastController : ICastController {
     }
 
     public bool TryUseAbility(int index, IPlayableUnit caster) {
-        Debug.Log($"[CastController] TryUseAbility — caster: {caster?.GetType().Name ?? "NULL"}, index: {index}");
         ISkillCastFlow selectedFlow = SelectFlow(caster);
         if (selectedFlow == null) {
             Debug.LogWarning("[CastController] TryUseAbility — no cast flow available for caster.");
@@ -60,7 +60,6 @@ public class CastController : ICastController {
         var ap = caster.GetActionPoints() ?? _naraActionPointsService;
         int cost = prepareResult.Cost;
         bool canAfford = (ap == null || ap.CanSpend(cost)) || _cheatController.InfinityCast;
-        Debug.Log($"[CastController] TryUseAbility — flow: {selectedFlow.GetType().Name}, cost: {cost}, AP: {(ap == null ? "NULL (free)" : ap.Current.ToString())}, canAfford: {canAfford}, InfinityCast: {_cheatController.InfinityCast}");
         if (!canAfford) {
             Debug.LogWarning($"[CastController] TryUseAbility — cannot afford ability (cost {cost}, AP {ap?.Current}).");
             selectedFlow.CancelPreparedCast(caster);
@@ -87,7 +86,6 @@ public class CastController : ICastController {
     }
 
     public void UseAbility(IPlayableUnit caster) {
-        Debug.Log($"[CastController] UseAbility — caster: {caster?.GetType().Name ?? "NULL"}, flow: {(_activeFlow != null ? _activeFlow.GetType().Name : "NULL")}");
         if (_activeFlow == null) return;
 
         _canUseAbility = true;

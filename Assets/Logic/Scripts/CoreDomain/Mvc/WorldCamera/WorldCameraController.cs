@@ -48,6 +48,7 @@ namespace Logic.Scripts.Core.Mvc.WorldCamera {
                 _isRegistered = false;
             }
             _target = null;
+            _worldCameraView.SetTargetNull();
         }
 
         public void UnlockCameraRotate() { _rotateEnabled = true; }

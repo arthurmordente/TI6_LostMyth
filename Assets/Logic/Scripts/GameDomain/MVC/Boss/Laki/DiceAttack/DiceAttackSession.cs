@@ -125,8 +125,19 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack
             {
                 var list = isBoss ? _bossRolls : _playerRolls;
                 if (rollSlotIndex < 0 || rollSlotIndex >= list.Count) return;
+                int oldSideSum = Sum(list);
                 list[rollSlotIndex] = value;
-                ReportUiProgress();
+                int newSideSum = Sum(list);
+                bool sideSumChanged = oldSideSum != newSideSum;
+
+                var punchP = new bool[_playerRolls.Count];
+                var punchB = new bool[_bossRolls.Count];
+                if (isBoss) punchB[rollSlotIndex] = true;
+                else punchP[rollSlotIndex] = true;
+
+                ReportUiProgress(punchP, punchB,
+                    punchPlayerSum: !isBoss && sideSumChanged,
+                    punchBossSum: isBoss && sideSumChanged);
             }
 
             public void OnDieAnimationComplete(bool isBoss, int rollSlotIndex, int value)
@@ -200,9 +211,20 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack
                 DestroyAllSpawnedDice();
             }
 
-            private void ReportUiProgress()
+            private void ReportUiProgress(bool[] punchPlayerSlots = null, bool[] punchBossSlots = null,
+                bool punchPlayerSum = false, bool punchBossSum = false)
             {
-                DiceUiRuntime.ReportProgress(new List<int>(_playerRolls), Sum(_playerRolls), new List<int>(_bossRolls), Sum(_bossRolls));
+                DiceUiRuntime.ReportProgress(new DiceUiProgressPayload
+                {
+                    PlayerRolls = new List<int>(_playerRolls),
+                    PlayerSum = Sum(_playerRolls),
+                    BossRolls = new List<int>(_bossRolls),
+                    BossSum = Sum(_bossRolls),
+                    PlayerSlotPunch = punchPlayerSlots,
+                    BossSlotPunch = punchBossSlots,
+                    PunchPlayerSum = punchPlayerSum,
+                    PunchBossSum = punchBossSum
+                });
             }
 
             private void ShowPlayerPrompt()

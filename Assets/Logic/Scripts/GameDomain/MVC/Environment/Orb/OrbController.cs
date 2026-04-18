@@ -3,6 +3,7 @@ using Logic.Scripts.GameDomain.MVC.Nara;
 using Logic.Scripts.GameDomain.MVC.Abilitys;
 using System.Collections.Generic;
 using Logic.Scripts.GameDomain.MVC.Environment.Orb;
+using Logic.Scripts.GameDomain.VisualFeedback;
 using Logic.Scripts.Turns;
 
 namespace Logic.Scripts.GameDomain.MVC.Environment.Orb
@@ -28,6 +29,8 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Orb
         private int _stunMoveTurns;
         private int _stunAttackTurns;
         private bool _isMoving;
+        private bool _orbSkipNextCatalogTurnAdvance;
+        private int _orbCatalogVisualTurn = 1;
         public System.Threading.Tasks.Task CurrentTickTask { get; private set; }
 
         // Remove automaticamente do registro genérico do Environment quando a orb estiver destruída
@@ -49,10 +52,14 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Orb
             _damageExponent = 0;
             // Reach max in 8 turns
             _growStep = (_maxRadius > _initialRadius) ? (_maxRadius - _initialRadius) / 8f : 0f;
+            _orbSkipNextCatalogTurnAdvance = true;
+            _orbCatalogVisualTurn = 1;
             _view = GetComponent<OrbView>();
             if (_view != null)
             {
                 _view.ConfigureAreaVisualPrefab(orbAreaVisualPrefab);
+                _view.ConfigureCatalogAreaVisualScaleGrowth(_initialRadius, _maxRadius);
+                _view.SetCatalogVisualTurn(_orbCatalogVisualTurn);
                 _view.PrepareTelegraph();
                 _view.UpdateRadius(_radius);
             }
@@ -84,6 +91,14 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Orb
         private async System.Threading.Tasks.Task DoTickAsync()
         {
             if (_hp <= 0) return;
+            if (!_orbSkipNextCatalogTurnAdvance && _view != null)
+            {
+                _orbCatalogVisualTurn++;
+                _view.SetCatalogVisualTurn(_orbCatalogVisualTurn);
+                _view.UpdateRadius(_radius);
+            }
+            _orbSkipNextCatalogTurnAdvance = false;
+
             UnityEngine.Debug.Log($"[Environment][Orb] Tick -> pos={transform.position} radius={_radius:0.##} exp={_damageExponent}");
             await System.Threading.Tasks.Task.Delay(500);
             if (_stunAttackTurns > 0) { _stunAttackTurns--; } else { PerformAction(); }
@@ -278,6 +293,10 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Orb
 
         public GameObject GetReferenceTargetPrefab() {
             return gameObject;
+        }
+
+        public void SetSkillTargetingHighlight(bool active) {
+            SkillTargetingHighlightBridge.SetHighlighted(this, active);
         }
     }
 }

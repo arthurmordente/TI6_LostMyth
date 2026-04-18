@@ -28,6 +28,7 @@ namespace Logic.Scripts.GameDomain.MVC.Abilitys {
         public ScriptableObject PlotData;
 
         public void SetUp(IUpdateSubscriptionService updateSubscriptionService, ICommandFactory commandFactory) {
+            if (TargetingStrategy == null) return;
             TargetingStrategy.SetUp(updateSubscriptionService, commandFactory);
         }
 

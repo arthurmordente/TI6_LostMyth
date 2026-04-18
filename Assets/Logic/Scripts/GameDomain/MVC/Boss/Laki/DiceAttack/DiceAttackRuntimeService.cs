@@ -1,24 +1,15 @@
-using Logic.Scripts.GameDomain.MVC.Boss;
+using Logic.Scripts.GameDomain.MVC.Environment.Laki;
 using UnityEngine;
 
 namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack
 {
     public static class DiceAttackRuntimeService
     {
-        /// <summary>HP Laki loses when the player wins the dice contest (strict win: player sum &gt; boss).</summary>
-        public const int LakiHpLossOnPlayerDiceWin = 30;
-
-        /// <summary>Applies <see cref="LakiHpLossOnPlayerDiceWin"/> via <see cref="BossView"/> as <see cref="IEffectable"/> (same path as combat damage from abilities).</summary>
-        public static void ApplyLakiDiceLossDamageIfPlayerWon(in DiceAttackResult result)
+        /// <summary>Opens the Laki shield vulnerability window (resolving fight turn + next fight turn) — no direct HP loss from dice.</summary>
+        public static void NotifyPlayerWonDiceOpensShieldWindow(in DiceAttackResult result, int fightTurnNumber)
         {
             if (!result.Completed || !result.PlayerWon) return;
-            var bossView = Object.FindFirstObjectByType<BossView>(FindObjectsInactive.Exclude);
-            if (bossView == null)
-            {
-                Debug.LogWarning("[Laki][DiceAttack] BossView not found; cannot apply dice loss HP.");
-                return;
-            }
-            ((IEffectable)bossView).TakeDamage(LakiHpLossOnPlayerDiceWin);
+            LakiBossShieldRuntime.RegisterDicePlayerWin(fightTurnNumber);
         }
 
         public interface IStatusProvider { string GetStatus(); }

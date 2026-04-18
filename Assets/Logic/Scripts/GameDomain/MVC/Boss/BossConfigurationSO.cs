@@ -17,5 +17,8 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
         // Defaults reproduce current behavior in world space.
         [field: SerializeField] public Vector3 InitialBossPosition { get; private set; } = new Vector3(0f, 0f, 0f);
         [field: SerializeField] public Vector3 InitialPlayerPosition { get; private set; } = new Vector3(0f, 0f, -10f);
+
+        /// <summary>Applied as Quaternion.Euler * prefab.rotation when spawning the boss view.</summary>
+        [field: SerializeField] public Vector3 InitialBossEulerAngles { get; private set; } = Vector3.zero;
     }
 }

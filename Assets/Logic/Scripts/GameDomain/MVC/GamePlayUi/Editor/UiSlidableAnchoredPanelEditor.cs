@@ -45,6 +45,18 @@ namespace Logic.Scripts.GameDomain.MVC.Ui.Editor
             if (Application.isPlaying)
             {
                 EditorGUILayout.LabelField("Estado", panel.IsExpanded ? "Aberto" : "Fechado");
+                EditorGUILayout.LabelField("Índice", $"{panel.CurrentStateIndex} / {panel.StateCount - 1}");
+                if (panel.StateCount > 2)
+                {
+                    EditorGUILayout.LabelField("Multi-estado", EditorStyles.boldLabel);
+                    EditorGUILayout.BeginHorizontal();
+                    for (int i = 0; i < panel.StateCount; i++)
+                    {
+                        if (GUILayout.Button($"{i}"))
+                            panel.SetStateIndex(i);
+                    }
+                    EditorGUILayout.EndHorizontal();
+                }
             }
         }
     }

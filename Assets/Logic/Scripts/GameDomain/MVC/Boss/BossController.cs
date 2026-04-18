@@ -9,8 +9,11 @@ using System;
 using System.Threading.Tasks;
 using Object = UnityEngine.Object;
 using Logic.Scripts.GameDomain.MVC.Ui;
+using Logic.Scripts.GameDomain.Services.ActiveUnit;
 using Assets.Logic.Scripts.GameDomain.Effects;
 using Logic.Scripts.GameDomain.VisualFeedback;
+using Logic.Scripts.GameDomain.MVC.Environment.Laki;
+using Logic.Scripts.Turns;
 
 namespace Logic.Scripts.GameDomain.MVC.Boss {
     [Serializable]
@@ -20,6 +23,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
         private readonly ICommandFactory _commandFactory;
         private readonly IResourcesLoaderService _resourcesLoaderService;
         private readonly IGamePlayUiController _gamePlayUiController;
+        private readonly IActiveUnitService _activeUnitService;
 
         private BossView _bossView;
         private readonly BossView _bossViewPrefab;
@@ -27,6 +31,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
         private readonly BossConfigurationSO _bossConfiguration;
         private readonly BossPhasesSO _bossPhases;
         private readonly string _fightBossHudDisplayName;
+        private readonly TurnStateService _turnStateService;
         private readonly IBossAbilityController _bossAbilityController;
         private ArenaPosReference _arenaReference;
         private BossBehaviorSO _activeBehavior;
@@ -68,7 +73,9 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
             IResourcesLoaderService resourcesLoaderService, BossView bossViewPrefab,
             BossConfigurationSO bossConfiguration, BossPhasesSO bossPhases,
             IBossAbilityController bossAbilityController, IGamePlayUiController gamePlayUiController,
-            string fightBossHudDisplayName) {
+            string fightBossHudDisplayName,
+            [InjectOptional] TurnStateService turnStateService = null,
+            [InjectOptional] IActiveUnitService activeUnitService = null) {
             _updateSubscriptionService = updateSubscriptionService;
             _audioService = audioService;
             _commandFactory = commandFactory;
@@ -78,6 +85,8 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
             _bossPhases = bossPhases;
             _bossAbilityController = bossAbilityController;
             _gamePlayUiController = gamePlayUiController;
+            _turnStateService = turnStateService;
+            _activeUnitService = activeUnitService;
             _fightBossHudDisplayName = fightBossHudDisplayName ?? string.Empty;
             _bossData = new BossData(_bossConfiguration);
         }
@@ -187,7 +196,10 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
         public void CreateBoss() {
 			// Instantiate boss directly at configured world position to avoid transient prefab-position frames
 			Vector3 spawnPos = (_bossConfiguration != null) ? _bossConfiguration.InitialBossPosition : Vector3.zero;
-			Quaternion spawnRot = (_bossViewPrefab != null) ? _bossViewPrefab.transform.rotation : Quaternion.identity;
+			Quaternion prefabRot = (_bossViewPrefab != null) ? _bossViewPrefab.transform.rotation : Quaternion.identity;
+			Quaternion spawnRot = (_bossConfiguration != null)
+				? Quaternion.Euler(_bossConfiguration.InitialBossEulerAngles) * prefabRot
+				: prefabRot;
 			_bossView = Object.Instantiate(_bossViewPrefab, spawnPos, spawnRot);
             _bossData.ResetData();
             _bossView.SetupCallbacks(PreviewHeal, PreviewDamage, TakeDamage, Heal);
@@ -238,7 +250,8 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
                 out Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.IResolver diceResolver))
             {
                 Debug.Log($"[Laki] DiceAttack resolved at Boss turn. PlayerWon={diceResult.PlayerWon}");
-                Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.ApplyLakiDiceLossDamageIfPlayerWon(diceResult);
+                int fightTurn = _turnStateService != null ? _turnStateService.TurnNumber : 0;
+                Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.NotifyPlayerWonDiceOpensShieldWindow(diceResult, fightTurn);
                 try { diceResolver?.DestroyDiceAttackRoot(); } catch { }
                 resolvedThisTurn = true;
             }
@@ -665,6 +678,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
 
 
         public void TakeDamage(int amount) {
+            if (LakiBossShieldRuntime.IsLakiShieldBlockingCombatInteraction()) return;
             _bossData.TakeDamage(amount);
             if (_bossView != null) {
                 var flash = _bossView.GetComponent<DamageFlashPresenter>();
@@ -693,6 +707,8 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
                 if (_bossView != null) {
                     // Optional: play death animation here if available
                 }
+                // Vitória com o Book/clone ativo deixa a câmara a seguir um alvo que pode ser destruído ou inválido; voltar à Nara antes do Game Over.
+                _activeUnitService?.SetNaraAsActiveUnit();
                 _commandFactory.CreateCommandVoid<GameOverCommand>().SetData(new GameOverCommandData(true)).Execute();
                 return;
             }
@@ -734,11 +750,16 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
         }
 
         public void PreviewDamage(int damageAmound) {
-
+            if (LakiBossShieldRuntime.IsLakiShieldBlockingCombatInteraction()) return;
         }
 
         public void ResetPreview() {
 
+        }
+
+        public void SetSkillTargetingHighlight(bool active) {
+            if (active && LakiBossShieldRuntime.IsLakiShieldBlockingCombatInteraction()) return;
+            SkillTargetingHighlightBridge.SetHighlighted(this, active);
         }
 
         public void Dispose() {

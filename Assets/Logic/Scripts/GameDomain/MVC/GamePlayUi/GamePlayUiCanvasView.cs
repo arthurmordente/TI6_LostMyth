@@ -140,12 +140,11 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
 
         private void OnDiceAttackEnded() => SetDiceScoreAreaActive(false);
 
-        private void OnDiceUiProgress(System.Collections.Generic.List<int> pRolls, int pSum,
-            System.Collections.Generic.List<int> bRolls, int bSum)
+        private void OnDiceUiProgress(DiceUiProgressPayload payload)
         {
             if (!DiceAttackRuntimeService.IsActive && !MinigameRuntimeService.IsActive) return;
             SetDiceScoreAreaActive(true);
-            ResolveDicePanel()?.ApplyProgress(pSum, bSum);
+            ResolveDicePanel()?.ApplyProgress(payload);
         }
 
         private GamePlayDiceAttackPanelView ResolveDicePanel()

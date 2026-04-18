@@ -47,6 +47,12 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 		[Tooltip("Optional override for tile prefabs. When null, uses CombatAttackVisualCatalogSO from the scene Zenject container (same binding as GamePlayInstaller).")]
 		[SerializeField] private CombatAttackVisualCatalogSO _combatAttackVisualCatalog;
 
+		[Header("Laki boss shield (prefab child)")]
+		[Tooltip("VFX root on the Laki boss prefab. While active: boss is immune and Paschoal aim/fresnel on her is suppressed. Disabled on fight turns T and T+1 after the boss loses dice on turn T.")]
+		[SerializeField] private GameObject _lakiShieldVfxRoot;
+
+		private int _lastSyncedFightTurn = int.MinValue;
+
 		private void Start()
 		{
 			Zenject.DiContainer container = null;
@@ -114,10 +120,27 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 			try { chipSvc = container.Resolve<IChipService>(); } catch { chipSvc = null; }
 			if (chipSvc != null) chipSvc.SetInitial(_initialPlayerChips, _initialBossChips);
 			// Legacy chips / pot / minigame HUD removed — use DiceAttack prompt prefab on BossAttack when needed.
+
+			LakiBossShieldRuntime.RegisterShieldRoot(_lakiShieldVfxRoot);
+			if (_turnStateService != null && _turnStateService.Active)
+			{
+				_lastSyncedFightTurn = _turnStateService.TurnNumber;
+				LakiBossShieldRuntime.SyncFightTurn(_turnStateService.TurnNumber);
+			}
+		}
+
+		private void Update()
+		{
+			if (_turnStateService == null || !_turnStateService.Active) return;
+			int t = _turnStateService.TurnNumber;
+			if (t == _lastSyncedFightTurn) return;
+			_lastSyncedFightTurn = t;
+			LakiBossShieldRuntime.SyncFightTurn(t);
 		}
 
 		private void OnDestroy()
 		{
+			LakiBossShieldRuntime.Reset();
 			try { Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.Reset(); } catch { }
 			try { Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.MinigameRuntimeService.Reset(); } catch { }
 		}

@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using UnityEngine;
 using Logic.Scripts.Turns;
+using Logic.Scripts.GameDomain.VisualFeedback;
 
 namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Diamond
 {
@@ -54,6 +55,10 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Diamond
 		public void TakeDamagePerTurn(int damageAmount, int duration) { }
 		public void Heal(int healAmount) { _hp += Mathf.Max(0, healAmount); }
 		public void HealPerTurn(int healAmount, int duration) { }
+
+		public void SetSkillTargetingHighlight(bool active) {
+			SkillTargetingHighlightBridge.SetHighlighted(this, active);
+		}
 	}
 }
 

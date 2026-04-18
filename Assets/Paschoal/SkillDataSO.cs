@@ -6,6 +6,8 @@ public abstract class SkillDataSO : ScriptableObject
     [Header("SkillData Properties")]
 
     public float CoolDown, CastTime, Range, AreaOfEffect;
+    /// <summary>Horizontal radius of <see cref="AoEPrefab"/> at localScale 1. Preview scale = AreaOfEffect / this so decal matches gameplay radius.</summary>
+    public float AoEPrefabBaseRadius = 1f;
     public int Power, Cost;
     public Sprite Icon;
     public string SkillName, Description;

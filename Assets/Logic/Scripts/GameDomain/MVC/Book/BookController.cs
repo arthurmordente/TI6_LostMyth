@@ -87,7 +87,10 @@ namespace Logic.Scripts.GameDomain.MVC.Book
             if (!_abilitiesSetUp)
             {
                 foreach (var ability in _abilities)
+                {
+                    if (ability == null) continue;
                     ability.SetUp(_updateSubscriptionService, _commandFactory);
+                }
                 _abilitiesSetUp = true;
             }
 
@@ -278,6 +281,10 @@ namespace Logic.Scripts.GameDomain.MVC.Book
         public void TakeDamagePerTurn(int damageAmount, int duration) { }
         public void Heal(int amount) { if (_bookData != null) _bookData.Heal(amount); }
         public void HealPerTurn(int healAmount, int duration) { }
+
+        public void SetSkillTargetingHighlight(bool active) {
+            SkillTargetingHighlightBridge.SetHighlighted(this, active);
+        }
 
         #endregion
 
