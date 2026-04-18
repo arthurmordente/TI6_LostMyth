@@ -137,6 +137,9 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
             _gamePlayHud.OnSkill4CostChange(c4);
         }
 
+        public void SetSkillHudIcons(Sprite erza0, Sprite erza1, Sprite erza2, Sprite erza3, Sprite book0, Sprite book1, Sprite book2, Sprite book3) =>
+            _gamePlayHud.SetSkillHudIcons(erza0, erza1, erza2, erza3, book0, book1, book2, book3);
+
         public void OnBossDisplayNameChange(string displayName) => _gamePlayHud.OnBossDisplayNameChange(displayName);
 
         public void ShowWinPanel(CancellationTokenSource cancellationTokenSource) {

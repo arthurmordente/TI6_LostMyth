@@ -67,6 +67,11 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
         [Tooltip("Custos das 4 skills do Book.")]
         [SerializeField] private List<TMP_Text> _bookSkillCostTexts = new List<TMP_Text>(4);
 
+        [Header("Skill Icons (Optional — filhos dos botões)")]
+        [Tooltip("Image de ícone por slot (ordem 0–3). Preenchido a partir de SkillDataSO.Icon ao refrescar o loadout.")]
+        [SerializeField] private List<Image> _erzaSkillIconImages = new List<Image>(4);
+        [SerializeField] private List<Image> _bookSkillIconImages = new List<Image>(4);
+
         [Header("Buttons")]
         [SerializeField] private Button _nextTurnButton;
         [Tooltip("Abre o menu de pausa (mesmo que ESC / PauseGameplayInputCommand).")]
@@ -351,6 +356,28 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
             _showBookSkillsTheme = showBookSkillsTheme;
             if (_erzaSkillsBackground != null) _erzaSkillsBackground.SetActive(!showBookSkillsTheme);
             if (_bookSkillsBackground != null) _bookSkillsBackground.SetActive(showBookSkillsTheme);
+        }
+
+        public void SetSkillHudIcons(Sprite erza0, Sprite erza1, Sprite erza2, Sprite erza3, Sprite book0, Sprite book1, Sprite book2, Sprite book3)
+        {
+            ApplySkillIconsToList(_erzaSkillIconImages, erza0, erza1, erza2, erza3);
+            ApplySkillIconsToList(_bookSkillIconImages, book0, book1, book2, book3);
+        }
+
+        private static void ApplySkillIconsToList(List<Image> icons, Sprite s0, Sprite s1, Sprite s2, Sprite s3)
+        {
+            if (icons == null || icons.Count == 0) return;
+            SetIconAt(icons, 0, s0);
+            SetIconAt(icons, 1, s1);
+            SetIconAt(icons, 2, s2);
+            SetIconAt(icons, 3, s3);
+        }
+
+        private static void SetIconAt(List<Image> icons, int index, Sprite sprite)
+        {
+            var img = At(icons, index);
+            if (img == null) return;
+            img.sprite = sprite;
         }
 
         /// <inheritdoc />

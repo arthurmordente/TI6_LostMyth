@@ -737,6 +737,16 @@ MonoBehaviour:
   - {fileID: 4252682214339767165}
   - {fileID: 3116038056375349554}
   - {fileID: 9022810465114266850}
+  _erzaSkillIconImages:
+  - {fileID: 4259036094002830014}
+  - {fileID: 445081732885062917}
+  - {fileID: 6573711492825840963}
+  - {fileID: 9088207682119262973}
+  _bookSkillIconImages:
+  - {fileID: 1551434018103061729}
+  - {fileID: 1708099758393576638}
+  - {fileID: 7683431006273001046}
+  - {fileID: 1632195087483947725}
   _nextTurnButton: {fileID: 6504937704079459649}
   _openPauseMenuButton: {fileID: 6016730986814255712}
   _firstTurnPassTurnHintDelaySeconds: 5
