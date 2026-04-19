@@ -1,4 +1,5 @@
 using CoreDomain.GameDomain.GameStateDomain.GamePlayDomain.Scripts.Commands.StartLevel;
+using Logic.Scripts.GameDomain.Exploration;
 using Logic.Scripts.GameDomain.GameInputActions;
 using Logic.Scripts.GameDomain.MVC.Nara;
 using Logic.Scripts.Services.CommandFactory;
@@ -31,6 +32,7 @@ public class StartExplorationStateCommand : BaseCommand, ICommandAsync {
 
     public async Awaitable Execute(CancellationTokenSource cancellationTokenSource) {
         _gameInputActionsController.RegisterExplorationInputListeners();
+        ExplorationInteractInputGate.Push();
         await _commandFactory.CreateCommandAsync<StartLevelCommand>().Execute(cancellationTokenSource);
         _naraController.InitEntryPointExploration();
         _customizeUIController.InitEntryPoint();

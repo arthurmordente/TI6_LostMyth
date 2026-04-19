@@ -6,6 +6,7 @@ using Logic.Scripts.Services.CommandFactory;
 using Logic.Scripts.Services.StateMachineService;
 using System.Threading;
 using UnityEngine;
+using Zenject;
 
 namespace Logic.Scripts.GameDomain.MVC.Ui {
     public class GamePlayUiController : IGamePlayUiController {
@@ -18,10 +19,14 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
         private readonly GameOverUIView _gameOverUIView;
         private readonly IUniversalUIController _universalUIController;
         private readonly ICommandFactory _commandFactory;
+        private readonly ILevelsDataService _levelsDataService;
+        private readonly IGamePlayDataService _gamePlayDataService;
 
         public GamePlayUiController(IStateMachineService stateMachineService, ExplorationState.Factory explorationStateFactory,
             IUICameraController uiCameraController, IGamePlayHudView gamePlayHud, IAudioService audioService, PauseUiView pauseUiView,
-            IUniversalUIController universalUIController, ICommandFactory commandFactory, GameOverUIView gameOverUIView) {
+            IUniversalUIController universalUIController, ICommandFactory commandFactory, GameOverUIView gameOverUIView,
+            [InjectOptional] ILevelsDataService levelsDataService = null,
+            [InjectOptional] IGamePlayDataService gamePlayDataService = null) {
             _stateMachineService = stateMachineService;
             _explorationStateFactory = explorationStateFactory;
             _uiCameraController = uiCameraController;
@@ -31,6 +36,8 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
             _universalUIController = universalUIController;
             _commandFactory = commandFactory;
             _gameOverUIView = gameOverUIView;
+            _levelsDataService = levelsDataService;
+            _gamePlayDataService = gamePlayDataService;
         }
 
         public void InitEntryPoint() {
@@ -39,13 +46,31 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
                 _universalUIController.ShowLoadScreen, _universalUIController.ShowCheatsScreen, ResumeGame, BackToLobby);
             _gamePlayHud.InitStartPoint();
             _gamePlayHud.RegisterCallbacks(OnClickNextTurn, OnClickAbility1, OnClickAbility2, OnClickAbility3, OnClickAbility4);
+            _gamePlayHud.RegisterOpenPauseMenuCallback(OnOpenPauseMenu);
+            SyncBossHudNameFromCurrentLevel();
             _gameOverUIView.InitEntryPoint();
             _gameOverUIView.RegisterCallbacks(OnClickPlayAgain, OnClickPlayAgain, BackToLobby);
+        }
+
+        /// <summary>
+        /// HUD boss title from <see cref="LevelTurnData"/>: per-level <c>bossHudDisplayName</c>, else <see cref="Logic.Scripts.GameDomain.MVC.Boss.BossConfigurationSO.BossDisplayName"/>.
+        /// Matches the string bound into <see cref="Logic.Scripts.GameDomain.MVC.Boss.BossController"/> via <see cref="LoadLevelCommand.SetBoss"/>.
+        /// </summary>
+        private void SyncBossHudNameFromCurrentLevel() {
+            if (_levelsDataService == null || _gamePlayDataService == null) return;
+            int levelNumber = _gamePlayDataService.CurrentLevelNumber;
+            if (_levelsDataService.GetLevelData(levelNumber) is not LevelTurnData turnData) return;
+            string display = turnData.GetEffectiveBossHudDisplayName();
+            if (string.IsNullOrWhiteSpace(display)) return;
+            _gamePlayHud.OnBossDisplayNameChange(display.Trim());
         }
         #region GameplayUiInputs
         public void OnClickNextTurn() {
             _commandFactory.CreateCommandVoid<CompletePlayerActionCommand>().Execute();
         }
+
+        private void OnOpenPauseMenu() =>
+            _commandFactory.CreateCommandVoid<PauseGameplayInputCommand>().Execute();
 
         public void OnClickAbility1() {
             _commandFactory.CreateCommandVoid<UseAbility1InputCommand>().Execute();
@@ -155,6 +180,11 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
 
         public void PlayPlayerTurnAnnouncement(int turnNumber) =>
             _gamePlayHud.PlayPlayerTurnAnnouncement(turnNumber);
+
+        public void BeginFirstTurnPassTurnHint(int fightTurnNumber) =>
+            _gamePlayHud.BeginFirstTurnPassTurnHint(fightTurnNumber);
+
+        public void EndFirstTurnPassTurnHint() => _gamePlayHud.EndFirstTurnPassTurnHint();
 
     }
 }

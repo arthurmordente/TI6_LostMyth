@@ -738,6 +738,11 @@ MonoBehaviour:
   - {fileID: 3116038056375349554}
   - {fileID: 9022810465114266850}
   _nextTurnButton: {fileID: 6504937704079459649}
+  _openPauseMenuButton: {fileID: 6016730986814255712}
+  _firstTurnPassTurnHintDelaySeconds: 5
+  _firstTurnPassTurnBobIntervalSeconds: 1
+  _firstTurnPassTurnBobOffsetPixels: 10
+  _firstTurnPassTurnBobHalfDuration: 0.15
   _skill1Button: {fileID: 0}
   _skill2Button: {fileID: 0}
   _skill3Button: {fileID: 0}

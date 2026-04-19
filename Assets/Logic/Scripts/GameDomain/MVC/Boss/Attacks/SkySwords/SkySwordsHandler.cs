@@ -35,9 +35,11 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.SkySwords
 		private readonly Material _lineMaterial;
 		private readonly Material _meshMaterial;
 		private readonly GameObject _telegraphDiscPrefab;
+		/// <summary>XZ scale for catalog disc when mesh at scale 1 spans the arena (radius = ref half-extent).</summary>
+		private readonly float _catalogDiscUniformScaleXZ;
 		private GameObject _catalogDiscInstance;
 
-		public SkySwordsHandler(float radius, float ringWidth, bool isPull, bool telegraphDisplacementEnabled, Material lineMaterial, Material meshMaterial, GameObject telegraphDiscPrefab = null)
+		public SkySwordsHandler(float radius, float ringWidth, bool isPull, bool telegraphDisplacementEnabled, Material lineMaterial, Material meshMaterial, GameObject telegraphDiscPrefab = null, float catalogDiscUniformScaleXZ = -1f)
 		{
 			_radius = Mathf.Max(0.1f, radius);
 			_ringWidth = Mathf.Max(0.02f, ringWidth);
@@ -46,6 +48,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.SkySwords
 			_lineMaterial = lineMaterial;
 			_meshMaterial = meshMaterial;
 			_telegraphDiscPrefab = telegraphDiscPrefab;
+			_catalogDiscUniformScaleXZ = catalogDiscUniformScaleXZ > 0f ? catalogDiscUniformScaleXZ : _radius;
 		}
 
 		public void PrepareTelegraph(Transform parentTransform)
@@ -74,8 +77,8 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.SkySwords
 				_catalogDiscInstance.transform.SetPositionAndRotation(
 					new Vector3(_centerWorld.x, _yOffset, _centerWorld.z),
 					Quaternion.identity);
-				float r = Mathf.Max(0.001f, _radius);
-				_catalogDiscInstance.transform.localScale = new Vector3(r, 1f, r);
+				float s = Mathf.Max(0.001f, _catalogDiscUniformScaleXZ);
+				_catalogDiscInstance.transform.localScale = new Vector3(s, 1f, s);
 				var mrs = _catalogDiscInstance.GetComponentsInChildren<MeshRenderer>(true);
 				for (int mi = 0; mi < mrs.Length; mi++)
 				{

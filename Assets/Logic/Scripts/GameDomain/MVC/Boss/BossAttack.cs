@@ -43,7 +43,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
         [SerializeField] private ProteanConesParams _protean = new ProteanConesParams { radius = 3f, angleDeg = 60f, sides = 36 };
         [SerializeField] private ProteanConesParams _wingSlash = new ProteanConesParams { radius = 4f, angleDeg = 215f, sides = 48 };
 
-        [SerializeField] private FeatherLinesParams _feather = new FeatherLinesParams { featherCount = 3, axisMode = FeatherAxisMode.XZ, width = 2f, margin = 5f, forceBase = 2f, forcePerMeter = 0.4f, forcePerDebuff = 0.5f };
+        [SerializeField] private FeatherLinesParams _feather = new FeatherLinesParams { featherCount = 3, axisMode = FeatherAxisMode.XZ, stripHalfExtent = 0f, telegraphStripUniformScale = 1f, width = 2f, margin = 5f, forceBase = 2f, forcePerMeter = 0.4f, forcePerDebuff = 0.5f };
 
         [Header("Feather Visuals")]
         [SerializeField] private bool _featherIsPull = false;
@@ -88,6 +88,9 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
         [FormerlySerializedAs("_hocariAttackVisualId")]
         [SerializeField] private HokariBossAttackVisualId _hokariAttackVisualId;
 
+        [Tooltip("Distance from arena center to edge (meters). Catalog meshes use scale 1 = full arena: SkySwords disc XZ scale = SkySwords.radius / this; Feather strip half-length uses FeatherLines.stripHalfExtent when > 0, else this.")]
+        [SerializeField] private float _hokariArenaTelegraphHalfExtent = 10f;
+
         private ArenaPosReference _arena;
         private IEffectable _caster;
         private IBossAttackHandler _handler;
@@ -96,6 +99,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
         private ICommandFactory _commandFactory;
         [Zenject.Inject(Optional = true)] private Logic.Scripts.GameDomain.MVC.Boss.Telegraph.ITelegraphMaterialProvider _telegraphProvider;
         [Zenject.Inject(Optional = true)] private CombatAttackVisualCatalogSO _attackVisualCatalog;
+        private CombatAttackVisualCatalogSO _resolvedCombatAttackVisualCatalog;
 
         private IAudioService _audio;
         [Header("Laki Minigame (legacy)")]
@@ -364,7 +368,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
                 case AttackType.ProteanCones:
                 {
                     float[] yaws = new float[] { 0f, 90f, 180f, 270f };
-                    _handler = new ConeAttackHandler(_protean.radius, _protean.angleDeg, _protean.sides, yaws, lineBase ?? meshBase, meshBase, ResolveVisualPrefabForDisplacement(false));
+                    _handler = new ConeAttackHandler(_protean.radius, _protean.angleDeg, _protean.sides, yaws, lineBase ?? meshBase, meshBase, ResolveVisualPrefabForDisplacement(false), ResolveConeTelegraphUniformScale());
                     break;
                 }
                 case AttackType.Circle:
@@ -386,13 +390,25 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
                 case AttackType.FeatherLines:
                 {
                     GameObject colN = null, colPull = null, colPush = null;
-                    if (_attackVisualCatalog != null)
+                    GameObject telN = null, telPull = null, telPush = null;
+                    var catalog = GetCombatAttackVisualCatalog();
+                    if (catalog != null)
                     {
-                        colN = _attackVisualCatalog.GetFeatherColumnPrefab(false, false);
-                        colPull = _attackVisualCatalog.GetFeatherColumnPrefab(true, false);
-                        colPush = _attackVisualCatalog.GetFeatherColumnPrefab(false, true);
+                        colN = catalog.GetFeatherColumnPrefab(false, false);
+                        colPull = catalog.GetFeatherColumnPrefab(true, false);
+                        colPush = catalog.GetFeatherColumnPrefab(false, true);
+                        var featherVid = ResolveCatalogVisualId();
+                        if (featherVid != HokariBossAttackVisualId.None)
+                        {
+                            telN = catalog.GetTelegraph(featherVid, false, false);
+                            telPull = catalog.GetTelegraph(featherVid, true, false);
+                            telPush = catalog.GetTelegraph(featherVid, false, true);
+                        }
                     }
-                    _handler = new FeatherLinesHandler(_feather, _featherIsPull, lineBase ?? meshBase, lineDisp ?? meshDisp, meshBase, meshDisp, colN, colPull, colPush);
+                    var featherParams = _feather;
+                    if (featherParams.stripHalfExtent <= 0f)
+                        featherParams.stripHalfExtent = _hokariArenaTelegraphHalfExtent;
+                    _handler = new FeatherLinesHandler(featherParams, _featherIsPull, lineBase ?? meshBase, lineDisp ?? meshDisp, meshBase, meshDisp, colN, colPull, colPush, telN, telPull, telPush);
                     break;
                 }
                 case AttackType.WingSlash:
@@ -423,7 +439,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
                     }
                     catch { yawBase = -90f; }
                     float[] yaws = new float[] { yawBase };
-                    _handler = new ConeAttackHandler(_wingSlash.radius, angleAbs, _wingSlash.sides, yaws, lineBase ?? meshBase, meshBase, ResolveVisualPrefabForDisplacement(_telegraphDisplacementEnabled));
+                    _handler = new ConeAttackHandler(_wingSlash.radius, angleAbs, _wingSlash.sides, yaws, lineBase ?? meshBase, meshBase, ResolveVisualPrefabForDisplacement(_telegraphDisplacementEnabled), ResolveConeTelegraphUniformScale());
                     break;
                 }
                 case AttackType.Orb:
@@ -436,6 +452,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
                     // Materiais específicos (line/mesh) resolvidos com displacement flag (para Grapple/Knockback/Normal)
                     Material ssLine = ResolveTelegraphLineMaterialFor(_telegraphDisplacementEnabled);
                     Material ssMesh = ResolveTelegraphMeshMaterialFor(_telegraphDisplacementEnabled);
+                    const float skyDiscScale = 0.3f;
                     _handler = new Logic.Scripts.GameDomain.MVC.Boss.Attacks.SkySwords.SkySwordsHandler(
                         _skySwords.radius,
                         _skySwords.ringWidth,
@@ -443,7 +460,8 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
                         _telegraphDisplacementEnabled,
                         ssLine,
                         ssMesh,
-                        ResolveVisualPrefabForDisplacement(_telegraphDisplacementEnabled));
+                        ResolveVisualPrefabForDisplacement(_telegraphDisplacementEnabled),
+                        skyDiscScale);
                     break;
                 }
                 default:
@@ -619,10 +637,44 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
             }
         }
 
+        private CombatAttackVisualCatalogSO GetCombatAttackVisualCatalog()
+        {
+            if (_attackVisualCatalog != null) return _attackVisualCatalog;
+            if (_resolvedCombatAttackVisualCatalog != null) return _resolvedCombatAttackVisualCatalog;
+            try
+            {
+                var sceneCtxs = Object.FindObjectsByType<Zenject.SceneContext>(FindObjectsSortMode.None);
+                for (int i = 0; i < sceneCtxs.Length; i++)
+                {
+                    var sc = sceneCtxs[i];
+                    if (sc == null || sc.gameObject.scene != gameObject.scene) continue;
+                    try
+                    {
+                        _resolvedCombatAttackVisualCatalog = sc.Container.Resolve<CombatAttackVisualCatalogSO>();
+                        return _resolvedCombatAttackVisualCatalog;
+                    }
+                    catch { }
+                }
+            }
+            catch { }
+            return null;
+        }
+
+        /// <summary>Prefab mesh at scale 1 fills arena; small multi-cone = 0.5, large single cone = 1.</summary>
+        private float ResolveConeTelegraphUniformScale()
+        {
+            if (_attackType == AttackType.WingSlash
+                || _hokariAttackVisualId == HokariBossAttackVisualId.BigWindSlash
+                || _hokariAttackVisualId == HokariBossAttackVisualId.BigCones)
+                return 1f;
+            return 0.5f;
+        }
+
         /// <summary>Telegraph prefab from catalog row Orb or BigOrb (Pull/Push from effects when telegraph displacement is enabled). Used as <see cref="OrbView"/> AoE mesh; if null, disc stays procedural.</summary>
         private GameObject ResolveOrbAreaVisualPrefabFromCatalog()
         {
-            if (_attackVisualCatalog == null) return null;
+            var catalog = GetCombatAttackVisualCatalog();
+            if (catalog == null) return null;
             bool hasGrapple = false;
             bool hasKnock = false;
             if (_telegraphDisplacementEnabled && _effects != null)
@@ -638,7 +690,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
             var row = _hokariAttackVisualId == HokariBossAttackVisualId.BigOrb
                 ? HokariBossAttackVisualId.BigOrb
                 : HokariBossAttackVisualId.Orb;
-            return _attackVisualCatalog.GetTelegraph(row, hasGrapple, hasKnock);
+            return catalog.GetTelegraph(row, hasGrapple, hasKnock);
         }
 
         private HokariBossAttackVisualId ResolveCatalogVisualId()
@@ -651,13 +703,15 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
                 AttackType.WingSlash => HokariBossAttackVisualId.WingSlash,
                 AttackType.SkySwords => HokariBossAttackVisualId.SkySwords,
                 AttackType.Circle => HokariBossAttackVisualId.Circle,
+                AttackType.FeatherLines => HokariBossAttackVisualId.XZFeatherG,
                 _ => HokariBossAttackVisualId.None,
             };
         }
 
         private GameObject ResolveVisualPrefabForDisplacement(bool displacementEnabled)
         {
-            if (_attackVisualCatalog == null) return null;
+            var catalog = GetCombatAttackVisualCatalog();
+            if (catalog == null) return null;
             bool hasGrapple = false;
             bool hasKnock = false;
             if (displacementEnabled && _effects != null)
@@ -673,7 +727,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
 
             var vid = ResolveCatalogVisualId();
             if (vid == HokariBossAttackVisualId.None) return null;
-            return _attackVisualCatalog.GetTelegraph(vid, hasGrapple, hasKnock);
+            return catalog.GetTelegraph(vid, hasGrapple, hasKnock);
         }
     }
 }
