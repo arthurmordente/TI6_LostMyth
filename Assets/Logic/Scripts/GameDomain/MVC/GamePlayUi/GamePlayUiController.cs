@@ -1,5 +1,6 @@
 using Logic.Scripts.Core.Mvc.UICamera;
 using Logic.Scripts.GameDomain.Commands;
+using Logic.Scripts.GameDomain.MVC.Echo;
 using Logic.Scripts.GameDomain.States;
 using Logic.Scripts.Services.AudioService;
 using Logic.Scripts.Services.CommandFactory;
@@ -21,12 +22,14 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
         private readonly ICommandFactory _commandFactory;
         private readonly ILevelsDataService _levelsDataService;
         private readonly IGamePlayDataService _gamePlayDataService;
+        private readonly ICloneUseLimiter _cloneUseLimiter;
 
         public GamePlayUiController(IStateMachineService stateMachineService, ExplorationState.Factory explorationStateFactory,
             IUICameraController uiCameraController, IGamePlayHudView gamePlayHud, IAudioService audioService, PauseUiView pauseUiView,
             IUniversalUIController universalUIController, ICommandFactory commandFactory, GameOverUIView gameOverUIView,
             [InjectOptional] ILevelsDataService levelsDataService = null,
-            [InjectOptional] IGamePlayDataService gamePlayDataService = null) {
+            [InjectOptional] IGamePlayDataService gamePlayDataService = null,
+            [InjectOptional] ICloneUseLimiter cloneUseLimiter = null) {
             _stateMachineService = stateMachineService;
             _explorationStateFactory = explorationStateFactory;
             _uiCameraController = uiCameraController;
@@ -38,6 +41,7 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
             _gameOverUIView = gameOverUIView;
             _levelsDataService = levelsDataService;
             _gamePlayDataService = gamePlayDataService;
+            _cloneUseLimiter = cloneUseLimiter;
         }
 
         public void InitEntryPoint() {
@@ -176,7 +180,15 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
 
         public void OnSkill2NameChange(string newValue) => _gamePlayHud.OnSkill2NameChange(newValue);
 
-        public void ShowBookSkillsTheme(bool showBookSkillsTheme) => _gamePlayHud.ShowBookSkillsTheme(showBookSkillsTheme);
+        public void ShowBookSkillsTheme(bool showBookSkillsTheme) {
+            _gamePlayHud.ShowBookSkillsTheme(showBookSkillsTheme);
+            SyncBookCloneActionHud();
+        }
+
+        public void SyncBookCloneActionHud() {
+            if (_cloneUseLimiter == null) return;
+            _gamePlayHud.SetBookCloneActionAvailable(_cloneUseLimiter.CanUse());
+        }
 
         public void SetSkillsSlidableExpanded(bool expanded, bool instant = false) =>
             _gamePlayHud.SetSkillsSlidableExpanded(expanded, instant);

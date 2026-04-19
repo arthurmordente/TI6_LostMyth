@@ -1,3 +1,5 @@
+using UnityEngine;
+
 namespace Logic.Scripts.GameDomain.MVC.Nara {
     public class NaraData {
         private readonly NaraConfigurationSO _naraSO;
@@ -19,6 +21,10 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
 
         public void ResetPreview() {
             PreviewHealth = ActualHealth;
+        }
+
+        public void ApplyPreviewHeal(int healAmount) {
+            PreviewHealth = Mathf.Min(_naraSO.MaxHealth, ActualHealth + healAmount);
         }
 
         public void TakeDamage(int damageAmound) {

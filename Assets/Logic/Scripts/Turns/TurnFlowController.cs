@@ -140,6 +140,7 @@ namespace Logic.Scripts.Turns {
             // Garantir que todos os telegraphs preparados estejam visíveis para o jogador
             Logic.Scripts.GameDomain.MVC.Boss.Telegraph.TelegraphVisibilityRegistry.SetAllVisible(true);
 			_cloneUseLimiter?.ResetForPlayerTurn();
+            _gamePlayUiController?.SyncBookCloneActionHud();
             // Tick divide ability cooldown and grant Book its AP for this turn
             _divideAbilityHandler?.OnPlayerTurnStart();
             LogService.Log($"Turno {_turnNumber} - Fase: PlayerAct");

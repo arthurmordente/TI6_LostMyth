@@ -146,9 +146,9 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
             _gamePlayUiController.OnPreviewPlayerHealthUpdate(_naraData.ActualHealth, _naraConfiguration.MaxHealth);
         }
 
-        public void PreviewHeal(int damageAmound) {
-            _naraData.TakeDamage(damageAmound);
-            _gamePlayUiController.OnPreviewPlayerHealthUpdate(_naraData.ActualHealth, _naraConfiguration.MaxHealth);
+        public void PreviewHeal(int healAmount) {
+            _naraData.ApplyPreviewHeal(healAmount);
+            _gamePlayUiController.OnPreviewPlayerHealthUpdate(_naraData.PreviewHealth, _naraConfiguration.MaxHealth);
         }
 
         public void TakeDamage(int damageAmound) {
@@ -177,7 +177,9 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
 
         public void Heal(int healAmount) {
             _naraData.Heal(healAmount);
+            _naraData.ResetPreview();
             _gamePlayUiController.OnPlayerHealthUpdate(_naraData.ActualHealth, _naraConfiguration.MaxHealth);
+            _gamePlayUiController.OnPreviewPlayerHealthUpdate(_naraData.ActualHealth, _naraConfiguration.MaxHealth);
         }
 
         public void TriggerExecute() {

@@ -2,6 +2,7 @@ using Logic.Scripts.GameDomain.MVC.Book;
 using Logic.Scripts.GameDomain.MVC.Echo;
 using Logic.Scripts.GameDomain.MVC.Nara;
 using Logic.Scripts.GameDomain.MVC.Shared;
+using Logic.Scripts.GameDomain.MVC.Ui;
 using Logic.Scripts.Services.AudioService;
 using Logic.Scripts.Services.CommandFactory;
 using Logic.Scripts.Services.UpdateService;
@@ -17,6 +18,7 @@ public class CastController : ICastController {
     // resolved yet on the very first ability use.
     private readonly IActionPointsService _naraActionPointsService;
     private readonly ICloneUseLimiter _cloneUseLimiter;
+    private readonly IGamePlayUiController _gamePlayUiController;
 
     private IPlayableUnit _currentCaster;
     private ISkillCastFlow _activeFlow;
@@ -33,12 +35,14 @@ public class CastController : ICastController {
     public CastController(IUpdateSubscriptionService updateSubscriptionService, ICommandFactory commandFactory,
         IActionPointsService actionPointsService, ICheatController cheatController,
         PaschoalDefaultSkillCastFlow paschoalSkillCastFlow,
-        [InjectOptional] ICloneUseLimiter cloneUseLimiter = null) {
+        [InjectOptional] ICloneUseLimiter cloneUseLimiter = null,
+        [InjectOptional] IGamePlayUiController gamePlayUiController = null) {
         _subscriptionService = updateSubscriptionService;
         _commandFactory = commandFactory;
         _naraActionPointsService = actionPointsService;
         _cheatController = cheatController;
         _cloneUseLimiter = cloneUseLimiter;
+        _gamePlayUiController = gamePlayUiController;
         _legacyFlow = new LegacySkillCastFlow(_subscriptionService, _commandFactory);
         _paschoalFlow = paschoalSkillCastFlow;
         try { _audio = ProjectContext.Instance.Container.Resolve<IAudioService>(); } catch { _audio = null; }
@@ -108,8 +112,10 @@ public class CastController : ICastController {
             ap?.Spend(_currentAbilityCost);
         }
 
-        if (caster is IBookController && !_cheatController.InfinityCast)
+        if (caster is IBookController && !_cheatController.InfinityCast) {
             _cloneUseLimiter?.MarkUsed();
+            _gamePlayUiController?.SyncBookCloneActionHud();
+        }
 
         caster?.TriggerExecute();
         PlayUsedSfxByIndex(_currentAbilityIndex);

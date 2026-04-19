@@ -37,6 +37,9 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
         void OnSkill2NameChange(string name);
         void ShowBookSkillsTheme(bool showBookSkillsTheme);
 
+        /// <summary>Livro: custo universal (um uso/turno) — fill 0–1 animado + texto opcional 0/1.</summary>
+        void SetBookCloneActionAvailable(bool available);
+
         /// <summary>Ícones dos 4 slots no HUD (sprites vindos de <c>SkillDataSO.Icon</c>). Null limpa o slot.</summary>
         void SetSkillHudIcons(Sprite erza0, Sprite erza1, Sprite erza2, Sprite erza3, Sprite book0, Sprite book1, Sprite book2, Sprite book3);
 

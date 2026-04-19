@@ -41,6 +41,9 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
         void OnSkill2NameChange(string newValue);
         void ShowBookSkillsTheme(bool showBookSkillsTheme);
 
+        /// <summary>Sincroniza o frasco 0/1 do clone com <see cref="Logic.Scripts.GameDomain.MVC.Echo.ICloneUseLimiter"/>.</summary>
+        void SyncBookCloneActionHud();
+
         /// <inheritdoc cref="IGamePlayHudView.SetSkillsSlidableExpanded"/>
         void SetSkillsSlidableExpanded(bool expanded, bool instant = false);
 

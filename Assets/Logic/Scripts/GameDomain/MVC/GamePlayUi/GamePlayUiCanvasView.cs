@@ -49,6 +49,18 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
         [SerializeField] private Image _playerApFillImage;
         [SerializeField] private TMP_Text _playerActionPointsText;
 
+        [Header("Mana flask — Nara (jogador)")]
+        [Tooltip("Root do ManaFlask da Nara. O Button já deve ser o _toggleButton / _expandButton do _skillsSlidablePanel no Inspector — não duplicar listener em código.")]
+        [SerializeField] private GameObject _naraManaFlaskRoot;
+
+        [Header("Mana flask — Livro (custo universal 0→1)")]
+        [Tooltip("Cópia do frasco do Livro: Button no root; o script só liga este ao Toggle de _skillsSlidablePanel (o da Nara já vem do UiSlidableAnchoredPanel).")]
+        [SerializeField] private GameObject _bookManaFlaskRoot;
+        [Tooltip("Image do líquido do Livro — fillAmount 0 a 1, animado conforme ICloneUseLimiter (1 = ação disponível, 0 = já usou). Mesmo tipo/Fill Method que o ManaFlask_Fill da Nara.")]
+        [SerializeField] private Image _bookUniversalActionFillImage;
+        [Tooltip("Opcional. Mostra 0 ou 1 alinhado ao limite de uma skill por turno (custos dos slots do Livro no HUD ficam em 0).")]
+        [SerializeField] private TMP_Text _bookUniversalActionText;
+
         [Header("Skills Theme Roots")]
         [Tooltip("Background completo das skills da Nara/Erza. O codigo resolve o filho 'container' e os 4 botoes.")]
         [SerializeField] private GameObject _erzaSkillsBackground;
@@ -136,10 +148,12 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
                 SetDiceScoreAreaActive(false);
 
             ResetTurnAnnouncementHiddenImmediate();
+            WireManaFlaskButtonsToSkillsSlidable();
         }
 
         private void OnDestroy()
         {
+            UnwireManaFlaskButtonsFromSkillsSlidable();
             KillTurnAnnouncementSequence();
             EndFirstTurnPassTurnHint();
         }
@@ -354,8 +368,30 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
         public void ShowBookSkillsTheme(bool showBookSkillsTheme)
         {
             _showBookSkillsTheme = showBookSkillsTheme;
+            if (_naraManaFlaskRoot != null)
+                _naraManaFlaskRoot.SetActive(!showBookSkillsTheme);
+            if (_bookManaFlaskRoot != null)
+                _bookManaFlaskRoot.SetActive(showBookSkillsTheme);
             if (_erzaSkillsBackground != null) _erzaSkillsBackground.SetActive(!showBookSkillsTheme);
             if (_bookSkillsBackground != null) _bookSkillsBackground.SetActive(showBookSkillsTheme);
+        }
+
+        /// <inheritdoc />
+        public void SetBookCloneActionAvailable(bool available)
+        {
+            SetIntText(_bookUniversalActionText, available ? 1 : 0);
+
+            if (_bookUniversalActionFillImage == null) return;
+
+            DOTween.Kill(_bookUniversalActionFillImage, true);
+            float target = available ? 1f : 0f;
+            float v = _bookUniversalActionFillImage.fillAmount;
+            DOTween.To(() => v, x =>
+            {
+                v = x;
+                if (_bookUniversalActionFillImage != null)
+                    _bookUniversalActionFillImage.fillAmount = Mathf.Clamp01(x);
+            }, target, _tweenDuration).SetEase(_tweenEase).SetTarget(_bookUniversalActionFillImage);
         }
 
         public void SetSkillHudIcons(Sprite erza0, Sprite erza1, Sprite erza2, Sprite erza3, Sprite book0, Sprite book1, Sprite book2, Sprite book3)
@@ -383,6 +419,37 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
         /// <inheritdoc />
         public void SetSkillsSlidableExpanded(bool expanded, bool instant = false) =>
             _skillsSlidablePanel?.SetExpanded(expanded, instant);
+
+        private void WireManaFlaskButtonsToSkillsSlidable()
+        {
+            if (_skillsSlidablePanel == null) return;
+            // Só o frasco do Livro: o da Nara já é o mesmo Button referenciado em UiSlidableAnchoredPanel (_toggleButton);
+            // adicionar listener aqui causava Toggle duplo (abrir e fechar no mesmo clique).
+            TryAddManaFlaskToggleListener(_bookManaFlaskRoot);
+        }
+
+        private void UnwireManaFlaskButtonsFromSkillsSlidable()
+        {
+            TryRemoveManaFlaskToggleListener(_bookManaFlaskRoot);
+        }
+
+        private void TryAddManaFlaskToggleListener(GameObject flaskRoot)
+        {
+            if (flaskRoot == null) return;
+            var button = flaskRoot.GetComponent<Button>();
+            if (button == null) return;
+            button.onClick.AddListener(OnManaFlaskClickedToggleSkillsSlidable);
+        }
+
+        private void TryRemoveManaFlaskToggleListener(GameObject flaskRoot)
+        {
+            if (flaskRoot == null) return;
+            var button = flaskRoot.GetComponent<Button>();
+            if (button == null) return;
+            button.onClick.RemoveListener(OnManaFlaskClickedToggleSkillsSlidable);
+        }
+
+        private void OnManaFlaskClickedToggleSkillsSlidable() => _skillsSlidablePanel?.Toggle();
 
         /// <inheritdoc />
         public void BeginFirstTurnPassTurnHint(int fightTurnNumber)

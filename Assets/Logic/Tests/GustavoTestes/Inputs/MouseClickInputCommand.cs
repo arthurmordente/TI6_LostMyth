@@ -1,6 +1,7 @@
 using Logic.Scripts.GameDomain.MVC.Book.Divide;
 using Logic.Scripts.GameDomain.Services.ActiveUnit;
 using Logic.Scripts.Services.CommandFactory;
+using UnityEngine.EventSystems;
 
 public class MouseClickInputCommand : BaseCommand, ICommandVoid {
     private IActiveUnitService _activeUnitService;
@@ -19,6 +20,10 @@ public class MouseClickInputCommand : BaseCommand, ICommandVoid {
             _divideAbilityHandler.ConfirmPlacement();
             return;
         }
+
+        // Mesmo clique do botão de skill no canvas não deve confirmar o cast — só prepara; confirma num clique no jogo.
+        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+            return;
 
         // Otherwise, confirm the currently aimed ability for the active unit
         var caster = _activeUnitService?.ActiveUnit;
