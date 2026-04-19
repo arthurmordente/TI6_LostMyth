@@ -83,6 +83,7 @@ namespace Logic.Scripts.Turns {
             _phase = TurnPhase.None;
             _actionPointsService.Reset();
             _turnStateService.ExitTurnMode();
+            _gamePlayUiController?.EndFirstTurnPassTurnHint();
             _gamePlayUiController?.SetSkillsSlidableExpanded(false);
         }
 
@@ -154,11 +155,15 @@ namespace Logic.Scripts.Turns {
                 if (_active && _phase == TurnPhase.PlayerAct && _turnNumber == 1)
                     _gamePlayUiController?.SetSkillsSlidableExpanded(false, instant: true);
             }
+
+            if (_turnNumber == 1)
+                _gamePlayUiController?.BeginFirstTurnPassTurnHint(_turnNumber);
         }
 
         public void SkipTurn() {
             if (!_active || !_waitingPlayer) return;
             _waitingPlayer = false;
+            _gamePlayUiController?.EndFirstTurnPassTurnHint();
             _gamePlayUiController?.SetSkillsSlidableExpanded(false);
             _divideAbilityHandler?.OnPlayerTurnEnd();
             StartEchoPhaseAsync();
@@ -167,6 +172,7 @@ namespace Logic.Scripts.Turns {
         public void CompletePlayerAction() {
             if (!_active || !_waitingPlayer) return;
             _waitingPlayer = false;
+            _gamePlayUiController?.EndFirstTurnPassTurnHint();
             _gamePlayUiController?.SetSkillsSlidableExpanded(false);
             _divideAbilityHandler?.OnPlayerTurnEnd();
             _turnMovement?.ActivateNaraGravity();

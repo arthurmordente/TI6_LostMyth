@@ -10,6 +10,9 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
 
         void RegisterCallbacks(Action onNextTurn, Action onSkill1, Action onSkill2, Action onSkill3, Action onSkill4);
 
+        /// <summary>Opcional. Mesmo fluxo que ESC no gameplay (PauseGameplayInputCommand).</summary>
+        void RegisterOpenPauseMenuCallback(Action onOpenPauseMenu);
+
         /// <summary>Root of the main HUD (for optional anchoring / camera).</summary>
         Transform GetGameplayHudRoot();
 
@@ -34,6 +37,9 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
         void OnSkill2NameChange(string name);
         void ShowBookSkillsTheme(bool showBookSkillsTheme);
 
+        /// <summary>Ícones dos 4 slots no HUD (sprites vindos de <c>SkillDataSO.Icon</c>). Null limpa o slot.</summary>
+        void SetSkillHudIcons(Sprite erza0, Sprite erza1, Sprite erza2, Sprite erza3, Sprite book0, Sprite book1, Sprite book2, Sprite book3);
+
         /// <summary>
         /// Barra de skills (<see cref="UiSlidableAnchoredPanel"/>). TurnFlow: abre após os gates no <c>PlayerAct</c>;
         /// fecha ao concluir / saltar o turno do jogador e nas outras fases. <paramref name="instant"/> ignora o tween.
@@ -42,5 +48,10 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
 
         /// <summary>Anúncio “Turno N” no centro: abre (alpha 0→1 + escala), mantém, fecha (alpha 1→0 + escala).</summary>
         void PlayPlayerTurnAnnouncement(int turnNumber);
+
+        /// <summary>Só <paramref name="fightTurnNumber"/> == 1: após delay, anima o botão passar turno (mesma lógica que DicePromptUI) até <see cref="EndFirstTurnPassTurnHint"/>.</summary>
+        void BeginFirstTurnPassTurnHint(int fightTurnNumber);
+
+        void EndFirstTurnPassTurnHint();
     }
 }

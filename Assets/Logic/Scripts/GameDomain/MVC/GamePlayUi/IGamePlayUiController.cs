@@ -13,6 +13,9 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
         /// <summary>Updates the four skill-slot mana labels from the active unit's ability set.</summary>
         void SetAbilityManaCosts(int c1, int c2, int c3, int c4);
 
+        /// <inheritdoc cref="IGamePlayHudView.SetSkillHudIcons"/>
+        void SetSkillHudIcons(Sprite erza0, Sprite erza1, Sprite erza2, Sprite erza3, Sprite book0, Sprite book1, Sprite book2, Sprite book3);
+
         void OnBossDisplayNameChange(string displayName);
 
         void SnapBossHealth(int hp, int maxHp);
@@ -43,5 +46,11 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
 
         /// <inheritdoc cref="IGamePlayHudView.PlayPlayerTurnAnnouncement"/>
         void PlayPlayerTurnAnnouncement(int turnNumber);
+
+        /// <inheritdoc cref="IGamePlayHudView.BeginFirstTurnPassTurnHint"/>
+        void BeginFirstTurnPassTurnHint(int fightTurnNumber);
+
+        /// <inheritdoc cref="IGamePlayHudView.EndFirstTurnPassTurnHint"/>
+        void EndFirstTurnPassTurnHint();
     }
 }

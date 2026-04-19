@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
 using Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack;
@@ -66,8 +67,21 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
         [Tooltip("Custos das 4 skills do Book.")]
         [SerializeField] private List<TMP_Text> _bookSkillCostTexts = new List<TMP_Text>(4);
 
+        [Header("Skill Icons (Optional — filhos dos botões)")]
+        [Tooltip("Image de ícone por slot (ordem 0–3). Preenchido a partir de SkillDataSO.Icon ao refrescar o loadout.")]
+        [SerializeField] private List<Image> _erzaSkillIconImages = new List<Image>(4);
+        [SerializeField] private List<Image> _bookSkillIconImages = new List<Image>(4);
+
         [Header("Buttons")]
         [SerializeField] private Button _nextTurnButton;
+        [Tooltip("Abre o menu de pausa (mesmo que ESC / PauseGameplayInputCommand).")]
+        [SerializeField] private Button _openPauseMenuButton;
+        [Header("Dica — passar turno (só 1º turno da luta)")]
+        [Tooltip("Igual DicePromptUI: após este delay (unscaled) o botão faz bob vertical até o jogador encerrar o turno.")]
+        [SerializeField] private float _firstTurnPassTurnHintDelaySeconds = 5f;
+        [SerializeField] private float _firstTurnPassTurnBobIntervalSeconds = 1f;
+        [SerializeField] private float _firstTurnPassTurnBobOffsetPixels = 10f;
+        [SerializeField] private float _firstTurnPassTurnBobHalfDuration = 0.15f;
         [SerializeField] private Button _skill1Button;
         [SerializeField] private Button _skill2Button;
         [SerializeField] private Button _skill3Button;
@@ -104,8 +118,16 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
         private bool _showBookSkillsTheme;
         private Sequence _turnAnnouncementSequence;
 
+        private Coroutine _firstTurnPassTurnHintRoutine;
+        private RectTransform _nextTurnButtonRect;
+        private Vector2 _nextTurnButtonAnchoredRestore;
+        private bool _hasNextTurnButtonAnchoredRestore;
+        private bool _firstTurnPassTurnHintRunning;
+
         private void Awake()
         {
+            if (_nextTurnButton != null)
+                _nextTurnButtonRect = _nextTurnButton.transform as RectTransform;
             if (_diceSlidablePanel != null && _diceScoreAreaRoot != null)
                 _diceScoreAreaRoot.SetActive(true);
             if (_diceSlidablePanel != null)
@@ -116,7 +138,11 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
             ResetTurnAnnouncementHiddenImmediate();
         }
 
-        private void OnDestroy() => KillTurnAnnouncementSequence();
+        private void OnDestroy()
+        {
+            KillTurnAnnouncementSequence();
+            EndFirstTurnPassTurnHint();
+        }
 
         private void OnEnable()
         {
@@ -200,6 +226,9 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
             Bind(_skill3Button, onSkill3);
             Bind(_skill4Button, onSkill4);
         }
+
+        public void RegisterOpenPauseMenuCallback(Action onOpenPauseMenu) =>
+            Bind(_openPauseMenuButton, onOpenPauseMenu);
 
         private static void Bind(Button b, Action a)
         {
@@ -329,9 +358,114 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
             if (_bookSkillsBackground != null) _bookSkillsBackground.SetActive(showBookSkillsTheme);
         }
 
+        public void SetSkillHudIcons(Sprite erza0, Sprite erza1, Sprite erza2, Sprite erza3, Sprite book0, Sprite book1, Sprite book2, Sprite book3)
+        {
+            ApplySkillIconsToList(_erzaSkillIconImages, erza0, erza1, erza2, erza3);
+            ApplySkillIconsToList(_bookSkillIconImages, book0, book1, book2, book3);
+        }
+
+        private static void ApplySkillIconsToList(List<Image> icons, Sprite s0, Sprite s1, Sprite s2, Sprite s3)
+        {
+            if (icons == null || icons.Count == 0) return;
+            SetIconAt(icons, 0, s0);
+            SetIconAt(icons, 1, s1);
+            SetIconAt(icons, 2, s2);
+            SetIconAt(icons, 3, s3);
+        }
+
+        private static void SetIconAt(List<Image> icons, int index, Sprite sprite)
+        {
+            var img = At(icons, index);
+            if (img == null) return;
+            img.sprite = sprite;
+        }
+
         /// <inheritdoc />
         public void SetSkillsSlidableExpanded(bool expanded, bool instant = false) =>
             _skillsSlidablePanel?.SetExpanded(expanded, instant);
+
+        /// <inheritdoc />
+        public void BeginFirstTurnPassTurnHint(int fightTurnNumber)
+        {
+            if (fightTurnNumber != 1 || _nextTurnButtonRect == null) return;
+            StopFirstTurnPassTurnHintInternal();
+            _firstTurnPassTurnHintRoutine = StartCoroutine(FirstTurnPassTurnHintRoutine());
+        }
+
+        /// <inheritdoc />
+        public void EndFirstTurnPassTurnHint() => StopFirstTurnPassTurnHintInternal();
+
+        private void StopFirstTurnPassTurnHintInternal()
+        {
+            _firstTurnPassTurnHintRunning = false;
+            if (_firstTurnPassTurnHintRoutine != null)
+            {
+                StopCoroutine(_firstTurnPassTurnHintRoutine);
+                _firstTurnPassTurnHintRoutine = null;
+            }
+            if (_nextTurnButtonRect != null)
+            {
+                DOTween.Kill(_nextTurnButtonRect, false);
+                if (_hasNextTurnButtonAnchoredRestore)
+                    _nextTurnButtonRect.anchoredPosition = _nextTurnButtonAnchoredRestore;
+            }
+            _hasNextTurnButtonAnchoredRestore = false;
+        }
+
+        private IEnumerator FirstTurnPassTurnHintRoutine()
+        {
+            _firstTurnPassTurnHintRunning = true;
+            float threshold = Mathf.Max(0.05f, _firstTurnPassTurnHintDelaySeconds);
+            float idle = 0f;
+            while (idle < threshold && gameObject.activeInHierarchy && _firstTurnPassTurnHintRunning)
+            {
+                idle += Time.unscaledDeltaTime;
+                yield return null;
+            }
+
+            if (!gameObject.activeInHierarchy || !_firstTurnPassTurnHintRunning || _nextTurnButtonRect == null)
+            {
+                _firstTurnPassTurnHintRoutine = null;
+                _firstTurnPassTurnHintRunning = false;
+                yield break;
+            }
+
+            _nextTurnButtonAnchoredRestore = _nextTurnButtonRect.anchoredPosition;
+            _hasNextTurnButtonAnchoredRestore = true;
+            float y0 = _nextTurnButtonAnchoredRestore.y;
+            float half = Mathf.Max(0.02f, _firstTurnPassTurnBobHalfDuration);
+            float bob = _firstTurnPassTurnBobOffsetPixels;
+            float interval = Mathf.Max(half * 2f, _firstTurnPassTurnBobIntervalSeconds);
+
+            while (gameObject.activeInHierarchy && _firstTurnPassTurnHintRunning && _nextTurnButtonRect != null)
+            {
+                var up = _nextTurnButtonRect.DOAnchorPosY(y0 + bob, half)
+                    .SetEase(Ease.OutQuad)
+                    .SetUpdate(true);
+                yield return up.WaitForCompletion(true);
+
+                if (!_firstTurnPassTurnHintRunning) break;
+
+                var down = _nextTurnButtonRect.DOAnchorPosY(y0, half)
+                    .SetEase(Ease.InQuad)
+                    .SetUpdate(true);
+                yield return down.WaitForCompletion(true);
+
+                float waitRemain = interval - 2f * half;
+                if (waitRemain > 0f)
+                {
+                    float w = 0f;
+                    while (w < waitRemain && gameObject.activeInHierarchy && _firstTurnPassTurnHintRunning)
+                    {
+                        w += Time.unscaledDeltaTime;
+                        yield return null;
+                    }
+                }
+            }
+
+            _firstTurnPassTurnHintRoutine = null;
+            _firstTurnPassTurnHintRunning = false;
+        }
 
         /// <inheritdoc />
         public void PlayPlayerTurnAnnouncement(int turnNumber)
