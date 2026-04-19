@@ -37,6 +37,9 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
         void OnSkill2NameChange(string name);
         void ShowBookSkillsTheme(bool showBookSkillsTheme);
 
+        /// <summary>Ícones dos 4 slots no HUD (sprites vindos de <c>SkillDataSO.Icon</c>). Null limpa o slot.</summary>
+        void SetSkillHudIcons(Sprite erza0, Sprite erza1, Sprite erza2, Sprite erza3, Sprite book0, Sprite book1, Sprite book2, Sprite book3);
+
         /// <summary>
         /// Barra de skills (<see cref="UiSlidableAnchoredPanel"/>). TurnFlow: abre após os gates no <c>PlayerAct</c>;
         /// fecha ao concluir / saltar o turno do jogador e nas outras fases. <paramref name="instant"/> ignora o tween.

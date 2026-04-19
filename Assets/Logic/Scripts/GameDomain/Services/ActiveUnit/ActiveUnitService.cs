@@ -36,6 +36,7 @@ namespace Logic.Scripts.GameDomain.Services.ActiveUnit
         {
             if (_gamePlayUiController == null || ActiveUnit == null) return;
             ReloadPaschoalLoadoutForUnit(ActiveUnit);
+            PushPaschoalSkillIconsToHud();
 
             if (ActiveUnit is IBookController)
             {
@@ -67,6 +68,22 @@ namespace Logic.Scripts.GameDomain.Services.ActiveUnit
             var abs = ActiveUnit.GetAbilities();
             int legacyCostAt(int i) => abs != null && i < abs.Length && abs[i] != null ? abs[i].GetCost() : 0;
             _gamePlayUiController.SetAbilityManaCosts(legacyCostAt(0), legacyCostAt(1), legacyCostAt(2), legacyCostAt(3));
+        }
+
+        private void PushPaschoalSkillIconsToHud()
+        {
+            if (_gamePlayUiController == null || _paschoalSkillLoadoutService == null) return;
+            SkillDataSO[] p = _paschoalSkillLoadoutService.BuildRuntimeSlotsArray(SkillLoadoutUnitType.Player);
+            SkillDataSO[] b = _paschoalSkillLoadoutService.BuildRuntimeSlotsArray(SkillLoadoutUnitType.Book);
+            _gamePlayUiController.SetSkillHudIcons(
+                IconFrom(p, 0), IconFrom(p, 1), IconFrom(p, 2), IconFrom(p, 3),
+                IconFrom(b, 0), IconFrom(b, 1), IconFrom(b, 2), IconFrom(b, 3));
+        }
+
+        private static Sprite IconFrom(SkillDataSO[] slots, int index)
+        {
+            if (slots == null || index < 0 || index >= slots.Length) return null;
+            return slots[index] != null ? slots[index].Icon : null;
         }
 
         public void RegisterBook(IPlayableUnit book)
