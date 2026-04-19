@@ -15,7 +15,7 @@ MonoBehaviour:
   guideTitle: Habilidades
   pages:
   - pageSprite: {fileID: 21300000, guid: 83ffb8ed44da24d46b66f177015f6d62, type: 3}
-    descriptionText: "Nara conta com 5 habilidades b\xE1sicas, todas distintas e
+    descriptionText: "Erza conta com 4 habilidades b\xE1sicas, todas distintas e
       divididas entre habilidades ofensivas e defensivas."
   - pageSprite: {fileID: 21300000, guid: f82075ec18cbf8547be23356674d784c, type: 3}
     descriptionText: "1. Disparo M\xE1gico \xE9 excelente para causar dano r\xE1pido

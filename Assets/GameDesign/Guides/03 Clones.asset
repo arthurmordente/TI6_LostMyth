@@ -15,9 +15,8 @@ MonoBehaviour:
   guideTitle: Clones
   pages:
   - pageSprite: {fileID: 21300000, guid: fafe9162c0d0b154b8866b50c8bf136f, type: 3}
-    descriptionText: "Nara \xE9 capaz de fragmentar sua alma, dividindo-se temporariamente.
-      Sendo uma iniciante seus clones n\xE3o conseguem realizar a\xE7\xF5es complexas,
-      mas s\xE3o perfeitos para interagir com objetos inanimados de forma pr\xE1tica."
+    descriptionText: "Erza \xE9 capaz de fragmentar sua alma, dividindo-se temporariamente.
+      Sendo uma iniciante seus clones n\xE3o conseguem realizar a\xE7\xF5es complexas."
   - pageSprite: {fileID: 21300000, guid: fafe9162c0d0b154b8866b50c8bf136f, type: 3}
     descriptionText: "A \xFAnica diferen\xE7a entre as duas vers\xF5es \xE9 a dura\xE7\xE3o
       que Nara consegue manter cada um ativo. Um clone tem dura\xE7\xE3o de 1 turno
