@@ -27,7 +27,7 @@ MonoBehaviour:
     - Guides
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 22e2abb1e84504345a669a3566bbb85f
-    m_Address: Assets/GameDesign/Guides/PA.asset
+    m_Address: Assets/GameDesign/Guides/01 PA.asset
     m_ReadOnly: 0
     m_SerializedLabels:
     - Guides
@@ -45,7 +45,7 @@ MonoBehaviour:
     - Guides
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 3fe45202d200c6945a774f2d1692b234
-    m_Address: Assets/GameDesign/Guides/PM 1.asset
+    m_Address: Assets/GameDesign/Guides/03 Clones.asset
     m_ReadOnly: 0
     m_SerializedLabels:
     - Guides
@@ -56,7 +56,7 @@ MonoBehaviour:
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 481fb91eb21b10440871773ba6284e23
-    m_Address: "Assets/GameDesign/Guides/10 Intera\xE7\xE3o.asset"
+    m_Address: Assets/GameDesign/Guides/10 Interacao.asset
     m_ReadOnly: 0
     m_SerializedLabels:
     - Guides
@@ -73,13 +73,13 @@ MonoBehaviour:
     - Guides
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b538ba2f641f0154787f94122e5e0e30
-    m_Address: Assets/GameDesign/Guides/PM.asset
+    m_Address: Assets/GameDesign/Guides/02 PM.asset
     m_ReadOnly: 0
     m_SerializedLabels:
     - Guides
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: bbc393544f7fbb243a192161ac812429
-    m_Address: Assets/GameDesign/Guides/05 Atributos 1.asset
+    m_Address: Assets/GameDesign/Guides/06 Aprimoramentos.asset
     m_ReadOnly: 0
     m_SerializedLabels:
     - Guides
