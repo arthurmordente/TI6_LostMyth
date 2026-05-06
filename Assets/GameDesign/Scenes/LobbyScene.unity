@@ -216,6 +216,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _lobbyView: {fileID: 2090061991}
+  _paschoalSkillCatalog:
+  - {fileID: 11400000, guid: f04b6d566fe365747b24eb078d7282b3, type: 2}
+  - {fileID: 11400000, guid: 9fc07bde9c3459e4e9aa47efe4ec8c0f, type: 2}
+  - {fileID: 11400000, guid: 98358369edb6eaa4babca2b2e157e400, type: 2}
+  - {fileID: 11400000, guid: 0d0dfdef8e136854d8d6e0b258cfc4df, type: 2}
+  - {fileID: 11400000, guid: 49838c23fa398c149a90d89d2d279333, type: 2}
+  - {fileID: 11400000, guid: 3af4d3ba230376e4a8175ed9712ae967, type: 2}
+  - {fileID: 11400000, guid: a79b564f3dd9e054383f221dcdba53d2, type: 2}
+  - {fileID: 11400000, guid: 23cbf116e990195458b36caf6e6c7b27, type: 2}
 --- !u!4 &1891764785
 Transform:
   m_ObjectHideFlags: 0
@@ -265,9 +274,13 @@ MonoBehaviour:
   m_ParentUI: {fileID: 0}
   sourceAsset: {fileID: 9197481963319205126, guid: baebffa59af8bd044b111b08302caf37, type: 3}
   m_SortingOrder: 0
+  m_Position: 0
   m_WorldSpaceSizeMode: 1
   m_WorldSpaceWidth: 1920
   m_WorldSpaceHeight: 1080
+  m_PivotReferenceSize: 0
+  m_Pivot: 0
+  m_WorldSpaceCollider: {fileID: 0}
 --- !u!4 &2090061990
 Transform:
   m_ObjectHideFlags: 0
@@ -296,12 +309,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _uIDocument: {fileID: 2090061989}
-  _datas:
-  - {fileID: 11400000, guid: d9d52de431f81e94c97467c811060a54, type: 2}
-  - {fileID: 11400000, guid: 4c82f2d9bc2cf09418a437c668996e07, type: 2}
-  - {fileID: 11400000, guid: d774261d7df73ed4fa8f08149dc4b81f, type: 2}
-  - {fileID: 11400000, guid: 72ba9ea640b863144836fdfdc9469bd6, type: 2}
-  - {fileID: 11400000, guid: f4ae99592295ab4438105fcbb1c1ae10, type: 2}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

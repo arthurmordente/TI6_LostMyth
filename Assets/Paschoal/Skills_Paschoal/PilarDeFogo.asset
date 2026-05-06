@@ -20,8 +20,10 @@ MonoBehaviour:
   Power: 100
   Cost: 4
   Icon: {fileID: 21300000, guid: c0de9e55624845a42b8ad06684976429, type: 3}
-  SkillName: 
+  SkillName: Pilar de Fogo
   Description: 
   AoEPrefab: {fileID: 9039327757128552823, guid: 7fe617a9b24879e4d899a96cdcbdfbea, type: 3}
   AttackPrefab: {fileID: 8461423453677537197, guid: 867afbc20d76191418ff0c30934d5dcc, type: 3}
   Upgrade: {fileID: 11400000, guid: 1a9572b546eecdb45b8187f63f39f7b4, type: 2}
+  _useSkillTypeOverride: 0
+  _skillTypeOverride: 0

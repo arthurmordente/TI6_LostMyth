@@ -11,9 +11,12 @@ namespace Logic.Scripts.GameDomain.Services.Skills
         private readonly SkillDataSO[] _catalog;
         private readonly SkillDataSO[] _selectedPlayerSlots;
         private readonly SkillDataSO[] _selectedBookSlots;
+        private readonly SkillType?[] _requiredPlayerSlotTypes;
+        private readonly SkillType?[] _requiredBookSlotTypes;
 
         public IReadOnlyList<SkillDataSO> AllSkills => _catalog;
         public int SlotCount => _selectedPlayerSlots.Length;
+        public bool AreSlotRestrictionsEnabled { get; set; }
         public event Action<SkillLoadoutUnitType> OnLoadoutChanged;
 
         public PaschoalSkillLoadoutService(SkillDataSO[] allSkills, int slotCount)
@@ -22,6 +25,8 @@ namespace Logic.Scripts.GameDomain.Services.Skills
             int safeSlotCount = Math.Max(1, slotCount);
             _selectedPlayerSlots = new SkillDataSO[safeSlotCount];
             _selectedBookSlots = new SkillDataSO[safeSlotCount];
+            _requiredPlayerSlotTypes = new SkillType?[safeSlotCount];
+            _requiredBookSlotTypes = new SkillType?[safeSlotCount];
             InitializeDefaultSelection(_selectedPlayerSlots);
             InitializeDefaultSelection(_selectedBookSlots);
             LoadFromPlayerPrefs();
@@ -49,9 +54,47 @@ namespace Logic.Scripts.GameDomain.Services.Skills
         {
             SkillDataSO[] selectedSlots = ResolveSlots(unitType);
             if (slotIndex < 0 || slotIndex >= selectedSlots.Length) return false;
+            if (!CanAssignSkillToSlot(unitType, slotIndex, skill)) return false;
             selectedSlots[slotIndex] = skill;
             SaveToPlayerPrefs(unitType, selectedSlots);
             OnLoadoutChanged?.Invoke(unitType);
+            return true;
+        }
+
+        public bool CanAssignSkillToSlot(SkillLoadoutUnitType unitType, int slotIndex, SkillDataSO skill)
+        {
+            SkillDataSO[] selectedSlots = ResolveSlots(unitType);
+            if (slotIndex < 0 || slotIndex >= selectedSlots.Length) return false;
+            if (skill == null) return true;
+            if (!AreSlotRestrictionsEnabled) return true;
+            if (!TryGetRequiredSkillType(unitType, slotIndex, out SkillType requiredSkillType)) return true;
+            return skill.SkillType == requiredSkillType;
+        }
+
+        public bool TryGetRequiredSkillType(SkillLoadoutUnitType unitType, int slotIndex, out SkillType requiredSkillType)
+        {
+            requiredSkillType = SkillType.Damage;
+            SkillType?[] requiredTypes = ResolveRequiredTypes(unitType);
+            if (slotIndex < 0 || slotIndex >= requiredTypes.Length) return false;
+            SkillType? value = requiredTypes[slotIndex];
+            if (!value.HasValue) return false;
+            requiredSkillType = value.Value;
+            return true;
+        }
+
+        public bool SetRequiredSkillType(SkillLoadoutUnitType unitType, int slotIndex, SkillType requiredSkillType)
+        {
+            SkillType?[] requiredTypes = ResolveRequiredTypes(unitType);
+            if (slotIndex < 0 || slotIndex >= requiredTypes.Length) return false;
+            requiredTypes[slotIndex] = requiredSkillType;
+            return true;
+        }
+
+        public bool ClearRequiredSkillType(SkillLoadoutUnitType unitType, int slotIndex)
+        {
+            SkillType?[] requiredTypes = ResolveRequiredTypes(unitType);
+            if (slotIndex < 0 || slotIndex >= requiredTypes.Length) return false;
+            requiredTypes[slotIndex] = null;
             return true;
         }
 
@@ -64,6 +107,11 @@ namespace Logic.Scripts.GameDomain.Services.Skills
         private SkillDataSO[] ResolveSlots(SkillLoadoutUnitType unitType)
         {
             return unitType == SkillLoadoutUnitType.Book ? _selectedBookSlots : _selectedPlayerSlots;
+        }
+
+        private SkillType?[] ResolveRequiredTypes(SkillLoadoutUnitType unitType)
+        {
+            return unitType == SkillLoadoutUnitType.Book ? _requiredBookSlotTypes : _requiredPlayerSlotTypes;
         }
 
         private void InitializeDefaultSelection(SkillDataSO[] target)

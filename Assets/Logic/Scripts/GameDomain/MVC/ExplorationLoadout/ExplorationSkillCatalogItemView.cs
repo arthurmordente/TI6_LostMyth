@@ -14,6 +14,13 @@ public class ExplorationSkillCatalogItemView : MonoBehaviour, IPointerEnterHandl
     private Action<SkillDataSO> _onSelected;
     private Action<SkillDataSO> _onHovered;
 
+    public void ConfigureRuntimeReferences(Button button, TMP_Text nameText, Image iconImage)
+    {
+        _button = button;
+        _nameText = nameText;
+        _iconImage = iconImage;
+    }
+
     public void Bind(SkillDataSO skill, Action<SkillDataSO> onSelected, Action<SkillDataSO> onHovered)
     {
         _boundSkill = skill;

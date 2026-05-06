@@ -1,0 +1,20 @@
+---
+description: Do not use UI Toolkit for new UI
+alwaysApply: true
+---
+
+# UI stack policy
+
+- Do not create new UIs with Unity UI Toolkit (`UIDocument`, UXML, USS, UI Toolkit controllers).
+- Treat existing UI Toolkit screens as legacy/transitional; avoid expanding them unless explicitly requested.
+- Prefer uGUI (`Canvas`, `RectTransform`, `Image`, `Button`, `TMP_Text`) for all new gameplay and menu UI work.
+- For temporary test interfaces, build runtime debug UI with uGUI and keep it isolated so it can be removed later.
+
+# When migrating/replacing old UI Toolkit screens
+
+- Keep logic separated from view so the final uGUI screen can replace the temporary screen without gameplay changes.
+- Reuse existing controllers/services when possible; only swap view layer and bindings.
+
+# Exceptions
+
+- Use UI Toolkit only if the user explicitly asks for it in that task.

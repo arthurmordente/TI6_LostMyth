@@ -32,7 +32,6 @@ public class StartExplorationStateCommand : BaseCommand, ICommandAsync {
 
     public async Awaitable Execute(CancellationTokenSource cancellationTokenSource) {
         _gameInputActionsController.RegisterExplorationInputListeners();
-        ExplorationInteractInputGate.Push();
         await _commandFactory.CreateCommandAsync<StartLevelCommand>().Execute(cancellationTokenSource);
         _naraController.InitEntryPointExploration();
         _customizeUIController.InitEntryPoint();

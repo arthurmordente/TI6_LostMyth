@@ -26,6 +26,5 @@ public class LobbyUiView : MonoBehaviour {
         _loadButton.clicked += OnLoadButtonPressed;
         _optionsButton.clicked += OnOptionsButtonPressed;
         _exitButton.clicked += OnExitButtonPressed;
-
     }
 }

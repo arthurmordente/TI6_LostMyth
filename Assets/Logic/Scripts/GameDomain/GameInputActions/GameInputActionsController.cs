@@ -14,7 +14,7 @@ namespace Logic.Scripts.GameDomain.GameInputActions {
 
         // TAB key programmatic binding — added without modifying the Input Actions asset
         private InputAction _switchUnitTabAction;
-        private InputAction _toggleLoadoutQAction;
+        private InputAction _explorationInteractFAction;
 
         public GameInputActionsController(global::GameInputActions gameInputActions, ICommandFactory commandFactory) {
             _gameInputActions = gameInputActions;
@@ -181,32 +181,30 @@ namespace Logic.Scripts.GameDomain.GameInputActions {
             LogService.LogTopic("Register all input listeners", LogTopicType.Inputs);
             _gameInputActions.Exploration.ActivateCam.started += OnActivateCamStarted;
             _gameInputActions.Exploration.ActivateCam.canceled += OnActivateCamCanceled;
-            _gameInputActions.Exploration.Interact.started += OnInteractStarted;
             _gameInputActions.Exploration.Move.started += OnMoveStarted;
             _gameInputActions.Exploration.Move.canceled += OnMoveCanceled;
             _gameInputActions.Exploration.Pause.started += OnPauseExplorationStarted;
             _gameInputActions.Exploration.RotateCam.started += OnRotateCamStarted;
             _gameInputActions.Exploration.Zoom.started += OnZoomPerformed;
-            _toggleLoadoutQAction = new InputAction(type: InputActionType.Button, binding: "<Keyboard>/q");
-            _toggleLoadoutQAction.started += OnToggleLoadoutStarted;
-            _toggleLoadoutQAction.Enable();
+            _explorationInteractFAction = new InputAction(type: InputActionType.Button, binding: "<Keyboard>/f");
+            _explorationInteractFAction.started += OnInteractStarted;
+            _explorationInteractFAction.Enable();
         }
 
         public void UnregisterExplorationInputListeners() {
             LogService.LogTopic("Register all input listeners", LogTopicType.Inputs);
             _gameInputActions.Exploration.ActivateCam.started -= OnActivateCamStarted;
             _gameInputActions.Exploration.ActivateCam.canceled -= OnActivateCamCanceled;
-            _gameInputActions.Exploration.Interact.started -= OnInteractStarted;
             _gameInputActions.Exploration.Move.started -= OnMoveStarted;
             _gameInputActions.Exploration.Move.canceled -= OnMoveCanceled;
             _gameInputActions.Exploration.Pause.started -= OnPauseExplorationStarted;
             _gameInputActions.Exploration.RotateCam.started -= OnRotateCamStarted;
             _gameInputActions.Exploration.Zoom.started -= OnZoomPerformed;
-            if (_toggleLoadoutQAction != null) {
-                _toggleLoadoutQAction.started -= OnToggleLoadoutStarted;
-                _toggleLoadoutQAction.Disable();
-                _toggleLoadoutQAction.Dispose();
-                _toggleLoadoutQAction = null;
+            if (_explorationInteractFAction != null) {
+                _explorationInteractFAction.started -= OnInteractStarted;
+                _explorationInteractFAction.Disable();
+                _explorationInteractFAction.Dispose();
+                _explorationInteractFAction = null;
             }
         }
 
@@ -227,9 +225,6 @@ namespace Logic.Scripts.GameDomain.GameInputActions {
             _commandFactory.CreateCommandVoid<PauseExplorationInputCommand>().Execute();
         }
 
-        private void OnToggleLoadoutStarted(InputAction.CallbackContext obj) {
-            _commandFactory.CreateCommandVoid<ToggleExplorationLoadoutUICommand>().Execute();
-        }
         #endregion
 
         public async Awaitable WaitForAnyKeyPressed(CancellationTokenSource cancellationTokenSource, bool canPressOverGui = false) {
