@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a7b8c9d0e1f23456789abcdef0123ab, type: 3}
+  m_Name: SK_Area_NosPes0a0
+  m_EditorClassIdentifier: 
+  CoolDown: 0
+  CastTime: 0
+  Range: 0
+  AreaOfEffect: 3.5
+  AoEPrefabBaseRadius: 1
+  Power: 30
+  Cost: 1
+  Icon: {fileID: 21300000, guid: c0de9e55624845a42b8ad06684976429, type: 3}
+  SkillName: Área (nos pés)
+  Description: Mín 0, máx 0 — centro na origem do conjurador. Raio 3.5.
+  AoEPrefab: {fileID: 8461423453677537197, guid: 488a28869ffd04d419651a4aa8be9ac1, type: 3}
+  AttackPrefab: {fileID: 0}
+  Upgrade: {fileID: 0}
+  _useSkillTypeOverride: 0
+  _skillTypeOverride: 0
+  _useCastModeOverride: 1
+  _castModeOverride: 1
+  _projectileCast:
+    Range: 8
+    MaxTargets: 1
+    HitMode: 0
+  _areaCast:
+    MinCastDistance: 0
+    MaxCastDistance: 0
+    Radius: 3.5
+  _useSelfCastOnCaster: 1
+  _effects:
+  - {fileID: 11400000, guid: a47ac10b58cc4372a5670e02b2c3d472, type: 2}
+  _runtimeModifiers: []

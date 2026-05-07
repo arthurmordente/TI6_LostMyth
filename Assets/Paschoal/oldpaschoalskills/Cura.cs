@@ -9,6 +9,11 @@ public class Cura : SkillDataSO
         return SkillType.SelfBuff;
     }
 
+    protected override SkillCastMode GetDefaultCastMode()
+    {
+        return SkillCastMode.Self;
+    }
+
     public override void OnCast(IEffectable caster, Transform target)
     {
         caster.Heal(Power);

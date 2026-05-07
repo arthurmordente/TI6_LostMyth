@@ -39,7 +39,7 @@ namespace Logic.Scripts.GameDomain.MVC.Cast.Paschoal {
 
         public static float GetMaxDirectedDistance(SkillDataSO skill) {
             if (skill == null) return 0f;
-            return skill.Range > 0.0001f ? skill.Range : 500f;
+            return skill.GetProjectileRange();
         }
 
         public static Vector3 ClampDirectedEnd(Vector3 origin, Vector3 aimPoint, float maxDistance) {
@@ -79,6 +79,22 @@ namespace Logic.Scripts.GameDomain.MVC.Cast.Paschoal {
             Vector3 dir = delta / mag;
             float travel = Mathf.Min(maxDist, mag);
             return origin + dir * travel;
+        }
+
+        public static Vector3 GetAreaClampedAimPoint(IPlayableUnit playable, IEffectable caster, SkillDataSO skill)
+        {
+            Vector3 origin = GetSkillOrigin(playable, caster);
+            Vector3 aim = ResolveAimPoint(playable, out _);
+            Vector3 delta = aim - origin;
+            delta.y = 0f;
+            float dist = delta.magnitude;
+            if (dist < 1e-8f)
+                return origin;
+
+            float minDist = skill.GetAreaMinCastDistance();
+            float maxDist = skill.GetAreaMaxCastDistance();
+            float clamped = Mathf.Clamp(dist, minDist, maxDist);
+            return origin + delta.normalized * clamped;
         }
     }
 }

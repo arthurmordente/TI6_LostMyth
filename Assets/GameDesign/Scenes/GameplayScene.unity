@@ -1148,10 +1148,10 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 72ba9ea640b863144836fdfdc9469bd6, type: 2}
   - {fileID: 11400000, guid: f4ae99592295ab4438105fcbb1c1ae10, type: 2}
   _paschoalSkillCatalog:
-  - {fileID: 11400000, guid: 3af4d3ba230376e4a8175ed9712ae967, type: 2}
-  - {fileID: 11400000, guid: a79b564f3dd9e054383f221dcdba53d2, type: 2}
-  - {fileID: 11400000, guid: 23cbf116e990195458b36caf6e6c7b27, type: 2}
-  - {fileID: 11400000, guid: 0d0dfdef8e136854d8d6e0b258cfc4df, type: 2}
+  - {fileID: 11400000, guid: f47ac10b58cc4372a5670e02b2c3d479, type: 2}
+  - {fileID: 11400000, guid: f47ac10b58cc4372a5670e02b2c3d47a, type: 2}
+  - {fileID: 11400000, guid: f47ac10b58cc4372a5670e02b2c3d47b, type: 2}
+  - {fileID: 11400000, guid: f47ac10b58cc4372a5670e02b2c3d47c, type: 2}
   _bookSkills:
   - {fileID: 0}
   - {fileID: 0}

@@ -27,3 +27,15 @@ MonoBehaviour:
   Upgrade: {fileID: 0}
   _useSkillTypeOverride: 0
   _skillTypeOverride: 0
+  _useCastModeOverride: 0
+  _castModeOverride: 0
+  _projectileCast:
+    Range: 8
+    MaxTargets: 1
+    HitMode: 0
+  _areaCast:
+    MinCastDistance: 0
+    MaxCastDistance: 8
+    Radius: 2
+  _useSelfCastOnCaster: 1
+  _effects: []

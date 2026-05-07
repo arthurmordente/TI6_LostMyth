@@ -11,6 +11,11 @@ public class Shield : SkillDataSO
         return SkillType.SelfBuff;
     }
 
+    protected override SkillCastMode GetDefaultCastMode()
+    {
+        return SkillCastMode.Self;
+    }
+
     public override void OnCast(IEffectable caster = null, Transform target = null)
     {
         //caster.AddEffect(effectSO)

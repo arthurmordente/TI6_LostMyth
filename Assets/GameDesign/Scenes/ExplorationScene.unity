@@ -168,10 +168,10 @@ MonoBehaviour:
   _customizeUiView: {fileID: 859191354}
   _explorationLoadoutUiView: {fileID: 2146867771}
   _paschoalSkillCatalog:
-  - {fileID: 11400000, guid: 3af4d3ba230376e4a8175ed9712ae967, type: 2}
-  - {fileID: 11400000, guid: a79b564f3dd9e054383f221dcdba53d2, type: 2}
-  - {fileID: 11400000, guid: 23cbf116e990195458b36caf6e6c7b27, type: 2}
-  - {fileID: 11400000, guid: 0d0dfdef8e136854d8d6e0b258cfc4df, type: 2}
+  - {fileID: 11400000, guid: f47ac10b58cc4372a5670e02b2c3d479, type: 2}
+  - {fileID: 11400000, guid: f47ac10b58cc4372a5670e02b2c3d47a, type: 2}
+  - {fileID: 11400000, guid: f47ac10b58cc4372a5670e02b2c3d47b, type: 2}
+  - {fileID: 11400000, guid: f47ac10b58cc4372a5670e02b2c3d47c, type: 2}
   - {fileID: 11400000, guid: f04b6d566fe365747b24eb078d7282b3, type: 2}
   - {fileID: 11400000, guid: 9fc07bde9c3459e4e9aa47efe4ec8c0f, type: 2}
 --- !u!1 &790439859

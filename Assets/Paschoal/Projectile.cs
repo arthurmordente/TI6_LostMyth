@@ -8,12 +8,13 @@ using UnityEngine;
 /// </summary>
 public class Projectile : MonoBehaviour
 {
-    enum Type { AreaDamage, SingleTarget, Pircer }
+    public enum Type { AreaDamage, SingleTarget, Pircer }
     [SerializeField] Type type;
     public float speed;
     Collider[] hits;
     [SerializeField] SkillDataSO skill;
     Vector3 startPos = new Vector3();
+    int _hitCount;
 
     /// <summary>
     /// Used by Paschoal aim preview: line highlight includes every hittable target along the ray
@@ -31,7 +32,7 @@ public class Projectile : MonoBehaviour
     {
         if (skill == null) return;
         transform.position += transform.forward * speed * Time.deltaTime;
-        if ((startPos - transform.position).magnitude > skill.Range)
+        if ((startPos - transform.position).magnitude > skill.GetProjectileRange())
             Destroy(gameObject);
     }
 
@@ -49,12 +50,27 @@ public class Projectile : MonoBehaviour
             OnHit(f);
     }
 
+    /// <summary>
+    /// Call after instantiate so range, max hits and hit mode come from the casting <see cref="SkillDataSO"/>, not the prefab defaults.
+    /// </summary>
+    public void ConfigureForCast(SkillDataSO activeSkill)
+    {
+        skill = activeSkill;
+        _hitCount = 0;
+        if (skill == null) return;
+        if (skill.GetProjectileHitMode() == SkillDataSO.ProjectileHitMode.PierceUpToMaxTargets)
+            type = Type.Pircer;
+        else
+            type = Type.SingleTarget;
+    }
+
     private void OnDestroy()
     {
         if (skill == null) return;
         if (type == Type.AreaDamage)
         {
-            hits = Physics.OverlapSphere(transform.position, skill.AreaOfEffect);
+            float r = skill.GetAreaRadius();
+            hits = Physics.OverlapSphere(transform.position, r > 0.0001f ? r : skill.AreaOfEffect);
             foreach (Collider col in hits)
             {
                 var f = col.GetComponentInParent<IEffectable>();
@@ -67,7 +83,9 @@ public class Projectile : MonoBehaviour
     {
         hit.TakeDamage(skill.Power);
         hit.PreviewDamage(skill.Power);
-        if (type == Type.SingleTarget)
+        _hitCount++;
+        bool reachedMaxTargets = _hitCount >= skill.GetProjectileMaxTargets();
+        if (type == Type.SingleTarget || reachedMaxTargets)
             Destroy(gameObject);
     }
 }

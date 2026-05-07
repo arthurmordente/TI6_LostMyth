@@ -143,8 +143,7 @@ public class CastController : ICastController {
     }
 
     private ISkillCastFlow SelectFlow(IPlayableUnit caster) {
-        if (_legacyFlow.CanHandleCaster(caster)) return _legacyFlow;
         if (_paschoalFlow.CanHandleCaster(caster)) return _paschoalFlow;
-        return _legacyFlow;
+        return null;
     }
 }

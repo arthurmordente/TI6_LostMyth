@@ -42,6 +42,7 @@ public class PaschoalDefaultSkillCastFlow : ISkillCastFlow
         var loadout = caster.UnitViewGO.GetComponent<PaschoalSkillLoadout>();
         if (loadout == null) return false;
         if (!loadout.TryGetSkill(index, out SkillDataSO skill)) return false;
+        if (!skill.IsCastable) return false;
 
         _currentSkill = skill;
         if (_currentSkill.AoEPrefab != null)
@@ -58,7 +59,7 @@ public class PaschoalDefaultSkillCastFlow : ISkillCastFlow
         prepareResult = new SkillCastPrepareResult
         {
             AbilityIndex = index,
-            Cost = Mathf.Max(0, _currentSkill.Cost),
+            Cost = _currentSkill.SkillType == Logic.Scripts.GameDomain.Services.Skills.SkillType.Passive ? 0 : Mathf.Max(0, _currentSkill.Cost),
             AnimatorAttackType = index + 1
         };
         return true;
@@ -99,7 +100,20 @@ public class PaschoalDefaultSkillCastFlow : ISkillCastFlow
 
         Vector3 origin = caster.UnitSkillSpotTransform != null ? caster.UnitSkillSpotTransform.position : caster.UnitViewGO.transform.position;
         Vector3 fallbackForward = caster.UnitViewGO.transform.forward;
-        Vector3 point = TryGetMouseWorldPoint(out Vector3 worldPoint) ? worldPoint : (origin + fallbackForward * 2f);
+        Vector3 point;
+        if (_currentSkill != null && _currentSkill.CastMode == Logic.Scripts.GameDomain.Services.Skills.SkillCastMode.Self)
+        {
+            point = origin;
+        }
+        else if (_currentSkill != null && _currentSkill.CastMode == Logic.Scripts.GameDomain.Services.Skills.SkillCastMode.Area)
+        {
+            point = PaschoalSkillAimWorld.GetAreaClampedAimPoint(caster, caster, _currentSkill);
+        }
+        else
+        {
+            point = TryGetMouseWorldPoint(out Vector3 worldPoint) ? worldPoint : (origin + fallbackForward * 2f);
+            point = PaschoalSkillAimWorld.ClampDirectedEnd(origin, point, _currentSkill != null ? _currentSkill.GetProjectileRange() : 500f);
+        }
 
         _fallbackTarget.position = point;
         // Planar facing matches directed preview / projectiles (avoids tilted knives when cast point is above the mouse hit).

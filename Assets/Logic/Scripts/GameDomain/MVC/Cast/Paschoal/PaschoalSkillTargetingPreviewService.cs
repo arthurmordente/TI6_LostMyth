@@ -62,20 +62,20 @@ namespace Logic.Scripts.GameDomain.MVC.Cast.Paschoal {
 
         private void SyncAoeVisualRoot() {
             if (_aoeVisualRoot == null || _skill == null || _playable == null) return;
-            Vector3 aim = PaschoalSkillAimWorld.ResolveAimPoint(_playable, out _);
+            Vector3 aim = PaschoalSkillAimWorld.GetAreaClampedAimPoint(_playable, _caster, _skill);
             Vector3 origin = PaschoalSkillAimWorld.GetSkillOrigin(_playable, _caster);
             Vector3 direction = aim - origin;
             _aoeVisualRoot.position = aim;
             if (direction.sqrMagnitude > 0.0001f)
                 _aoeVisualRoot.rotation = Quaternion.LookRotation(direction.normalized, Vector3.up);
             float baseR = _skill.AoEPrefabBaseRadius <= 0f ? 1f : _skill.AoEPrefabBaseRadius;
-            float uniform = _skill.AreaOfEffect / Mathf.Max(0.01f, baseR);
+            float uniform = _skill.GetAreaRadius() / Mathf.Max(0.01f, baseR);
             _aoeVisualRoot.localScale = new Vector3(uniform, uniform, uniform);
         }
 
         private void CollectAreaTargets(HashSet<IEffectable> next) {
-            Vector3 aim = PaschoalSkillAimWorld.ResolveAimPoint(_playable, out _);
-            var hits = Physics.OverlapSphere(aim, _skill.AreaOfEffect, ~0, QueryTriggerInteraction.Collide);
+            Vector3 aim = PaschoalSkillAimWorld.GetAreaClampedAimPoint(_playable, _caster, _skill);
+            var hits = Physics.OverlapSphere(aim, _skill.GetAreaRadius(), ~0, QueryTriggerInteraction.Collide);
             for (int i = 0; i < hits.Length; i++)
                 TryAddCombatTarget(hits[i], next);
         }
@@ -89,6 +89,7 @@ namespace Logic.Scripts.GameDomain.MVC.Cast.Paschoal {
             Vector3 dirN = dir / segLen;
 
             bool pierce = PaschoalSkillTargetingRules.GetDirectedLineUsesPierce(_skill);
+            int maxTargets = PaschoalSkillTargetingRules.GetDirectedLineMaxTargets(_skill);
             var rayHits = Physics.RaycastAll(origin, dirN, segLen, ~0, QueryTriggerInteraction.Collide);
             System.Array.Sort(rayHits, (a, b) => a.distance.CompareTo(b.distance));
 
@@ -96,6 +97,7 @@ namespace Logic.Scripts.GameDomain.MVC.Cast.Paschoal {
                 if (!TryResolveCombatTarget(rayHits[i].collider, out IEffectable effectable)) continue;
                 next.Add(effectable);
                 if (!pierce) break;
+                if (next.Count >= maxTargets) break;
             }
         }
 

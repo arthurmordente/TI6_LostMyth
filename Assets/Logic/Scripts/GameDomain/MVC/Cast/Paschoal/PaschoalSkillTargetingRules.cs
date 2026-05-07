@@ -1,4 +1,5 @@
 using UnityEngine;
+using Logic.Scripts.GameDomain.Services.Skills;
 
 namespace Logic.Scripts.GameDomain.MVC.Cast.Paschoal {
     /// <summary>
@@ -8,8 +9,9 @@ namespace Logic.Scripts.GameDomain.MVC.Cast.Paschoal {
     public static class PaschoalSkillTargetingRules {
         public static PaschoalAimHighlightKind GetHighlightKind(SkillDataSO skill) {
             if (skill == null) return PaschoalAimHighlightKind.None;
-            if (skill.AreaOfEffect > 0.0001f) return PaschoalAimHighlightKind.GroundAreaSphere;
-            if (skill.AttackPrefab != null) return PaschoalAimHighlightKind.DirectedLine;
+            if (skill.CastMode == SkillCastMode.Self) return PaschoalAimHighlightKind.None;
+            if (skill.CastMode == SkillCastMode.Area) return PaschoalAimHighlightKind.GroundAreaSphere;
+            if (skill.CastMode == SkillCastMode.Projectile) return PaschoalAimHighlightKind.DirectedLine;
             return PaschoalAimHighlightKind.None;
         }
 
@@ -20,10 +22,19 @@ namespace Logic.Scripts.GameDomain.MVC.Cast.Paschoal {
         /// otherwise defaults to first-target-only for directed skills.
         /// </summary>
         public static bool GetDirectedLineUsesPierce(SkillDataSO skill) {
-            if (skill?.AttackPrefab == null) return false;
+            if (skill == null) return false;
+            if (skill.GetProjectileHitMode() == SkillDataSO.ProjectileHitMode.PierceUpToMaxTargets)
+                return true;
+            if (skill.AttackPrefab == null) return false;
             var projectile = skill.AttackPrefab.GetComponent<Projectile>();
             if (projectile == null) return false;
             return projectile.PaschoalAimUsesPiercingLineHighlight;
+        }
+
+        public static int GetDirectedLineMaxTargets(SkillDataSO skill)
+        {
+            if (skill == null) return 1;
+            return skill.GetProjectileMaxTargets();
         }
     }
 }

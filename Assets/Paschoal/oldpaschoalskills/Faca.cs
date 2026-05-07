@@ -1,8 +1,14 @@
 using UnityEngine;
+using Logic.Scripts.GameDomain.Services.Skills;
 
 [CreateAssetMenu(fileName = "Data", menuName = "ScriptableObjects/Skills/Faca", order = 2)]
 public class Faca : SkillDataSO
 {
+    protected override SkillCastMode GetDefaultCastMode()
+    {
+        return SkillCastMode.Projectile;
+    }
+
     public override void OnCast(IEffectable caster, Transform target)
     {
         if (AttackPrefab == null || target == null) return;
