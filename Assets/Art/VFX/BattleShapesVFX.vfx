@@ -52,7 +52,7 @@ MonoBehaviour:
   - {fileID: 114986932069951040}
   - {fileID: 114963171269329408}
   m_UIPosition: {x: 0, y: 0}
-  m_UICollapsed: 1
+  m_UICollapsed: 0
   m_UISuperCollapsed: 0
   m_MasterSlot: {fileID: 114307113894698210}
   m_MasterData:
@@ -61,7 +61,7 @@ MonoBehaviour:
       m_Type:
         m_SerializableType: UnityEditor.VFX.AABox, Unity.VisualEffectGraph.Editor,
           Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-      m_SerializableObject: '{"space":0,"center":{"x":0.0,"y":0.0,"z":0.0},"size":{"x":1.0,"y":1.0,"z":1.0}}'
+      m_SerializableObject: '{"center":{"x":0.0,"y":0.0,"z":0.0},"size":{"x":100.0,"y":1.0,"z":100.0}}'
     m_Space: 0
   m_Property:
     name: bounds
@@ -169,7 +169,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7d4c867f6b72b714dbb5fd1780afe208, type: 3}
-  m_Name: BS_Circle
+  m_Name: BattleShapesVFX
   m_EditorClassIdentifier: 
   m_UIIgnoredErrors: []
   m_Parent: {fileID: 0}
@@ -324,22 +324,6 @@ MonoBehaviour:
     max: 1
     enumValues: []
     descendantCount: 0
-  - name: BackGroundColor
-    path: BackGroundColor
-    tooltip: 
-    space: -1
-    spaceable: 0
-    sheetType: m_Vector4f
-    realType: Color
-    defaultValue:
-      m_Type:
-        m_SerializableType: UnityEngine.Color, UnityEngine.CoreModule, Version=0.0.0.0,
-          Culture=neutral, PublicKeyToken=null
-      m_SerializableObject: '{"r":2.0,"g":2.0,"b":2.0,"a":0.0}'
-    min: -Infinity
-    max: Infinity
-    enumValues: []
-    descendantCount: 0
   - name: BGAlphaClip
     path: BGAlphaClip
     tooltip: 
@@ -354,6 +338,22 @@ MonoBehaviour:
       m_SerializableObject: 0
     min: 0
     max: 1
+    enumValues: []
+    descendantCount: 0
+  - name: BackGroundColor
+    path: BackGroundColor
+    tooltip: 
+    space: -1
+    spaceable: 0
+    sheetType: m_Vector4f
+    realType: Color
+    defaultValue:
+      m_Type:
+        m_SerializableType: UnityEngine.Color, UnityEngine.CoreModule, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+      m_SerializableObject: '{"r":2.0,"g":2.0,"b":2.0,"a":0.0}'
+    min: -Infinity
+    max: Infinity
     enumValues: []
     descendantCount: 0
   - name: HoverTexture
@@ -814,7 +814,7 @@ VisualEffectResource:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: BS_Circle
+  m_Name: BattleShapesVFX
   m_Graph: {fileID: 114350483966674976}
   m_Infos:
     m_RendererSettings:
@@ -2854,7 +2854,7 @@ MonoBehaviour:
   - {fileID: 8926484042661614672}
   m_ExposedName: BorderTexture
   m_Exposed: 1
-  m_Order: 3
+  m_Order: 2
   m_Category: Border
   m_Min:
     m_Type:
@@ -2935,7 +2935,7 @@ MonoBehaviour:
   - {fileID: 8926484042661614676}
   m_ExposedName: BorderOffset
   m_Exposed: 1
-  m_Order: 5
+  m_Order: 3
   m_Category: Border
   m_Min:
     m_Type:
@@ -3084,7 +3084,7 @@ MonoBehaviour:
   - {fileID: 8926484042661614680}
   m_ExposedName: BorderTiling
   m_Exposed: 1
-  m_Order: 6
+  m_Order: 4
   m_Category: Border
   m_Min:
     m_Type:
@@ -3233,7 +3233,7 @@ MonoBehaviour:
   - {fileID: 8926484042661614684}
   m_ExposedName: BorderColor
   m_Exposed: 1
-  m_Order: 7
+  m_Order: 5
   m_Category: HoverTexture
   m_Min:
     m_Type:
@@ -3450,7 +3450,7 @@ MonoBehaviour:
   - {fileID: 8926484042661614690}
   m_ExposedName: BGAlpha
   m_Exposed: 1
-  m_Order: 2
+  m_Order: 6
   m_Category: Background
   m_Min:
     m_Type:
@@ -3533,7 +3533,7 @@ MonoBehaviour:
   - {fileID: 8926484042661614692}
   m_ExposedName: BGAlphaClip
   m_Exposed: 1
-  m_Order: 4
+  m_Order: 7
   m_Category: Background
   m_Min:
     m_Type:
@@ -3914,7 +3914,7 @@ MonoBehaviour:
   - {fileID: 8926484042661614718}
   m_ExposedName: BackGroundColor
   m_Exposed: 1
-  m_Order: 2
+  m_Order: 10
   m_Category: Background
   m_Min:
     m_Type:
@@ -4131,7 +4131,7 @@ MonoBehaviour:
   - {fileID: 8926484042661614724}
   m_ExposedName: AnimationCurve
   m_Exposed: 1
-  m_Order: 1
+  m_Order: 11
   m_Category: 
   m_Min:
     m_Type:
