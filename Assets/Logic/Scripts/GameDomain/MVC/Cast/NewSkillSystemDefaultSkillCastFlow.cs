@@ -1,17 +1,18 @@
-using Logic.Scripts.GameDomain.MVC.Cast.Paschoal;
+using Logic.Scripts.GameDomain.MVC.Cast.NewSkillSystem;
 using Logic.Scripts.GameDomain.MVC.Nara;
 using Logic.Scripts.GameDomain.MVC.Shared;
+using Logic.Scripts.GameDomain.Services.Skills;
 using UnityEngine;
 
-public class PaschoalDefaultSkillCastFlow : ISkillCastFlow
+public class NewSkillSystemDefaultSkillCastFlow : ISkillCastFlow
 {
-    private readonly IPaschoalSkillTargetingPreviewService _targetingPreview;
+    private readonly INewSkillSystemSkillTargetingPreviewService _targetingPreview;
 
     private SkillDataSO _currentSkill;
     private GameObject _currentPreview;
     private Transform _fallbackTarget;
 
-    public PaschoalDefaultSkillCastFlow(IPaschoalSkillTargetingPreviewService targetingPreview) {
+    public NewSkillSystemDefaultSkillCastFlow(INewSkillSystemSkillTargetingPreviewService targetingPreview) {
         _targetingPreview = targetingPreview;
     }
 
@@ -22,13 +23,13 @@ public class PaschoalDefaultSkillCastFlow : ISkillCastFlow
         var legacyToggle = caster.UnitViewGO.GetComponent<LegacySkillSystemToggle>();
         if (legacyToggle != null && legacyToggle.UseLegacySkillSystem) return false;
 
-        var loadout = caster.UnitViewGO.GetComponent<PaschoalSkillLoadout>();
+        var loadout = caster.UnitViewGO.GetComponent<NewSkillSystemSkillLoadout>();
         return loadout != null;
     }
 
     public void InitEntryPoint(INaraController naraController)
     {
-        // No setup required for Paschoal's ScriptableObject casts.
+        // No setup required for ScriptableObject-driven casts.
     }
 
     public bool TryPrepareCast(int index, IPlayableUnit caster, out SkillCastPrepareResult prepareResult)
@@ -39,17 +40,17 @@ public class PaschoalDefaultSkillCastFlow : ISkillCastFlow
         var legacyToggle = caster.UnitViewGO.GetComponent<LegacySkillSystemToggle>();
         if (legacyToggle != null && legacyToggle.UseLegacySkillSystem) return false;
 
-        var loadout = caster.UnitViewGO.GetComponent<PaschoalSkillLoadout>();
+        var loadout = caster.UnitViewGO.GetComponent<NewSkillSystemSkillLoadout>();
         if (loadout == null) return false;
         if (!loadout.TryGetSkill(index, out SkillDataSO skill)) return false;
         if (!skill.IsCastable) return false;
 
         _currentSkill = skill;
-        if (_currentSkill.AoEPrefab != null)
-        {
-            Transform spawn = caster.UnitSkillSpotTransform != null ? caster.UnitSkillSpotTransform : caster.UnitViewGO.transform;
+        Transform spawn = caster.UnitSkillSpotTransform != null ? caster.UnitSkillSpotTransform : caster.UnitViewGO.transform;
+        if (_currentSkill.CastMode == SkillCastMode.Area && _currentSkill.AoEPrefab != null)
             _currentPreview = Object.Instantiate(_currentSkill.AoEPrefab, spawn.position, spawn.rotation);
-        }
+        else if (_currentSkill.CastMode == SkillCastMode.Projectile && _currentSkill.ProjectileAimPreviewPrefab != null)
+            _currentPreview = Object.Instantiate(_currentSkill.ProjectileAimPreviewPrefab, spawn.position, spawn.rotation);
 
         EnsureFallbackTarget(caster);
         UpdateFallbackTarget(caster);
@@ -71,7 +72,7 @@ public class PaschoalDefaultSkillCastFlow : ISkillCastFlow
 
         UpdateFallbackTarget(caster);
         _targetingPreview?.End();
-        // Always use fallback aim transform for damage/decals — AoEPrefab is visual-only and is synced by the preview service.
+        // Aim transform for effects: AoE / projectile aim prefabs are visual-only; hit position & direction come from this fallback target.
         Transform castTarget = _fallbackTarget != null ? _fallbackTarget : _currentPreview != null ? _currentPreview.transform : caster.UnitViewGO.transform;
         _currentSkill.OnCast(caster, castTarget);
         CleanupPreviewAndTarget();
@@ -88,7 +89,7 @@ public class PaschoalDefaultSkillCastFlow : ISkillCastFlow
     private void EnsureFallbackTarget(IPlayableUnit caster)
     {
         if (_fallbackTarget != null) return;
-        var go = new GameObject("PaschoalCastTarget");
+        var go = new GameObject("NewSkillSystemCastTarget");
         _fallbackTarget = go.transform;
         if (caster?.UnitViewGO != null)
             _fallbackTarget.position = caster.UnitViewGO.transform.position;
@@ -107,12 +108,12 @@ public class PaschoalDefaultSkillCastFlow : ISkillCastFlow
         }
         else if (_currentSkill != null && _currentSkill.CastMode == Logic.Scripts.GameDomain.Services.Skills.SkillCastMode.Area)
         {
-            point = PaschoalSkillAimWorld.GetAreaClampedAimPoint(caster, caster, _currentSkill);
+            point = NewSkillSystemSkillAimWorld.GetAreaClampedAimPoint(caster, caster, _currentSkill);
         }
         else
         {
             point = TryGetMouseWorldPoint(out Vector3 worldPoint) ? worldPoint : (origin + fallbackForward * 2f);
-            point = PaschoalSkillAimWorld.ClampDirectedEnd(origin, point, _currentSkill != null ? _currentSkill.GetProjectileRange() : 500f);
+            point = NewSkillSystemSkillAimWorld.ClampDirectedEnd(origin, point, _currentSkill != null ? _currentSkill.GetProjectileRange() : 500f);
         }
 
         _fallbackTarget.position = point;

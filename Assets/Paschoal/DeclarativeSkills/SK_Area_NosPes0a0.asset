@@ -20,9 +20,9 @@ MonoBehaviour:
   Power: 30
   Cost: 1
   Icon: {fileID: 21300000, guid: c0de9e55624845a42b8ad06684976429, type: 3}
-  SkillName: Área (nos pés)
-  Description: Mín 0, máx 0 — centro na origem do conjurador. Raio 3.5.
-  AoEPrefab: {fileID: 8461423453677537197, guid: 488a28869ffd04d419651a4aa8be9ac1, type: 3}
+  SkillName: "\xC1rea (nos p\xE9s)"
+  Description: "M\xEDn 0, m\xE1x 0 \u2014 centro na origem do conjurador. Raio 3.5."
+  AoEPrefab: {fileID: 2224025274982176450, guid: caa4a69375bd38348901ddadba2f8953, type: 3}
   AttackPrefab: {fileID: 0}
   Upgrade: {fileID: 0}
   _useSkillTypeOverride: 0

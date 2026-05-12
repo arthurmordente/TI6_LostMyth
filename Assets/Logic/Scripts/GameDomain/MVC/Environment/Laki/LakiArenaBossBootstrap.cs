@@ -48,7 +48,7 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 		[SerializeField] private CombatAttackVisualCatalogSO _combatAttackVisualCatalog;
 
 		[Header("Laki boss shield (prefab child)")]
-		[Tooltip("VFX root on the Laki boss prefab. While active: boss is immune and Paschoal aim/fresnel on her is suppressed. Disabled on fight turns T and T+1 after the boss loses dice on turn T.")]
+		[Tooltip("VFX root on the Laki boss prefab. While active: boss is immune and new skill system aim/fresnel on her is suppressed. Disabled on fight turns T and T+1 after the boss loses dice on turn T.")]
 		[SerializeField] private GameObject _lakiShieldVfxRoot;
 
 		private int _lastSyncedFightTurn = int.MinValue;

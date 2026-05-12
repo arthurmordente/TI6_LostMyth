@@ -13,7 +13,7 @@ public class Faca : SkillDataSO
     {
         if (AttackPrefab == null || target == null) return;
 
-        // target = PaschoalCastTarget: position is mouse aim on ground; rotation looks from caster origin → aim.
+        // target = NewSkillSystemCastTarget: position is mouse aim on ground; rotation looks from caster origin → aim.
         // Spawn at the skill origin, not at aim point (otherwise the knife appears at the crosshair).
         Vector3 origin;
         if (caster != null && caster.GetTransformCastPoint() != null)

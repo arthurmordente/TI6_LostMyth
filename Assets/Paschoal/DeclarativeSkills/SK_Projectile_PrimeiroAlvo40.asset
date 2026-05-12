@@ -24,6 +24,8 @@ MonoBehaviour:
   Description: Para no primeiro inimigo. 40 de dano.
   AoEPrefab: {fileID: 0}
   AttackPrefab: {fileID: 4470363709726842422, guid: 05ecf4c11bd35014797b40e47735e1c1, type: 3}
+  ProjectileAimPreviewPrefab: {fileID: 8272950397043843596, guid: 8058bca71956f704e915ec3e0b22aabd, type: 3}
+  ProjectileAimPreviewBaseLength: 1
   Upgrade: {fileID: 0}
   _useSkillTypeOverride: 0
   _skillTypeOverride: 0
@@ -33,6 +35,8 @@ MonoBehaviour:
     Range: 12
     MaxTargets: 1
     HitMode: 0
+    Speed: 12
+    ImpactAreaRadius: 0
   _areaCast:
     MinCastDistance: 0
     MaxCastDistance: 8

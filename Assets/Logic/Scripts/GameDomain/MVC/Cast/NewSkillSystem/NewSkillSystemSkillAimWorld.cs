@@ -1,8 +1,8 @@
 using Logic.Scripts.GameDomain.MVC.Shared;
 using UnityEngine;
 
-namespace Logic.Scripts.GameDomain.MVC.Cast.Paschoal {
-    internal static class PaschoalSkillAimWorld {
+namespace Logic.Scripts.GameDomain.MVC.Cast.NewSkillSystem {
+    internal static class NewSkillSystemSkillAimWorld {
         public static bool TryMouseHitPoint(out Vector3 worldPoint) {
             worldPoint = Vector3.zero;
             if (Camera.main == null) return false;

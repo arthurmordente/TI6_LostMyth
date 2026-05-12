@@ -18,6 +18,10 @@ public abstract class SkillDataSO : ScriptableObject
         public int MaxTargets;
         [Tooltip("Stop at first enemy hit, or pierce until MaxTargets hits.")]
         public ProjectileHitMode HitMode;
+        [Tooltip("Units per second along spawn forward (horizontal aim).")]
+        public float Speed;
+        [Tooltip("If > 0, on destroy (hit, max range, or pierce cap) damages every IEffectable in a sphere at this radius.")]
+        public float ImpactAreaRadius;
     }
 
     [Serializable]
@@ -38,6 +42,13 @@ public abstract class SkillDataSO : ScriptableObject
     public Sprite Icon;
     public string SkillName, Description;
     public GameObject AoEPrefab, AttackPrefab;
+    /// <summary>
+    /// Optional mesh/beam while aiming a <see cref="SkillCastMode.Projectile"/> skill. Root at spawn; geometry extends along <b>local +Z</b>.
+    /// Length at <c>localScale.z == 1</c> must match <see cref="ProjectileAimPreviewBaseLength"/> (same idea as AoE preview base radius).
+    /// </summary>
+    public GameObject ProjectileAimPreviewPrefab;
+    [Tooltip("World length of ProjectileAimPreviewPrefab along local +Z when localScale.z is 1.")]
+    public float ProjectileAimPreviewBaseLength = 1f;
     public SkillDataSO Upgrade;
     [Header("Skill Type")]
     [Tooltip("When enabled, this override forces the skill type for this asset. Keep disabled to use script defaults.")]
@@ -46,7 +57,14 @@ public abstract class SkillDataSO : ScriptableObject
     [Header("Cast Definition")]
     [SerializeField] private bool _useCastModeOverride;
     [SerializeField] private SkillCastMode _castModeOverride = SkillCastMode.Projectile;
-    [SerializeField] private ProjectileCastData _projectileCast = new ProjectileCastData { Range = 8f, MaxTargets = 1, HitMode = ProjectileHitMode.StopOnFirstTarget };
+    [SerializeField] private ProjectileCastData _projectileCast = new ProjectileCastData
+    {
+        Range = 8f,
+        MaxTargets = 1,
+        HitMode = ProjectileHitMode.StopOnFirstTarget,
+        Speed = 12f,
+        ImpactAreaRadius = 0f
+    };
     [SerializeField] private AreaCastData _areaCast = new AreaCastData { MinCastDistance = 0f, MaxCastDistance = 8f, Radius = 2f };
     [SerializeField] private bool _useSelfCastOnCaster = true;
     [Header("Effects Definition")]
@@ -122,6 +140,17 @@ public abstract class SkillDataSO : ScriptableObject
         return _projectileCast.HitMode;
     }
 
+    public float GetProjectileSpeed()
+    {
+        if (_projectileCast.Speed > 0.0001f) return _projectileCast.Speed;
+        return 12f;
+    }
+
+    public float GetProjectileImpactAreaRadius()
+    {
+        return Mathf.Max(0f, _projectileCast.ImpactAreaRadius);
+    }
+
     public float GetAreaRadius()
     {
         if (_areaCast.Radius > 0.0001f) return _areaCast.Radius;
@@ -155,6 +184,8 @@ public abstract class SkillDataSO : ScriptableObject
             _areaCast.MaxCastDistance = _areaCast.MinCastDistance;
         if (_projectileCast.MaxTargets < 1)
             _projectileCast.MaxTargets = 1;
+        if (_projectileCast.Speed <= 0f)
+            _projectileCast.Speed = 12f;
         if (CastMode == SkillCastMode.Self || SkillType == SkillType.Passive)
             Cost = 0;
     }

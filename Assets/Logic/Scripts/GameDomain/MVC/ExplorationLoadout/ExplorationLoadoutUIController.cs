@@ -3,12 +3,12 @@ using Logic.Scripts.GameDomain.Services.Skills;
 public class ExplorationLoadoutUIController : IExplorationLoadoutUIController
 {
     private readonly ExplorationLoadoutUIView _view;
-    private readonly IPaschoalSkillLoadoutService _loadoutService;
+    private readonly INewSkillSystemSkillLoadoutService _loadoutService;
 
     private SkillLoadoutUnitType _selectedUnitType = SkillLoadoutUnitType.Player;
     private int _selectedSlotIndex;
 
-    public ExplorationLoadoutUIController(ExplorationLoadoutUIView view, IPaschoalSkillLoadoutService loadoutService)
+    public ExplorationLoadoutUIController(ExplorationLoadoutUIView view, INewSkillSystemSkillLoadoutService loadoutService)
     {
         _view = view;
         _loadoutService = loadoutService;

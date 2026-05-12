@@ -79,7 +79,7 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
             return !IsVulnerableForTurn(_lastSyncedTurn);
         }
 
-        public static bool ShouldSuppressPaschoalHighlightFor(IEffectable effectable)
+        public static bool ShouldSuppressNewSkillSystemHighlightFor(IEffectable effectable)
         {
             if (!IsLakiShieldBlockingCombatInteraction()) return false;
             return ResolvesToBoss(effectable);

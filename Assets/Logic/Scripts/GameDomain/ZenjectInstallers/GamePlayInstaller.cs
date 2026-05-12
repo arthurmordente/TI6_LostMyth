@@ -8,7 +8,8 @@ using Logic.Scripts.GameDomain.Services.ActiveUnit;
 using Logic.Scripts.GameDomain.Services.Skills;
 using Zenject;
 using UnityEngine;
-using Logic.Scripts.GameDomain.MVC.Cast.Paschoal;
+using UnityEngine.Serialization;
+using Logic.Scripts.GameDomain.MVC.Cast.NewSkillSystem;
 using Logic.Scripts.GameDomain.MVC.Ui;
 using Logic.Scripts.GameDomain.MVC.Echo;
 using Logic.Scripts.GameDomain.MVC.Boss.Telegraph;
@@ -27,9 +28,10 @@ public class GamePlayInstaller : MonoInstaller {
     [SerializeField] private GameOverUIView _gameOverUIView;
 
     [SerializeField] private AbilityData[] _skills;
-    [Header("Paschoal Skill Catalog")]
+    [Header("New Skill System Catalog")]
     [Tooltip("Todas as skills do novo sistema. As 4 primeiras viram o loadout padrao da luta.")]
-    [SerializeField] private SkillDataSO[] _paschoalSkillCatalog;
+    [FormerlySerializedAs("_paschoalSkillCatalog")]
+    [SerializeField] private SkillDataSO[] _newSkillSystemSkillCatalog;
 
     [Header("Book Skills")]
     [Tooltip("Skills exclusivas do Livro. Se vazio, o Livro usará as mesmas skills da Nara.")]
@@ -62,11 +64,11 @@ public class GamePlayInstaller : MonoInstaller {
         Container.BindInterfacesTo<LevelCancellationTokenService>().AsSingle().NonLazy();
         Container.Bind<INaraMovementControllerFactory>().To<NaraMovementControllerFactory>().AsSingle();
         Container.BindInterfacesTo<GamePlayDataService>().AsSingle().NonLazy();
-        Container.Bind<IPaschoalSkillLoadoutService>().To<PaschoalSkillLoadoutService>().AsSingle()
-            .WithArguments(_paschoalSkillCatalog, 4);
+        Container.Bind<INewSkillSystemSkillLoadoutService>().To<NewSkillSystemSkillLoadoutService>().AsSingle()
+            .WithArguments(_newSkillSystemSkillCatalog, 4);
 
-        Container.Bind<IPaschoalSkillTargetingPreviewService>().To<PaschoalSkillTargetingPreviewService>().AsSingle();
-        Container.Bind<PaschoalDefaultSkillCastFlow>().AsSingle();
+        Container.Bind<INewSkillSystemSkillTargetingPreviewService>().To<NewSkillSystemSkillTargetingPreviewService>().AsSingle();
+        Container.Bind<NewSkillSystemDefaultSkillCastFlow>().AsSingle();
 
         // Book system
         Container.Bind<IActiveUnitService>().To<ActiveUnitService>().AsSingle();

@@ -1,0 +1,17 @@
+---
+description: SkillDataSO is the only supported skill system
+alwaysApply: true
+---
+
+# Skill system source of truth
+
+- Treat `SkillDataSO` as the only active and supported skill system.
+- Do not add new gameplay features to the legacy `AbilityData` skill pipeline.
+- When touching cast flows, prioritize `NewSkillSystemDefaultSkillCastFlow` and `SkillDataSO` paths.
+- Legacy code may stay only for temporary build compatibility during migration.
+
+# New skills
+
+- New skills must be data-driven from `SkillDataSO`.
+- Prefer reusable effect ScriptableObjects over per-skill custom C# behavior.
+- Skill targeting must be configured through cast definitions (projectile/area/self), not inferred by ad-hoc logic.

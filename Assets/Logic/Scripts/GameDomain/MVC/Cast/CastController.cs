@@ -30,11 +30,11 @@ public class CastController : ICastController {
 
     private IAudioService _audio;
     private readonly LegacySkillCastFlow _legacyFlow;
-    private readonly PaschoalDefaultSkillCastFlow _paschoalFlow;
+    private readonly NewSkillSystemDefaultSkillCastFlow _newSkillSystemCastFlow;
 
     public CastController(IUpdateSubscriptionService updateSubscriptionService, ICommandFactory commandFactory,
         IActionPointsService actionPointsService, ICheatController cheatController,
-        PaschoalDefaultSkillCastFlow paschoalSkillCastFlow,
+        NewSkillSystemDefaultSkillCastFlow newSkillSystemSkillCastFlow,
         [InjectOptional] ICloneUseLimiter cloneUseLimiter = null,
         [InjectOptional] IGamePlayUiController gamePlayUiController = null) {
         _subscriptionService = updateSubscriptionService;
@@ -44,14 +44,14 @@ public class CastController : ICastController {
         _cloneUseLimiter = cloneUseLimiter;
         _gamePlayUiController = gamePlayUiController;
         _legacyFlow = new LegacySkillCastFlow(_subscriptionService, _commandFactory);
-        _paschoalFlow = paschoalSkillCastFlow;
+        _newSkillSystemCastFlow = newSkillSystemSkillCastFlow;
         try { _audio = ProjectContext.Instance.Container.Resolve<IAudioService>(); } catch { _audio = null; }
     }
 
     public void InitEntryPoint(INaraController naraController) {
         PlayerTransform = naraController.NaraViewGO.transform;
         _legacyFlow.InitEntryPoint(naraController);
-        _paschoalFlow.InitEntryPoint(naraController);
+        _newSkillSystemCastFlow.InitEntryPoint(naraController);
     }
 
     public bool TryUseAbility(int index, IPlayableUnit caster) {
@@ -143,7 +143,7 @@ public class CastController : ICastController {
     }
 
     private ISkillCastFlow SelectFlow(IPlayableUnit caster) {
-        if (_paschoalFlow.CanHandleCaster(caster)) return _paschoalFlow;
+        if (_newSkillSystemCastFlow.CanHandleCaster(caster)) return _newSkillSystemCastFlow;
         return null;
     }
 }

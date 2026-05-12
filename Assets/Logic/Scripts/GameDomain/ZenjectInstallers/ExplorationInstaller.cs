@@ -2,6 +2,7 @@ using Logic.Scripts.GameDomain.GameInputActions;
 using Logic.Scripts.GameDomain.MVC.Nara;
 using Logic.Scripts.GameDomain.Services.Skills;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Zenject;
 
 public class ExplorationInstaller : MonoInstaller {
@@ -9,7 +10,8 @@ public class ExplorationInstaller : MonoInstaller {
     [SerializeField] private NaraConfigurationSO _naraConfiguration;
     [SerializeField] private CustomizeUIView _customizeUiView;
     [SerializeField] private ExplorationLoadoutUIView _explorationLoadoutUiView;
-    [SerializeField] private SkillDataSO[] _paschoalSkillCatalog;
+    [FormerlySerializedAs("_paschoalSkillCatalog")]
+    [SerializeField] private SkillDataSO[] _newSkillSystemSkillCatalog;
 
     public override void InstallBindings() {
         BindServices();
@@ -21,8 +23,8 @@ public class ExplorationInstaller : MonoInstaller {
         Container.BindInterfacesTo<LevelCancellationTokenService>().AsSingle().NonLazy();
         Container.Bind<INaraMovementControllerFactory>().To<NaraMovementControllerFactory>().AsSingle();
         Container.BindInterfacesTo<GamePlayDataService>().AsSingle().NonLazy();
-        Container.Bind<IPaschoalSkillLoadoutService>().To<PaschoalSkillLoadoutService>().AsSingle()
-            .WithArguments(_paschoalSkillCatalog, 4);
+        Container.Bind<INewSkillSystemSkillLoadoutService>().To<NewSkillSystemSkillLoadoutService>().AsSingle()
+            .WithArguments(_newSkillSystemSkillCatalog, 4);
     }
 
     private void BindControllers() {

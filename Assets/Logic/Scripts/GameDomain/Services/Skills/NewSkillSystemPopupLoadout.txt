@@ -1,0 +1,95 @@
+================================================================================
+Popup na HUD / gameplay — obter skills do loadout (novo sistema)
+================================================================================
+
+1. Serviço a usar
+   - Interface: Logic.Scripts.GameDomain.Services.Skills.INewSkillSystemSkillLoadoutService
+   - Implementação: NewSkillSystemSkillLoadoutService (já registada na cena de gameplay
+     pelo GamePlayInstaller, AsSingle).
+
+   Este serviço é a fonte da verdade para as skills escolhidas em slots para:
+   - SkillLoadoutUnitType.Player  → personagem (Nara)
+   - SkillLoadoutUnitType.Book    → Livro
+
+2. Injetar no teu script (Zenject)
+   Opção A — MonoBehaviour na mesma cena que usa GamePlayInstaller:
+   - Adiciona ao teu MonoBehaviour:
+
+        using Zenject;
+        using Logic.Scripts.GameDomain.Services.Skills;
+
+        public class MeuPopupController : MonoBehaviour
+        {
+            private INewSkillSystemSkillLoadoutService _loadout;
+
+            [Inject]
+            private void Construct(INewSkillSystemSkillLoadoutService loadout)
+            {
+                _loadout = loadout;
+            }
+        }
+
+   Opção B — classe pura criada pelo Zenject (constructor inject):
+   - Assim como ExplorationLoadoutUIController: recebe INewSkillSystemSkillLoadoutService
+     no construtor e regista o tipo no installer adequado (Gameplay ou outro MonoInstaller
+     da cena).
+
+   Nota: o popup tem de viver no contexto onde o serviço está ligado (normalmente a cena
+   com GamePlayInstaller). Se o popup for instanciado por prefab sem Zenject, usa
+   ZenjectSceneLoader / ProjectContext conforme o resto do projeto, ou resolve o serviço
+   a partir do container da cena.
+
+3. Ler as skills dos slots
+   - Número de slots: _loadout.SlotCount (ex.: 4).
+   - Por slot e unidade:
+
+        for (int i = 0; i < _loadout.SlotCount; i++)
+        {
+            _loadout.TryGetSelectedSkill(SkillLoadoutUnitType.Player, i, out SkillDataSO playerSkill);
+            _loadout.TryGetSelectedSkill(SkillLoadoutUnitType.Book, i, out SkillDataSO bookSkill);
+            // playerSkill / bookSkill podem ser null se o slot estiver vazio
+        }
+
+   - Snapshot completo (cópia do array em runtime):
+
+        SkillDataSO[] playerSlots = _loadout.BuildRuntimeSlotsArray(SkillLoadoutUnitType.Player);
+        SkillDataSO[] bookSlots = _loadout.BuildRuntimeSlotsArray(SkillLoadoutUnitType.Book);
+
+4. Dados úteis em cada SkillDataSO (para texto/ícone do popup)
+   Depende do que o SkillDataSO expõe no projeto (ex.: nome, descrição, ícone, custo,
+   poder, alcance, etc.). Usa as propriedades públicas do asset como fonte para o UI.
+
+   Catálogo completo de skills disponíveis (lista para picker ou ajuda):
+   - _loadout.AllSkills (IReadOnlyList<SkillDataSO>)
+
+5. Atualizar o popup quando o loadout mudar
+   - Evento: _loadout.OnLoadoutChanged
+   - Assinatura: Action<SkillLoadoutUnitType> — indica se mudou Player ou Book.
+
+        void OnEnable()
+        {
+            if (_loadout != null)
+                _loadout.OnLoadoutChanged += OnLoadoutChanged;
+        }
+
+        void OnDisable()
+        {
+            if (_loadout != null)
+                _loadout.OnLoadoutChanged -= OnLoadoutChanged;
+        }
+
+        void OnLoadoutChanged(SkillLoadoutUnitType unitType)
+        {
+            RefreshPopup(); // volta a ler TryGetSelectedSkill / BuildRuntimeSlotsArray
+        }
+
+6. Unidade ativa (Nara vs Livro) — só se precisares do contexto de controlo
+   - IActiveUnitService (Gameplay): diz qual unidade está ativa; as skills mostradas nos
+     botões da HUD podem seguir essa unidade, mas o loadout de Player e Book continua a vir
+     sempre do INewSkillSystemSkillLoadoutService com Player vs Book.
+
+7. Referência no código
+   - ExplorationLoadoutUIController repete o padrão de refresh dos slots com
+     TryGetSelectedSkill para Player e Book — útil como exemplo.
+
+================================================================================

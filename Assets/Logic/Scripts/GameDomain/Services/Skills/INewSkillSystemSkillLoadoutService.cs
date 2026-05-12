@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Logic.Scripts.GameDomain.Services.Skills
 {
-    public interface IPaschoalSkillLoadoutService
+    public interface INewSkillSystemSkillLoadoutService
     {
         IReadOnlyList<SkillDataSO> AllSkills { get; }
         int SlotCount { get; }

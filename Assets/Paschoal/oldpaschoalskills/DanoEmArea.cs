@@ -21,7 +21,7 @@ public class DanoEmArea : SkillDataSO
             var f = col.GetComponentInParent<IEffectable>();
             if (f != null) {
                 if (f is DiceActor dice)
-                    Debug.Log($"[Paschoal][DanoEmArea→DiceActor] {dice.name} power={Power} sphereCenter={center} r={AreaOfEffect}");
+                    Debug.Log($"[NewSkillSystemLegacy][DanoEmArea→DiceActor] {dice.name} power={Power} sphereCenter={center} r={AreaOfEffect}");
                 f.TakeDamage(Power);
                 f.PreviewDamage(Power);
             }

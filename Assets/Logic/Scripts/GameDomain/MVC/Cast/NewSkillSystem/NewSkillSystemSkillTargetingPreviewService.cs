@@ -4,31 +4,31 @@ using Logic.Scripts.GameDomain.MVC.Shared;
 using Logic.Scripts.Services.UpdateService;
 using UnityEngine;
 
-namespace Logic.Scripts.GameDomain.MVC.Cast.Paschoal {
-    public class PaschoalSkillTargetingPreviewService : IPaschoalSkillTargetingPreviewService, IUpdatable {
+namespace Logic.Scripts.GameDomain.MVC.Cast.NewSkillSystem {
+    public class NewSkillSystemSkillTargetingPreviewService : INewSkillSystemSkillTargetingPreviewService, IUpdatable {
         private readonly IUpdateSubscriptionService _subscriptionService;
 
         private bool _registered;
         private SkillDataSO _skill;
         private IPlayableUnit _playable;
         private IEffectable _caster;
-        private Transform _aoeVisualRoot;
+        private Transform _aimVisualRoot;
 
         private readonly HashSet<IEffectable> _highlighted = new HashSet<IEffectable>();
 
-        public PaschoalSkillTargetingPreviewService(IUpdateSubscriptionService subscriptionService) {
+        public NewSkillSystemSkillTargetingPreviewService(IUpdateSubscriptionService subscriptionService) {
             _subscriptionService = subscriptionService;
         }
 
         public void Begin(SkillDataSO skill, IPlayableUnit playableCaster, Transform aoeVisualRoot = null) {
             End();
             if (skill == null || playableCaster == null) return;
-            if (PaschoalSkillTargetingRules.GetHighlightKind(skill) == PaschoalAimHighlightKind.None) return;
+            if (NewSkillSystemSkillTargetingRules.GetHighlightKind(skill) == NewSkillSystemAimHighlightKind.None) return;
 
             _skill = skill;
             _playable = playableCaster;
             _caster = playableCaster;
-            _aoeVisualRoot = aoeVisualRoot;
+            _aimVisualRoot = aoeVisualRoot;
             _subscriptionService.RegisterUpdatable(this);
             _registered = true;
         }
@@ -41,19 +41,20 @@ namespace Logic.Scripts.GameDomain.MVC.Cast.Paschoal {
             _skill = null;
             _playable = null;
             _caster = null;
-            _aoeVisualRoot = null;
+            _aimVisualRoot = null;
         }
 
         public void ManagedUpdate() {
             if (!_registered || _skill == null || _playable == null) return;
 
             var next = new HashSet<IEffectable>();
-            switch (PaschoalSkillTargetingRules.GetHighlightKind(_skill)) {
-                case PaschoalAimHighlightKind.GroundAreaSphere:
+            switch (NewSkillSystemSkillTargetingRules.GetHighlightKind(_skill)) {
+                case NewSkillSystemAimHighlightKind.GroundAreaSphere:
                     SyncAoeVisualRoot();
                     CollectAreaTargets(next);
                     break;
-                case PaschoalAimHighlightKind.DirectedLine:
+                case NewSkillSystemAimHighlightKind.DirectedLine:
+                    SyncDirectedAimVisualRoot();
                     CollectDirectedLineTargets(next);
                     break;
             }
@@ -61,35 +62,56 @@ namespace Logic.Scripts.GameDomain.MVC.Cast.Paschoal {
         }
 
         private void SyncAoeVisualRoot() {
-            if (_aoeVisualRoot == null || _skill == null || _playable == null) return;
-            Vector3 aim = PaschoalSkillAimWorld.GetAreaClampedAimPoint(_playable, _caster, _skill);
-            Vector3 origin = PaschoalSkillAimWorld.GetSkillOrigin(_playable, _caster);
+            if (_aimVisualRoot == null || _skill == null || _playable == null) return;
+            Vector3 aim = NewSkillSystemSkillAimWorld.GetAreaClampedAimPoint(_playable, _caster, _skill);
+            Vector3 origin = NewSkillSystemSkillAimWorld.GetSkillOrigin(_playable, _caster);
             Vector3 direction = aim - origin;
-            _aoeVisualRoot.position = aim;
+            _aimVisualRoot.position = aim;
             if (direction.sqrMagnitude > 0.0001f)
-                _aoeVisualRoot.rotation = Quaternion.LookRotation(direction.normalized, Vector3.up);
+                _aimVisualRoot.rotation = Quaternion.LookRotation(direction.normalized, Vector3.up);
             float baseR = _skill.AoEPrefabBaseRadius <= 0f ? 1f : _skill.AoEPrefabBaseRadius;
             float uniform = _skill.GetAreaRadius() / Mathf.Max(0.01f, baseR);
-            _aoeVisualRoot.localScale = new Vector3(uniform, uniform, uniform);
+            _aimVisualRoot.localScale = new Vector3(uniform, uniform, uniform);
+        }
+
+        /// <summary>
+        /// Stretches the projectile aim prefab along the planar cast segment (origin → clamped aim end). Scale.z = segmentLength / base length.
+        /// </summary>
+        private void SyncDirectedAimVisualRoot() {
+            if (_aimVisualRoot == null || _skill == null || _playable == null) return;
+            Vector3 origin = NewSkillSystemSkillAimWorld.GetSkillOrigin(_playable, _caster);
+            Vector3 end = NewSkillSystemSkillAimWorld.GetPlanarClampedAimEnd(_playable, _caster, _skill);
+            Vector3 dir = end - origin;
+            float len = dir.magnitude;
+            _aimVisualRoot.position = origin;
+            if (len > 0.0001f)
+                _aimVisualRoot.rotation = Quaternion.LookRotation(dir / len, Vector3.up);
+            else {
+                Vector3 fallback = NewSkillSystemSkillAimWorld.GetPlanarDirectionFromOriginToAim(_playable, _caster);
+                _aimVisualRoot.rotation = Quaternion.LookRotation(fallback, Vector3.up);
+            }
+            float baseLen = _skill.ProjectileAimPreviewBaseLength <= 0f ? 1f : _skill.ProjectileAimPreviewBaseLength;
+            float zScale = len > 0.0001f ? len / Mathf.Max(0.01f, baseLen) : 0.01f;
+            _aimVisualRoot.localScale = new Vector3(1f, 1f, zScale);
         }
 
         private void CollectAreaTargets(HashSet<IEffectable> next) {
-            Vector3 aim = PaschoalSkillAimWorld.GetAreaClampedAimPoint(_playable, _caster, _skill);
+            Vector3 aim = NewSkillSystemSkillAimWorld.GetAreaClampedAimPoint(_playable, _caster, _skill);
             var hits = Physics.OverlapSphere(aim, _skill.GetAreaRadius(), ~0, QueryTriggerInteraction.Collide);
             for (int i = 0; i < hits.Length; i++)
                 TryAddCombatTarget(hits[i], next);
         }
 
         private void CollectDirectedLineTargets(HashSet<IEffectable> next) {
-            Vector3 origin = PaschoalSkillAimWorld.GetSkillOrigin(_playable, _caster);
-            Vector3 end = PaschoalSkillAimWorld.GetPlanarClampedAimEnd(_playable, _caster, _skill);
+            Vector3 origin = NewSkillSystemSkillAimWorld.GetSkillOrigin(_playable, _caster);
+            Vector3 end = NewSkillSystemSkillAimWorld.GetPlanarClampedAimEnd(_playable, _caster, _skill);
             Vector3 dir = end - origin;
             float segLen = dir.magnitude;
             if (segLen < 1e-5f) return;
             Vector3 dirN = dir / segLen;
 
-            bool pierce = PaschoalSkillTargetingRules.GetDirectedLineUsesPierce(_skill);
-            int maxTargets = PaschoalSkillTargetingRules.GetDirectedLineMaxTargets(_skill);
+            bool pierce = NewSkillSystemSkillTargetingRules.GetDirectedLineUsesPierce(_skill);
+            int maxTargets = NewSkillSystemSkillTargetingRules.GetDirectedLineMaxTargets(_skill);
             var rayHits = Physics.RaycastAll(origin, dirN, segLen, ~0, QueryTriggerInteraction.Collide);
             System.Array.Sort(rayHits, (a, b) => a.distance.CompareTo(b.distance));
 
@@ -112,9 +134,9 @@ namespace Logic.Scripts.GameDomain.MVC.Cast.Paschoal {
             effectable = col.GetComponentInParent<IEffectable>();
             if (effectable == null) return false;
             if (ReferenceEquals(effectable, _caster)) return false;
-            // Player / Book: not highlighted while aiming Paschoal skills. (Highlighting the player inside allied AoE etc. can use the same IEffectable API later.)
+            // Player / Book: not highlighted while aiming new skill system skills. (Highlighting the player inside allied AoE etc. can use the same IEffectable API later.)
             if (effectable is IPlayableUnit) return false;
-            if (LakiBossShieldRuntime.ShouldSuppressPaschoalHighlightFor(effectable)) return false;
+            if (LakiBossShieldRuntime.ShouldSuppressNewSkillSystemHighlightFor(effectable)) return false;
             return true;
         }
 

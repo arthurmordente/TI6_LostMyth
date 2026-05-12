@@ -14,19 +14,19 @@ namespace Logic.Scripts.GameDomain.Services.ActiveUnit
         private readonly INaraController _naraController;
         private readonly IWorldCameraController _worldCamera;
         private readonly IGamePlayUiController _gamePlayUiController;
-        private readonly IPaschoalSkillLoadoutService _paschoalSkillLoadoutService;
+        private readonly INewSkillSystemSkillLoadoutService _newSkillSystemSkillLoadoutService;
         private IPlayableUnit _bookUnit;
 
         public IPlayableUnit ActiveUnit { get; private set; }
         public bool IsBookDeployed => _bookUnit != null;
 
         public ActiveUnitService(INaraController naraController, IWorldCameraController worldCameraController,
-            IGamePlayUiController gamePlayUiController, [InjectOptional] IPaschoalSkillLoadoutService paschoalSkillLoadoutService = null)
+            IGamePlayUiController gamePlayUiController, [InjectOptional] INewSkillSystemSkillLoadoutService newSkillSystemSkillLoadoutService = null)
         {
             _naraController = naraController;
             _worldCamera = worldCameraController;
             _gamePlayUiController = gamePlayUiController;
-            _paschoalSkillLoadoutService = paschoalSkillLoadoutService;
+            _newSkillSystemSkillLoadoutService = newSkillSystemSkillLoadoutService;
             ActiveUnit = naraController as IPlayableUnit;
         }
 
@@ -35,8 +35,8 @@ namespace Logic.Scripts.GameDomain.Services.ActiveUnit
         private void PushAbilityCostsToHud()
         {
             if (_gamePlayUiController == null || ActiveUnit == null) return;
-            ReloadPaschoalLoadoutForUnit(ActiveUnit);
-            PushPaschoalSkillIconsToHud();
+            ReloadNewSkillSystemLoadoutForUnit(ActiveUnit);
+            PushNewSkillSystemSkillIconsToHud();
 
             if (ActiveUnit is IBookController)
             {
@@ -51,15 +51,15 @@ namespace Logic.Scripts.GameDomain.Services.ActiveUnit
                 bool useLegacy = legacyToggle != null && legacyToggle.UseLegacySkillSystem;
                 if (!useLegacy)
                 {
-                    var paschoalLoadout = unitView.GetComponent<PaschoalSkillLoadout>();
-                    if (paschoalLoadout != null)
+                    var newSkillSystemLoadout = unitView.GetComponent<NewSkillSystemSkillLoadout>();
+                    if (newSkillSystemLoadout != null)
                     {
-                        int paschoalCostAt(int i)
+                        int newSkillSystemCostAt(int i)
                         {
-                            if (!paschoalLoadout.TryGetSkill(i, out SkillDataSO skill) || skill == null) return 0;
+                            if (!newSkillSystemLoadout.TryGetSkill(i, out SkillDataSO skill) || skill == null) return 0;
                             return Mathf.Max(0, skill.Cost);
                         }
-                        _gamePlayUiController.SetAbilityManaCosts(paschoalCostAt(0), paschoalCostAt(1), paschoalCostAt(2), paschoalCostAt(3));
+                        _gamePlayUiController.SetAbilityManaCosts(newSkillSystemCostAt(0), newSkillSystemCostAt(1), newSkillSystemCostAt(2), newSkillSystemCostAt(3));
                         return;
                     }
                 }
@@ -70,11 +70,11 @@ namespace Logic.Scripts.GameDomain.Services.ActiveUnit
             _gamePlayUiController.SetAbilityManaCosts(legacyCostAt(0), legacyCostAt(1), legacyCostAt(2), legacyCostAt(3));
         }
 
-        private void PushPaschoalSkillIconsToHud()
+        private void PushNewSkillSystemSkillIconsToHud()
         {
-            if (_gamePlayUiController == null || _paschoalSkillLoadoutService == null) return;
-            SkillDataSO[] p = _paschoalSkillLoadoutService.BuildRuntimeSlotsArray(SkillLoadoutUnitType.Player);
-            SkillDataSO[] b = _paschoalSkillLoadoutService.BuildRuntimeSlotsArray(SkillLoadoutUnitType.Book);
+            if (_gamePlayUiController == null || _newSkillSystemSkillLoadoutService == null) return;
+            SkillDataSO[] p = _newSkillSystemSkillLoadoutService.BuildRuntimeSlotsArray(SkillLoadoutUnitType.Player);
+            SkillDataSO[] b = _newSkillSystemSkillLoadoutService.BuildRuntimeSlotsArray(SkillLoadoutUnitType.Book);
             _gamePlayUiController.SetSkillHudIcons(
                 IconFrom(p, 0), IconFrom(p, 1), IconFrom(p, 2), IconFrom(p, 3),
                 IconFrom(b, 0), IconFrom(b, 1), IconFrom(b, 2), IconFrom(b, 3));
@@ -158,17 +158,17 @@ namespace Logic.Scripts.GameDomain.Services.ActiveUnit
                 _worldCamera.StartFollowTarget(target);
         }
 
-        private void ReloadPaschoalLoadoutForUnit(IPlayableUnit unit)
+        private void ReloadNewSkillSystemLoadoutForUnit(IPlayableUnit unit)
         {
-            if (unit == null || _paschoalSkillLoadoutService == null) return;
+            if (unit == null || _newSkillSystemSkillLoadoutService == null) return;
             var unitView = unit.UnitViewGO;
             if (unitView == null) return;
 
-            var paschoalLoadout = unitView.GetComponent<PaschoalSkillLoadout>();
-            if (paschoalLoadout == null) return;
+            var newSkillSystemLoadout = unitView.GetComponent<NewSkillSystemSkillLoadout>();
+            if (newSkillSystemLoadout == null) return;
 
             var unitType = ResolveUnitType(unit);
-            paschoalLoadout.SetSkills(_paschoalSkillLoadoutService.BuildRuntimeSlotsArray(unitType));
+            newSkillSystemLoadout.SetSkills(_newSkillSystemSkillLoadoutService.BuildRuntimeSlotsArray(unitType));
         }
 
         private SkillLoadoutUnitType ResolveUnitType(IPlayableUnit unit)

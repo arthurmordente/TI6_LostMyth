@@ -3,10 +3,12 @@ using System.Collections.Generic;
 
 namespace Logic.Scripts.GameDomain.Services.Skills
 {
-    public class PaschoalSkillLoadoutService : IPaschoalSkillLoadoutService
+    public class NewSkillSystemSkillLoadoutService : INewSkillSystemSkillLoadoutService
     {
-        private const string PlayerPrefsPlayerPrefix = "PaschoalLoadout_Player_";
-        private const string PlayerPrefsBookPrefix = "PaschoalLoadout_Book_";
+        private const string PlayerPrefsPlayerPrefix = "NewSkillSystemLoadout_Player_";
+        private const string PlayerPrefsBookPrefix = "NewSkillSystemLoadout_Book_";
+        private const string LegacyPlayerPrefsPlayerPrefix = "PaschoalLoadout_Player_";
+        private const string LegacyPlayerPrefsBookPrefix = "PaschoalLoadout_Book_";
 
         private readonly SkillDataSO[] _catalog;
         private readonly SkillDataSO[] _selectedPlayerSlots;
@@ -19,7 +21,7 @@ namespace Logic.Scripts.GameDomain.Services.Skills
         public bool AreSlotRestrictionsEnabled { get; set; }
         public event Action<SkillLoadoutUnitType> OnLoadoutChanged;
 
-        public PaschoalSkillLoadoutService(SkillDataSO[] allSkills, int slotCount)
+        public NewSkillSystemSkillLoadoutService(SkillDataSO[] allSkills, int slotCount)
         {
             _catalog = allSkills ?? Array.Empty<SkillDataSO>();
             int safeSlotCount = Math.Max(1, slotCount);
@@ -151,15 +153,26 @@ namespace Logic.Scripts.GameDomain.Services.Skills
         private void LoadUnitFromPlayerPrefs(SkillLoadoutUnitType unitType, SkillDataSO[] target)
         {
             string prefix = unitType == SkillLoadoutUnitType.Book ? PlayerPrefsBookPrefix : PlayerPrefsPlayerPrefix;
+            string legacyPrefix = unitType == SkillLoadoutUnitType.Book ? LegacyPlayerPrefsBookPrefix : LegacyPlayerPrefsPlayerPrefix;
+            bool usedLegacy = false;
             for (int i = 0; i < target.Length; i++)
             {
-                string key = prefix + i;
-                if (!UnityEngine.PlayerPrefs.HasKey(key)) continue;
-                int idx = UnityEngine.PlayerPrefs.GetInt(key, -1);
-                if (idx >= 0 && idx < _catalog.Length)
-                    target[i] = _catalog[idx];
+                string newKey = prefix + i;
+                string oldKey = legacyPrefix + i;
+                int idx = -1;
+                if (UnityEngine.PlayerPrefs.HasKey(newKey))
+                    idx = UnityEngine.PlayerPrefs.GetInt(newKey, -1);
+                else if (UnityEngine.PlayerPrefs.HasKey(oldKey))
+                {
+                    idx = UnityEngine.PlayerPrefs.GetInt(oldKey, -1);
+                    usedLegacy = true;
+                }
+                if (idx < 0 || idx >= _catalog.Length) continue;
+                target[i] = _catalog[idx];
             }
             EnsureSlotsFilledWithDefaults(target);
+            if (usedLegacy)
+                SaveToPlayerPrefs(unitType, target);
         }
 
         private int IndexOfInCatalog(SkillDataSO skill)

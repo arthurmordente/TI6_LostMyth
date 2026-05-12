@@ -18,7 +18,7 @@ public interface IEffectable
     /// Skill targeting / AoE preview highlight (e.g. fresnel). Implementations should delegate to
     /// <see cref="Logic.Scripts.GameDomain.VisualFeedback.SkillTargetingHighlightBridge.SetHighlighted"/>.
     /// Add <see cref="Logic.Scripts.GameDomain.VisualFeedback.SkillTargetingHighlightPresenter"/> on the prefab to show visuals.
-    /// Paschoal offensive aim skips <see cref="Logic.Scripts.GameDomain.MVC.Shared.IPlayableUnit"/> until friendly AoE preview is implemented.
+    /// New skill system offensive aim skips <see cref="Logic.Scripts.GameDomain.MVC.Shared.IPlayableUnit"/> until friendly AoE preview is implemented.
     /// </summary>
     public void SetSkillTargetingHighlight(bool active);
 }
