@@ -1,20 +1,12 @@
 using UnityEngine;
-using Logic.Scripts.GameDomain.Services.Skills;
 
 [CreateAssetMenu(fileName = "Data", menuName = "ScriptableObjects/Skills/Faca", order = 2)]
 public class Faca : SkillDataSO
 {
-    protected override SkillCastMode GetDefaultCastMode()
-    {
-        return SkillCastMode.Projectile;
-    }
-
     public override void OnCast(IEffectable caster, Transform target)
     {
-        if (AttackPrefab == null || target == null) return;
+        if (ProjectilePrefab == null || target == null) return;
 
-        // target = NewSkillSystemCastTarget: position is mouse aim on ground; rotation looks from caster origin → aim.
-        // Spawn at the skill origin, not at aim point (otherwise the knife appears at the crosshair).
         Vector3 origin;
         if (caster != null && caster.GetTransformCastPoint() != null)
             origin = caster.GetTransformCastPoint().position;
@@ -29,7 +21,6 @@ public class Faca : SkillDataSO
             dir = Vector3.ProjectOnPlane(caster.GetReferenceTransform().forward, Vector3.up);
         }
         if (dir.sqrMagnitude < 1e-8f) dir = Vector3.forward;
-        Object.Instantiate(AttackPrefab, origin, Quaternion.LookRotation(dir.normalized, Vector3.up));
+        Object.Instantiate(ProjectilePrefab, origin, Quaternion.LookRotation(dir.normalized, Vector3.up));
     }
 }
-

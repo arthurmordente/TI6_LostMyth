@@ -47,10 +47,15 @@ public class NewSkillSystemDefaultSkillCastFlow : ISkillCastFlow
 
         _currentSkill = skill;
         Transform spawn = caster.UnitSkillSpotTransform != null ? caster.UnitSkillSpotTransform : caster.UnitViewGO.transform;
-        if (_currentSkill.CastMode == SkillCastMode.Area && _currentSkill.AoEPrefab != null)
-            _currentPreview = Object.Instantiate(_currentSkill.AoEPrefab, spawn.position, spawn.rotation);
-        else if (_currentSkill.CastMode == SkillCastMode.Projectile && _currentSkill.ProjectileAimPreviewPrefab != null)
-            _currentPreview = Object.Instantiate(_currentSkill.ProjectileAimPreviewPrefab, spawn.position, spawn.rotation);
+        if (_currentSkill.CastType == SkillCastType.Area && _currentSkill.AreaAimPrefab != null)
+            _currentPreview = Object.Instantiate(_currentSkill.AreaAimPrefab, spawn.position, spawn.rotation);
+        else if (_currentSkill.CastType == SkillCastType.Projectile && _currentSkill.ProjectileAimPrefab != null)
+            _currentPreview = Object.Instantiate(_currentSkill.ProjectileAimPrefab, spawn.position, spawn.rotation);
+        else if (_currentSkill.CastType == SkillCastType.Self && _currentSkill.SelfAimPrefab != null)
+        {
+            Vector3 foot = NewSkillSystemSkillAimWorld.GetSelfCastFootWorld(caster);
+            _currentPreview = Object.Instantiate(_currentSkill.SelfAimPrefab, foot, caster.UnitViewGO.transform.rotation);
+        }
 
         EnsureFallbackTarget(caster);
         UpdateFallbackTarget(caster);
@@ -72,7 +77,15 @@ public class NewSkillSystemDefaultSkillCastFlow : ISkillCastFlow
 
         UpdateFallbackTarget(caster);
         _targetingPreview?.End();
-        // Aim transform for effects: AoE / projectile aim prefabs are visual-only; hit position & direction come from this fallback target.
+
+        if (_currentSkill.CastType == SkillCastType.Area && _currentSkill.AreaImpactPrefab != null && _fallbackTarget != null)
+            Object.Instantiate(_currentSkill.AreaImpactPrefab, _fallbackTarget.position, Quaternion.identity);
+        else if (_currentSkill.CastType == SkillCastType.Self && _currentSkill.SelfCastPrefab != null)
+        {
+            Vector3 p = NewSkillSystemSkillAimWorld.GetSelfCastFootWorld(caster);
+            Object.Instantiate(_currentSkill.SelfCastPrefab, p, caster.UnitViewGO != null ? caster.UnitViewGO.transform.rotation : Quaternion.identity);
+        }
+
         Transform castTarget = _fallbackTarget != null ? _fallbackTarget : _currentPreview != null ? _currentPreview.transform : caster.UnitViewGO.transform;
         _currentSkill.OnCast(caster, castTarget);
         CleanupPreviewAndTarget();
@@ -102,11 +115,11 @@ public class NewSkillSystemDefaultSkillCastFlow : ISkillCastFlow
         Vector3 origin = caster.UnitSkillSpotTransform != null ? caster.UnitSkillSpotTransform.position : caster.UnitViewGO.transform.position;
         Vector3 fallbackForward = caster.UnitViewGO.transform.forward;
         Vector3 point;
-        if (_currentSkill != null && _currentSkill.CastMode == Logic.Scripts.GameDomain.Services.Skills.SkillCastMode.Self)
+        if (_currentSkill != null && _currentSkill.CastType == SkillCastType.Self)
         {
-            point = origin;
+            point = NewSkillSystemSkillAimWorld.GetSelfCastFootWorld(caster);
         }
-        else if (_currentSkill != null && _currentSkill.CastMode == Logic.Scripts.GameDomain.Services.Skills.SkillCastMode.Area)
+        else if (_currentSkill != null && _currentSkill.CastType == SkillCastType.Area)
         {
             point = NewSkillSystemSkillAimWorld.GetAreaClampedAimPoint(caster, caster, _currentSkill);
         }
@@ -117,7 +130,6 @@ public class NewSkillSystemDefaultSkillCastFlow : ISkillCastFlow
         }
 
         _fallbackTarget.position = point;
-        // Planar facing matches directed preview / projectiles (avoids tilted knives when cast point is above the mouse hit).
         Vector3 direction = point - origin;
         direction.y = 0f;
         if (direction.sqrMagnitude < 1e-6f) {

@@ -1,6 +1,6 @@
 namespace Logic.Scripts.GameDomain.Services.Skills
 {
-    public enum SkillCastMode
+    public enum SkillCastType
     {
         Projectile = 0,
         Area = 1,

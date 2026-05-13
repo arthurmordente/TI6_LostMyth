@@ -12,36 +12,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6a7b8c9d0e1f23456789abcdef0123ab, type: 3}
   m_Name: SK_Area_Alcance0a10
   m_EditorClassIdentifier: 
-  CoolDown: -6.96
-  CastTime: 0
-  Range: 10
-  AreaOfEffect: 4
-  AoEPrefabBaseRadius: 1
+  _skillType: 0
+  _castType: 1
+  _projectileRange: 8
+  _projectileNumberOfTargets: 1
+  _projectileTravelSpeed: 12
+  _projectileAimPrefab: {fileID: 0}
+  _projectilePrefab: {fileID: 0}
+  _areaMinRange: 0
+  _areaMaxRange: 8
+  _areaRadius: 2
+  _areaAimPrefab: {fileID: 1607142820532151380, guid: 6feee9629db8db94f83b1e6771d787d1, type: 3}
+  _areaImpactPrefab: {fileID: 2224025274982176450, guid: caa4a69375bd38348901ddadba2f8953, type: 3}
+  _selfAimPrefab: {fileID: 0}
+  _selfCastPrefab: {fileID: 0}
   Power: 35
-  Cost: 1
+  Cost: 2
   Icon: {fileID: 21300000, guid: c0de9e55624845a42b8ad06684976429, type: 3}
-  SkillName: "\xC1rea (0\u201310m)"
-  Description: "M\xEDn 0, m\xE1x 10 unidades do conjurador. Raio 4."
-  AoEPrefab: {fileID: 2224025274982176450, guid: caa4a69375bd38348901ddadba2f8953, type: 3}
-  AttackPrefab: {fileID: 0}
-  ProjectileAimPreviewPrefab: {fileID: 0}
-  ProjectileAimPreviewBaseLength: 1
-  Upgrade: {fileID: 0}
-  _useSkillTypeOverride: 0
-  _skillTypeOverride: 0
-  _useCastModeOverride: 1
-  _castModeOverride: 1
-  _projectileCast:
-    Range: 8
-    MaxTargets: 1
-    HitMode: 0
-    Speed: 12
-    ImpactAreaRadius: 0
-  _areaCast:
-    MinCastDistance: 0
-    MaxCastDistance: 10
-    Radius: 4
-  _useSelfCastOnCaster: 0
+  SkillName: Chuva de raios
+  Description: "Ataque em \xE1rea"
   _effects:
   - {fileID: 11400000, guid: a47ac10b58cc4372a5670e02b2c3d472, type: 2}
   _runtimeModifiers: []

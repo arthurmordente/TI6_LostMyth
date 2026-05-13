@@ -3,5 +3,6 @@ namespace Logic.Scripts.GameDomain.MVC.Cast.NewSkillSystem {
         None = 0,
         GroundAreaSphere = 1,
         DirectedLine = 2,
+        SelfFootAnchor = 3,
     }
 }

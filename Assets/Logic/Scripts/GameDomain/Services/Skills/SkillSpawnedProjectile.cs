@@ -3,22 +3,20 @@ using UnityEngine;
 namespace Logic.Scripts.GameDomain.Services.Skills
 {
     /// <summary>
-    /// Snapshot of projectile rules at cast time. Built from <see cref="SkillDataSO"/> by spawn code — no ScriptableObject reference on the instance.
+    /// Snapshot at cast time — no ScriptableObject on the instance.
     /// </summary>
     public struct SkillProjectileSpawnArgs
     {
         public float Speed;
         public float MaxRange;
         public int MaxTargets;
-        public SkillDataSO.ProjectileHitMode HitMode;
         public int Damage;
-        public float ImpactAreaRadius;
         public IEffectable Caster;
     }
 
     /// <summary>
-    /// Added at runtime to <see cref="SkillDataSO.AttackPrefab"/> by <see cref="SpawnProjectileSkillEffectSO"/>.
-    /// Prefab can be visuals + collider only; call <see cref="Initialize"/> once after <see cref="Object.Instantiate"/>.
+    /// Runtime motor added by <see cref="SkillProjectileSpawn"/> to <see cref="SkillDataSO.ProjectilePrefab"/>.
+    /// Destroyed after <see cref="SkillProjectileSpawnArgs.MaxTargets"/> distinct hits or max travel range.
     /// </summary>
     [DisallowMultipleComponent]
     public class SkillSpawnedProjectile : MonoBehaviour
@@ -27,23 +25,17 @@ namespace Logic.Scripts.GameDomain.Services.Skills
         float _speed;
         float _maxRange;
         int _maxTargets;
-        SkillDataSO.ProjectileHitMode _hitMode;
         int _damage;
-        float _impactAreaRadius;
         IEffectable _caster;
         Vector3 _spawnPos;
         int _hitCount;
-
-        bool Pierce => _hitMode == SkillDataSO.ProjectileHitMode.PierceUpToMaxTargets;
 
         public void Initialize(in SkillProjectileSpawnArgs args)
         {
             _speed = args.Speed;
             _maxRange = args.MaxRange;
             _maxTargets = Mathf.Max(1, args.MaxTargets);
-            _hitMode = args.HitMode;
             _damage = args.Damage;
-            _impactAreaRadius = Mathf.Max(0f, args.ImpactAreaRadius);
             _caster = args.Caster;
             _spawnPos = transform.position;
             _hitCount = 0;
@@ -76,23 +68,8 @@ namespace Logic.Scripts.GameDomain.Services.Skills
             hit.TakeDamage(_damage);
             hit.PreviewDamage(_damage);
             _hitCount++;
-            bool stop = !Pierce || _hitCount >= _maxTargets;
-            if (stop)
+            if (_hitCount >= _maxTargets)
                 Destroy(gameObject);
-        }
-
-        void OnDestroy()
-        {
-            if (!_configured || _impactAreaRadius <= 0.0001f) return;
-            Collider[] hits = Physics.OverlapSphere(transform.position, _impactAreaRadius, ~0, QueryTriggerInteraction.Collide);
-            for (int i = 0; i < hits.Length; i++)
-            {
-                IEffectable f = hits[i].GetComponentInParent<IEffectable>();
-                if (f == null) continue;
-                if (_caster != null && ReferenceEquals(f, _caster)) continue;
-                f.TakeDamage(_damage);
-                f.PreviewDamage(_damage);
-            }
         }
     }
 }

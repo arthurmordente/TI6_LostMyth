@@ -1,15 +1,9 @@
 using UnityEngine;
-using Logic.Scripts.GameDomain.Services.Skills;
 
 [CreateAssetMenu(fileName = "Data", menuName = "ScriptableObjects/Skills/PilarDeFogoUpgrade", order = 2)]
 public class PilarDeFogo2 : SkillDataSO
 {
     Collider[] colliders;
-
-    protected override SkillCastMode GetDefaultCastMode()
-    {
-        return SkillCastMode.Area;
-    }
 
     public override void OnCast(IEffectable caster, Transform target)
     {

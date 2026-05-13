@@ -37,6 +37,12 @@ namespace Logic.Scripts.GameDomain.MVC.Cast.NewSkillSystem {
             return Vector3.zero;
         }
 
+        /// <summary>Self-cast aim / VFX anchor at the playable unit root (feet).</summary>
+        public static Vector3 GetSelfCastFootWorld(IPlayableUnit playable) {
+            if (playable?.UnitViewGO == null) return Vector3.zero;
+            return playable.UnitViewGO.transform.position;
+        }
+
         public static float GetMaxDirectedDistance(SkillDataSO skill) {
             if (skill == null) return 0f;
             return skill.GetProjectileRange();
