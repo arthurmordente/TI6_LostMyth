@@ -5,6 +5,7 @@ using Logic.Scripts.Services.CommandFactory;
 using Logic.Scripts.GameDomain.MVC.Nara;
 using Logic.Scripts.GameDomain.MVC.Boss.Laki.Chips;
 using Logic.Scripts.GameDomain.MVC.Boss.Visuals;
+using System.Threading.Tasks;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -53,6 +54,13 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 
 		private int _lastSyncedFightTurn = int.MinValue;
 
+		private const int FightBoardIntroNeutralHoldMs = 2000;
+
+		private void Awake()
+		{
+			LakiRouletteArenaFightIntro.EnsurePendingIntro();
+		}
+
 		private void Start()
 		{
 			Zenject.DiContainer container = null;
@@ -66,22 +74,21 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 					break;
 				}
 			}
-			if (container == null) { Debug.LogError("[LakiArenaBossBootstrap] No Zenject container found in this scene."); return; }
+			if (container == null) { Debug.LogError("[LakiArenaBossBootstrap] No Zenject container found in this scene."); LakiRouletteArenaFightIntro.SignalBoardIntroComplete(); return; }
 
 			try { _turnStateService = container.Resolve<TurnStateService>(); }
-			catch { Debug.LogError("[LakiArenaBossBootstrap] TurnStateService not bound."); return; }
+			catch { Debug.LogError("[LakiArenaBossBootstrap] TurnStateService not bound."); LakiRouletteArenaFightIntro.SignalBoardIntroComplete(); return; }
 			try { _naraController = container.Resolve<INaraController>(); }
-			catch { Debug.LogError("[LakiArenaBossBootstrap] INaraController not bound."); return; }
+			catch { Debug.LogError("[LakiArenaBossBootstrap] INaraController not bound."); LakiRouletteArenaFightIntro.SignalBoardIntroComplete(); return; }
 			try { _commandFactory = container.Resolve<ICommandFactory>(); }
-			catch { Debug.LogError("[LakiArenaBossBootstrap] ICommandFactory not bound."); return; }
+			catch { Debug.LogError("[LakiArenaBossBootstrap] ICommandFactory not bound."); LakiRouletteArenaFightIntro.SignalBoardIntroComplete(); return; }
 
 			var arenaService = new RouletteArenaService(_innerRadius, _outerRadius, _radialSplit01, _arcStartDeg, _arcDeg);
 			arenaService.SetLayoutConfigs(
 				_positiveTileConfig, _neutralTileConfig, _negativeTileConfig,
 				_largePositiveEffects, _smallPositiveEffects,
 				_largeNegativeEffects, _smallNegativeEffects);
-			// Initial roll so the canvas already shows effects when the scene loads
-			arenaService.RerollTiles(0, new System.Random(17));
+			arenaService.ResetTilesBlank();
 			var viewGO = new GameObject("LakiRouletteArena");
 			var view = viewGO.AddComponent<LakiRouletteArenaView>();
 			var catalog = _combatAttackVisualCatalog;
@@ -116,6 +123,8 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 			cmd.SetActor(actor);
 			cmd.Execute();
 
+			_ = RunFightBoardIntroThenReleaseTurnFlowAsync(arenaService, view);
+
 			IChipService chipSvc = null;
 			try { chipSvc = container.Resolve<IChipService>(); } catch { chipSvc = null; }
 			if (chipSvc != null) chipSvc.SetInitial(_initialPlayerChips, _initialBossChips);
@@ -126,6 +135,31 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 			{
 				_lastSyncedFightTurn = _turnStateService.TurnNumber;
 				LakiBossShieldRuntime.SyncFightTurn(_turnStateService.TurnNumber);
+			}
+		}
+
+		private async Task RunFightBoardIntroThenReleaseTurnFlowAsync(RouletteArenaService arenaService, LakiRouletteArenaView view)
+		{
+			try
+			{
+				await Task.Delay(FightBoardIntroNeutralHoldMs);
+				Vector3 playerPos = (_naraController != null && _naraController.NaraViewGO != null)
+					? _naraController.NaraViewGO.transform.position
+					: Vector3.zero;
+				int playerTile = arenaService.ComputeTileIndex(playerPos, _centerWorld);
+				const int turnForIntroSeed = 0;
+				for (int i = 0; i < 3; i++)
+				{
+					arenaService.RandomizeVisualMapping(new System.Random((turnForIntroSeed + i + 1) * 104729 + playerTile));
+					view.RefreshFrom(arenaService);
+					await Task.Delay(150);
+				}
+				arenaService.RerollTiles(0, new System.Random(17));
+				view.RefreshFrom(arenaService);
+			}
+			finally
+			{
+				LakiRouletteArenaFightIntro.SignalBoardIntroComplete();
 			}
 		}
 
@@ -140,6 +174,7 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 
 		private void OnDestroy()
 		{
+			LakiRouletteArenaFightIntro.CancelWait();
 			LakiBossShieldRuntime.Reset();
 			try { Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.Reset(); } catch { }
 			try { Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.MinigameRuntimeService.Reset(); } catch { }

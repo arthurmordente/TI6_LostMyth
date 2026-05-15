@@ -148,6 +148,20 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 
 		// ─── Tile rolling ─────────────────────────────────────────────────────────
 
+		/// <summary>
+		/// All tiles neutral, no assigned effects; <see cref="RerollTiles"/> will run again on the next call.
+		/// Used at fight start so the board can stay visually blank until the first environment reveal.
+		/// </summary>
+		public void ResetTilesBlank()
+		{
+			for (int i = 0; i < TILE_COUNT; i++)
+			{
+				_effectsCurrentTurn[i] = TileEffectType.Neutral;
+				_assignedEffects[i] = Array.Empty<AbilityEffect>();
+			}
+			_lastRolledTurn = int.MinValue;
+		}
+
 		public void RerollTiles(int turnNumber, System.Random rng)
 		{
 			if (turnNumber == _lastRolledTurn) return;
