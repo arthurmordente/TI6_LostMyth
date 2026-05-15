@@ -3,6 +3,7 @@ using Logic.Scripts.GameDomain.MVC.Echo;
 using Logic.Scripts.GameDomain.MVC.Nara;
 using Logic.Scripts.GameDomain.MVC.Shared;
 using Logic.Scripts.GameDomain.MVC.Ui;
+using Logic.Scripts.GameDomain.Services.Skills;
 using Logic.Scripts.Services.AudioService;
 using Logic.Scripts.Services.CommandFactory;
 using Logic.Scripts.Services.UpdateService;
@@ -23,6 +24,8 @@ public class CastController : ICastController {
     private IPlayableUnit _currentCaster;
     private ISkillCastFlow _activeFlow;
     private bool _canUseAbility;
+    private bool _deferredArenaSyncAfterProjectileCast;
+    private bool _lastCastWasMovementSkill;
     private int _currentAbilityIndex = -1;
     private int _currentAbilityCost = 0;
 
@@ -61,6 +64,9 @@ public class CastController : ICastController {
             return false;
         }
 
+        if (IsPassiveNewSkillSlot(caster, index))
+            return false;
+
         ISkillCastFlow selectedFlow = SelectFlow(caster);
         if (selectedFlow == null) {
             Debug.LogWarning("[CastController] TryUseAbility — no cast flow available for caster.");
@@ -88,14 +94,25 @@ public class CastController : ICastController {
         _currentAbilityIndex = prepareResult.AbilityIndex;
         _currentAbilityCost = isBook ? 0 : prepareResult.Cost;
 
+        var loadout = caster.UnitViewGO != null ? caster.UnitViewGO.GetComponent<NewSkillSystemSkillLoadout>() : null;
+        SkillDataSO skillForPreview = null;
+        if (loadout != null)
+            loadout.TryGetSkill(prepareResult.AbilityIndex, out skillForPreview);
+
+        bool showManaPreview = !isBook && !_cheatController.InfinityCast;
+        _gamePlayUiController?.BeginSkillCastAimPreview(caster, skillForPreview, prepareResult.Cost, showManaPreview && ap != null, ap?.Current ?? 0, ap?.Max ?? 0);
+
         int attackType = prepareResult.AnimatorAttackType;
         caster.PlayAttackType(attackType);
         return true;
     }
 
     public void CancelAbilityUse() {
+        var c = _currentCaster;
         _currentCaster?.TriggerCancel();
-        _activeFlow?.CancelPreparedCast(_currentCaster);
+        _activeFlow?.CancelPreparedCast(c);
+        if (c != null)
+            _gamePlayUiController?.EndSkillCastAimPreviewCancel(c);
         _activeFlow = null;
         _currentCaster = null;
         _currentAbilityIndex = -1;
@@ -106,6 +123,8 @@ public class CastController : ICastController {
         if (_activeFlow == null) return;
 
         _canUseAbility = true;
+
+        _gamePlayUiController?.EndSkillCastAimPreviewCommit(caster);
 
         if (_cheatController.InfinityCast == false && caster is not IBookController) {
             var ap = caster?.GetActionPoints() ?? _naraActionPointsService;
@@ -119,12 +138,39 @@ public class CastController : ICastController {
 
         caster?.TriggerExecute();
         PlayUsedSfxByIndex(_currentAbilityIndex);
+
+        _deferredArenaSyncAfterProjectileCast = false;
+        _lastCastWasMovementSkill = false;
+        SkillDataSO preparedSkill = null;
+        _activeFlow.TryGetPreparedSkill(out preparedSkill);
+        if (preparedSkill != null) {
+            if (preparedSkill.ShouldDeferArenaSyncUntilProjectileHit())
+                _deferredArenaSyncAfterProjectileCast = true;
+            if (preparedSkill.SkillType == Logic.Scripts.GameDomain.Services.Skills.SkillType.Movement)
+                _lastCastWasMovementSkill = true;
+        }
+
         _activeFlow.ExecutePreparedCast(caster);
         CancelAbilityUse();
     }
 
     public bool GetCanUseAbility() => _canUseAbility;
     public void SetCanUseAbility(bool b) => _canUseAbility = b;
+
+    public bool ConsumeDeferredArenaSyncAfterProjectileCast()
+    {
+        if (!_deferredArenaSyncAfterProjectileCast) return false;
+        _deferredArenaSyncAfterProjectileCast = false;
+        _lastCastWasMovementSkill = false;
+        return true;
+    }
+
+    public bool ConsumeLastCastWasMovementSkill()
+    {
+        if (!_lastCastWasMovementSkill) return false;
+        _lastCastWasMovementSkill = false;
+        return true;
+    }
 
     private void PlayUsedSfxByIndex(int index) {
         if (_audio == null) return;
@@ -145,5 +191,15 @@ public class CastController : ICastController {
     private ISkillCastFlow SelectFlow(IPlayableUnit caster) {
         if (_newSkillSystemCastFlow.CanHandleCaster(caster)) return _newSkillSystemCastFlow;
         return null;
+    }
+
+    /// <summary>Passive loadout slots never start a cast (no warning — intentional no-op).</summary>
+    private static bool IsPassiveNewSkillSlot(IPlayableUnit caster, int index) {
+        if (caster?.UnitViewGO == null) return false;
+        var legacyToggle = caster.UnitViewGO.GetComponent<LegacySkillSystemToggle>();
+        if (legacyToggle != null && legacyToggle.UseLegacySkillSystem) return false;
+        var loadout = caster.UnitViewGO.GetComponent<NewSkillSystemSkillLoadout>();
+        if (loadout == null || !loadout.TryGetSkill(index, out SkillDataSO skill) || skill == null) return false;
+        return skill.SkillType == SkillType.Passive;
     }
 }

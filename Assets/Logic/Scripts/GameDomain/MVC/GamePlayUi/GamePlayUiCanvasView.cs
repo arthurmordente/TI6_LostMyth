@@ -5,6 +5,9 @@ using DG.Tweening;
 using Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack;
 using Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames;
 using Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Dice;
+using Logic.Scripts.GameDomain.MVC.Nara;
+using Logic.Scripts.GameDomain.MVC.Shared;
+using Logic.Scripts.GameDomain.Services.Skills;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -13,6 +16,7 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
 {
     /// <summary>
     /// uGUI fight HUD. HP/AP fills use 0–1 on the Image; HP/AP numbers tween to match.
+    /// Mana (Nara): opcional imagem de preview por baixo do fill principal do frasco — durante aim de cast anima até à mana após gastar (sombra), como o preview de HP.
     /// Dice score area is shown only while <see cref="DiceAttackRuntimeService"/> is active.
     /// </summary>
     public sealed class GamePlayUiCanvasView : MonoBehaviour, IGamePlayHudView
@@ -47,7 +51,13 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
         [SerializeField] private Image _playerPreviewHpFillImage;
         [SerializeField] private TMP_Text _playerCurrentHealthText;
         [SerializeField] private Image _playerApFillImage;
+        [Tooltip("Opcional. Camada por baixo do fill principal do frasco de mana (mesmo Rect/Fill Method). Cor mais escura/alpha — durante prepare cast anima até à mana após gastar; fora do cast fica alinhada ao valor real.")]
+        [SerializeField] private Image _playerPreviewApFillImage;
         [SerializeField] private TMP_Text _playerActionPointsText;
+
+        [Header("Player — next hit shield")]
+        [Tooltip("Opcional. Visível enquanto a Nara tiver escudo de próximo golpe.")]
+        [SerializeField] private GameObject _playerNextHitShieldIndicator;
 
         [Header("Mana flask — Nara (jogador)")]
         [Tooltip("Root do ManaFlask da Nara. O Button já deve ser o _toggleButton / _expandButton do _skillsSlidablePanel no Inspector — não duplicar listener em código.")]
@@ -78,6 +88,11 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
         [SerializeField] private List<TMP_Text> _erzaSkillCostTexts = new List<TMP_Text>(4);
         [Tooltip("Custos das 4 skills do Book.")]
         [SerializeField] private List<TMP_Text> _bookSkillCostTexts = new List<TMP_Text>(4);
+
+        [Header("Skill cost UI roots (optional)")]
+        [Tooltip("Se preenchido por slot, esconde o objeto inteiro para passivas; senão esconde só o TMP do custo.")]
+        [SerializeField] private List<GameObject> _erzaSkillCostDisplayRoots = new List<GameObject>(4);
+        [SerializeField] private List<GameObject> _bookSkillCostDisplayRoots = new List<GameObject>(4);
 
         [Header("Skill Icons (Optional — filhos dos botões)")]
         [Tooltip("Image de ícone por slot (ordem 0–3). Preenchido a partir de SkillDataSO.Icon ao refrescar o loadout.")]
@@ -121,6 +136,7 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
         private float _playerPreviewHpDisplayFloat;
         private float _bossHpDisplayFloat;
         private float _playerApDisplayFloat;
+        private float _playerApPreviewDisplayFloat;
 
         private GamePlayDiceAttackPanelView _dicePanelResolved;
         private Action _onSkill1;
@@ -135,6 +151,13 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
         private Vector2 _nextTurnButtonAnchoredRestore;
         private bool _hasNextTurnButtonAnchoredRestore;
         private bool _firstTurnPassTurnHintRunning;
+
+        private bool _castAimPreviewActive;
+        private IPlayableUnit _aimPreviewCaster;
+        private bool _apManaAimPreviewActive;
+        private int _apAimBaseline;
+        private int _apAimCost;
+        private int _apAimMax;
 
         private void Awake()
         {
@@ -330,9 +353,13 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
         {
             float maxF = Mathf.Max(1, max);
             DOTween.Kill(_playerApFillImage, true);
+            DOTween.Kill(_playerPreviewApFillImage, true);
             DOTween.Kill(_playerActionPointsText, true);
             _playerApDisplayFloat = current;
+            _playerApPreviewDisplayFloat = current;
             SnapFill01(_playerApFillImage, current / maxF);
+            if (_playerPreviewApFillImage != null)
+                _playerPreviewApFillImage.fillAmount = Mathf.Clamp01(current / maxF);
             SetIntText(_playerActionPointsText, current);
         }
 
@@ -341,25 +368,170 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
             float maxF = Mathf.Max(1, max);
             float start = _playerApDisplayFloat;
             DOTween.Kill(_playerApFillImage, true);
+            DOTween.Kill(_playerPreviewApFillImage, true);
             DOTween.Kill(_playerActionPointsText, true);
             float v = start;
+            bool syncManaPreview = _playerPreviewApFillImage != null && !_apManaAimPreviewActive;
             var target = _playerApFillImage != null ? (UnityEngine.Object)_playerApFillImage : this;
             DOTween.To(() => v, x =>
             {
                 v = x;
                 _playerApDisplayFloat = x;
                 if (_playerApFillImage != null) _playerApFillImage.fillAmount = Mathf.Clamp01(x / maxF);
+                if (syncManaPreview)
+                {
+                    _playerApPreviewDisplayFloat = x;
+                    if (_playerPreviewApFillImage != null)
+                        _playerPreviewApFillImage.fillAmount = Mathf.Clamp01(x / maxF);
+                }
                 if (_playerActionPointsText != null) _playerActionPointsText.SetText(Mathf.RoundToInt(x).ToString());
             }, current, _tweenDuration).SetEase(_tweenEase).SetTarget(target);
         }
 
-        public void OnSkill1CostChange(int cost) => SetIntText(GetActiveCostText(0), cost);
+        public void OnPlayerNextHitShieldChanged(bool active)
+        {
+            if (_playerNextHitShieldIndicator != null)
+                _playerNextHitShieldIndicator.SetActive(active);
+        }
 
-        public void OnSkill2CostChange(int cost) => SetIntText(GetActiveCostText(1), cost);
+        public void BeginSkillCastAimPreview(IPlayableUnit caster, SkillDataSO skill, int apCost, bool showPlayerManaPreview, int apCurrent, int apMax)
+        {
+            if (_castAimPreviewActive && _aimPreviewCaster != null)
+                EndSkillCastAimPreviewCancel(_aimPreviewCaster);
 
-        public void OnSkill3CostChange(int cost) => SetIntText(GetActiveCostText(2), cost);
+            _castAimPreviewActive = true;
+            _aimPreviewCaster = caster;
+            _apManaAimPreviewActive = false;
 
-        public void OnSkill4CostChange(int cost) => SetIntText(GetActiveCostText(3), cost);
+            if (caster is INaraController && skill != null && SkillCastSelfHealPreview.TryGetSelfHealPreviewAmount(skill, out int heal) && caster is IEffectable eff)
+                eff.PreviewHeal(heal);
+
+            if (showPlayerManaPreview && apCost > 0 && apMax > 0 && caster is INaraController)
+            {
+                _apManaAimPreviewActive = true;
+                _apAimBaseline = apCurrent;
+                _apAimCost = apCost;
+                _apAimMax = apMax;
+                int targetAp = Mathf.Max(0, apCurrent - apCost);
+                if (_playerPreviewApFillImage != null)
+                {
+                    EnsurePlayerManaMainFillAtCurrentWhileAiming(apCurrent, apMax);
+                    TweenPlayerPreviewActionPointsFill(targetAp, apMax);
+                }
+                else
+                    TweenPlayerActionPointsDisplay(targetAp, apMax);
+            }
+        }
+
+        public void EndSkillCastAimPreviewCancel(IPlayableUnit caster)
+        {
+            if (!_castAimPreviewActive) return;
+
+            if (caster is IEffectable eff)
+                eff.ResetPreview();
+
+            if (_apManaAimPreviewActive)
+            {
+                _apManaAimPreviewActive = false;
+                if (_playerPreviewApFillImage != null)
+                    TweenPlayerPreviewActionPointsFill(_apAimBaseline, _apAimMax);
+                else
+                    TweenPlayerActionPointsDisplay(_apAimBaseline, _apAimMax);
+            }
+
+            _castAimPreviewActive = false;
+            _aimPreviewCaster = null;
+        }
+
+        public void EndSkillCastAimPreviewCommit(IPlayableUnit caster)
+        {
+            if (!_castAimPreviewActive) return;
+
+            if (caster is IEffectable eff)
+                eff.ResetPreview();
+
+            if (_apManaAimPreviewActive)
+            {
+                DOTween.Kill(_playerApFillImage, true);
+                DOTween.Kill(_playerPreviewApFillImage, true);
+                DOTween.Kill(_playerActionPointsText, true);
+                int postSpendVisual = Mathf.Max(0, _apAimBaseline - _apAimCost);
+                float maxF = Mathf.Max(1, _apAimMax);
+                _playerApDisplayFloat = postSpendVisual;
+                _playerApPreviewDisplayFloat = postSpendVisual;
+                if (_playerApFillImage != null) _playerApFillImage.fillAmount = Mathf.Clamp01(postSpendVisual / maxF);
+                if (_playerPreviewApFillImage != null)
+                    _playerPreviewApFillImage.fillAmount = Mathf.Clamp01(postSpendVisual / maxF);
+                if (_playerActionPointsText != null) _playerActionPointsText.SetText(postSpendVisual.ToString());
+                _apManaAimPreviewActive = false;
+            }
+
+            _castAimPreviewActive = false;
+            _aimPreviewCaster = null;
+        }
+
+        private void EnsurePlayerManaMainFillAtCurrentWhileAiming(int apCurrent, int maxAp)
+        {
+            float maxF = Mathf.Max(1, maxAp);
+            DOTween.Kill(_playerApFillImage, true);
+            DOTween.Kill(_playerActionPointsText, true);
+            _playerApDisplayFloat = apCurrent;
+            if (_playerApFillImage != null) _playerApFillImage.fillAmount = Mathf.Clamp01(apCurrent / maxF);
+            if (_playerActionPointsText != null) _playerActionPointsText.SetText(apCurrent.ToString());
+
+            DOTween.Kill(_playerPreviewApFillImage, true);
+            _playerApPreviewDisplayFloat = apCurrent;
+            if (_playerPreviewApFillImage != null)
+                _playerPreviewApFillImage.fillAmount = Mathf.Clamp01(apCurrent / maxF);
+        }
+
+        private void TweenPlayerPreviewActionPointsFill(int targetPreviewAp, int maxAp)
+        {
+            if (_playerPreviewApFillImage == null) return;
+            float maxF = Mathf.Max(1, maxAp);
+            float start = _playerApPreviewDisplayFloat;
+            DOTween.Kill(_playerPreviewApFillImage, true);
+            float v = start;
+            DOTween.To(() => v, x =>
+            {
+                v = x;
+                _playerApPreviewDisplayFloat = x;
+                _playerPreviewApFillImage.fillAmount = Mathf.Clamp01(x / maxF);
+            }, targetPreviewAp, _tweenDuration).SetEase(_tweenEase).SetTarget(_playerPreviewApFillImage);
+        }
+
+        private void TweenPlayerActionPointsDisplay(int targetCurrent, int maxAp)
+        {
+            float maxF = Mathf.Max(1, maxAp);
+            float start = _playerApDisplayFloat;
+            DOTween.Kill(_playerApFillImage, true);
+            DOTween.Kill(_playerActionPointsText, true);
+            float v = start;
+            var tweenTarget = _playerApFillImage != null ? (UnityEngine.Object)_playerApFillImage : this;
+            DOTween.To(() => v, x =>
+            {
+                v = x;
+                _playerApDisplayFloat = x;
+                if (_playerApFillImage != null) _playerApFillImage.fillAmount = Mathf.Clamp01(x / maxF);
+                if (_playerActionPointsText != null) _playerActionPointsText.SetText(Mathf.RoundToInt(x).ToString());
+            }, targetCurrent, _tweenDuration).SetEase(_tweenEase).SetTarget(tweenTarget);
+        }
+
+        public void SetAbilityManaCosts(int c1, int c2, int c3, int c4, bool showCostSlot1 = true, bool showCostSlot2 = true, bool showCostSlot3 = true, bool showCostSlot4 = true)
+        {
+            ApplySkillCostCell(0, c1, showCostSlot1);
+            ApplySkillCostCell(1, c2, showCostSlot2);
+            ApplySkillCostCell(2, c3, showCostSlot3);
+            ApplySkillCostCell(3, c4, showCostSlot4);
+        }
+
+        public void OnSkill1CostChange(int cost) => ApplySkillCostCell(0, cost, true);
+
+        public void OnSkill2CostChange(int cost) => ApplySkillCostCell(1, cost, true);
+
+        public void OnSkill3CostChange(int cost) => ApplySkillCostCell(2, cost, true);
+
+        public void OnSkill4CostChange(int cost) => ApplySkillCostCell(3, cost, true);
 
         public void OnSkill1NameChange(string name) { }
 
@@ -624,6 +796,36 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
             if (slotIndex < 0 || slotIndex >= container.childCount) return;
             var button = container.GetChild(slotIndex).GetComponent<Button>();
             Bind(button, callback);
+        }
+
+        private GameObject GetSkillCostDisplayRoot(int slotIndex)
+        {
+            var configuredList = _showBookSkillsTheme ? _bookSkillCostDisplayRoots : _erzaSkillCostDisplayRoots;
+            return At(configuredList, slotIndex);
+        }
+
+        private void ApplySkillCostCell(int slotIndex, int cost, bool showCostDisplay)
+        {
+            GameObject root = GetSkillCostDisplayRoot(slotIndex);
+            if (root != null)
+            {
+                root.SetActive(showCostDisplay);
+                if (showCostDisplay)
+                {
+                    var t = root.GetComponentInChildren<TMP_Text>(true);
+                    SetIntText(t, cost);
+                }
+
+                return;
+            }
+
+            TMP_Text text = GetActiveCostText(slotIndex);
+            if (text != null)
+            {
+                text.gameObject.SetActive(showCostDisplay);
+                if (showCostDisplay)
+                    SetIntText(text, cost);
+            }
         }
 
         private TMP_Text GetActiveCostText(int slotIndex)

@@ -1,3 +1,4 @@
+using Logic.Scripts.GameDomain.MVC.Shared;
 using UnityEngine;
 
 namespace Logic.Scripts.GameDomain.MVC.Ui {
@@ -10,8 +11,8 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
         Transform GameplayHudRoot();
         /// <summary>Initial HUD sync (no tween).</summary>
         void SetPlayerValues(int previewHp, int actualHp, int maxHp);
-        /// <summary>Updates the four skill-slot mana labels from the active unit's ability set.</summary>
-        void SetAbilityManaCosts(int c1, int c2, int c3, int c4);
+        /// <summary>Updates the four skill-slot mana labels; hide flags omit passive slots (no mana UI).</summary>
+        void SetAbilityManaCosts(int c1, int c2, int c3, int c4, bool showCostSlot1 = true, bool showCostSlot2 = true, bool showCostSlot3 = true, bool showCostSlot4 = true);
 
         /// <inheritdoc cref="IGamePlayHudView.SetSkillHudIcons"/>
         void SetSkillHudIcons(Sprite erza0, Sprite erza1, Sprite erza2, Sprite erza3, Sprite book0, Sprite book1, Sprite book2, Sprite book3);
@@ -27,6 +28,12 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
 
         void SnapPlayerActionPoints(int current, int max);
         void OnPlayerActionPointsChange(int current, int max);
+
+        void OnPlayerNextHitShieldChanged(bool active);
+
+        void BeginSkillCastAimPreview(IPlayableUnit caster, SkillDataSO skill, int apCost, bool showPlayerManaPreview, int apCurrent, int apMax);
+        void EndSkillCastAimPreviewCancel(IPlayableUnit caster);
+        void EndSkillCastAimPreviewCommit(IPlayableUnit caster);
 
         void OnSkill1CostChange(int newValue);
 

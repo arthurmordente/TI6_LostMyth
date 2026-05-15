@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a7b8c9d0e1f23456789abcdef0123ab, type: 3}
+  m_Name: SK_Dmg_Projectile_Penetra2x20
+  m_EditorClassIdentifier: 
+  _skillType: 0
+  _castType: 0
+  _projectileRange: 16
+  _projectileNumberOfTargets: 3
+  _projectileTravelSpeed: 12
+  _projectileAimPrefab: {fileID: 8272950397043843596, guid: 8058bca71956f704e915ec3e0b22aabd, type: 3}
+  _projectilePrefab: {fileID: 4470363709726842422, guid: 05ecf4c11bd35014797b40e47735e1c1, type: 3}
+  _areaMinRange: 0
+  _areaMaxRange: 8
+  _areaRadius: 2
+  _areaAimPrefab: {fileID: 0}
+  _areaImpactPrefab: {fileID: 0}
+  _selfAimPrefab: {fileID: 0}
+  _selfCastPrefab: {fileID: 0}
+  Power: 15
+  Cost: 1
+  Icon: {fileID: 21300000, guid: abcd2cdfb73542b428f25b2007050ade, type: 3}
+  SkillName: "Proj\xE9til (penetra 2)"
+  Description: "Atravessa at\xE9 2 alvos. 20 de dano por acerto."
+  _effects:
+  - {fileID: 0}
+  _runtimeModifiers: []

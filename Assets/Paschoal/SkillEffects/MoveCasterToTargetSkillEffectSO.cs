@@ -8,6 +8,11 @@ public class MoveCasterToTargetSkillEffectSO : SkillEffectSO
 
     public override void Execute(in SkillExecutionContext context)
     {
+        if (context.Skill != null
+            && context.Skill.CastType == SkillCastType.Projectile
+            && context.Skill.MoveCasterToProjectileHit)
+            return;
+
         if (context.Caster == null) return;
         Transform root = context.Caster.GetReferenceTransform();
         if (root == null) return;

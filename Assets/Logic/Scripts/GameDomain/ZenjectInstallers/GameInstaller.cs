@@ -1,10 +1,12 @@
 using Logic.Scripts.GameDomain.GameInitiator;
 using Logic.Scripts.GameDomain.MVC.Abilitys;
+using Logic.Scripts.GameDomain.Services.Skills;
 using Logic.Scripts.GameDomain.States;
 using System.Collections.Generic;
 using Zenject;
 using Logic.Scripts.Services.AudioService;
 using UnityEngine;
+using UnityEngine.Serialization;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -21,6 +23,11 @@ namespace Logic.Scripts.GameDomain.ZenjectInstallers {
         [SerializeField] private CreditsUIView _creditsUIView;
         [SerializeField] private OptionsUIView _optionsView;
 
+        [Header("New Skill System — catálogo global")]
+        [Tooltip("Uma única lista de SkillDataSO para todo o jogo. Exploração e Luta usam este serviço via Zenject (parent GameScene → CoreScene).")]
+        [FormerlySerializedAs("_paschoalSkillCatalog")]
+        [SerializeField] private SkillDataSO[] _newSkillSystemSkillCatalog;
+
         public override void InstallBindings() {
             Container.Bind<IGameInitiator>().To<GameInitiator.GameInitiator>().AsSingle().NonLazy();
             Container.BindInterfacesTo<CheatController>().AsSingle().NonLazy();
@@ -31,6 +38,9 @@ namespace Logic.Scripts.GameDomain.ZenjectInstallers {
             Container.BindFactory<LobbyInitiatorEnterData, LobbyState, LobbyState.Factory>().AsSingle().NonLazy();
             Container.BindInterfacesTo<UniversalUIController>().AsSingle().WithArguments(_loadView, _guideView,
                 _cheatsView, _creditsUIView, _optionsView).NonLazy();
+
+            Container.Bind<INewSkillSystemSkillLoadoutService>().To<NewSkillSystemSkillLoadoutService>().AsSingle()
+                .WithArguments(_newSkillSystemSkillCatalog, 4).NonLazy();
 
             Container.Bind<IAudioService>()
                 .To<AudioService>()

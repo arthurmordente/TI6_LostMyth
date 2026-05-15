@@ -23,10 +23,16 @@ namespace Logic.Scripts.GameDomain.Services.Skills
                 Targets = targets
             };
 
+            bool declarativeProjectileSpawnHandled = skill is DeclarativeSkillDataSO
+                && skill.CastType == SkillCastType.Projectile
+                && skill.ProjectilePrefab != null;
+
             for (int i = 0; i < effects.Length; i++)
             {
                 SkillEffectSO effect = effects[i];
                 if (effect == null) continue;
+                if (declarativeProjectileSpawnHandled && effect is ISpawnProjectileSkillEffect)
+                    continue;
                 effect.Execute(context);
             }
         }

@@ -6,6 +6,7 @@ public interface ISkillCastFlow
     bool CanHandleCaster(IPlayableUnit caster);
     void InitEntryPoint(INaraController naraController);
     bool TryPrepareCast(int index, IPlayableUnit caster, out SkillCastPrepareResult prepareResult);
+    bool TryGetPreparedSkill(out SkillDataSO skill);
     void ExecutePreparedCast(IPlayableUnit caster);
     void CancelPreparedCast(IPlayableUnit caster);
 }

@@ -1,4 +1,5 @@
 using System;
+using Logic.Scripts.GameDomain.MVC.Shared;
 using UnityEngine;
 
 namespace Logic.Scripts.GameDomain.MVC.Ui
@@ -29,10 +30,19 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
         void SnapPlayerActionPoints(int current, int max);
         void OnPlayerActionPointsChange(int current, int max);
 
+        void OnPlayerNextHitShieldChanged(bool active);
+
+        void BeginSkillCastAimPreview(IPlayableUnit caster, SkillDataSO skill, int apCost, bool showPlayerManaPreview, int apCurrent, int apMax);
+        void EndSkillCastAimPreviewCancel(IPlayableUnit caster);
+        void EndSkillCastAimPreviewCommit(IPlayableUnit caster);
+
         void OnSkill1CostChange(int cost);
         void OnSkill2CostChange(int cost);
         void OnSkill3CostChange(int cost);
         void OnSkill4CostChange(int cost);
+
+        /// <summary>Nara HUD: per-slot mana label + optional root (see cost display lists on the view).</summary>
+        void SetAbilityManaCosts(int c1, int c2, int c3, int c4, bool showCostSlot1 = true, bool showCostSlot2 = true, bool showCostSlot3 = true, bool showCostSlot4 = true);
         void OnSkill1NameChange(string name);
         void OnSkill2NameChange(string name);
         void ShowBookSkillsTheme(bool showBookSkillsTheme);

@@ -6,6 +6,7 @@ using Logic.Scripts.GameDomain.MVC.Ui;
 using Logic.Scripts.GameDomain.Services.ActiveUnit;
 using Logic.Scripts.Services.AudioService;
 using Logic.Scripts.Services.CommandFactory;
+using Logic.Scripts.Turns;
 using System.Threading;
 using UnityEngine;
 
@@ -18,6 +19,7 @@ namespace Logic.Scripts.GameDomain.Commands {
         private IWorldCameraController _worldCameraController;
         private IGameInputActionsController _gameInputActionsController;
         private IActiveUnitService _activeUnitService;
+        private IActionPointsService _actionPointsService;
 
         private GamePlayInitatorEnterData _enterData;
 
@@ -34,6 +36,7 @@ namespace Logic.Scripts.GameDomain.Commands {
             _worldCameraController = _diContainer.Resolve<IWorldCameraController>();
             _gameInputActionsController = _diContainer.Resolve<IGameInputActionsController>();
             _activeUnitService = _diContainer.Resolve<IActiveUnitService>();
+            _actionPointsService = _diContainer.Resolve<IActionPointsService>();
         }
 
         public async Awaitable Execute(CancellationTokenSource cancellationTokenSource) {
@@ -42,6 +45,7 @@ namespace Logic.Scripts.GameDomain.Commands {
             // can finish synchronously and reach PlayerAct before this method would otherwise continue,
             // which left NaraTransform null inside ResetMovementArea (Hokari usually awaits long enough to mask it).
             _naraController.InitEntryPointGamePlay(_gamePlayUiController);
+            _naraController.ApplyCombatLoadoutPassivesAndActionPoints(_actionPointsService);
             await _commandFactory.CreateCommandAsync<StartLevelCommand>().StartBoss().Execute(cancellationTokenSource);
             _audioService.PlayAudio(AudioClipType.BossTheme, AudioChannelType.Music, AudioPlayType.Loop);
             _gamePlayUiController.InitEntryPoint();

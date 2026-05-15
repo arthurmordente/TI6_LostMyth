@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a7b8c9d0e1f23456789abcdef0123ab, type: 3}
+  m_Name: SK_Passive_Manaregen
+  m_EditorClassIdentifier: 
+  _skillType: 3
+  _castType: 2
+  _projectileRange: 12
+  _projectileNumberOfTargets: 1
+  _projectileTravelSpeed: 12
+  _projectileAimPrefab: {fileID: 8272950397043843596, guid: 8058bca71956f704e915ec3e0b22aabd, type: 3}
+  _projectilePrefab: {fileID: 4470363709726842422, guid: 05ecf4c11bd35014797b40e47735e1c1, type: 3}
+  _moveCasterToProjectileHit: 0
+  _projectilePullStandoffFromTargetMeters: 0.5
+  _projectileDealsDamage: 1
+  _projectileDefersArenaSyncUntilHit: 1
+  _projectileSpawnForwardOffset: 0.35
+  _projectileMinTravelBeforeHitMeters: 0.45
+  _projectileHitDisplacementDurationSeconds: 0.35
+  _areaMinRange: 0
+  _areaMaxRange: 8
+  _areaRadius: 2
+  _areaAimPrefab: {fileID: 0}
+  _areaImpactPrefab: {fileID: 0}
+  _selfAimPrefab: {fileID: 0}
+  _selfCastPrefab: {fileID: 0}
+  Power: 0
+  Cost: 0
+  Icon: {fileID: 21300000, guid: 86de078bf2089f24db8804a3578cb301, type: 3}
+  SkillName: Influxo de mana
+  Description: "Aumenta a regenera\xE7\xE3o de mana em 1"
+  _effects: []
+  _passiveModifiers:
+  - Kind: 2
+    Value: 1
+  _runtimeModifiers: []

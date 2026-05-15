@@ -20,7 +20,7 @@ namespace Logic.Scripts.GameDomain.MVC.Cast.NewSkillSystem {
             _subscriptionService = subscriptionService;
         }
 
-        public void Begin(SkillDataSO skill, IPlayableUnit playableCaster, Transform aoeVisualRoot = null) {
+        public void Begin(SkillDataSO skill, IPlayableUnit playableCaster, Transform aimVisualRoot = null) {
             End();
             if (skill == null || playableCaster == null) return;
             if (NewSkillSystemSkillTargetingRules.GetHighlightKind(skill) == NewSkillSystemAimHighlightKind.None) return;
@@ -28,7 +28,7 @@ namespace Logic.Scripts.GameDomain.MVC.Cast.NewSkillSystem {
             _skill = skill;
             _playable = playableCaster;
             _caster = playableCaster;
-            _aimVisualRoot = aoeVisualRoot;
+            _aimVisualRoot = aimVisualRoot;
             _subscriptionService.RegisterUpdatable(this);
             _registered = true;
         }
@@ -57,6 +57,9 @@ namespace Logic.Scripts.GameDomain.MVC.Cast.NewSkillSystem {
                     SyncDirectedAimVisualRoot();
                     CollectDirectedLineTargets(next);
                     break;
+                case NewSkillSystemAimHighlightKind.SelfFootAnchor:
+                    SyncSelfFootAimRoot();
+                    break;
             }
             ApplyHighlightDiff(next);
         }
@@ -69,7 +72,7 @@ namespace Logic.Scripts.GameDomain.MVC.Cast.NewSkillSystem {
             _aimVisualRoot.position = aim;
             if (direction.sqrMagnitude > 0.0001f)
                 _aimVisualRoot.rotation = Quaternion.LookRotation(direction.normalized, Vector3.up);
-            float baseR = _skill.AoEPrefabBaseRadius <= 0f ? 1f : _skill.AoEPrefabBaseRadius;
+            float baseR = 1f;
             float uniform = _skill.GetAreaRadius() / Mathf.Max(0.01f, baseR);
             _aimVisualRoot.localScale = new Vector3(uniform, uniform, uniform);
         }
@@ -90,9 +93,20 @@ namespace Logic.Scripts.GameDomain.MVC.Cast.NewSkillSystem {
                 Vector3 fallback = NewSkillSystemSkillAimWorld.GetPlanarDirectionFromOriginToAim(_playable, _caster);
                 _aimVisualRoot.rotation = Quaternion.LookRotation(fallback, Vector3.up);
             }
-            float baseLen = _skill.ProjectileAimPreviewBaseLength <= 0f ? 1f : _skill.ProjectileAimPreviewBaseLength;
+            const float baseLen = 1f;
             float zScale = len > 0.0001f ? len / Mathf.Max(0.01f, baseLen) : 0.01f;
             _aimVisualRoot.localScale = new Vector3(1f, 1f, zScale);
+        }
+
+        private void SyncSelfFootAimRoot() {
+            if (_aimVisualRoot == null || _skill == null || _playable == null) return;
+            Vector3 foot = NewSkillSystemSkillAimWorld.GetSelfCastFootWorld(_playable);
+            _aimVisualRoot.position = foot;
+            if (_playable.UnitViewGO != null) {
+                Vector3 f = Vector3.ProjectOnPlane(_playable.UnitViewGO.transform.forward, Vector3.up);
+                if (f.sqrMagnitude > 1e-6f)
+                    _aimVisualRoot.rotation = Quaternion.LookRotation(f.normalized, Vector3.up);
+            }
         }
 
         private void CollectAreaTargets(HashSet<IEffectable> next) {

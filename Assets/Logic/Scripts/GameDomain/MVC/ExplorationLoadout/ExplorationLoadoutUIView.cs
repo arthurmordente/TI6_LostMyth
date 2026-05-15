@@ -4,6 +4,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using Logic.Scripts.GameDomain.Services.Skills;
+using Logic.Scripts.GameDomain.MVC.ExplorationLoadout;
 using UnityEngine.EventSystems;
 
 public class ExplorationLoadoutUIView : MonoBehaviour
@@ -30,6 +31,8 @@ public class ExplorationLoadoutUIView : MonoBehaviour
     [Header("Catalog")]
     [SerializeField] private Transform _catalogContainer;
     [SerializeField] private ExplorationSkillCatalogItemView _catalogItemPrefab;
+    [Tooltip("Opcional. Dropdown TMP no prefab da cena (mesma ordem que ExplorationLoadoutSkillFilter).")]
+    [SerializeField] private TMP_Dropdown _skillCategoryDropdown;
 
     [Header("Details")]
     [SerializeField] private TMP_Text _detailNameText;
@@ -37,8 +40,15 @@ public class ExplorationLoadoutUIView : MonoBehaviour
     [SerializeField] private TMP_Text _detailPowerText;
     [SerializeField] private TMP_Text _detailCostText;
     [SerializeField] private TMP_Text _detailRangeText;
-    [SerializeField] private TMP_Text _detailCooldownText;
     [SerializeField] private Image _detailIconImage;
+
+    private TMP_Text _debugFilterHeaderText;
+    private GameObject _debugFilterListRoot;
+    private GameObject _debugFilterClickBlocker;
+    private GameObject _filterDropdownModalBlocker;
+    private Transform _catalogPanelTransform;
+    private ScrollRect _catalogScrollRect;
+    private Action<ExplorationLoadoutSkillFilter> _onCatalogFilterChanged;
 
     private void Awake()
     {
@@ -53,7 +63,8 @@ public class ExplorationLoadoutUIView : MonoBehaviour
         SetVisible(false);
     }
 
-    public void RegisterCallbacks(Action onClose, Action<int> onPlayerSlotClicked, Action<int> onBookSlotClicked)
+    public void RegisterCallbacks(Action onClose, Action<int> onPlayerSlotClicked, Action<int> onBookSlotClicked,
+        Action<ExplorationLoadoutSkillFilter> onCatalogFilterChanged = null)
     {
         if (_closeButton != null)
         {
@@ -63,6 +74,28 @@ public class ExplorationLoadoutUIView : MonoBehaviour
 
         RegisterSlotCallbacks(_playerSlots, onPlayerSlotClicked);
         RegisterSlotCallbacks(_bookSlots, onBookSlotClicked);
+
+        _onCatalogFilterChanged = onCatalogFilterChanged;
+        WireSkillCategoryDropdown();
+    }
+
+    private void WireSkillCategoryDropdown()
+    {
+        if (_skillCategoryDropdown == null) return;
+        _skillCategoryDropdown.onValueChanged.RemoveListener(OnSkillCategoryDropdownValueChanged);
+        _skillCategoryDropdown.ClearOptions();
+        var opts = new List<string>(5);
+        for (int i = 0; i <= (int)ExplorationLoadoutSkillFilter.Buff; i++)
+            opts.Add(ExplorationLoadoutSkillFilterUtil.DisplayLabel((ExplorationLoadoutSkillFilter)i));
+        _skillCategoryDropdown.AddOptions(opts);
+        _skillCategoryDropdown.SetValueWithoutNotify(0);
+        _skillCategoryDropdown.onValueChanged.AddListener(OnSkillCategoryDropdownValueChanged);
+    }
+
+    private void OnSkillCategoryDropdownValueChanged(int index)
+    {
+        if (index < 0 || index > (int)ExplorationLoadoutSkillFilter.Buff) return;
+        _onCatalogFilterChanged?.Invoke((ExplorationLoadoutSkillFilter)index);
     }
 
     public void SetVisible(bool visible)
@@ -76,7 +109,12 @@ public class ExplorationLoadoutUIView : MonoBehaviour
         if (slot == null) return;
 
         if (slot.NameText != null) slot.NameText.SetText(skill != null ? skill.SkillName : "-");
-        if (slot.CostText != null) slot.CostText.SetText(skill != null ? skill.Cost.ToString() : "0");
+        if (slot.CostText != null)
+        {
+            if (skill == null) slot.CostText.SetText("0");
+            else if (skill.SkillType == SkillType.Passive) slot.CostText.SetText("-");
+            else slot.CostText.SetText(skill.Cost.ToString());
+        }
         if (slot.IconImage != null)
         {
             slot.IconImage.sprite = skill != null ? skill.Icon : null;
@@ -108,14 +146,63 @@ public class ExplorationLoadoutUIView : MonoBehaviour
         return Instantiate(_catalogItemPrefab, _catalogContainer);
     }
 
+    public void FinalizeCatalogScroll()
+    {
+        if (_catalogScrollRect == null || _catalogScrollRect.content == null) return;
+        var content = _catalogScrollRect.content;
+        LayoutRebuilder.ForceRebuildLayoutImmediate(content);
+        Canvas.ForceUpdateCanvases();
+        _catalogScrollRect.verticalNormalizedPosition = 1f;
+    }
+
+    private void CloseDebugFilterDropdown()
+    {
+        if (_debugFilterListRoot != null) _debugFilterListRoot.SetActive(false);
+        if (_debugFilterClickBlocker != null) _debugFilterClickBlocker.SetActive(false);
+        if (_filterDropdownModalBlocker != null) _filterDropdownModalBlocker.SetActive(false);
+    }
+
+    private void SetDebugFilterDropdownOpen(bool open)
+    {
+        if (_debugFilterListRoot != null) _debugFilterListRoot.SetActive(open);
+        if (_debugFilterClickBlocker != null) _debugFilterClickBlocker.SetActive(open);
+        if (_filterDropdownModalBlocker != null) _filterDropdownModalBlocker.SetActive(open);
+        if (open)
+        {
+            BringCatalogAndDropdownToFront();
+            if (_debugFilterListRoot != null)
+            {
+                var listRt = _debugFilterListRoot.GetComponent<RectTransform>();
+                if (listRt != null)
+                {
+                    LayoutRebuilder.ForceRebuildLayoutImmediate(listRt);
+                    Canvas.ForceUpdateCanvases();
+                }
+                _debugFilterListRoot.transform.SetAsLastSibling();
+            }
+        }
+    }
+
+    private void BringCatalogAndDropdownToFront()
+    {
+        if (_catalogPanelTransform != null)
+            _catalogPanelTransform.SetAsLastSibling();
+        if (_closeButton != null)
+            _closeButton.transform.SetAsLastSibling();
+    }
+
     public void ShowSkillDetails(SkillDataSO skill)
     {
         if (_detailNameText != null) _detailNameText.SetText(skill != null ? skill.SkillName : "-");
         if (_detailDescriptionText != null) _detailDescriptionText.SetText(skill != null ? skill.Description : string.Empty);
         if (_detailPowerText != null) _detailPowerText.SetText(skill != null ? skill.Power.ToString() : "-");
-        if (_detailCostText != null) _detailCostText.SetText(skill != null ? skill.Cost.ToString() : "-");
+        if (_detailCostText != null)
+        {
+            if (skill == null) _detailCostText.SetText("-");
+            else if (skill.SkillType == SkillType.Passive) _detailCostText.SetText("-");
+            else _detailCostText.SetText(skill.Cost.ToString());
+        }
         if (_detailRangeText != null) _detailRangeText.SetText(skill != null ? skill.Range.ToString("0.##") : "-");
-        if (_detailCooldownText != null) _detailCooldownText.SetText(skill != null ? skill.CoolDown.ToString("0.##") : "-");
         if (_detailIconImage != null)
         {
             _detailIconImage.sprite = skill != null ? skill.Icon : null;
@@ -153,6 +240,19 @@ public class ExplorationLoadoutUIView : MonoBehaviour
         return slots[slotIndex];
     }
 
+    private static void AddPanelOutline(GameObject go, Color outlineColor)
+    {
+        var o = go.AddComponent<Outline>();
+        o.effectColor = outlineColor;
+        o.effectDistance = new Vector2(1.5f, -1.5f);
+    }
+
+    private static void InsetRect(RectTransform rt, float pixels)
+    {
+        rt.offsetMin += new Vector2(pixels, pixels);
+        rt.offsetMax += new Vector2(-pixels, -pixels);
+    }
+
     private void BuildDebugCanvasIfNeeded()
     {
         EnsureEventSystemExists();
@@ -165,71 +265,170 @@ public class ExplorationLoadoutUIView : MonoBehaviour
         canvasRoot.AddComponent<GraphicRaycaster>();
 
         var panel = CreateUiObject("Panel", canvasRoot.transform);
-        var panelImage = panel.AddComponent<Image>();
-        panelImage.color = new Color(0f, 0f, 0f, 0.8f);
+        panel.AddComponent<Image>().color = new Color(0f, 0f, 0f, 0.82f);
+        AddPanelOutline(panel, new Color(0.75f, 0.75f, 0.85f, 0.5f));
         var panelRect = panel.GetComponent<RectTransform>();
         panelRect.anchorMin = new Vector2(0.05f, 0.08f);
         panelRect.anchorMax = new Vector2(0.95f, 0.92f);
-        panelRect.offsetMin = Vector2.zero;
-        panelRect.offsetMax = Vector2.zero;
+        panelRect.offsetMin = new Vector2(10f, 10f);
+        panelRect.offsetMax = new Vector2(-10f, -10f);
 
         _rootPanel = panel;
         _playerSlots.Clear();
         _bookSlots.Clear();
 
-        _closeButton = CreateButton(panel.transform, "CloseButton", "Fechar", new Vector2(0.92f, 0.95f), new Vector2(0.99f, 0.99f));
-
-        var catalogObj = CreateUiObject("Catalog", panel.transform);
-        StretchRect(catalogObj.GetComponent<RectTransform>(), new Vector2(0.03f, 0.52f), new Vector2(0.58f, 0.94f));
-        var catalogImage = catalogObj.AddComponent<Image>();
-        catalogImage.color = new Color(1f, 1f, 1f, 0.08f);
-        CreateText(catalogObj.transform, "CatalogTitle", "Catalogo de Habilidades", new Vector2(0.02f, 0.86f), new Vector2(0.98f, 0.98f), 24f);
-        _catalogContainer = BuildCatalogScrollArea(catalogObj.transform);
+        _closeButton = CreateButton(panel.transform, "CloseButton", "Fechar", new Vector2(0.90f, 0.94f), new Vector2(0.985f, 0.985f));
 
         var detailsObj = CreateUiObject("Details", panel.transform);
-        StretchRect(detailsObj.GetComponent<RectTransform>(), new Vector2(0.60f, 0.52f), new Vector2(0.97f, 0.94f));
-        var detailsImage = detailsObj.AddComponent<Image>();
-        detailsImage.color = new Color(1f, 1f, 1f, 0.08f);
-        CreateText(detailsObj.transform, "DetailsTitle", "Detalhes", new Vector2(0.03f, 0.86f), new Vector2(0.97f, 0.98f), 24f);
+        StretchRect(detailsObj.GetComponent<RectTransform>(), new Vector2(0.60f, 0.38f), new Vector2(0.97f, 0.94f));
+        InsetRect(detailsObj.GetComponent<RectTransform>(), 6f);
+        detailsObj.AddComponent<Image>().color = new Color(1f, 1f, 1f, 0.07f);
+        AddPanelOutline(detailsObj, new Color(1f, 1f, 1f, 0.32f));
+        CreateText(detailsObj.transform, "DetailsTitle", "Detalhes", new Vector2(0.04f, 0.88f), new Vector2(0.96f, 0.97f), 22f);
         BuildDetails(detailsObj.transform);
 
         var playerContainer = CreateUiObject("PlayerSlots", panel.transform);
-        StretchRect(playerContainer.GetComponent<RectTransform>(), new Vector2(0.03f, 0.06f), new Vector2(0.49f, 0.46f));
-        var playerBg = playerContainer.AddComponent<Image>();
-        playerBg.color = new Color(1f, 1f, 1f, 0.08f);
+        StretchRect(playerContainer.GetComponent<RectTransform>(), new Vector2(0.03f, 0.06f), new Vector2(0.49f, 0.35f));
+        InsetRect(playerContainer.GetComponent<RectTransform>(), 6f);
+        playerContainer.AddComponent<Image>().color = new Color(1f, 1f, 1f, 0.07f);
+        AddPanelOutline(playerContainer, new Color(1f, 1f, 1f, 0.32f));
         BuildSlotRow(playerContainer.transform, _playerSlots, "Skills Player", "P");
 
         var bookContainer = CreateUiObject("BookSlots", panel.transform);
-        StretchRect(bookContainer.GetComponent<RectTransform>(), new Vector2(0.51f, 0.06f), new Vector2(0.97f, 0.46f));
-        var bookBg = bookContainer.AddComponent<Image>();
-        bookBg.color = new Color(1f, 1f, 1f, 0.08f);
+        StretchRect(bookContainer.GetComponent<RectTransform>(), new Vector2(0.51f, 0.06f), new Vector2(0.97f, 0.35f));
+        InsetRect(bookContainer.GetComponent<RectTransform>(), 6f);
+        bookContainer.AddComponent<Image>().color = new Color(1f, 1f, 1f, 0.07f);
+        AddPanelOutline(bookContainer, new Color(1f, 1f, 1f, 0.32f));
         BuildSlotRow(bookContainer.transform, _bookSlots, "Skills Livro", "L");
+
+        _filterDropdownModalBlocker = CreateUiObject("FilterDropdownModalBlocker", panel.transform);
+        StretchRect(_filterDropdownModalBlocker.GetComponent<RectTransform>(), Vector2.zero, Vector2.one);
+        var modalImg = _filterDropdownModalBlocker.AddComponent<Image>();
+        modalImg.color = new Color(0f, 0f, 0f, 0.25f);
+        modalImg.raycastTarget = true;
+        var modalBtn = _filterDropdownModalBlocker.AddComponent<Button>();
+        modalBtn.targetGraphic = modalImg;
+        modalBtn.onClick.AddListener(CloseDebugFilterDropdown);
+        _filterDropdownModalBlocker.SetActive(false);
+
+        var catalogObj = CreateUiObject("Catalog", panel.transform);
+        _catalogPanelTransform = catalogObj.transform;
+        StretchRect(catalogObj.GetComponent<RectTransform>(), new Vector2(0.03f, 0.38f), new Vector2(0.58f, 0.94f));
+        InsetRect(catalogObj.GetComponent<RectTransform>(), 6f);
+        catalogObj.AddComponent<Image>().color = new Color(1f, 1f, 1f, 0.07f);
+        AddPanelOutline(catalogObj, new Color(1f, 1f, 1f, 0.32f));
+        CreateText(catalogObj.transform, "CatalogTitle", "Catalogo de Habilidades", new Vector2(0.04f, 0.88f), new Vector2(0.96f, 0.97f), 22f);
+        _catalogContainer = BuildCatalogScrollArea(catalogObj.transform);
+        BuildDebugFilterBar(catalogObj.transform);
+
+        BringCatalogAndDropdownToFront();
+    }
+
+    private void BuildDebugFilterBar(Transform catalogParent)
+    {
+        _debugFilterClickBlocker = CreateUiObject("FilterClickBlocker", catalogParent);
+        StretchRect(_debugFilterClickBlocker.GetComponent<RectTransform>(), new Vector2(0.02f, 0.02f), new Vector2(0.98f, 0.748f));
+        var blk = _debugFilterClickBlocker.AddComponent<Image>();
+        blk.color = new Color(0f, 0f, 0f, 0.12f);
+        blk.raycastTarget = true;
+        var blkBtn = _debugFilterClickBlocker.AddComponent<Button>();
+        blkBtn.targetGraphic = blk;
+        blkBtn.onClick.AddListener(CloseDebugFilterDropdown);
+        _debugFilterClickBlocker.SetActive(false);
+
+        var row = CreateUiObject("FilterRow", catalogParent);
+        StretchRect(row.GetComponent<RectTransform>(), new Vector2(0.04f, 0.755f), new Vector2(0.96f, 0.855f));
+        row.AddComponent<Image>().color = new Color(0f, 0f, 0f, 0.22f);
+        AddPanelOutline(row, new Color(1f, 1f, 1f, 0.22f));
+        CreateText(row.transform, "Lbl", "Categoria", new Vector2(0.03f, 0.2f), new Vector2(0.22f, 0.8f), 15f);
+        var hdrGo = CreateUiObject("FilterHeaderBtn", row.transform);
+        StretchRect(hdrGo.GetComponent<RectTransform>(), new Vector2(0.24f, 0.12f), new Vector2(0.97f, 0.88f));
+        hdrGo.AddComponent<Image>().color = new Color(1f, 1f, 1f, 0.1f);
+        var hdrBtn = hdrGo.AddComponent<Button>();
+        _debugFilterHeaderText = CreateText(hdrGo.transform, "Txt", "Todas ▼", new Vector2(0.05f, 0.12f), new Vector2(0.95f, 0.88f), 17f);
+        _debugFilterHeaderText.alignment = TextAlignmentOptions.Left;
+
+        _debugFilterListRoot = CreateUiObject("FilterList", catalogParent);
+        var listRt = _debugFilterListRoot.GetComponent<RectTransform>();
+        listRt.anchorMin = new Vector2(0.06f, 0.755f);
+        listRt.anchorMax = new Vector2(0.94f, 0.755f);
+        listRt.pivot = new Vector2(0.5f, 1f);
+        listRt.anchoredPosition = Vector2.zero;
+        listRt.sizeDelta = Vector2.zero;
+        var listBg = _debugFilterListRoot.AddComponent<Image>();
+        listBg.color = new Color(0.08f, 0.08f, 0.1f, 0.98f);
+        listBg.raycastTarget = true;
+        AddPanelOutline(_debugFilterListRoot, new Color(0.9f, 0.9f, 1f, 0.4f));
+        var vlg = _debugFilterListRoot.AddComponent<VerticalLayoutGroup>();
+        vlg.padding = new RectOffset(12, 12, 10, 10);
+        vlg.spacing = 8f;
+        vlg.childAlignment = TextAnchor.UpperCenter;
+        vlg.childControlWidth = true;
+        vlg.childControlHeight = true;
+        vlg.childForceExpandWidth = true;
+        vlg.childForceExpandHeight = false;
+        var listCsf = _debugFilterListRoot.AddComponent<ContentSizeFitter>();
+        listCsf.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+        listCsf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+        _debugFilterListRoot.SetActive(false);
+
+        for (int i = 0; i <= (int)ExplorationLoadoutSkillFilter.Buff; i++)
+        {
+            int idx = i;
+            var label = ExplorationLoadoutSkillFilterUtil.DisplayLabel((ExplorationLoadoutSkillFilter)idx);
+            var optGo = CreateUiObject("Opt" + i, _debugFilterListRoot.transform);
+            var optImg = optGo.AddComponent<Image>();
+            optImg.color = new Color(1f, 1f, 1f, 0.1f);
+            var le = optGo.AddComponent<LayoutElement>();
+            le.minHeight = 38f;
+            le.preferredHeight = 38f;
+            var optBtn = optGo.AddComponent<Button>();
+            var optTxt = CreateText(optGo.transform, "Txt", label, new Vector2(0.05f, 0.1f), new Vector2(0.95f, 0.9f), 16f);
+            optTxt.alignment = TextAlignmentOptions.Left;
+            optBtn.onClick.AddListener(() =>
+            {
+                if (_skillCategoryDropdown != null)
+                    _skillCategoryDropdown.SetValueWithoutNotify(idx);
+                _onCatalogFilterChanged?.Invoke((ExplorationLoadoutSkillFilter)idx);
+                _debugFilterHeaderText?.SetText(label + " ▼");
+                CloseDebugFilterDropdown();
+            });
+        }
+
+        hdrBtn.onClick.AddListener(() =>
+        {
+            bool open = _debugFilterListRoot == null || !_debugFilterListRoot.activeSelf;
+            SetDebugFilterDropdownOpen(open);
+        });
     }
 
     private void BuildSlotRow(Transform parent, List<SkillSlotUiRef> targetSlots, string title, string prefix)
     {
-        CreateText(parent, $"{title}Title", title, new Vector2(0.02f, 0.83f), new Vector2(0.98f, 0.98f), 24f);
+        CreateText(parent, $"{title}Title", title, new Vector2(0.03f, 0.80f), new Vector2(0.97f, 0.96f), 21f);
+        const float gap = 0.018f;
+        float slotW = (1f - gap * 5f) / 4f;
         for (int i = 0; i < 4; i++)
         {
-            float minX = 0.01f + i * 0.245f;
-            float maxX = minX + 0.235f;
+            float minX = gap + i * (slotW + gap);
+            float maxX = minX + slotW;
             var slotObj = CreateUiObject($"{prefix}Slot{i}", parent);
-            StretchRect(slotObj.GetComponent<RectTransform>(), new Vector2(minX, 0.10f), new Vector2(maxX, 0.80f));
+            StretchRect(slotObj.GetComponent<RectTransform>(), new Vector2(minX, 0.08f), new Vector2(maxX, 0.76f));
 
             var button = slotObj.AddComponent<Button>();
             var image = slotObj.AddComponent<Image>();
-            image.color = new Color(1f, 1f, 1f, 0.14f);
+            image.color = new Color(1f, 1f, 1f, 0.12f);
+            AddPanelOutline(slotObj, new Color(1f, 1f, 1f, 0.28f));
             var outlineObj = CreateUiObject("Selected", slotObj.transform);
             var outline = outlineObj.AddComponent<Image>();
-            outline.color = new Color(1f, 0.85f, 0.2f, 0.45f);
+            outline.color = new Color(1f, 0.85f, 0.2f, 0.5f);
             StretchRect(outlineObj.GetComponent<RectTransform>(), Vector2.zero, Vector2.one);
             outline.enabled = false;
 
-            var name = CreateText(slotObj.transform, "Name", "-", new Vector2(0.04f, 0.58f), new Vector2(0.96f, 0.95f), 17f);
-            var cost = CreateText(slotObj.transform, "Cost", "0", new Vector2(0.04f, 0.1f), new Vector2(0.45f, 0.5f), 18f);
+            var name = CreateText(slotObj.transform, "Name", "-", new Vector2(0.06f, 0.55f), new Vector2(0.94f, 0.92f), 16f, ellipsis: true);
+            var cost = CreateText(slotObj.transform, "Cost", "0", new Vector2(0.06f, 0.1f), new Vector2(0.42f, 0.48f), 16f);
             var iconObj = CreateUiObject("Icon", slotObj.transform);
             var icon = iconObj.AddComponent<Image>();
-            StretchRect(iconObj.GetComponent<RectTransform>(), new Vector2(0.52f, 0.12f), new Vector2(0.92f, 0.52f));
+            StretchRect(iconObj.GetComponent<RectTransform>(), new Vector2(0.48f, 0.14f), new Vector2(0.93f, 0.52f));
             icon.enabled = false;
 
             targetSlots.Add(new SkillSlotUiRef
@@ -245,37 +444,77 @@ public class ExplorationLoadoutUIView : MonoBehaviour
 
     private void BuildDetails(Transform parent)
     {
-        CreateText(parent, "NameLabel", "Nome", new Vector2(0.03f, 0.78f), new Vector2(0.97f, 0.86f), 14f);
-        _detailNameText = CreateText(parent, "Name", "-", new Vector2(0.03f, 0.66f), new Vector2(0.97f, 0.78f), 24f);
+        CreateText(parent, "NameLabel", "Nome", new Vector2(0.04f, 0.80f), new Vector2(0.96f, 0.87f), 13f);
+        _detailNameText = CreateText(parent, "Name", "-", new Vector2(0.04f, 0.70f), new Vector2(0.96f, 0.79f), 22f, ellipsis: true);
 
-        CreateText(parent, "DescriptionLabel", "Descricao", new Vector2(0.03f, 0.58f), new Vector2(0.97f, 0.66f), 14f);
-        _detailDescriptionText = CreateText(parent, "Description", "", new Vector2(0.03f, 0.42f), new Vector2(0.97f, 0.58f), 18f);
+        CreateText(parent, "DescriptionLabel", "Descricao", new Vector2(0.04f, 0.62f), new Vector2(0.96f, 0.69f), 13f);
+        _detailDescriptionText = CreateText(parent, "Description", "", new Vector2(0.04f, 0.38f), new Vector2(0.96f, 0.61f), 16f);
+        if (_detailDescriptionText != null)
+        {
+            _detailDescriptionText.enableWordWrapping = true;
+            _detailDescriptionText.overflowMode = TextOverflowModes.Ellipsis;
+        }
 
-        CreateText(parent, "PowerLabel", "Poder", new Vector2(0.03f, 0.33f), new Vector2(0.28f, 0.40f), 14f);
-        _detailPowerText = CreateText(parent, "Power", "-", new Vector2(0.03f, 0.25f), new Vector2(0.28f, 0.33f), 18f);
+        CreateText(parent, "PowerLabel", "Poder", new Vector2(0.04f, 0.30f), new Vector2(0.30f, 0.36f), 13f);
+        _detailPowerText = CreateText(parent, "Power", "-", new Vector2(0.04f, 0.23f), new Vector2(0.30f, 0.29f), 16f);
 
-        CreateText(parent, "CostLabel", "Custo", new Vector2(0.30f, 0.33f), new Vector2(0.55f, 0.40f), 14f);
-        _detailCostText = CreateText(parent, "Cost", "-", new Vector2(0.30f, 0.25f), new Vector2(0.55f, 0.33f), 18f);
+        CreateText(parent, "CostLabel", "Custo", new Vector2(0.32f, 0.30f), new Vector2(0.58f, 0.36f), 13f);
+        _detailCostText = CreateText(parent, "Cost", "-", new Vector2(0.32f, 0.23f), new Vector2(0.58f, 0.29f), 16f);
 
-        CreateText(parent, "RangeLabel", "Alcance", new Vector2(0.57f, 0.33f), new Vector2(0.82f, 0.40f), 14f);
-        _detailRangeText = CreateText(parent, "Range", "-", new Vector2(0.57f, 0.25f), new Vector2(0.82f, 0.33f), 18f);
-
-        CreateText(parent, "CooldownLabel", "Cooldown", new Vector2(0.03f, 0.16f), new Vector2(0.55f, 0.23f), 14f);
-        _detailCooldownText = CreateText(parent, "Cooldown", "-", new Vector2(0.03f, 0.08f), new Vector2(0.55f, 0.16f), 18f);
+        CreateText(parent, "RangeLabel", "Alcance", new Vector2(0.60f, 0.30f), new Vector2(0.86f, 0.36f), 13f);
+        _detailRangeText = CreateText(parent, "Range", "-", new Vector2(0.60f, 0.23f), new Vector2(0.86f, 0.29f), 16f);
 
         var iconObj = CreateUiObject("Icon", parent);
         _detailIconImage = iconObj.AddComponent<Image>();
-        StretchRect(iconObj.GetComponent<RectTransform>(), new Vector2(0.75f, 0.05f), new Vector2(0.95f, 0.23f));
+        AddPanelOutline(iconObj, new Color(1f, 1f, 1f, 0.25f));
+        StretchRect(iconObj.GetComponent<RectTransform>(), new Vector2(0.74f, 0.06f), new Vector2(0.96f, 0.22f));
         _detailIconImage.enabled = false;
     }
 
     private Transform BuildCatalogScrollArea(Transform parent)
     {
-        var viewport = CreateUiObject("Viewport", parent);
-        StretchRect(viewport.GetComponent<RectTransform>(), new Vector2(0.02f, 0.04f), new Vector2(0.98f, 0.84f));
-        var viewportImage = viewport.AddComponent<Image>();
-        viewportImage.color = new Color(0f, 0f, 0f, 0.15f);
+        const float scrollbarWidth = 18f;
+
+        var scrollRoot = CreateUiObject("CatalogScroll", parent);
+        StretchRect(scrollRoot.GetComponent<RectTransform>(), new Vector2(0.035f, 0.03f), new Vector2(0.965f, 0.74f));
+
+        var viewport = CreateUiObject("Viewport", scrollRoot.transform);
+        var vpRt = viewport.GetComponent<RectTransform>();
+        vpRt.anchorMin = Vector2.zero;
+        vpRt.anchorMax = Vector2.one;
+        vpRt.offsetMin = Vector2.zero;
+        vpRt.offsetMax = new Vector2(-scrollbarWidth, 0f);
+
+        var vpImg = viewport.AddComponent<Image>();
+        vpImg.color = new Color(0f, 0f, 0f, 0.18f);
+        AddPanelOutline(viewport, new Color(1f, 1f, 1f, 0.2f));
         viewport.AddComponent<Mask>().showMaskGraphic = false;
+
+        var scrollbarGo = CreateUiObject("Scrollbar", scrollRoot.transform);
+        var sbRt = scrollbarGo.GetComponent<RectTransform>();
+        sbRt.anchorMin = new Vector2(1f, 0f);
+        sbRt.anchorMax = new Vector2(1f, 1f);
+        sbRt.pivot = new Vector2(1f, 0.5f);
+        sbRt.sizeDelta = new Vector2(scrollbarWidth, 0f);
+        sbRt.anchoredPosition = Vector2.zero;
+        scrollbarGo.AddComponent<Image>().color = new Color(0f, 0f, 0f, 0.4f);
+
+        var sliding = CreateUiObject("SlidingArea", scrollbarGo.transform);
+        StretchRect(sliding.GetComponent<RectTransform>(), new Vector2(0.15f, 0.03f), new Vector2(0.85f, 0.97f));
+        sliding.AddComponent<Image>().color = new Color(0f, 0f, 0f, 0.15f);
+
+        var handle = CreateUiObject("Handle", sliding.transform);
+        var hRt = handle.GetComponent<RectTransform>();
+        hRt.anchorMin = Vector2.zero;
+        hRt.anchorMax = Vector2.one;
+        hRt.sizeDelta = Vector2.zero;
+        var hImg = handle.AddComponent<Image>();
+        hImg.color = new Color(0.88f, 0.88f, 0.95f, 0.95f);
+
+        var scrollbar = scrollbarGo.AddComponent<Scrollbar>();
+        scrollbar.direction = Scrollbar.Direction.BottomToTop;
+        scrollbar.targetGraphic = hImg;
+        scrollbar.handleRect = hRt;
 
         var content = CreateUiObject("Content", viewport.transform);
         var contentRect = content.GetComponent<RectTransform>();
@@ -285,38 +524,53 @@ public class ExplorationLoadoutUIView : MonoBehaviour
         contentRect.anchoredPosition = Vector2.zero;
         contentRect.sizeDelta = new Vector2(0f, 0f);
 
-        var scrollRect = parent.gameObject.AddComponent<ScrollRect>();
-        scrollRect.viewport = viewport.GetComponent<RectTransform>();
+        var vlg = content.AddComponent<VerticalLayoutGroup>();
+        vlg.spacing = 6f;
+        vlg.padding = new RectOffset(4, 6, 2, 6);
+        vlg.childAlignment = TextAnchor.UpperCenter;
+        vlg.childControlWidth = true;
+        vlg.childControlHeight = true;
+        vlg.childForceExpandWidth = true;
+        vlg.childForceExpandHeight = false;
+
+        var csf = content.AddComponent<ContentSizeFitter>();
+        csf.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+        csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+        var scrollRect = scrollRoot.AddComponent<ScrollRect>();
+        scrollRect.viewport = vpRt;
         scrollRect.content = contentRect;
+        scrollRect.verticalScrollbar = scrollbar;
+        scrollRect.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.Permanent;
         scrollRect.horizontal = false;
         scrollRect.vertical = true;
         scrollRect.movementType = ScrollRect.MovementType.Clamped;
-        scrollRect.scrollSensitivity = 30f;
+        scrollRect.scrollSensitivity = 38f;
+
+        _catalogScrollRect = scrollRect;
 
         return content.transform;
     }
 
     private ExplorationSkillCatalogItemView CreateRuntimeCatalogItem(Transform parent)
     {
+        const float rowH = 76f;
         var row = CreateUiObject("CatalogItem", parent);
-        var rowRect = row.GetComponent<RectTransform>();
-        rowRect.anchorMin = new Vector2(0f, 1f);
-        rowRect.anchorMax = new Vector2(1f, 1f);
-        rowRect.pivot = new Vector2(0.5f, 1f);
-        rowRect.sizeDelta = new Vector2(0f, 64f);
-        rowRect.anchoredPosition = new Vector2(0f, -68f * (parent.childCount - 1));
-        float contentHeight = 68f * (parent.childCount + 1);
-        if (parent is RectTransform parentRect)
-            parentRect.sizeDelta = new Vector2(parentRect.sizeDelta.x, contentHeight);
+        var le = row.AddComponent<LayoutElement>();
+        le.minHeight = rowH;
+        le.preferredHeight = rowH;
+        le.flexibleHeight = 0f;
 
         var button = row.AddComponent<Button>();
         var image = row.AddComponent<Image>();
-        image.color = new Color(1f, 1f, 1f, 0.12f);
+        image.color = new Color(1f, 1f, 1f, 0.11f);
+        AddPanelOutline(row, new Color(1f, 1f, 1f, 0.22f));
 
-        var name = CreateText(row.transform, "Name", "-", new Vector2(0.08f, 0.15f), new Vector2(0.96f, 0.85f), 20f);
+        var name = CreateText(row.transform, "Name", "-", new Vector2(0.11f, 0.18f), new Vector2(0.96f, 0.82f), 18f, ellipsis: true);
         var iconObj = CreateUiObject("Icon", row.transform);
         var icon = iconObj.AddComponent<Image>();
-        StretchRect(iconObj.GetComponent<RectTransform>(), new Vector2(0.01f, 0.15f), new Vector2(0.07f, 0.85f));
+        StretchRect(iconObj.GetComponent<RectTransform>(), new Vector2(0.03f, 0.18f), new Vector2(0.10f, 0.82f));
+        AddPanelOutline(iconObj, new Color(1f, 1f, 1f, 0.15f));
         icon.enabled = false;
 
         var view = row.AddComponent<ExplorationSkillCatalogItemView>();
@@ -339,7 +593,7 @@ public class ExplorationLoadoutUIView : MonoBehaviour
         rect.offsetMax = Vector2.zero;
     }
 
-    private static TMP_Text CreateText(Transform parent, string name, string text, Vector2 min, Vector2 max, float size)
+    private static TMP_Text CreateText(Transform parent, string name, string text, Vector2 min, Vector2 max, float size, bool ellipsis = false)
     {
         var go = CreateUiObject(name, parent);
         var txt = go.AddComponent<TextMeshProUGUI>();
@@ -347,6 +601,11 @@ public class ExplorationLoadoutUIView : MonoBehaviour
         txt.fontSize = size;
         txt.color = Color.white;
         txt.alignment = TextAlignmentOptions.Left;
+        if (ellipsis)
+        {
+            txt.enableWordWrapping = false;
+            txt.overflowMode = TextOverflowModes.Ellipsis;
+        }
         StretchRect(go.GetComponent<RectTransform>(), min, max);
         return txt;
     }

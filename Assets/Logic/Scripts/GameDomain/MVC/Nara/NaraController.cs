@@ -1,4 +1,6 @@
+using System;
 using Logic.Scripts.GameDomain.MVC.Abilitys;
+using Logic.Scripts.GameDomain.MVC.Shared;
 using Logic.Scripts.GameDomain.MVC.Ui;
 using Logic.Scripts.Services.AudioService;
 using Logic.Scripts.Services.CommandFactory;
@@ -13,7 +15,7 @@ using Logic.Scripts.GameDomain.Services.Skills;
 namespace Logic.Scripts.GameDomain.MVC.Nara {
     // INaraController now extends IPlayableUnit, IEffectable and IEffectableAction,
     // so we no longer need to list those separately here.
-    public class NaraController : INaraController, IFixedUpdatable {
+    public class NaraController : INaraController, IFixedUpdatable, INextHitDamageShield, ISkillCasterWorldTeleport {
         private readonly IUpdateSubscriptionService _updateSubscriptionService;
         private readonly IAudioService _audioService;
         private readonly ICommandFactory _commandFactory;
@@ -35,6 +37,7 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
         private readonly AbilityData[] _abilities;
 
         private GameObject _activeUnitCircleInstance;
+        private bool _hasNextHitShield;
 
         public NaraController(IUpdateSubscriptionService updateSubscriptionService,
             IAudioService audioService, ICommandFactory commandFactory,
@@ -99,7 +102,7 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
         }
 
         public void CreateNara(NaraMovementController movementController) {
-            _naraView = Object.Instantiate(_naraViewPrefab);
+            _naraView = UnityEngine.Object.Instantiate(_naraViewPrefab);
             InstallNewSkillSystemSkillComponents();
             _naraData.ResetData();
             _naraView.SetMoving(false);
@@ -115,12 +118,54 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
             UnityEngine.Object.Destroy(_naraView.gameObject);
 
             _activeUnitCircleInstance = null;
+            _hasNextHitShield = false;
+            _gamePlayUiController?.OnPlayerNextHitShieldChanged(false);
         }
 
         public void InitEntryPointGamePlay(IGamePlayUiController gamePlayUiController) {
             _gamePlayUiController = gamePlayUiController;
             _gamePlayUiController.SetPlayerValues(_naraData.PreviewHealth, _naraData.ActualHealth, _naraConfiguration.MaxHealth);
+            _gamePlayUiController.OnPlayerNextHitShieldChanged(false);
             _naraMovementController.InitEntryPoint(_naraView.GetRigidbody(), _naraView.GetCamera());
+        }
+
+        /// <inheritdoc />
+        public void ApplyCombatLoadoutPassivesAndActionPoints(IActionPointsService actionPoints) {
+            SkillDataSO[] slots = _newSkillSystemSkillLoadoutService != null
+                ? _newSkillSystemSkillLoadoutService.BuildRuntimeSlotsArray(SkillLoadoutUnitType.Player)
+                : null;
+
+            float moveMult = 1f;
+            int apTurnBonus = 0;
+            if (slots != null) {
+                for (int i = 0; i < slots.Length; i++) {
+                    SkillDataSO s = slots[i];
+                    if (s == null || s.SkillType != SkillType.Passive) continue;
+
+                    PassiveStatModifierEntry[] mods = s.PassiveModifiers;
+                    for (int j = 0; j < mods.Length; j++) {
+                        PassiveStatModifierEntry e = mods[j];
+                        switch (e.Kind) {
+                            case PassiveStatModifierKind.MovementRadiusMultiplier:
+                                if (e.Value > 0f && !float.IsNaN(e.Value) && !float.IsInfinity(e.Value))
+                                    moveMult *= e.Value;
+                                break;
+                            case PassiveStatModifierKind.ActionPointsTurnGainBonus:
+                                apTurnBonus += Mathf.RoundToInt(e.Value);
+                                break;
+                        }
+                    }
+                }
+            }
+
+            if (actionPoints != null) {
+                int max = _naraConfiguration.MaxActionPoints;
+                int gain = Mathf.Max(0, _naraConfiguration.ActionPointsTurnGain + apTurnBonus);
+                actionPoints.Configure(max, gain);
+            }
+
+            if (_naraMovementController is NaraTurnMovementController ntm)
+                ntm.ApplyPassiveMovementAreaMultiplier(moveMult);
         }
 
         public void InitEntryPointExploration() {
@@ -132,6 +177,15 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
             _naraView.GetRigidbody().position = movementCenter;
         }
 
+        public void TeleportToWorldPosition(Vector3 worldPosition) {
+            if (_naraView == null) return;
+            var rb = _naraView.GetRigidbody();
+            if (rb != null) {
+                rb.position = worldPosition;
+                rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
+            }
+        }
+
         #region IEffectable Methods
 
         public Transform GetReferenceTransform() {
@@ -140,27 +194,38 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
 
         public void ResetPreview() {
             _naraData.ResetPreview();
+            _gamePlayUiController?.OnPreviewPlayerHealthUpdate(_naraData.PreviewHealth, _naraConfiguration.MaxHealth);
         }
         public void PreviewDamage(int damageAmound) {
             _naraData.TakeDamage(damageAmound);
-            _gamePlayUiController.OnPreviewPlayerHealthUpdate(_naraData.ActualHealth, _naraConfiguration.MaxHealth);
+            _gamePlayUiController?.OnPreviewPlayerHealthUpdate(_naraData.ActualHealth, _naraConfiguration.MaxHealth);
         }
 
         public void PreviewHeal(int healAmount) {
             _naraData.ApplyPreviewHeal(healAmount);
-            _gamePlayUiController.OnPreviewPlayerHealthUpdate(_naraData.PreviewHealth, _naraConfiguration.MaxHealth);
+            _gamePlayUiController?.OnPreviewPlayerHealthUpdate(_naraData.PreviewHealth, _naraConfiguration.MaxHealth);
+        }
+
+        public void GrantNextHitShield() {
+            _hasNextHitShield = true;
+            _gamePlayUiController?.OnPlayerNextHitShieldChanged(true);
         }
 
         public void TakeDamage(int damageAmound) {
+            if (_cheatController.Imortal == false && damageAmound > 0 && _hasNextHitShield) {
+                _hasNextHitShield = false;
+                _gamePlayUiController?.OnPlayerNextHitShieldChanged(false);
+                return;
+            }
             if (_cheatController.Imortal == false) _naraData.TakeDamage(damageAmound);
             if (_naraView != null) {
                 var flash = _naraView.GetComponent<DamageFlashPresenter>();
                 if (flash == null) flash = _naraView.gameObject.AddComponent<DamageFlashPresenter>();
                 flash.TriggerFlash();
             }
-            _audioService?.PlayAudio(AudioClipType.AbilityPrep2SFX, AudioChannelType.Fx);
-            _gamePlayUiController.OnPlayerHealthUpdate(_naraData.ActualHealth, _naraConfiguration.MaxHealth);
-            _gamePlayUiController.OnPreviewPlayerHealthUpdate(_naraData.ActualHealth, _naraConfiguration.MaxHealth);
+            _audioService?.PlayAudio(AudioClipType.AbilityPrep2SFX, AudioChannelType.Fx, AudioPlayType.OneShot);
+            _gamePlayUiController?.OnPlayerHealthUpdate(_naraData.ActualHealth, _naraConfiguration.MaxHealth);
+            _gamePlayUiController?.OnPreviewPlayerHealthUpdate(_naraData.ActualHealth, _naraConfiguration.MaxHealth);
             if (_naraData.IsAlive()) {
                 _naraView?.PlayDeath();
                 _commandFactory.CreateCommandVoid<GameOverCommand>().SetData(new GameOverCommandData(false)).Execute();
@@ -178,8 +243,8 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
         public void Heal(int healAmount) {
             _naraData.Heal(healAmount);
             _naraData.ResetPreview();
-            _gamePlayUiController.OnPlayerHealthUpdate(_naraData.ActualHealth, _naraConfiguration.MaxHealth);
-            _gamePlayUiController.OnPreviewPlayerHealthUpdate(_naraData.ActualHealth, _naraConfiguration.MaxHealth);
+            _gamePlayUiController?.OnPlayerHealthUpdate(_naraData.ActualHealth, _naraConfiguration.MaxHealth);
+            _gamePlayUiController?.OnPreviewPlayerHealthUpdate(_naraData.ActualHealth, _naraConfiguration.MaxHealth);
         }
 
         public void TriggerExecute() {
@@ -244,7 +309,7 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
         private IActionPointsService EnsureApService() {
             if (_actionPointsService != null) return _actionPointsService;
             try {
-                var sceneCtxs = Object.FindObjectsByType<SceneContext>(FindObjectsSortMode.None);
+                var sceneCtxs = UnityEngine.Object.FindObjectsByType<SceneContext>(FindObjectsSortMode.None);
                 for (int i = 0; i < sceneCtxs.Length; i++) {
                     var sc = sceneCtxs[i];
                     if (sc != null) {
@@ -322,7 +387,7 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
             if (_naraView == null) return;
             if (_naraView.ActiveUnitCirclePrefab == null) return;
 
-            _activeUnitCircleInstance = Object.Instantiate(_naraView.ActiveUnitCirclePrefab, _naraView.transform);
+            _activeUnitCircleInstance = UnityEngine.Object.Instantiate(_naraView.ActiveUnitCirclePrefab, _naraView.transform);
             _activeUnitCircleInstance.name = "ActiveUnitCircle";
             _activeUnitCircleInstance.transform.localPosition = new Vector3(0f, 0.2f, 0f);
             _activeUnitCircleInstance.transform.localRotation = Quaternion.identity;
@@ -350,6 +415,13 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
         public IActionPointsService GetActionPoints() => EnsureApService();
         public AbilityData[] GetAbilities() => _abilities;
 
+        public void SyncArenaMovementAfterMovementSkillDisplacement() {
+            if (_naraMovementController is NaraTurnMovementController ntm) {
+                ntm.RecenterMovementRingPreservingRadius();
+            }
+            Unfreeeze();
+        }
+
         public void OnAbilityExecuted() {
             if (_naraMovementController is NaraTurnMovementController ntm) {
                 ntm.RecalculateRadiusAfterAbility();
@@ -357,6 +429,17 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
                 ntm.Refresh();
             }
             Unfreeeze();
+        }
+
+        public void BeginSkillGuidedDisplacementToWorldPosition(Vector3 worldTarget, float durationSeconds, Action onComplete) {
+            if (_naraView == null) {
+                onComplete?.Invoke();
+                return;
+            }
+            var displacer = _naraView.GetComponent<ArenaSkillPathDisplacer>();
+            if (displacer == null)
+                displacer = _naraView.gameObject.AddComponent<ArenaSkillPathDisplacer>();
+            displacer.Begin(_naraView.GetRigidbody(), worldTarget, durationSeconds, onComplete);
         }
 
         #endregion

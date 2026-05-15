@@ -1,6 +1,7 @@
 using Logic.Scripts.Core.Mvc.UICamera;
 using Logic.Scripts.GameDomain.Commands;
 using Logic.Scripts.GameDomain.MVC.Echo;
+using Logic.Scripts.GameDomain.MVC.Shared;
 using Logic.Scripts.GameDomain.States;
 using Logic.Scripts.Services.AudioService;
 using Logic.Scripts.Services.CommandFactory;
@@ -134,11 +135,8 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
             _gamePlayHud.SnapPlayerHealth(previewHp, actualHp, maxHp);
         }
 
-        public void SetAbilityManaCosts(int c1, int c2, int c3, int c4) {
-            _gamePlayHud.OnSkill1CostChange(c1);
-            _gamePlayHud.OnSkill2CostChange(c2);
-            _gamePlayHud.OnSkill3CostChange(c3);
-            _gamePlayHud.OnSkill4CostChange(c4);
+        public void SetAbilityManaCosts(int c1, int c2, int c3, int c4, bool showCostSlot1 = true, bool showCostSlot2 = true, bool showCostSlot3 = true, bool showCostSlot4 = true) {
+            _gamePlayHud.SetAbilityManaCosts(c1, c2, c3, c4, showCostSlot1, showCostSlot2, showCostSlot3, showCostSlot4);
         }
 
         public void SetSkillHudIcons(Sprite erza0, Sprite erza1, Sprite erza2, Sprite erza3, Sprite book0, Sprite book1, Sprite book2, Sprite book3) =>
@@ -167,6 +165,17 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
         public void SnapPlayerActionPoints(int current, int max) => _gamePlayHud.SnapPlayerActionPoints(current, max);
 
         public void OnPlayerActionPointsChange(int current, int max) => _gamePlayHud.OnPlayerActionPointsChange(current, max);
+
+        public void OnPlayerNextHitShieldChanged(bool active) => _gamePlayHud.OnPlayerNextHitShieldChanged(active);
+
+        public void BeginSkillCastAimPreview(IPlayableUnit caster, SkillDataSO skill, int apCost, bool showPlayerManaPreview, int apCurrent, int apMax) =>
+            _gamePlayHud.BeginSkillCastAimPreview(caster, skill, apCost, showPlayerManaPreview, apCurrent, apMax);
+
+        public void EndSkillCastAimPreviewCancel(IPlayableUnit caster) =>
+            _gamePlayHud.EndSkillCastAimPreviewCancel(caster);
+
+        public void EndSkillCastAimPreviewCommit(IPlayableUnit caster) =>
+            _gamePlayHud.EndSkillCastAimPreviewCommit(caster);
 
         public void OnSkill1CostChange(int newValue) => _gamePlayHud.OnSkill1CostChange(newValue);
 

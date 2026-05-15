@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a7b8c9d0e1f23456789abcdef0123ab, type: 3}
+  m_Name: SK_Movement_Area_Teleport
+  m_EditorClassIdentifier: 
+  _skillType: 2
+  _castType: 1
+  _projectileRange: 12
+  _projectileNumberOfTargets: 1
+  _projectileTravelSpeed: 12
+  _projectileAimPrefab: {fileID: 8272950397043843596, guid: 8058bca71956f704e915ec3e0b22aabd, type: 3}
+  _projectilePrefab: {fileID: 4470363709726842422, guid: 05ecf4c11bd35014797b40e47735e1c1, type: 3}
+  _moveCasterToProjectileHit: 0
+  _projectileHitSurfaceSeparation: 0.25
+  _projectileHitAntiOverlapAlongPath: 0.15
+  _projectileWorldHitMask:
+    serializedVersion: 2
+    m_Bits: 0
+  _projectileDealsDamage: 1
+  _projectileDefersArenaSyncUntilHit: 0
+  _areaMinRange: 0
+  _areaMaxRange: 5
+  _areaRadius: 2
+  _areaAimPrefab: {fileID: 1607142820532151380, guid: 6feee9629db8db94f83b1e6771d787d1, type: 3}
+  _areaImpactPrefab: {fileID: 1607142820532151380, guid: 6feee9629db8db94f83b1e6771d787d1, type: 3}
+  _selfAimPrefab: {fileID: 1607142820532151380, guid: 869e8460ad50e054b9b351e10c296c31, type: 3}
+  _selfCastPrefab: {fileID: 1607142820532151380, guid: 6190cf774033c09479d45e3c13b935d7, type: 3}
+  Power: 0
+  Cost: 2
+  Icon: {fileID: 21300000, guid: f1f774d82f1bae14a95b9197cb85239d, type: 3}
+  SkillName: Blink
+  Description: "Teleporta at\xE9 a \xE1rea alvo"
+  _loadoutPersistenceKey: 
+  _effects:
+  - {fileID: 11400000, guid: 697ae35b4c5cfb0439a41ec694d04329, type: 2}
+  _runtimeModifiers: []

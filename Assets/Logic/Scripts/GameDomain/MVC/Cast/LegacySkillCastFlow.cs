@@ -54,6 +54,12 @@ public class LegacySkillCastFlow : ISkillCastFlow
         return true;
     }
 
+    public bool TryGetPreparedSkill(out SkillDataSO skill)
+    {
+        skill = null;
+        return false;
+    }
+
     public void ExecutePreparedCast(IPlayableUnit caster)
     {
         _currentAbility?.Cast(caster);

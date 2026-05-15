@@ -11,6 +11,8 @@ namespace Logic.Scripts.GameDomain.Services.ActiveUnit
 {
     public class ActiveUnitService : IActiveUnitService
     {
+        private static bool SlotShowsManaCostUi(SkillDataSO skill) =>
+            skill == null || skill.SkillType != SkillType.Passive;
         private readonly INaraController _naraController;
         private readonly IWorldCameraController _worldCamera;
         private readonly IGamePlayUiController _gamePlayUiController;
@@ -40,7 +42,19 @@ namespace Logic.Scripts.GameDomain.Services.ActiveUnit
 
             if (ActiveUnit is IBookController)
             {
-                _gamePlayUiController.SetAbilityManaCosts(0, 0, 0, 0);
+                var bookView = ActiveUnit.UnitViewGO;
+                var bookLoadout = bookView != null ? bookView.GetComponent<NewSkillSystemSkillLoadout>() : null;
+                SkillDataSO skillAtSlot(int i)
+                {
+                    if (bookLoadout == null || !bookLoadout.TryGetSkill(i, out SkillDataSO s)) return null;
+                    return s;
+                }
+
+                _gamePlayUiController.SetAbilityManaCosts(0, 0, 0, 0,
+                    SlotShowsManaCostUi(skillAtSlot(0)),
+                    SlotShowsManaCostUi(skillAtSlot(1)),
+                    SlotShowsManaCostUi(skillAtSlot(2)),
+                    SlotShowsManaCostUi(skillAtSlot(3)));
                 return;
             }
 
@@ -59,7 +73,19 @@ namespace Logic.Scripts.GameDomain.Services.ActiveUnit
                             if (!newSkillSystemLoadout.TryGetSkill(i, out SkillDataSO skill) || skill == null) return 0;
                             return Mathf.Max(0, skill.Cost);
                         }
-                        _gamePlayUiController.SetAbilityManaCosts(newSkillSystemCostAt(0), newSkillSystemCostAt(1), newSkillSystemCostAt(2), newSkillSystemCostAt(3));
+
+                        SkillDataSO skillAt(int i)
+                        {
+                            if (!newSkillSystemLoadout.TryGetSkill(i, out SkillDataSO s)) return null;
+                            return s;
+                        }
+
+                        _gamePlayUiController.SetAbilityManaCosts(
+                            newSkillSystemCostAt(0), newSkillSystemCostAt(1), newSkillSystemCostAt(2), newSkillSystemCostAt(3),
+                            SlotShowsManaCostUi(skillAt(0)),
+                            SlotShowsManaCostUi(skillAt(1)),
+                            SlotShowsManaCostUi(skillAt(2)),
+                            SlotShowsManaCostUi(skillAt(3)));
                         return;
                     }
                 }
@@ -67,7 +93,8 @@ namespace Logic.Scripts.GameDomain.Services.ActiveUnit
 
             var abs = ActiveUnit.GetAbilities();
             int legacyCostAt(int i) => abs != null && i < abs.Length && abs[i] != null ? abs[i].GetCost() : 0;
-            _gamePlayUiController.SetAbilityManaCosts(legacyCostAt(0), legacyCostAt(1), legacyCostAt(2), legacyCostAt(3));
+            _gamePlayUiController.SetAbilityManaCosts(legacyCostAt(0), legacyCostAt(1), legacyCostAt(2), legacyCostAt(3),
+                true, true, true, true);
         }
 
         private void PushNewSkillSystemSkillIconsToHud()

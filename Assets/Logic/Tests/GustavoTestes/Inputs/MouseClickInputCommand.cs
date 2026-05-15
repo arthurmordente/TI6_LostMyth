@@ -32,7 +32,12 @@ public class MouseClickInputCommand : BaseCommand, ICommandVoid {
         _castController.UseAbility(caster);
 
         if (_castController?.GetCanUseAbility() == true) {
-            caster.OnAbilityExecuted();
+            if (_castController.ConsumeDeferredArenaSyncAfterProjectileCast())
+                caster.Unfreeeze();
+            else if (_castController.ConsumeLastCastWasMovementSkill())
+                caster.SyncArenaMovementAfterMovementSkillDisplacement();
+            else
+                caster.OnAbilityExecuted();
             _castController.SetCanUseAbility(false);
         }
     }

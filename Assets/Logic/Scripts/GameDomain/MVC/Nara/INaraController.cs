@@ -1,5 +1,6 @@
 using Logic.Scripts.GameDomain.MVC.Shared;
 using Logic.Scripts.GameDomain.MVC.Ui;
+using Logic.Scripts.Turns;
 using UnityEngine;
 
 namespace Logic.Scripts.GameDomain.MVC.Nara {
@@ -13,6 +14,8 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
         NaraMovementController NaraMove { get; }
         void InitEntryPointExploration();
         void InitEntryPointGamePlay(IGamePlayUiController gamePlayUiController);
+        /// <summary>Once per fight after <see cref="InitEntryPointGamePlay"/>: passive skills + <see cref="NaraConfigurationSO"/> mana gain/max.</summary>
+        void ApplyCombatLoadoutPassivesAndActionPoints(IActionPointsService actionPoints);
         void CreateNara(NaraMovementController movementController);
         void ResetController();
         void PlayAttackType1();

@@ -5,7 +5,6 @@ using Logic.Scripts.GameDomain.MVC.Abilitys;
 using Logic.Scripts.GameDomain.MVC.Book;
 using Logic.Scripts.GameDomain.MVC.Book.Divide;
 using Logic.Scripts.GameDomain.Services.ActiveUnit;
-using Logic.Scripts.GameDomain.Services.Skills;
 using Zenject;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -28,10 +27,6 @@ public class GamePlayInstaller : MonoInstaller {
     [SerializeField] private GameOverUIView _gameOverUIView;
 
     [SerializeField] private AbilityData[] _skills;
-    [Header("New Skill System Catalog")]
-    [Tooltip("Todas as skills do novo sistema. As 4 primeiras viram o loadout padrao da luta.")]
-    [FormerlySerializedAs("_paschoalSkillCatalog")]
-    [SerializeField] private SkillDataSO[] _newSkillSystemSkillCatalog;
 
     [Header("Book Skills")]
     [Tooltip("Skills exclusivas do Livro. Se vazio, o Livro usará as mesmas skills da Nara.")]
@@ -64,9 +59,6 @@ public class GamePlayInstaller : MonoInstaller {
         Container.BindInterfacesTo<LevelCancellationTokenService>().AsSingle().NonLazy();
         Container.Bind<INaraMovementControllerFactory>().To<NaraMovementControllerFactory>().AsSingle();
         Container.BindInterfacesTo<GamePlayDataService>().AsSingle().NonLazy();
-        Container.Bind<INewSkillSystemSkillLoadoutService>().To<NewSkillSystemSkillLoadoutService>().AsSingle()
-            .WithArguments(_newSkillSystemSkillCatalog, 4);
-
         Container.Bind<INewSkillSystemSkillTargetingPreviewService>().To<NewSkillSystemSkillTargetingPreviewService>().AsSingle();
         Container.Bind<NewSkillSystemDefaultSkillCastFlow>().AsSingle();
 
