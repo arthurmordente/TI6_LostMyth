@@ -19,6 +19,13 @@ MonoBehaviour:
   _projectileTravelSpeed: 12
   _projectileAimPrefab: {fileID: 0}
   _projectilePrefab: {fileID: 0}
+  _moveCasterToProjectileHit: 0
+  _projectilePullStandoffFromTargetMeters: 1.2
+  _projectileDealsDamage: 1
+  _projectileDefersArenaSyncUntilHit: 0
+  _projectileSpawnForwardOffset: 0.35
+  _projectileMinTravelBeforeHitMeters: 0.45
+  _projectileHitDisplacementDurationSeconds: 0.35
   _areaMinRange: 0
   _areaMaxRange: 8
   _areaRadius: 2
@@ -26,11 +33,12 @@ MonoBehaviour:
   _areaImpactPrefab: {fileID: 2224025274982176450, guid: caa4a69375bd38348901ddadba2f8953, type: 3}
   _selfAimPrefab: {fileID: 0}
   _selfCastPrefab: {fileID: 0}
-  Power: 35
+  Power: 25
   Cost: 2
   Icon: {fileID: 21300000, guid: c0de9e55624845a42b8ad06684976429, type: 3}
   SkillName: Chuva de raios
-  Description: "Ataque em \xE1rea"
+  Description: "Invoca raio dos c\xE9us, causando muito dano em tudo na \xE1rea selecionada."
   _effects:
   - {fileID: 11400000, guid: a47ac10b58cc4372a5670e02b2c3d472, type: 2}
+  _passiveModifiers: []
   _runtimeModifiers: []

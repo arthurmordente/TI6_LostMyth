@@ -1,4 +1,5 @@
 using Logic.Scripts.GameDomain.MVC.Nara;
+using UnityEngine;
 
 namespace Logic.Scripts.GameDomain.MVC.Book
 {
@@ -24,6 +25,12 @@ namespace Logic.Scripts.GameDomain.MVC.Book
         public void ResetPreview()
         {
             PreviewHealth = ActualHealth;
+        }
+
+        public void ApplyPreviewSubtractDamage(int amount)
+        {
+            if (amount <= 0) return;
+            PreviewHealth = Mathf.Max(0, PreviewHealth - amount);
         }
 
         public void TakeDamage(int amount)

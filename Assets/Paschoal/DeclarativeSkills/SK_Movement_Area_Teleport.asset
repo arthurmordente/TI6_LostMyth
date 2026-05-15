@@ -20,13 +20,12 @@ MonoBehaviour:
   _projectileAimPrefab: {fileID: 8272950397043843596, guid: 8058bca71956f704e915ec3e0b22aabd, type: 3}
   _projectilePrefab: {fileID: 4470363709726842422, guid: 05ecf4c11bd35014797b40e47735e1c1, type: 3}
   _moveCasterToProjectileHit: 0
-  _projectileHitSurfaceSeparation: 0.25
-  _projectileHitAntiOverlapAlongPath: 0.15
-  _projectileWorldHitMask:
-    serializedVersion: 2
-    m_Bits: 0
+  _projectilePullStandoffFromTargetMeters: 0.25
   _projectileDealsDamage: 1
   _projectileDefersArenaSyncUntilHit: 0
+  _projectileSpawnForwardOffset: 0.35
+  _projectileMinTravelBeforeHitMeters: 0.45
+  _projectileHitDisplacementDurationSeconds: 0.35
   _areaMinRange: 0
   _areaMaxRange: 5
   _areaRadius: 2
@@ -38,8 +37,8 @@ MonoBehaviour:
   Cost: 2
   Icon: {fileID: 21300000, guid: f1f774d82f1bae14a95b9197cb85239d, type: 3}
   SkillName: Blink
-  Description: "Teleporta at\xE9 a \xE1rea alvo"
-  _loadoutPersistenceKey: 
+  Description: "Teleporta at\xE9 a \xE1rea alvo."
   _effects:
   - {fileID: 11400000, guid: 697ae35b4c5cfb0439a41ec694d04329, type: 2}
+  _passiveModifiers: []
   _runtimeModifiers: []

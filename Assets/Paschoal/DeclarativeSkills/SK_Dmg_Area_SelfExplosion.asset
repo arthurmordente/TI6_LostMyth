@@ -19,6 +19,13 @@ MonoBehaviour:
   _projectileTravelSpeed: 12
   _projectileAimPrefab: {fileID: 0}
   _projectilePrefab: {fileID: 0}
+  _moveCasterToProjectileHit: 0
+  _projectilePullStandoffFromTargetMeters: 1.2
+  _projectileDealsDamage: 1
+  _projectileDefersArenaSyncUntilHit: 0
+  _projectileSpawnForwardOffset: 0.35
+  _projectileMinTravelBeforeHitMeters: 0.45
+  _projectileHitDisplacementDurationSeconds: 0.35
   _areaMinRange: 0
   _areaMaxRange: 0
   _areaRadius: 2
@@ -26,11 +33,14 @@ MonoBehaviour:
   _areaImpactPrefab: {fileID: 2224025274982176450, guid: caa4a69375bd38348901ddadba2f8953, type: 3}
   _selfAimPrefab: {fileID: 0}
   _selfCastPrefab: {fileID: 0}
-  Power: 30
-  Cost: 1
+  Power: 50
+  Cost: 3
   Icon: {fileID: 21300000, guid: c0de9e55624845a42b8ad06684976429, type: 3}
-  SkillName: Self Explosion
-  Description: "Explos\xE3o centrada no jogador"
+  SkillName: "Explos\xE3o elemental"
+  Description: "Explode tudo em sua volta, causando dano GIGANTESCO a inimigos mas
+    sofrendo 25 voc\xEA mesma."
   _effects:
   - {fileID: 11400000, guid: a47ac10b58cc4372a5670e02b2c3d472, type: 2}
+  - {fileID: 11400000, guid: eb42f10539757554f99d828bcb5c266d, type: 2}
+  _passiveModifiers: []
   _runtimeModifiers: []

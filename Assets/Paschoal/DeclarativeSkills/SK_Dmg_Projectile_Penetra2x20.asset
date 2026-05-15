@@ -19,6 +19,13 @@ MonoBehaviour:
   _projectileTravelSpeed: 12
   _projectileAimPrefab: {fileID: 8272950397043843596, guid: 8058bca71956f704e915ec3e0b22aabd, type: 3}
   _projectilePrefab: {fileID: 4470363709726842422, guid: 05ecf4c11bd35014797b40e47735e1c1, type: 3}
+  _moveCasterToProjectileHit: 0
+  _projectilePullStandoffFromTargetMeters: 1.2
+  _projectileDealsDamage: 1
+  _projectileDefersArenaSyncUntilHit: 0
+  _projectileSpawnForwardOffset: 0.35
+  _projectileMinTravelBeforeHitMeters: 0.45
+  _projectileHitDisplacementDurationSeconds: 0.35
   _areaMinRange: 0
   _areaMaxRange: 8
   _areaRadius: 2
@@ -29,8 +36,10 @@ MonoBehaviour:
   Power: 15
   Cost: 1
   Icon: {fileID: 21300000, guid: abcd2cdfb73542b428f25b2007050ade, type: 3}
-  SkillName: "Proj\xE9til (penetra 2)"
-  Description: "Atravessa at\xE9 2 alvos. 20 de dano por acerto."
+  SkillName: Piercing arrow
+  Description: Dispara uma flecha que perfura os dois primeiros alvos, causando dano
+    em tudo ao seu caminho.
   _effects:
   - {fileID: 0}
+  _passiveModifiers: []
   _runtimeModifiers: []

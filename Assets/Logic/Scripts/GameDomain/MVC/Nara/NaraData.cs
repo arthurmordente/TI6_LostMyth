@@ -27,6 +27,12 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
             PreviewHealth = Mathf.Min(_naraSO.MaxHealth, ActualHealth + healAmount);
         }
 
+        /// <summary>Reduces <see cref="PreviewHealth"/> from its current value (stacks after heal preview).</summary>
+        public void ApplyPreviewSubtractDamage(int amount) {
+            if (amount <= 0) return;
+            PreviewHealth = Mathf.Max(0, PreviewHealth - amount);
+        }
+
         public void TakeDamage(int damageAmound) {
             //if (_naraSO.Defense > damageAmound) return;
             //else if (_naraSO.Defense < 0) ActualHealth -= damageAmound;

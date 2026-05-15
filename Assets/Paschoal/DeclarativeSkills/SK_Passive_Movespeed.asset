@@ -37,7 +37,7 @@ MonoBehaviour:
   Cost: 0
   Icon: {fileID: 21300000, guid: f1f774d82f1bae14a95b9197cb85239d, type: 3}
   SkillName: "P\xE9s \xE1geis"
-  Description: "Aumenta a movimenta\xE7\xE3o em 50%"
+  Description: "Aumenta a movimenta\xE7\xE3o em 50%."
   _effects: []
   _passiveModifiers:
   - Kind: 1

@@ -154,6 +154,7 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
 
         private bool _castAimPreviewActive;
         private IPlayableUnit _aimPreviewCaster;
+        private bool _playerHpSelfDamageAimActive;
         private bool _apManaAimPreviewActive;
         private int _apAimBaseline;
         private int _apAimCost;
@@ -308,6 +309,7 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
 
         public void SnapPlayerHealth(int previewHp, int actualHp, int maxHp)
         {
+            _playerHpSelfDamageAimActive = false;
             float max = Mathf.Max(1, maxHp);
             DOTween.Kill(_playerHpFillImage, true);
             DOTween.Kill(_playerPreviewHpFillImage, true);
@@ -321,6 +323,7 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
 
         public void OnPlayerHealthUpdate(int hp, int maxHp)
         {
+            _playerHpSelfDamageAimActive = false;
             float max = Mathf.Max(1, maxHp);
             float start = _playerHpDisplayFloat;
             DOTween.Kill(_playerHpFillImage, true);
@@ -347,6 +350,62 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
                 _playerPreviewHpDisplayFloat = x;
                 if (_playerPreviewHpFillImage != null) _playerPreviewHpFillImage.fillAmount = Mathf.Clamp01(x / max);
             }, previewHp, _tweenDuration).SetEase(_tweenEase).SetTarget(_playerPreviewHpFillImage != null ? _playerPreviewHpFillImage : (UnityEngine.Object)this);
+        }
+
+        public void BeginPlayerSelfDamageCastAimVisual(int actualHp, int baselineHp, int projectedHpAfterSelfHit, int maxHp)
+        {
+            float max = Mathf.Max(1f, maxHp);
+            _playerHpSelfDamageAimActive = true;
+
+            DOTween.Kill(_playerHpFillImage, true);
+            DOTween.Kill(_playerPreviewHpFillImage, true);
+
+            _playerPreviewHpDisplayFloat = baselineHp;
+            if (_playerPreviewHpFillImage != null)
+                _playerPreviewHpFillImage.fillAmount = Mathf.Clamp01(baselineHp / max);
+
+            _playerHpDisplayFloat = actualHp;
+            float startFill = Mathf.Clamp01(actualHp / max);
+            float endFill = Mathf.Clamp01(projectedHpAfterSelfHit / max);
+            if (_playerHpFillImage != null)
+                _playerHpFillImage.fillAmount = startFill;
+
+            float v = startFill;
+            var target = _playerHpFillImage != null ? (UnityEngine.Object)_playerHpFillImage : this;
+            DOTween.To(() => v, x =>
+            {
+                v = x;
+                if (_playerHpFillImage != null) _playerHpFillImage.fillAmount = x;
+            }, endFill, _tweenDuration).SetEase(_tweenEase).SetTarget(target);
+        }
+
+        public void EndPlayerSelfDamageCastAimVisual(bool cancel, int actualHp, int maxHp)
+        {
+            if (!_playerHpSelfDamageAimActive) return;
+            _playerHpSelfDamageAimActive = false;
+
+            float max = Mathf.Max(1f, maxHp);
+            var target = _playerHpFillImage != null ? (UnityEngine.Object)_playerHpFillImage : this;
+            DOTween.Kill(_playerHpFillImage, true);
+
+            _playerHpDisplayFloat = actualHp;
+
+            if (cancel)
+            {
+                float startFill = _playerHpFillImage != null ? _playerHpFillImage.fillAmount : Mathf.Clamp01(actualHp / max);
+                float endFill = Mathf.Clamp01(actualHp / max);
+                float v = startFill;
+                DOTween.To(() => v, x =>
+                {
+                    v = x;
+                    if (_playerHpFillImage != null) _playerHpFillImage.fillAmount = x;
+                }, endFill, _tweenDuration).SetEase(_tweenEase).SetTarget(target);
+            }
+            else
+            {
+                if (_playerHpFillImage != null)
+                    _playerHpFillImage.fillAmount = Mathf.Clamp01(actualHp / max);
+            }
         }
 
         public void SnapPlayerActionPoints(int current, int max)
@@ -403,8 +462,12 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
             _aimPreviewCaster = caster;
             _apManaAimPreviewActive = false;
 
-            if (caster is INaraController && skill != null && SkillCastSelfHealPreview.TryGetSelfHealPreviewAmount(skill, out int heal) && caster is IEffectable eff)
-                eff.PreviewHeal(heal);
+            if (caster is INaraController naraForPreview && skill != null && caster is IEffectable effNara)
+            {
+                if (SkillCastSelfHealPreview.TryGetSelfHealPreviewAmount(skill, out int heal) && heal > 0)
+                    effNara.PreviewHeal(heal);
+                naraForPreview.BeginSelfDamageCastAimPreviewFromSkill(skill);
+            }
 
             if (showPlayerManaPreview && apCost > 0 && apMax > 0 && caster is INaraController)
             {
@@ -427,6 +490,9 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
         {
             if (!_castAimPreviewActive) return;
 
+            if (caster is INaraController nara)
+                nara.EndSelfDamageCastAimPreview(true);
+
             if (caster is IEffectable eff)
                 eff.ResetPreview();
 
@@ -446,6 +512,9 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
         public void EndSkillCastAimPreviewCommit(IPlayableUnit caster)
         {
             if (!_castAimPreviewActive) return;
+
+            if (caster is INaraController nara)
+                nara.EndSelfDamageCastAimPreview(false);
 
             if (caster is IEffectable eff)
                 eff.ResetPreview();

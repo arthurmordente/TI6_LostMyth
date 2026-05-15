@@ -751,10 +751,10 @@ MonoBehaviour:
   - {fileID: 4827132614574826796}
   - {fileID: 1625319587876880680}
   _bookSkillCostDisplayRoots:
-  - {fileID: 62865709925885644}
-  - {fileID: 4598966063870273992}
-  - {fileID: 1372112605743725658}
-  - {fileID: 3748382527193024709}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   _erzaSkillIconImages:
   - {fileID: 4259036094002830014}
   - {fileID: 445081732885062917}

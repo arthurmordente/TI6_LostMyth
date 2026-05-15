@@ -19,6 +19,13 @@ MonoBehaviour:
   _projectileTravelSpeed: 12
   _projectileAimPrefab: {fileID: 8272950397043843596, guid: 8058bca71956f704e915ec3e0b22aabd, type: 3}
   _projectilePrefab: {fileID: 4470363709726842422, guid: 05ecf4c11bd35014797b40e47735e1c1, type: 3}
+  _moveCasterToProjectileHit: 0
+  _projectilePullStandoffFromTargetMeters: 1.2
+  _projectileDealsDamage: 1
+  _projectileDefersArenaSyncUntilHit: 0
+  _projectileSpawnForwardOffset: 0.35
+  _projectileMinTravelBeforeHitMeters: 0.45
+  _projectileHitDisplacementDurationSeconds: 0.35
   _areaMinRange: 0
   _areaMaxRange: 8
   _areaRadius: 2
@@ -29,8 +36,10 @@ MonoBehaviour:
   Power: 20
   Cost: 5
   Icon: {fileID: 21300000, guid: f18e00465fefb7b4db6702a67ed18621, type: 3}
-  SkillName: Healing Wave
-  Description: Invoca ventos rejuvenecedores que aliviam a dor
+  SkillName: Onda de cura
+  Description: Invoca ventos rejuvenecedores que aliviam a dor, recuperando um pouco
+    de vida.
   _effects:
   - {fileID: 11400000, guid: e43e4868cc75aaf48b433861cd68c8c5, type: 2}
+  _passiveModifiers: []
   _runtimeModifiers: []

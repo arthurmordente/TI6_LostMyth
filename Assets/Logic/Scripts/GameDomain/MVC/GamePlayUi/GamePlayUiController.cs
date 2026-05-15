@@ -177,6 +177,12 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
         public void EndSkillCastAimPreviewCommit(IPlayableUnit caster) =>
             _gamePlayHud.EndSkillCastAimPreviewCommit(caster);
 
+        public void BeginPlayerSelfDamageCastAimVisual(int actualHp, int baselineHp, int projectedHpAfterSelfHit, int maxHp) =>
+            _gamePlayHud.BeginPlayerSelfDamageCastAimVisual(actualHp, baselineHp, projectedHpAfterSelfHit, maxHp);
+
+        public void EndPlayerSelfDamageCastAimVisual(bool cancel, int actualHp, int maxHp) =>
+            _gamePlayHud.EndPlayerSelfDamageCastAimVisual(cancel, actualHp, maxHp);
+
         public void OnSkill1CostChange(int newValue) => _gamePlayHud.OnSkill1CostChange(newValue);
 
         public void OnSkill2CostChange(int newValue) => _gamePlayHud.OnSkill2CostChange(newValue);

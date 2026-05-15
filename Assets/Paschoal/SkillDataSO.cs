@@ -54,7 +54,9 @@ public abstract class SkillDataSO : ScriptableObject
     [Header("Skill")]
     public int Power, Cost;
     public Sprite Icon;
-    public string SkillName, Description;
+    public string SkillName;
+    [TextArea(5, 18)]
+    public string Description;
 
     /// <summary>PlayerPrefs loadout identity: nome do ficheiro asset (<c>name</c> no Unity).</summary>
     public string LoadoutPersistenceKey => name;

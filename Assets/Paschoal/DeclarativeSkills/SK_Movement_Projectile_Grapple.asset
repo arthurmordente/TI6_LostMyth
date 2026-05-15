@@ -21,9 +21,6 @@ MonoBehaviour:
   _projectilePrefab: {fileID: 4470363709726842422, guid: 05ecf4c11bd35014797b40e47735e1c1, type: 3}
   _moveCasterToProjectileHit: 1
   _projectilePullStandoffFromTargetMeters: 0.5
-  _projectileWorldHitMask:
-    serializedVersion: 2
-    m_Bits: 0
   _projectileDealsDamage: 1
   _projectileDefersArenaSyncUntilHit: 1
   _projectileSpawnForwardOffset: 0.35
@@ -36,14 +33,12 @@ MonoBehaviour:
   _areaImpactPrefab: {fileID: 0}
   _selfAimPrefab: {fileID: 1607142820532151380, guid: 869e8460ad50e054b9b351e10c296c31, type: 3}
   _selfCastPrefab: {fileID: 1607142820532151380, guid: 6190cf774033c09479d45e3c13b935d7, type: 3}
-  _castImpactAndSelfVfxPersistInScene: 0
-  _castVfxDestroyAfterSeconds: 0
   Power: 0
   Cost: 2
   Icon: {fileID: 21300000, guid: f1f774d82f1bae14a95b9197cb85239d, type: 3}
   SkillName: Grapple
-  Description: "Arremessa uma pluma m\xE1gica que puxa o conjurador ao atingir um
-    alvo"
-  _loadoutPersistenceKey: 
+  Description: "Arremessa uma pluma m\xE1gica que puxa o conjurador at\xE9 o primeiro
+    alvo atingido."
   _effects: []
+  _passiveModifiers: []
   _runtimeModifiers: []

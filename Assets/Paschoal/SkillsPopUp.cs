@@ -40,7 +40,7 @@ public class SkillsPopUp : MonoBehaviour
     public void MudaTexto()
     {
         _loadout.TryGetSelectedSkill(_loadoutUnitType, _loadoutIndex, out SkillDataSO skill);
-        nome.text = skill.name;
+        nome.text = skill.SkillName;
         descricao.text = skill.Description;
         custo.text = skill.Cost.ToString();
         icon.sprite = skill.Icon;

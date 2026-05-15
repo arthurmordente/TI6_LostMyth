@@ -293,7 +293,10 @@ namespace Logic.Scripts.GameDomain.MVC.Book
 
         public void PreviewDamage(int amount)
         {
-            _bookData?.TakeDamage(amount);
+            if (amount <= 0 || _bookData == null) return;
+            bool absorbed = _hasNextHitShield;
+            int effective = absorbed ? 0 : amount;
+            _bookData.ApplyPreviewSubtractDamage(effective);
         }
 
         public void PreviewHeal(int amount)
@@ -327,6 +330,8 @@ namespace Logic.Scripts.GameDomain.MVC.Book
         }
 
         public void GrantNextHitShield() => _hasNextHitShield = true;
+
+        public bool HasNextHitShieldActive => _hasNextHitShield;
 
         #endregion
 

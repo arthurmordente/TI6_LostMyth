@@ -177,6 +177,25 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
             _naraView.GetRigidbody().position = movementCenter;
         }
 
+        public void BeginSelfDamageCastAimPreviewFromSkill(SkillDataSO skill) {
+            if (skill == null || _gamePlayUiController == null) return;
+            if (!SkillCastSelfDamagePreview.TryGetSelfDamagePreviewAmount(skill, out int selfDmg) || selfDmg <= 0) return;
+
+            bool immunePreview = _cheatController.Imortal;
+            bool absorbed = !immunePreview && _hasNextHitShield;
+            int effective = (!immunePreview && !absorbed) ? selfDmg : 0;
+            int max = _naraConfiguration.MaxHealth;
+            int actual = _naraData.ActualHealth;
+            int baseline = _naraData.PreviewHealth;
+            int projected = Mathf.Max(0, baseline - effective);
+            _gamePlayUiController.BeginPlayerSelfDamageCastAimVisual(actual, baseline, projected, max);
+        }
+
+        public void EndSelfDamageCastAimPreview(bool cancel) {
+            if (_gamePlayUiController == null) return;
+            _gamePlayUiController.EndPlayerSelfDamageCastAimVisual(cancel, _naraData.ActualHealth, _naraConfiguration.MaxHealth);
+        }
+
         public void TeleportToWorldPosition(Vector3 worldPosition) {
             if (_naraView == null) return;
             var rb = _naraView.GetRigidbody();
@@ -197,8 +216,12 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
             _gamePlayUiController?.OnPreviewPlayerHealthUpdate(_naraData.PreviewHealth, _naraConfiguration.MaxHealth);
         }
         public void PreviewDamage(int damageAmound) {
-            _naraData.TakeDamage(damageAmound);
-            _gamePlayUiController?.OnPreviewPlayerHealthUpdate(_naraData.ActualHealth, _naraConfiguration.MaxHealth);
+            if (damageAmound <= 0) return;
+            bool immunePreview = _cheatController.Imortal;
+            bool absorbed = !immunePreview && _hasNextHitShield;
+            int effectiveOnPreview = (!immunePreview && !absorbed) ? damageAmound : 0;
+            _naraData.ApplyPreviewSubtractDamage(effectiveOnPreview);
+            _gamePlayUiController?.OnPreviewPlayerHealthUpdate(_naraData.PreviewHealth, _naraConfiguration.MaxHealth);
         }
 
         public void PreviewHeal(int healAmount) {
@@ -210,6 +233,8 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
             _hasNextHitShield = true;
             _gamePlayUiController?.OnPlayerNextHitShieldChanged(true);
         }
+
+        public bool HasNextHitShieldActive => _hasNextHitShield;
 
         public void TakeDamage(int damageAmound) {
             if (_cheatController.Imortal == false && damageAmound > 0 && _hasNextHitShield) {

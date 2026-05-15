@@ -36,6 +36,17 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
         void EndSkillCastAimPreviewCancel(IPlayableUnit caster);
         void EndSkillCastAimPreviewCommit(IPlayableUnit caster);
 
+        /// <summary>
+        /// During Nara aim with self-damage: preview layer holds <paramref name="baselineHp"/> (e.g. after heal preview);
+        /// main HP fill tweens toward <paramref name="projectedHpAfterSelfHit"/>.
+        /// </summary>
+        void BeginPlayerSelfDamageCastAimVisual(int actualHp, int baselineHp, int projectedHpAfterSelfHit, int maxHp);
+
+        /// <summary>
+        /// <paramref name="cancel"/> true: tween main fill back to <paramref name="actualHp"/>; false: snap main to actual before cast resolves.
+        /// </summary>
+        void EndPlayerSelfDamageCastAimVisual(bool cancel, int actualHp, int maxHp);
+
         void OnSkill1CostChange(int cost);
         void OnSkill2CostChange(int cost);
         void OnSkill3CostChange(int cost);

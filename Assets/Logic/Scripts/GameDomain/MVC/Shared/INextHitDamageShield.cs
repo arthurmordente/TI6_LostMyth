@@ -6,5 +6,8 @@ namespace Logic.Scripts.GameDomain.MVC.Shared
     public interface INextHitDamageShield
     {
         void GrantNextHitShield();
+
+        /// <summary>True if the next positive <see cref="IEffectable.TakeDamage"/> would be fully absorbed.</summary>
+        bool HasNextHitShieldActive { get; }
     }
 }

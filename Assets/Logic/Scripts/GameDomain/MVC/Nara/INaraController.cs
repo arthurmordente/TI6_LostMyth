@@ -23,5 +23,11 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
         void UnregisterListeners();
         void ManagedFixedUpdate();
         void SetPosition(Vector3 movementCenter);
+
+        /// <summary>During skill aim: if the skill has self-damage, dip main HP bar toward post-hit HP; preview stays at heal baseline.</summary>
+        void BeginSelfDamageCastAimPreviewFromSkill(SkillDataSO skill);
+
+        /// <summary>End self-damage aim visual. Call before <see cref="Logic.Scripts.GameDomain.Effects.IEffectable.ResetPreview"/> on cancel/commit.</summary>
+        void EndSelfDamageCastAimPreview(bool cancel);
     }
 }
