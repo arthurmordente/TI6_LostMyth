@@ -1,6 +1,7 @@
 using Logic.Scripts.Core.Mvc.UICamera;
 using Logic.Scripts.GameDomain.Commands;
 using Logic.Scripts.GameDomain.MVC.Echo;
+using Logic.Scripts.GameDomain.MVC.Shared;
 using Logic.Scripts.GameDomain.States;
 using Logic.Scripts.Services.AudioService;
 using Logic.Scripts.Services.CommandFactory;
@@ -167,6 +168,17 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
         public void SnapPlayerActionPoints(int current, int max) => _gamePlayHud.SnapPlayerActionPoints(current, max);
 
         public void OnPlayerActionPointsChange(int current, int max) => _gamePlayHud.OnPlayerActionPointsChange(current, max);
+
+        public void OnPlayerNextHitShieldChanged(bool active) => _gamePlayHud.OnPlayerNextHitShieldChanged(active);
+
+        public void BeginSkillCastAimPreview(IPlayableUnit caster, SkillDataSO skill, int apCost, bool showPlayerManaPreview, int apCurrent, int apMax) =>
+            _gamePlayHud.BeginSkillCastAimPreview(caster, skill, apCost, showPlayerManaPreview, apCurrent, apMax);
+
+        public void EndSkillCastAimPreviewCancel(IPlayableUnit caster) =>
+            _gamePlayHud.EndSkillCastAimPreviewCancel(caster);
+
+        public void EndSkillCastAimPreviewCommit(IPlayableUnit caster) =>
+            _gamePlayHud.EndSkillCastAimPreviewCommit(caster);
 
         public void OnSkill1CostChange(int newValue) => _gamePlayHud.OnSkill1CostChange(newValue);
 

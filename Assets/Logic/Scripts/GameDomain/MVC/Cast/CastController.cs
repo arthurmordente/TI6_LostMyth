@@ -88,14 +88,25 @@ public class CastController : ICastController {
         _currentAbilityIndex = prepareResult.AbilityIndex;
         _currentAbilityCost = isBook ? 0 : prepareResult.Cost;
 
+        var loadout = caster.UnitViewGO != null ? caster.UnitViewGO.GetComponent<NewSkillSystemSkillLoadout>() : null;
+        SkillDataSO skillForPreview = null;
+        if (loadout != null)
+            loadout.TryGetSkill(prepareResult.AbilityIndex, out skillForPreview);
+
+        bool showManaPreview = !isBook && !_cheatController.InfinityCast;
+        _gamePlayUiController?.BeginSkillCastAimPreview(caster, skillForPreview, prepareResult.Cost, showManaPreview && ap != null, ap?.Current ?? 0, ap?.Max ?? 0);
+
         int attackType = prepareResult.AnimatorAttackType;
         caster.PlayAttackType(attackType);
         return true;
     }
 
     public void CancelAbilityUse() {
+        var c = _currentCaster;
         _currentCaster?.TriggerCancel();
-        _activeFlow?.CancelPreparedCast(_currentCaster);
+        _activeFlow?.CancelPreparedCast(c);
+        if (c != null)
+            _gamePlayUiController?.EndSkillCastAimPreviewCancel(c);
         _activeFlow = null;
         _currentCaster = null;
         _currentAbilityIndex = -1;
@@ -106,6 +117,8 @@ public class CastController : ICastController {
         if (_activeFlow == null) return;
 
         _canUseAbility = true;
+
+        _gamePlayUiController?.EndSkillCastAimPreviewCommit(caster);
 
         if (_cheatController.InfinityCast == false && caster is not IBookController) {
             var ap = caster?.GetActionPoints() ?? _naraActionPointsService;

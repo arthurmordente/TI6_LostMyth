@@ -164,7 +164,7 @@ public abstract class SkillDataSO : ScriptableObject
             _projectileNumberOfTargets = 1;
         if (_projectileTravelSpeed <= 0f)
             _projectileTravelSpeed = 12f;
-        if (_castType == SkillCastType.Self || SkillType == SkillType.Passive)
+        if (SkillType == SkillType.Passive)
             Cost = 0;
     }
 }

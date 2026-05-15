@@ -11,7 +11,7 @@ using Zenject;
 
 namespace Logic.Scripts.GameDomain.MVC.Book
 {
-    public class BookController : IBookController, IFixedUpdatable
+    public class BookController : IBookController, IFixedUpdatable, INextHitDamageShield
     {
         private readonly BookView _bookViewPrefab;
         private readonly NaraConfigurationSO _config;
@@ -33,6 +33,7 @@ namespace Logic.Scripts.GameDomain.MVC.Book
         private bool _isDeployed;
 
         private GameObject _activeUnitCircleInstance;
+        private bool _hasNextHitShield;
 
         public bool IsDeployed => _isDeployed;
         public GameObject UnitViewGO => _bookView != null ? _bookView.gameObject : null;
@@ -134,6 +135,7 @@ namespace Logic.Scripts.GameDomain.MVC.Book
             }
 
             _activeUnitCircleInstance = null;
+            _hasNextHitShield = false;
 
             _movementController = null;
             _bookData = null;
@@ -269,6 +271,11 @@ namespace Logic.Scripts.GameDomain.MVC.Book
         public void TakeDamage(int amount)
         {
             if (_bookData == null) return;
+            if (amount > 0 && _hasNextHitShield)
+            {
+                _hasNextHitShield = false;
+                return;
+            }
             _bookData.TakeDamage(amount);
             if (_bookView != null)
             {
@@ -285,6 +292,8 @@ namespace Logic.Scripts.GameDomain.MVC.Book
         public void SetSkillTargetingHighlight(bool active) {
             SkillTargetingHighlightBridge.SetHighlighted(this, active);
         }
+
+        public void GrantNextHitShield() => _hasNextHitShield = true;
 
         #endregion
 

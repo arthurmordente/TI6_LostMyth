@@ -1,3 +1,4 @@
+using Logic.Scripts.GameDomain.MVC.Shared;
 using UnityEngine;
 
 namespace Logic.Scripts.GameDomain.MVC.Ui {
@@ -27,6 +28,12 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
 
         void SnapPlayerActionPoints(int current, int max);
         void OnPlayerActionPointsChange(int current, int max);
+
+        void OnPlayerNextHitShieldChanged(bool active);
+
+        void BeginSkillCastAimPreview(IPlayableUnit caster, SkillDataSO skill, int apCost, bool showPlayerManaPreview, int apCurrent, int apMax);
+        void EndSkillCastAimPreviewCancel(IPlayableUnit caster);
+        void EndSkillCastAimPreviewCommit(IPlayableUnit caster);
 
         void OnSkill1CostChange(int newValue);
 

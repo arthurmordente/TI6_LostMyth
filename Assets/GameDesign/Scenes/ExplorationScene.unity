@@ -167,13 +167,13 @@ MonoBehaviour:
   _naraConfiguration: {fileID: 11400000, guid: 142620ce9bd96e047b9ce17a72cbfe7a, type: 2}
   _customizeUiView: {fileID: 859191354}
   _explorationLoadoutUiView: {fileID: 2146867771}
-  _paschoalSkillCatalog:
+  _newSkillSystemSkillCatalog:
   - {fileID: 11400000, guid: f47ac10b58cc4372a5670e02b2c3d479, type: 2}
   - {fileID: 11400000, guid: f47ac10b58cc4372a5670e02b2c3d47a, type: 2}
   - {fileID: 11400000, guid: f47ac10b58cc4372a5670e02b2c3d47b, type: 2}
   - {fileID: 11400000, guid: f47ac10b58cc4372a5670e02b2c3d47c, type: 2}
-  - {fileID: 11400000, guid: f04b6d566fe365747b24eb078d7282b3, type: 2}
-  - {fileID: 11400000, guid: 9fc07bde9c3459e4e9aa47efe4ec8c0f, type: 2}
+  - {fileID: 11400000, guid: 64fea6c3aef129d48b549b5238f2d586, type: 2}
+  - {fileID: 11400000, guid: d548e03ba1372aa4b9c0c271ec06628d, type: 2}
 --- !u!1 &790439859
 GameObject:
   m_ObjectHideFlags: 0

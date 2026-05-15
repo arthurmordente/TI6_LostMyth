@@ -1,4 +1,5 @@
 using Logic.Scripts.GameDomain.MVC.Abilitys;
+using Logic.Scripts.GameDomain.MVC.Shared;
 using Logic.Scripts.GameDomain.MVC.Ui;
 using Logic.Scripts.Services.AudioService;
 using Logic.Scripts.Services.CommandFactory;
@@ -13,7 +14,7 @@ using Logic.Scripts.GameDomain.Services.Skills;
 namespace Logic.Scripts.GameDomain.MVC.Nara {
     // INaraController now extends IPlayableUnit, IEffectable and IEffectableAction,
     // so we no longer need to list those separately here.
-    public class NaraController : INaraController, IFixedUpdatable {
+    public class NaraController : INaraController, IFixedUpdatable, INextHitDamageShield {
         private readonly IUpdateSubscriptionService _updateSubscriptionService;
         private readonly IAudioService _audioService;
         private readonly ICommandFactory _commandFactory;
@@ -35,6 +36,7 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
         private readonly AbilityData[] _abilities;
 
         private GameObject _activeUnitCircleInstance;
+        private bool _hasNextHitShield;
 
         public NaraController(IUpdateSubscriptionService updateSubscriptionService,
             IAudioService audioService, ICommandFactory commandFactory,
@@ -115,11 +117,14 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
             UnityEngine.Object.Destroy(_naraView.gameObject);
 
             _activeUnitCircleInstance = null;
+            _hasNextHitShield = false;
+            _gamePlayUiController?.OnPlayerNextHitShieldChanged(false);
         }
 
         public void InitEntryPointGamePlay(IGamePlayUiController gamePlayUiController) {
             _gamePlayUiController = gamePlayUiController;
             _gamePlayUiController.SetPlayerValues(_naraData.PreviewHealth, _naraData.ActualHealth, _naraConfiguration.MaxHealth);
+            _gamePlayUiController.OnPlayerNextHitShieldChanged(false);
             _naraMovementController.InitEntryPoint(_naraView.GetRigidbody(), _naraView.GetCamera());
         }
 
@@ -140,27 +145,38 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
 
         public void ResetPreview() {
             _naraData.ResetPreview();
+            _gamePlayUiController?.OnPreviewPlayerHealthUpdate(_naraData.PreviewHealth, _naraConfiguration.MaxHealth);
         }
         public void PreviewDamage(int damageAmound) {
             _naraData.TakeDamage(damageAmound);
-            _gamePlayUiController.OnPreviewPlayerHealthUpdate(_naraData.ActualHealth, _naraConfiguration.MaxHealth);
+            _gamePlayUiController?.OnPreviewPlayerHealthUpdate(_naraData.ActualHealth, _naraConfiguration.MaxHealth);
         }
 
         public void PreviewHeal(int healAmount) {
             _naraData.ApplyPreviewHeal(healAmount);
-            _gamePlayUiController.OnPreviewPlayerHealthUpdate(_naraData.PreviewHealth, _naraConfiguration.MaxHealth);
+            _gamePlayUiController?.OnPreviewPlayerHealthUpdate(_naraData.PreviewHealth, _naraConfiguration.MaxHealth);
+        }
+
+        public void GrantNextHitShield() {
+            _hasNextHitShield = true;
+            _gamePlayUiController?.OnPlayerNextHitShieldChanged(true);
         }
 
         public void TakeDamage(int damageAmound) {
+            if (_cheatController.Imortal == false && damageAmound > 0 && _hasNextHitShield) {
+                _hasNextHitShield = false;
+                _gamePlayUiController?.OnPlayerNextHitShieldChanged(false);
+                return;
+            }
             if (_cheatController.Imortal == false) _naraData.TakeDamage(damageAmound);
             if (_naraView != null) {
                 var flash = _naraView.GetComponent<DamageFlashPresenter>();
                 if (flash == null) flash = _naraView.gameObject.AddComponent<DamageFlashPresenter>();
                 flash.TriggerFlash();
             }
-            _audioService?.PlayAudio(AudioClipType.AbilityPrep2SFX, AudioChannelType.Fx);
-            _gamePlayUiController.OnPlayerHealthUpdate(_naraData.ActualHealth, _naraConfiguration.MaxHealth);
-            _gamePlayUiController.OnPreviewPlayerHealthUpdate(_naraData.ActualHealth, _naraConfiguration.MaxHealth);
+            _audioService?.PlayAudio(AudioClipType.AbilityPrep2SFX, AudioChannelType.Fx, AudioPlayType.OneShot);
+            _gamePlayUiController?.OnPlayerHealthUpdate(_naraData.ActualHealth, _naraConfiguration.MaxHealth);
+            _gamePlayUiController?.OnPreviewPlayerHealthUpdate(_naraData.ActualHealth, _naraConfiguration.MaxHealth);
             if (_naraData.IsAlive()) {
                 _naraView?.PlayDeath();
                 _commandFactory.CreateCommandVoid<GameOverCommand>().SetData(new GameOverCommandData(false)).Execute();
@@ -178,8 +194,8 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
         public void Heal(int healAmount) {
             _naraData.Heal(healAmount);
             _naraData.ResetPreview();
-            _gamePlayUiController.OnPlayerHealthUpdate(_naraData.ActualHealth, _naraConfiguration.MaxHealth);
-            _gamePlayUiController.OnPreviewPlayerHealthUpdate(_naraData.ActualHealth, _naraConfiguration.MaxHealth);
+            _gamePlayUiController?.OnPlayerHealthUpdate(_naraData.ActualHealth, _naraConfiguration.MaxHealth);
+            _gamePlayUiController?.OnPreviewPlayerHealthUpdate(_naraData.ActualHealth, _naraConfiguration.MaxHealth);
         }
 
         public void TriggerExecute() {
