@@ -30,8 +30,10 @@ namespace Logic.Scripts.GameDomain.Services.Skills
             if (dir.sqrMagnitude < 1e-8f && context.Caster.GetReferenceTransform() != null)
                 dir = Vector3.ProjectOnPlane(context.Caster.GetReferenceTransform().forward, Vector3.up);
             if (dir.sqrMagnitude < 1e-8f) dir = Vector3.forward;
+            Vector3 dirN = dir.normalized;
+            origin += dirN * skill.ProjectileSpawnForwardOffset;
 
-            GameObject instance = Object.Instantiate(skill.ProjectilePrefab, origin, Quaternion.LookRotation(dir.normalized, Vector3.up));
+            GameObject instance = Object.Instantiate(skill.ProjectilePrefab, origin, Quaternion.LookRotation(dirN, Vector3.up));
 
             var motor = instance.GetComponent<SkillSpawnedProjectile>();
             if (motor == null)
@@ -42,8 +44,12 @@ namespace Logic.Scripts.GameDomain.Services.Skills
                 Speed = skill.GetProjectileSpeed(),
                 MaxRange = skill.GetProjectileRange(),
                 MaxTargets = skill.GetProjectileMaxTargets(),
-                Damage = skill.Power,
-                Caster = context.Caster
+                Damage = skill.GetProjectileCollisionDamage(),
+                Caster = context.Caster,
+                MoveCasterToHit = skill.MoveCasterToProjectileHit,
+                PullStandoffFromTarget = skill.ProjectilePullStandoffFromTargetMeters,
+                MinTravelBeforeHitMeters = skill.ProjectileMinTravelBeforeHitMeters,
+                HitDisplacementDurationSeconds = skill.ProjectileHitDisplacementDurationSeconds
             };
             motor.Initialize(args);
         }

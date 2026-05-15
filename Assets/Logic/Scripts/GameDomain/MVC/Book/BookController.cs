@@ -1,5 +1,6 @@
 using Logic.Scripts.GameDomain.MVC.Abilitys;
 using Logic.Scripts.GameDomain.MVC.Nara;
+using System;
 using Logic.Scripts.GameDomain.MVC.Shared;
 using Logic.Scripts.GameDomain.Services.Skills;
 using Logic.Scripts.Services.CommandFactory;
@@ -11,7 +12,7 @@ using Zenject;
 
 namespace Logic.Scripts.GameDomain.MVC.Book
 {
-    public class BookController : IBookController, IFixedUpdatable, INextHitDamageShield
+    public class BookController : IBookController, IFixedUpdatable, INextHitDamageShield, ISkillCasterWorldTeleport
     {
         private readonly BookView _bookViewPrefab;
         private readonly NaraConfigurationSO _config;
@@ -65,7 +66,7 @@ namespace Logic.Scripts.GameDomain.MVC.Book
             // physics position is set correctly from the start.  Setting transform.position
             // after a plain Instantiate() only moves the Transform; the Rigidbody's position
             // stays at the spawn origin and the physics loop snaps the object back next FixedUpdate.
-            _bookView = Object.Instantiate(_bookViewPrefab, position, Quaternion.identity);
+            _bookView = UnityEngine.Object.Instantiate(_bookViewPrefab, position, Quaternion.identity);
             InstallNewSkillSystemSkillComponents();
 
             // Extra guarantee: zero out any velocity the prefab might carry and lock the
@@ -130,7 +131,7 @@ namespace Logic.Scripts.GameDomain.MVC.Book
 
             if (_bookView != null)
             {
-                Object.Destroy(_bookView.gameObject);
+                UnityEngine.Object.Destroy(_bookView.gameObject);
                 _bookView = null;
             }
 
@@ -190,6 +191,38 @@ namespace Logic.Scripts.GameDomain.MVC.Book
         public IActionPointsService GetActionPoints() => _bookActionPoints;
         public AbilityData[] GetAbilities() => _abilities;
 
+        public void TeleportToWorldPosition(Vector3 worldPosition)
+        {
+            if (_bookView == null) return;
+            var rb = _bookView.GetRigidbody();
+            if (rb != null)
+            {
+                rb.position = worldPosition;
+                rb.linearVelocity = Vector3.zero;
+                rb.angularVelocity = Vector3.zero;
+            }
+        }
+
+        public void SyncArenaMovementAfterMovementSkillDisplacement()
+        {
+            if (_movementController == null) return;
+            _movementController.RecenterMovementRingPreservingRadius();
+            Unfreeeze();
+        }
+
+        public void BeginSkillGuidedDisplacementToWorldPosition(Vector3 worldTarget, float durationSeconds, Action onComplete)
+        {
+            if (_bookView == null)
+            {
+                onComplete?.Invoke();
+                return;
+            }
+            var displacer = _bookView.GetComponent<ArenaSkillPathDisplacer>();
+            if (displacer == null)
+                displacer = _bookView.gameObject.AddComponent<ArenaSkillPathDisplacer>();
+            displacer.Begin(_bookView.GetRigidbody(), worldTarget, durationSeconds, onComplete);
+        }
+
         public void OnAbilityExecuted()
         {
             if (_movementController == null) return;
@@ -222,7 +255,7 @@ namespace Logic.Scripts.GameDomain.MVC.Book
             if (_bookView == null) return;
             if (_bookView.ActiveUnitCirclePrefab == null) return;
 
-            _activeUnitCircleInstance = Object.Instantiate(_bookView.ActiveUnitCirclePrefab, _bookView.transform);
+            _activeUnitCircleInstance = UnityEngine.Object.Instantiate(_bookView.ActiveUnitCirclePrefab, _bookView.transform);
             _activeUnitCircleInstance.name = "ActiveUnitCircle";
             _activeUnitCircleInstance.transform.localPosition = new Vector3(0f, 0.2f, 0f);
             _activeUnitCircleInstance.transform.localRotation = Quaternion.identity;

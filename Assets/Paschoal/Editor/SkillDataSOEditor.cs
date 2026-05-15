@@ -14,6 +14,10 @@ public class SkillDataSOEditor : Editor
 
         var castProp = serializedObject.FindProperty("_castType");
         var castType = (SkillCastType)castProp.enumValueIndex;
+        var skillTypeProp = serializedObject.FindProperty("_skillType");
+        var skillType = (SkillType)skillTypeProp.enumValueIndex;
+        bool showMovementProjectileOptions =
+            castType == SkillCastType.Projectile && skillType == SkillType.Movement;
 
         EditorGUILayout.Space(6f);
         switch (castType)
@@ -25,6 +29,34 @@ public class SkillDataSOEditor : Editor
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("_projectileTravelSpeed"), new GUIContent("Travel Speed"));
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("_projectileAimPrefab"), new GUIContent("Aim Prefab"));
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("_projectilePrefab"), new GUIContent("Projectile Prefab"));
+
+                if (showMovementProjectileOptions)
+                {
+                    EditorGUILayout.Space(6f);
+                    EditorGUILayout.LabelField("Movement (projectile)", EditorStyles.boldLabel);
+                    SerializedProperty moveCasterProp = serializedObject.FindProperty("_moveCasterToProjectileHit");
+                    EditorGUILayout.PropertyField(moveCasterProp, new GUIContent("Move Caster On IEffectable Hit"));
+
+                    if (moveCasterProp.boolValue)
+                    {
+                        string advKey = "TI6.SkillDataSO.AdvProjMove." + target.GetInstanceID();
+                        bool advOpen = EditorPrefs.GetBool(advKey, false);
+                        advOpen = EditorGUILayout.Foldout(advOpen, "Advanced movement options", true);
+                        EditorPrefs.SetBool(advKey, advOpen);
+
+                        if (advOpen)
+                        {
+                            EditorGUI.indentLevel++;
+                            EditorGUILayout.PropertyField(serializedObject.FindProperty("_projectilePullStandoffFromTargetMeters"), new GUIContent("Pull Standoff From Target (m)"));
+                            EditorGUILayout.PropertyField(serializedObject.FindProperty("_projectileDealsDamage"), new GUIContent("Deals Damage On Hit"));
+                            EditorGUILayout.PropertyField(serializedObject.FindProperty("_projectileDefersArenaSyncUntilHit"), new GUIContent("Defer Arena Sync Until Hit"));
+                            EditorGUILayout.PropertyField(serializedObject.FindProperty("_projectileSpawnForwardOffset"), new GUIContent("Spawn Forward Offset (m)"));
+                            EditorGUILayout.PropertyField(serializedObject.FindProperty("_projectileMinTravelBeforeHitMeters"), new GUIContent("Min Travel Before Hit (m)"));
+                            EditorGUILayout.PropertyField(serializedObject.FindProperty("_projectileHitDisplacementDurationSeconds"), new GUIContent("Pull Move Duration (s)"));
+                            EditorGUI.indentLevel--;
+                        }
+                    }
+                }
                 break;
             case SkillCastType.Area:
                 EditorGUILayout.LabelField("Area", EditorStyles.boldLabel);

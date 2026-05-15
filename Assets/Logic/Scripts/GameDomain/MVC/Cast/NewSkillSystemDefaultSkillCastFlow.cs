@@ -71,6 +71,12 @@ public class NewSkillSystemDefaultSkillCastFlow : ISkillCastFlow
         return true;
     }
 
+    public bool TryGetPreparedSkill(out SkillDataSO skill)
+    {
+        skill = _currentSkill;
+        return skill != null;
+    }
+
     public void ExecutePreparedCast(IPlayableUnit caster)
     {
         if (_currentSkill == null || caster == null) return;
@@ -79,11 +85,15 @@ public class NewSkillSystemDefaultSkillCastFlow : ISkillCastFlow
         _targetingPreview?.End();
 
         if (_currentSkill.CastType == SkillCastType.Area && _currentSkill.AreaImpactPrefab != null && _fallbackTarget != null)
-            Object.Instantiate(_currentSkill.AreaImpactPrefab, _fallbackTarget.position, Quaternion.identity);
+        {
+            var vfx = Object.Instantiate(_currentSkill.AreaImpactPrefab, _fallbackTarget.position, Quaternion.identity);
+            SkillCastVfxUtility.ConfigureSpawnedInstance(vfx, persistInScene: false, destroyAfterSeconds: 0f);
+        }
         else if (_currentSkill.CastType == SkillCastType.Self && _currentSkill.SelfCastPrefab != null)
         {
             Vector3 p = NewSkillSystemSkillAimWorld.GetSelfCastFootWorld(caster);
-            Object.Instantiate(_currentSkill.SelfCastPrefab, p, caster.UnitViewGO != null ? caster.UnitViewGO.transform.rotation : Quaternion.identity);
+            var vfx = Object.Instantiate(_currentSkill.SelfCastPrefab, p, caster.UnitViewGO != null ? caster.UnitViewGO.transform.rotation : Quaternion.identity);
+            SkillCastVfxUtility.ConfigureSpawnedInstance(vfx, persistInScene: false, destroyAfterSeconds: 0f);
         }
 
         Transform castTarget = _fallbackTarget != null ? _fallbackTarget : _currentPreview != null ? _currentPreview.transform : caster.UnitViewGO.transform;

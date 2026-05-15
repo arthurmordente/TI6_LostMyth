@@ -1,3 +1,4 @@
+using System;
 using Logic.Scripts.GameDomain.MVC.Abilitys;
 using Logic.Scripts.Turns;
 using UnityEngine;
@@ -42,8 +43,16 @@ namespace Logic.Scripts.GameDomain.MVC.Shared
         /// </summary>
         AbilityData[] GetAbilities();
 
-        /// <summary>Called right after this unit executes an ability, so it can update its movement area.</summary>
+        /// <summary>Called right after this unit executes a normal ability: consumes walk budget from the movement ring, then unfreezes.</summary>
         void OnAbilityExecuted();
+
+        /// <summary>
+        /// After a <see cref="Logic.Scripts.GameDomain.Services.Skills.SkillType.Movement"/> skill moves the unit: recenter the ring without reducing remaining distance.
+        /// </summary>
+        void SyncArenaMovementAfterMovementSkillDisplacement();
+
+        /// <summary>Smooth rigidbody glide used for projectile arrival (not an instant teleport).</summary>
+        void BeginSkillGuidedDisplacementToWorldPosition(Vector3 worldTarget, float durationSeconds, Action onComplete);
 
         /// <summary>
         /// Called when this unit becomes the actively controlled unit (TAB switch or turn start).

@@ -9,4 +9,12 @@ public interface ICastController {
     public void CancelAbilityUse();
     public bool GetCanUseAbility();
     public void SetCanUseAbility(bool b);
+
+    /// <summary>
+    /// After <see cref="UseAbility"/>, if the prepared skill deferred arena movement sync (projectile blink),
+    /// returns true once and clears the flag so <see cref="Logic.Scripts.GameDomain.MVC.Shared.IPlayableUnit.OnAbilityExecuted"/>
+    /// can be skipped or replaced with <see cref="Logic.Scripts.GameDomain.MVC.Shared.IPlayableUnit.Unfreeeze"/> only.
+    /// </summary>
+    bool ConsumeDeferredArenaSyncAfterProjectileCast();
+    bool ConsumeLastCastWasMovementSkill();
 }

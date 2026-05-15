@@ -134,6 +134,12 @@ public class NaraTurnMovementController : NaraMovementController {
         }
     }
 
+    public void RecenterMovementRingPreservingRadius()
+    {
+        SetMovementRadiusCenter();
+        Refresh();
+    }
+
     public void RecalculateRadiusAfterAbility() {
         if (NaraTransform != null) {
             float distance = Vector3.Distance(NaraTransform.position, _movementCenter);

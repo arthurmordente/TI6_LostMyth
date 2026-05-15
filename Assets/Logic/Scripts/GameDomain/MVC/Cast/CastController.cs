@@ -23,6 +23,8 @@ public class CastController : ICastController {
     private IPlayableUnit _currentCaster;
     private ISkillCastFlow _activeFlow;
     private bool _canUseAbility;
+    private bool _deferredArenaSyncAfterProjectileCast;
+    private bool _lastCastWasMovementSkill;
     private int _currentAbilityIndex = -1;
     private int _currentAbilityCost = 0;
 
@@ -132,12 +134,39 @@ public class CastController : ICastController {
 
         caster?.TriggerExecute();
         PlayUsedSfxByIndex(_currentAbilityIndex);
+
+        _deferredArenaSyncAfterProjectileCast = false;
+        _lastCastWasMovementSkill = false;
+        SkillDataSO preparedSkill = null;
+        _activeFlow.TryGetPreparedSkill(out preparedSkill);
+        if (preparedSkill != null) {
+            if (preparedSkill.ShouldDeferArenaSyncUntilProjectileHit())
+                _deferredArenaSyncAfterProjectileCast = true;
+            if (preparedSkill.SkillType == Logic.Scripts.GameDomain.Services.Skills.SkillType.Movement)
+                _lastCastWasMovementSkill = true;
+        }
+
         _activeFlow.ExecutePreparedCast(caster);
         CancelAbilityUse();
     }
 
     public bool GetCanUseAbility() => _canUseAbility;
     public void SetCanUseAbility(bool b) => _canUseAbility = b;
+
+    public bool ConsumeDeferredArenaSyncAfterProjectileCast()
+    {
+        if (!_deferredArenaSyncAfterProjectileCast) return false;
+        _deferredArenaSyncAfterProjectileCast = false;
+        _lastCastWasMovementSkill = false;
+        return true;
+    }
+
+    public bool ConsumeLastCastWasMovementSkill()
+    {
+        if (!_lastCastWasMovementSkill) return false;
+        _lastCastWasMovementSkill = false;
+        return true;
+    }
 
     private void PlayUsedSfxByIndex(int index) {
         if (_audio == null) return;

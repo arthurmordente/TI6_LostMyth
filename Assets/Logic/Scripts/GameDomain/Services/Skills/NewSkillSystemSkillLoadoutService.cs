@@ -217,27 +217,19 @@ namespace Logic.Scripts.GameDomain.Services.Skills
                 SaveToPlayerPrefs(unitType, target);
         }
 
-        /// <summary>Resolve por <see cref="SkillDataSO.LoadoutPersistenceKey"/> ou pelo nome do asset (<c>name</c>).</summary>
+        /// <summary>Resolve skill no catálogo pelo nome do asset (<see cref="SkillDataSO.LoadoutPersistenceKey"/>).</summary>
         private bool TryResolveSkillByPersistenceKey(string key, out SkillDataSO skill)
         {
             skill = null;
             if (string.IsNullOrEmpty(key)) return false;
-            SkillDataSO firstNameMatch = null;
             for (int i = 0; i < _catalog.Length; i++)
             {
                 if (_catalog[i] == null) continue;
-                if (_catalog[i].LoadoutPersistenceKey == key)
+                if (_catalog[i].name == key)
                 {
                     skill = _catalog[i];
                     return true;
                 }
-                if (firstNameMatch == null && _catalog[i].name == key)
-                    firstNameMatch = _catalog[i];
-            }
-            if (firstNameMatch != null)
-            {
-                skill = firstNameMatch;
-                return true;
             }
             return false;
         }

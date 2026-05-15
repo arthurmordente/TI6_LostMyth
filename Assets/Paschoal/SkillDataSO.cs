@@ -23,6 +23,22 @@ public abstract class SkillDataSO : ScriptableObject
     [SerializeField, FormerlySerializedAs("AttackPrefab")]
     private GameObject _projectilePrefab;
 
+    [Header("Projectile movement / pull to target (Projectile only)")]
+    [Tooltip("When enabled, hitting another IEffectable pulls the caster next to that target (miss = no movement). Uses the same hit rules as projectile damage.")]
+    [SerializeField] private bool _moveCasterToProjectileHit;
+    [Tooltip("Horizontal distance from the enemy root where the caster stops when pulled (avoid overlap).")]
+    [SerializeField, FormerlySerializedAs("_projectileHitSurfaceSeparation")]
+    private float _projectilePullStandoffFromTargetMeters = 1.2f;
+    [Tooltip("When false, projectile hits apply no HP damage (still counts as a hit for Max Targets).")]
+    [SerializeField] private bool _projectileDealsDamage = true;
+    [Tooltip("When true, arena radius/recenter after cast waits until the projectile resolves movement (or hits nothing).")]
+    [SerializeField] private bool _projectileDefersArenaSyncUntilHit;
+
+    [SerializeField] private float _projectileSpawnForwardOffset = 0.35f;
+    [Tooltip("Ignore hits until the projectile has travelled this far from spawn (avoids instant self-hits).")]
+    [SerializeField] private float _projectileMinTravelBeforeHitMeters = 0.45f;
+    [SerializeField] private float _projectileHitDisplacementDurationSeconds = 0.35f;
+
     [Header("Area (when Cast Type is Area)")]
     [SerializeField] private float _areaMinRange;
     [SerializeField] private float _areaMaxRange = 8f;
@@ -40,12 +56,8 @@ public abstract class SkillDataSO : ScriptableObject
     public Sprite Icon;
     public string SkillName, Description;
 
-    [Header("Loadout persistence")]
-    [Tooltip("Chave única para guardar o slot do loadout entre Exploração e Luta (PlayerPrefs). Se vazio, usa o nome do asset Unity (ficheiro). Use IDs distintos se vários skills tiverem o mesmo nome de ficheiro.")]
-    [SerializeField] private string _loadoutPersistenceKey;
-
-    /// <summary>Chave usada no serviço de loadout (independente da ordem do array do catálogo entre cenas).</summary>
-    public string LoadoutPersistenceKey => string.IsNullOrWhiteSpace(_loadoutPersistenceKey) ? name : _loadoutPersistenceKey.Trim();
+    /// <summary>PlayerPrefs loadout identity: nome do ficheiro asset (<c>name</c> no Unity).</summary>
+    public string LoadoutPersistenceKey => name;
 
     [Header("Effects Definition")]
     [SerializeField] private SkillEffectSO[] _effects = Array.Empty<SkillEffectSO>();
@@ -134,6 +146,30 @@ public abstract class SkillDataSO : ScriptableObject
         return _projectileTravelSpeed > 0.0001f ? _projectileTravelSpeed : 12f;
     }
 
+    /// <summary>Pull caster toward hit <see cref="IEffectable"/> when the movement projectile option is enabled.</summary>
+    public bool MoveCasterToProjectileHit =>
+        _castType == SkillCastType.Projectile && _moveCasterToProjectileHit;
+
+    public float ProjectilePullStandoffFromTargetMeters =>
+        Mathf.Max(0.1f, _projectilePullStandoffFromTargetMeters);
+
+    public int GetProjectileCollisionDamage()
+    {
+        if (_castType != SkillCastType.Projectile || !_projectileDealsDamage) return 0;
+        return Power;
+    }
+
+    public bool ShouldDeferArenaSyncUntilProjectileHit() =>
+        _castType == SkillCastType.Projectile
+        && (_projectileDefersArenaSyncUntilHit || _moveCasterToProjectileHit);
+
+    public float ProjectileSpawnForwardOffset => Mathf.Max(0f, _projectileSpawnForwardOffset);
+
+    public float ProjectileMinTravelBeforeHitMeters => Mathf.Max(0f, _projectileMinTravelBeforeHitMeters);
+
+    public float ProjectileHitDisplacementDurationSeconds =>
+        Mathf.Max(0.05f, _projectileHitDisplacementDurationSeconds);
+
     public float GetAreaRadius()
     {
         if (_castType != SkillCastType.Area) return 0f;
@@ -171,6 +207,16 @@ public abstract class SkillDataSO : ScriptableObject
             _projectileNumberOfTargets = 1;
         if (_projectileTravelSpeed <= 0f)
             _projectileTravelSpeed = 12f;
+        if (_projectilePullStandoffFromTargetMeters < 0.1f)
+            _projectilePullStandoffFromTargetMeters = 0.1f;
+        if (_projectileSpawnForwardOffset < 0f)
+            _projectileSpawnForwardOffset = 0f;
+        if (_projectileMinTravelBeforeHitMeters < 0f)
+            _projectileMinTravelBeforeHitMeters = 0f;
+        if (_projectileHitDisplacementDurationSeconds < 0.05f)
+            _projectileHitDisplacementDurationSeconds = 0.05f;
+        if (_castType == SkillCastType.Projectile && _skillType != SkillType.Movement && _moveCasterToProjectileHit)
+            _moveCasterToProjectileHit = false;
         if (SkillType == SkillType.Passive)
             Cost = 0;
     }

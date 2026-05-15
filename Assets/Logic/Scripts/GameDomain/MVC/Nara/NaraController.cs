@@ -1,3 +1,4 @@
+using System;
 using Logic.Scripts.GameDomain.MVC.Abilitys;
 using Logic.Scripts.GameDomain.MVC.Shared;
 using Logic.Scripts.GameDomain.MVC.Ui;
@@ -14,7 +15,7 @@ using Logic.Scripts.GameDomain.Services.Skills;
 namespace Logic.Scripts.GameDomain.MVC.Nara {
     // INaraController now extends IPlayableUnit, IEffectable and IEffectableAction,
     // so we no longer need to list those separately here.
-    public class NaraController : INaraController, IFixedUpdatable, INextHitDamageShield {
+    public class NaraController : INaraController, IFixedUpdatable, INextHitDamageShield, ISkillCasterWorldTeleport {
         private readonly IUpdateSubscriptionService _updateSubscriptionService;
         private readonly IAudioService _audioService;
         private readonly ICommandFactory _commandFactory;
@@ -101,7 +102,7 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
         }
 
         public void CreateNara(NaraMovementController movementController) {
-            _naraView = Object.Instantiate(_naraViewPrefab);
+            _naraView = UnityEngine.Object.Instantiate(_naraViewPrefab);
             InstallNewSkillSystemSkillComponents();
             _naraData.ResetData();
             _naraView.SetMoving(false);
@@ -135,6 +136,15 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
 
         public void SetPosition(Vector3 movementCenter) {
             _naraView.GetRigidbody().position = movementCenter;
+        }
+
+        public void TeleportToWorldPosition(Vector3 worldPosition) {
+            if (_naraView == null) return;
+            var rb = _naraView.GetRigidbody();
+            if (rb != null) {
+                rb.position = worldPosition;
+                rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
+            }
         }
 
         #region IEffectable Methods
@@ -260,7 +270,7 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
         private IActionPointsService EnsureApService() {
             if (_actionPointsService != null) return _actionPointsService;
             try {
-                var sceneCtxs = Object.FindObjectsByType<SceneContext>(FindObjectsSortMode.None);
+                var sceneCtxs = UnityEngine.Object.FindObjectsByType<SceneContext>(FindObjectsSortMode.None);
                 for (int i = 0; i < sceneCtxs.Length; i++) {
                     var sc = sceneCtxs[i];
                     if (sc != null) {
@@ -338,7 +348,7 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
             if (_naraView == null) return;
             if (_naraView.ActiveUnitCirclePrefab == null) return;
 
-            _activeUnitCircleInstance = Object.Instantiate(_naraView.ActiveUnitCirclePrefab, _naraView.transform);
+            _activeUnitCircleInstance = UnityEngine.Object.Instantiate(_naraView.ActiveUnitCirclePrefab, _naraView.transform);
             _activeUnitCircleInstance.name = "ActiveUnitCircle";
             _activeUnitCircleInstance.transform.localPosition = new Vector3(0f, 0.2f, 0f);
             _activeUnitCircleInstance.transform.localRotation = Quaternion.identity;
@@ -366,6 +376,13 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
         public IActionPointsService GetActionPoints() => EnsureApService();
         public AbilityData[] GetAbilities() => _abilities;
 
+        public void SyncArenaMovementAfterMovementSkillDisplacement() {
+            if (_naraMovementController is NaraTurnMovementController ntm) {
+                ntm.RecenterMovementRingPreservingRadius();
+            }
+            Unfreeeze();
+        }
+
         public void OnAbilityExecuted() {
             if (_naraMovementController is NaraTurnMovementController ntm) {
                 ntm.RecalculateRadiusAfterAbility();
@@ -373,6 +390,17 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
                 ntm.Refresh();
             }
             Unfreeeze();
+        }
+
+        public void BeginSkillGuidedDisplacementToWorldPosition(Vector3 worldTarget, float durationSeconds, Action onComplete) {
+            if (_naraView == null) {
+                onComplete?.Invoke();
+                return;
+            }
+            var displacer = _naraView.GetComponent<ArenaSkillPathDisplacer>();
+            if (displacer == null)
+                displacer = _naraView.gameObject.AddComponent<ArenaSkillPathDisplacer>();
+            displacer.Begin(_naraView.GetRigidbody(), worldTarget, durationSeconds, onComplete);
         }
 
         #endregion
