@@ -168,9 +168,13 @@ MonoBehaviour:
   m_ParentUI: {fileID: 0}
   sourceAsset: {fileID: 9197481963319205126, guid: 7dc3fabde3f536249a39ece5d085b9f6, type: 3}
   m_SortingOrder: 50
+  m_Position: 0
   m_WorldSpaceSizeMode: 1
   m_WorldSpaceWidth: 1920
   m_WorldSpaceHeight: 1080
+  m_PivotReferenceSize: 0
+  m_Pivot: 0
+  m_WorldSpaceCollider: {fileID: 0}
 --- !u!114 &315563609
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -299,9 +303,13 @@ MonoBehaviour:
   m_ParentUI: {fileID: 0}
   sourceAsset: {fileID: 9197481963319205126, guid: d76852b569349384080a113c51aec3a0, type: 3}
   m_SortingOrder: 50
+  m_Position: 0
   m_WorldSpaceSizeMode: 1
   m_WorldSpaceWidth: 1920
   m_WorldSpaceHeight: 1080
+  m_PivotReferenceSize: 0
+  m_Pivot: 0
+  m_WorldSpaceCollider: {fileID: 0}
 --- !u!114 &384565947
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -372,6 +380,13 @@ MonoBehaviour:
   _cheatsView: {fileID: 1880283124}
   _creditsUIView: {fileID: 315563609}
   _optionsView: {fileID: 384565947}
+  _newSkillSystemSkillCatalog:
+  - {fileID: 11400000, guid: f47ac10b58cc4372a5670e02b2c3d479, type: 2}
+  - {fileID: 11400000, guid: f47ac10b58cc4372a5670e02b2c3d47a, type: 2}
+  - {fileID: 11400000, guid: f47ac10b58cc4372a5670e02b2c3d47b, type: 2}
+  - {fileID: 11400000, guid: f47ac10b58cc4372a5670e02b2c3d47c, type: 2}
+  - {fileID: 11400000, guid: 64fea6c3aef129d48b549b5238f2d586, type: 2}
+  - {fileID: 11400000, guid: d548e03ba1372aa4b9c0c271ec06628d, type: 2}
 --- !u!1 &1074250748
 GameObject:
   m_ObjectHideFlags: 0
@@ -421,9 +436,13 @@ MonoBehaviour:
   m_ParentUI: {fileID: 0}
   sourceAsset: {fileID: 9197481963319205126, guid: 6aa4f01f285b4fb41a2fcedf4776620c, type: 3}
   m_SortingOrder: 50
+  m_Position: 0
   m_WorldSpaceSizeMode: 1
   m_WorldSpaceWidth: 1920
   m_WorldSpaceHeight: 1080
+  m_PivotReferenceSize: 0
+  m_Pivot: 0
+  m_WorldSpaceCollider: {fileID: 0}
 --- !u!114 &1074250751
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -500,9 +519,13 @@ MonoBehaviour:
   m_ParentUI: {fileID: 0}
   sourceAsset: {fileID: 9197481963319205126, guid: b3b3aa0ad3da76842bed376020999203, type: 3}
   m_SortingOrder: 50
+  m_Position: 0
   m_WorldSpaceSizeMode: 1
   m_WorldSpaceWidth: 1920
   m_WorldSpaceHeight: 1080
+  m_PivotReferenceSize: 0
+  m_Pivot: 0
+  m_WorldSpaceCollider: {fileID: 0}
 --- !u!1 &1880283121
 GameObject:
   m_ObjectHideFlags: 0
@@ -552,9 +575,13 @@ MonoBehaviour:
   m_ParentUI: {fileID: 0}
   sourceAsset: {fileID: 9197481963319205126, guid: 5eb739373350da242a8c990152162df8, type: 3}
   m_SortingOrder: 50
+  m_Position: 0
   m_WorldSpaceSizeMode: 1
   m_WorldSpaceWidth: 1920
   m_WorldSpaceHeight: 1080
+  m_PivotReferenceSize: 0
+  m_Pivot: 0
+  m_WorldSpaceCollider: {fileID: 0}
 --- !u!114 &1880283124
 MonoBehaviour:
   m_ObjectHideFlags: 0

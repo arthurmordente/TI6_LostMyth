@@ -5,6 +5,9 @@ namespace Logic.Scripts.GameDomain.Services.Skills
 {
     public class NewSkillSystemSkillLoadoutService : INewSkillSystemSkillLoadoutService
     {
+        /// <summary>Grava o nome/chave da skill — sobrevive a catálogos com ordem diferente entre cenas.</summary>
+        private const string PlayerPrefsPlayerV2Prefix = "NSLoadoutV2_Player_";
+        private const string PlayerPrefsBookV2Prefix = "NSLoadoutV2_Book_";
         private const string PlayerPrefsPlayerPrefix = "NewSkillSystemLoadout_Player_";
         private const string PlayerPrefsBookPrefix = "NewSkillSystemLoadout_Book_";
         private const string LegacyPlayerPrefsPlayerPrefix = "PaschoalLoadout_Player_";
@@ -135,11 +138,32 @@ namespace Logic.Scripts.GameDomain.Services.Skills
 
         private void SaveToPlayerPrefs(SkillLoadoutUnitType unitType, SkillDataSO[] slots)
         {
-            string prefix = unitType == SkillLoadoutUnitType.Book ? PlayerPrefsBookPrefix : PlayerPrefsPlayerPrefix;
+            string legacyPrefix = unitType == SkillLoadoutUnitType.Book ? PlayerPrefsBookPrefix : PlayerPrefsPlayerPrefix;
+            string v2Prefix = unitType == SkillLoadoutUnitType.Book ? PlayerPrefsBookV2Prefix : PlayerPrefsPlayerV2Prefix;
             for (int i = 0; i < slots.Length; i++)
             {
-                int catalogIndex = IndexOfInCatalog(slots[i]);
-                UnityEngine.PlayerPrefs.SetInt(prefix + i, catalogIndex);
+                string v2Key = v2Prefix + i;
+                string legacyKey = legacyPrefix + i;
+                SkillDataSO skill = slots[i];
+                if (skill == null)
+                {
+                    UnityEngine.PlayerPrefs.DeleteKey(v2Key);
+                    UnityEngine.PlayerPrefs.DeleteKey(legacyKey);
+                    continue;
+                }
+
+                string persistenceKey = skill.LoadoutPersistenceKey;
+                UnityEngine.PlayerPrefs.SetString(v2Key, persistenceKey);
+
+                int catalogIndex = IndexOfInCatalog(skill);
+                if (catalogIndex >= 0)
+                    UnityEngine.PlayerPrefs.SetInt(legacyKey, catalogIndex);
+                else
+                {
+                    UnityEngine.PlayerPrefs.DeleteKey(legacyKey);
+                    UnityEngine.Debug.LogWarning(
+                        $"[NewSkillSystemSkillLoadoutService] Skill '{skill.name}' não está no catálogo desta cena — loadout guardado só por chave V2. Confirma que GamePlay e Exploration usam o mesmo asset em cada entrada do catálogo.");
+                }
             }
             UnityEngine.PlayerPrefs.Save();
         }
@@ -152,27 +176,70 @@ namespace Logic.Scripts.GameDomain.Services.Skills
 
         private void LoadUnitFromPlayerPrefs(SkillLoadoutUnitType unitType, SkillDataSO[] target)
         {
-            string prefix = unitType == SkillLoadoutUnitType.Book ? PlayerPrefsBookPrefix : PlayerPrefsPlayerPrefix;
-            string legacyPrefix = unitType == SkillLoadoutUnitType.Book ? LegacyPlayerPrefsBookPrefix : LegacyPlayerPrefsPlayerPrefix;
+            string legacyPrefix = unitType == SkillLoadoutUnitType.Book ? PlayerPrefsBookPrefix : PlayerPrefsPlayerPrefix;
+            string legacyPaschoalPrefix = unitType == SkillLoadoutUnitType.Book ? LegacyPlayerPrefsBookPrefix : LegacyPlayerPrefsPlayerPrefix;
+            string v2Prefix = unitType == SkillLoadoutUnitType.Book ? PlayerPrefsBookV2Prefix : PlayerPrefsPlayerV2Prefix;
             bool usedLegacy = false;
+            bool migratedToV2 = false;
             for (int i = 0; i < target.Length; i++)
             {
-                string newKey = prefix + i;
-                string oldKey = legacyPrefix + i;
-                int idx = -1;
-                if (UnityEngine.PlayerPrefs.HasKey(newKey))
-                    idx = UnityEngine.PlayerPrefs.GetInt(newKey, -1);
-                else if (UnityEngine.PlayerPrefs.HasKey(oldKey))
+                string v2Key = v2Prefix + i;
+                if (UnityEngine.PlayerPrefs.HasKey(v2Key))
                 {
-                    idx = UnityEngine.PlayerPrefs.GetInt(oldKey, -1);
+                    string key = UnityEngine.PlayerPrefs.GetString(v2Key, string.Empty);
+                    if (!string.IsNullOrEmpty(key) && TryResolveSkillByPersistenceKey(key, out SkillDataSO resolved))
+                    {
+                        target[i] = resolved;
+                        continue;
+                    }
+                    if (!string.IsNullOrEmpty(key))
+                        UnityEngine.Debug.LogWarning(
+                            $"[NewSkillSystemSkillLoadoutService] Chave V2 '{key}' (slot {i}, {unitType}) não bate com nenhuma skill do catálogo desta cena. A usar índice antigo ou predefinição.");
+                }
+
+                int idx = -1;
+                if (UnityEngine.PlayerPrefs.HasKey(legacyPrefix + i))
+                    idx = UnityEngine.PlayerPrefs.GetInt(legacyPrefix + i, -1);
+                else if (UnityEngine.PlayerPrefs.HasKey(legacyPaschoalPrefix + i))
+                {
+                    idx = UnityEngine.PlayerPrefs.GetInt(legacyPaschoalPrefix + i, -1);
                     usedLegacy = true;
                 }
-                if (idx < 0 || idx >= _catalog.Length) continue;
-                target[i] = _catalog[idx];
+
+                if (idx >= 0 && idx < _catalog.Length)
+                {
+                    target[i] = _catalog[idx];
+                    migratedToV2 = true;
+                }
             }
             EnsureSlotsFilledWithDefaults(target);
-            if (usedLegacy)
+            if (usedLegacy || migratedToV2)
                 SaveToPlayerPrefs(unitType, target);
+        }
+
+        /// <summary>Resolve por <see cref="SkillDataSO.LoadoutPersistenceKey"/> ou pelo nome do asset (<c>name</c>).</summary>
+        private bool TryResolveSkillByPersistenceKey(string key, out SkillDataSO skill)
+        {
+            skill = null;
+            if (string.IsNullOrEmpty(key)) return false;
+            SkillDataSO firstNameMatch = null;
+            for (int i = 0; i < _catalog.Length; i++)
+            {
+                if (_catalog[i] == null) continue;
+                if (_catalog[i].LoadoutPersistenceKey == key)
+                {
+                    skill = _catalog[i];
+                    return true;
+                }
+                if (firstNameMatch == null && _catalog[i].name == key)
+                    firstNameMatch = _catalog[i];
+            }
+            if (firstNameMatch != null)
+            {
+                skill = firstNameMatch;
+                return true;
+            }
+            return false;
         }
 
         private int IndexOfInCatalog(SkillDataSO skill)

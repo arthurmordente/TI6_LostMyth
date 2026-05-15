@@ -40,6 +40,13 @@ public abstract class SkillDataSO : ScriptableObject
     public Sprite Icon;
     public string SkillName, Description;
 
+    [Header("Loadout persistence")]
+    [Tooltip("Chave única para guardar o slot do loadout entre Exploração e Luta (PlayerPrefs). Se vazio, usa o nome do asset Unity (ficheiro). Use IDs distintos se vários skills tiverem o mesmo nome de ficheiro.")]
+    [SerializeField] private string _loadoutPersistenceKey;
+
+    /// <summary>Chave usada no serviço de loadout (independente da ordem do array do catálogo entre cenas).</summary>
+    public string LoadoutPersistenceKey => string.IsNullOrWhiteSpace(_loadoutPersistenceKey) ? name : _loadoutPersistenceKey.Trim();
+
     [Header("Effects Definition")]
     [SerializeField] private SkillEffectSO[] _effects = Array.Empty<SkillEffectSO>();
 
