@@ -715,7 +715,9 @@ MonoBehaviour:
   _playerPreviewHpFillImage: {fileID: 0}
   _playerCurrentHealthText: {fileID: 7329972963590830713}
   _playerApFillImage: {fileID: 6323959399705518017}
+  _playerPreviewApFillImage: {fileID: 0}
   _playerActionPointsText: {fileID: 6257389854961483108}
+  _playerNextHitShieldIndicator: {fileID: 0}
   _naraManaFlaskRoot: {fileID: 6470573692380650191}
   _bookManaFlaskRoot: {fileID: 4683180061349252626}
   _bookUniversalActionFillImage: {fileID: 5252703918838385134}
@@ -742,6 +744,16 @@ MonoBehaviour:
   - {fileID: 4252682214339767165}
   - {fileID: 3116038056375349554}
   - {fileID: 9022810465114266850}
+  _erzaSkillCostDisplayRoots:
+  - {fileID: 6933197206597790664}
+  - {fileID: 9021927026322294326}
+  - {fileID: 4827132614574826796}
+  - {fileID: 1625319587876880680}
+  _bookSkillCostDisplayRoots:
+  - {fileID: 62865709925885644}
+  - {fileID: 4598966063870273992}
+  - {fileID: 1372112605743725658}
+  - {fileID: 3748382527193024709}
   _erzaSkillIconImages:
   - {fileID: 4259036094002830014}
   - {fileID: 445081732885062917}

@@ -3,6 +3,7 @@ using Logic.Scripts.GameDomain.MVC.Echo;
 using Logic.Scripts.GameDomain.MVC.Nara;
 using Logic.Scripts.GameDomain.MVC.Shared;
 using Logic.Scripts.GameDomain.MVC.Ui;
+using Logic.Scripts.GameDomain.Services.Skills;
 using Logic.Scripts.Services.AudioService;
 using Logic.Scripts.Services.CommandFactory;
 using Logic.Scripts.Services.UpdateService;
@@ -62,6 +63,9 @@ public class CastController : ICastController {
             Debug.LogWarning("[CastController] TryUseAbility — Book already used its one skill this player turn.");
             return false;
         }
+
+        if (IsPassiveNewSkillSlot(caster, index))
+            return false;
 
         ISkillCastFlow selectedFlow = SelectFlow(caster);
         if (selectedFlow == null) {
@@ -187,5 +191,15 @@ public class CastController : ICastController {
     private ISkillCastFlow SelectFlow(IPlayableUnit caster) {
         if (_newSkillSystemCastFlow.CanHandleCaster(caster)) return _newSkillSystemCastFlow;
         return null;
+    }
+
+    /// <summary>Passive loadout slots never start a cast (no warning — intentional no-op).</summary>
+    private static bool IsPassiveNewSkillSlot(IPlayableUnit caster, int index) {
+        if (caster?.UnitViewGO == null) return false;
+        var legacyToggle = caster.UnitViewGO.GetComponent<LegacySkillSystemToggle>();
+        if (legacyToggle != null && legacyToggle.UseLegacySkillSystem) return false;
+        var loadout = caster.UnitViewGO.GetComponent<NewSkillSystemSkillLoadout>();
+        if (loadout == null || !loadout.TryGetSkill(index, out SkillDataSO skill) || skill == null) return false;
+        return skill.SkillType == SkillType.Passive;
     }
 }

@@ -153,6 +153,20 @@ public class NaraTurnMovementController : NaraMovementController {
         else _movementRadius = _initialMovementRadius;
     }
 
+    /// <summary>
+    /// Combat passives: multiply the arena movement radius (ring size). Call after <see cref="InitEntryPoint"/>.
+    /// Values &lt;= 1 are ignored. Several passives multiply together.
+    /// </summary>
+    public void ApplyPassiveMovementAreaMultiplier(float multiplier) {
+        if (multiplier <= 1.0001f || float.IsNaN(multiplier) || float.IsInfinity(multiplier)) return;
+        int newBase = Mathf.Max(1, Mathf.RoundToInt(_initialMovementRadius * multiplier));
+        _initialMovementRadius = newBase;
+        _movementRadius = newBase;
+        if (NaraTransform == null) return;
+        SetMovementRadiusCenter();
+        LineHandlerController?.Refresh(_movementCenter, _movementRadius, NaraTransform.position);
+    }
+
     public void RemoveMovementRadius() {
         _movementRadius = 10000;
     }

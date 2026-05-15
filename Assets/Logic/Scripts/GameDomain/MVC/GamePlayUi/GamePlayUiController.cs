@@ -135,11 +135,8 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
             _gamePlayHud.SnapPlayerHealth(previewHp, actualHp, maxHp);
         }
 
-        public void SetAbilityManaCosts(int c1, int c2, int c3, int c4) {
-            _gamePlayHud.OnSkill1CostChange(c1);
-            _gamePlayHud.OnSkill2CostChange(c2);
-            _gamePlayHud.OnSkill3CostChange(c3);
-            _gamePlayHud.OnSkill4CostChange(c4);
+        public void SetAbilityManaCosts(int c1, int c2, int c3, int c4, bool showCostSlot1 = true, bool showCostSlot2 = true, bool showCostSlot3 = true, bool showCostSlot4 = true) {
+            _gamePlayHud.SetAbilityManaCosts(c1, c2, c3, c4, showCostSlot1, showCostSlot2, showCostSlot3, showCostSlot4);
         }
 
         public void SetSkillHudIcons(Sprite erza0, Sprite erza1, Sprite erza2, Sprite erza3, Sprite book0, Sprite book1, Sprite book2, Sprite book3) =>

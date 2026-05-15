@@ -62,9 +62,22 @@ public abstract class SkillDataSO : ScriptableObject
     [Header("Effects Definition")]
     [SerializeField] private SkillEffectSO[] _effects = Array.Empty<SkillEffectSO>();
 
+    [Header("Passive (Skill Type = Passive)")]
+    [Tooltip("Applied once when the player starts a fight (Nara movement ring + mana gained per turn).")]
+    [SerializeField] private PassiveStatModifierEntry[] _passiveModifiers = Array.Empty<PassiveStatModifierEntry>();
+
     public SkillType SkillType => _skillType;
-    public SkillCastType CastType => _castType;
+
+    /// <summary>Passive skills always behave as <see cref="SkillCastType.Self"/> at runtime (serialized cast is forced in <see cref="OnValidate"/>).</summary>
+    private SkillCastType EffectiveCastType =>
+        _skillType == SkillType.Passive ? SkillCastType.Self : _castType;
+
+    public SkillCastType CastType => EffectiveCastType;
     public SkillEffectSO[] Effects => _effects;
+
+    /// <summary>Entries for <see cref="SkillType.Passive"/>; ignored for other skill types at runtime.</summary>
+    public PassiveStatModifierEntry[] PassiveModifiers => _passiveModifiers ?? Array.Empty<PassiveStatModifierEntry>();
+
     public bool IsCastable => SkillType != SkillType.Passive;
 
     /// <summary>Derived display range for UI / legacy helpers (Projectile: range; Area: max ring; Self: 0).</summary>
@@ -72,7 +85,7 @@ public abstract class SkillDataSO : ScriptableObject
     {
         get
         {
-            switch (_castType)
+            switch (EffectiveCastType)
             {
                 case SkillCastType.Projectile:
                     return GetProjectileRange();
@@ -96,7 +109,7 @@ public abstract class SkillDataSO : ScriptableObject
 
     protected virtual IReadOnlyList<IEffectable> ResolveTargets(IEffectable caster, Transform target)
     {
-        if (_castType == SkillCastType.Self)
+        if (EffectiveCastType == SkillCastType.Self)
         {
             if (caster == null) return Array.Empty<IEffectable>();
             return new[] { caster };
@@ -104,7 +117,7 @@ public abstract class SkillDataSO : ScriptableObject
 
         Vector3 center = target != null ? target.position : (caster != null && caster.GetReferenceTransform() != null ? caster.GetReferenceTransform().position : Vector3.zero);
         float radius = GetAreaRadius();
-        if (_castType == SkillCastType.Area && radius > 0.0001f)
+        if (EffectiveCastType == SkillCastType.Area && radius > 0.0001f)
         {
             var hits = Physics.OverlapSphere(center, radius, ~0, QueryTriggerInteraction.Collide);
             List<IEffectable> resolved = new List<IEffectable>(hits.Length);
@@ -130,37 +143,37 @@ public abstract class SkillDataSO : ScriptableObject
 
     public float GetProjectileRange()
     {
-        if (_castType != SkillCastType.Projectile) return 0f;
+        if (EffectiveCastType != SkillCastType.Projectile) return 0f;
         return _projectileRange > 0.0001f ? _projectileRange : 500f;
     }
 
     public int GetProjectileMaxTargets()
     {
-        if (_castType != SkillCastType.Projectile) return 1;
+        if (EffectiveCastType != SkillCastType.Projectile) return 1;
         return Mathf.Max(1, _projectileNumberOfTargets);
     }
 
     public float GetProjectileSpeed()
     {
-        if (_castType != SkillCastType.Projectile) return 12f;
+        if (EffectiveCastType != SkillCastType.Projectile) return 12f;
         return _projectileTravelSpeed > 0.0001f ? _projectileTravelSpeed : 12f;
     }
 
     /// <summary>Pull caster toward hit <see cref="IEffectable"/> when the movement projectile option is enabled.</summary>
     public bool MoveCasterToProjectileHit =>
-        _castType == SkillCastType.Projectile && _moveCasterToProjectileHit;
+        EffectiveCastType == SkillCastType.Projectile && _moveCasterToProjectileHit;
 
     public float ProjectilePullStandoffFromTargetMeters =>
         Mathf.Max(0.1f, _projectilePullStandoffFromTargetMeters);
 
     public int GetProjectileCollisionDamage()
     {
-        if (_castType != SkillCastType.Projectile || !_projectileDealsDamage) return 0;
+        if (EffectiveCastType != SkillCastType.Projectile || !_projectileDealsDamage) return 0;
         return Power;
     }
 
     public bool ShouldDeferArenaSyncUntilProjectileHit() =>
-        _castType == SkillCastType.Projectile
+        EffectiveCastType == SkillCastType.Projectile
         && (_projectileDefersArenaSyncUntilHit || _moveCasterToProjectileHit);
 
     public float ProjectileSpawnForwardOffset => Mathf.Max(0f, _projectileSpawnForwardOffset);
@@ -172,19 +185,19 @@ public abstract class SkillDataSO : ScriptableObject
 
     public float GetAreaRadius()
     {
-        if (_castType != SkillCastType.Area) return 0f;
+        if (EffectiveCastType != SkillCastType.Area) return 0f;
         return _areaRadius > 0.0001f ? _areaRadius : 0f;
     }
 
     public float GetAreaMinCastDistance()
     {
-        if (_castType != SkillCastType.Area) return 0f;
+        if (EffectiveCastType != SkillCastType.Area) return 0f;
         return Mathf.Max(0f, _areaMinRange);
     }
 
     public float GetAreaMaxCastDistance()
     {
-        if (_castType != SkillCastType.Area) return 0f;
+        if (EffectiveCastType != SkillCastType.Area) return 0f;
         float min = GetAreaMinCastDistance();
         if (_areaMaxRange <= 0.0001f && min <= 0.0001f)
             return 0f;
@@ -217,7 +230,9 @@ public abstract class SkillDataSO : ScriptableObject
             _projectileHitDisplacementDurationSeconds = 0.05f;
         if (_castType == SkillCastType.Projectile && _skillType != SkillType.Movement && _moveCasterToProjectileHit)
             _moveCasterToProjectileHit = false;
-        if (SkillType == SkillType.Passive)
+        if (_skillType == SkillType.Passive) {
             Cost = 0;
+            _castType = SkillCastType.Self;
+        }
     }
 }

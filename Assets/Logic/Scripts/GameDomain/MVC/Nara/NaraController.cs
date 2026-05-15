@@ -129,6 +129,45 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
             _naraMovementController.InitEntryPoint(_naraView.GetRigidbody(), _naraView.GetCamera());
         }
 
+        /// <inheritdoc />
+        public void ApplyCombatLoadoutPassivesAndActionPoints(IActionPointsService actionPoints) {
+            SkillDataSO[] slots = _newSkillSystemSkillLoadoutService != null
+                ? _newSkillSystemSkillLoadoutService.BuildRuntimeSlotsArray(SkillLoadoutUnitType.Player)
+                : null;
+
+            float moveMult = 1f;
+            int apTurnBonus = 0;
+            if (slots != null) {
+                for (int i = 0; i < slots.Length; i++) {
+                    SkillDataSO s = slots[i];
+                    if (s == null || s.SkillType != SkillType.Passive) continue;
+
+                    PassiveStatModifierEntry[] mods = s.PassiveModifiers;
+                    for (int j = 0; j < mods.Length; j++) {
+                        PassiveStatModifierEntry e = mods[j];
+                        switch (e.Kind) {
+                            case PassiveStatModifierKind.MovementRadiusMultiplier:
+                                if (e.Value > 0f && !float.IsNaN(e.Value) && !float.IsInfinity(e.Value))
+                                    moveMult *= e.Value;
+                                break;
+                            case PassiveStatModifierKind.ActionPointsTurnGainBonus:
+                                apTurnBonus += Mathf.RoundToInt(e.Value);
+                                break;
+                        }
+                    }
+                }
+            }
+
+            if (actionPoints != null) {
+                int max = _naraConfiguration.MaxActionPoints;
+                int gain = Mathf.Max(0, _naraConfiguration.ActionPointsTurnGain + apTurnBonus);
+                actionPoints.Configure(max, gain);
+            }
+
+            if (_naraMovementController is NaraTurnMovementController ntm)
+                ntm.ApplyPassiveMovementAreaMultiplier(moveMult);
+        }
+
         public void InitEntryPointExploration() {
             _naraMovementController.InitEntryPoint(_naraView.GetRigidbody(), _naraView.GetCamera());
             Unfreeeze();

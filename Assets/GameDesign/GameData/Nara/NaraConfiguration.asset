@@ -15,7 +15,7 @@ MonoBehaviour:
   <MaxHealth>k__BackingField: 100
   <InitialMovementDistance>k__BackingField: 10
   <MaxActionPoints>k__BackingField: 10
-  <ActionPointsTurnGain>k__BackingField: 4
+  <ActionPointsTurnGain>k__BackingField: 2
   <Defense>k__BackingField: 30
   <MoveSpeed>k__BackingField: 15
   <RotationSpeed>k__BackingField: 10

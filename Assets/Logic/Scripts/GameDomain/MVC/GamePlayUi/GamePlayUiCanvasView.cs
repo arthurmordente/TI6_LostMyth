@@ -89,6 +89,11 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
         [Tooltip("Custos das 4 skills do Book.")]
         [SerializeField] private List<TMP_Text> _bookSkillCostTexts = new List<TMP_Text>(4);
 
+        [Header("Skill cost UI roots (optional)")]
+        [Tooltip("Se preenchido por slot, esconde o objeto inteiro para passivas; senão esconde só o TMP do custo.")]
+        [SerializeField] private List<GameObject> _erzaSkillCostDisplayRoots = new List<GameObject>(4);
+        [SerializeField] private List<GameObject> _bookSkillCostDisplayRoots = new List<GameObject>(4);
+
         [Header("Skill Icons (Optional — filhos dos botões)")]
         [Tooltip("Image de ícone por slot (ordem 0–3). Preenchido a partir de SkillDataSO.Icon ao refrescar o loadout.")]
         [SerializeField] private List<Image> _erzaSkillIconImages = new List<Image>(4);
@@ -512,13 +517,21 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
             }, targetCurrent, _tweenDuration).SetEase(_tweenEase).SetTarget(tweenTarget);
         }
 
-        public void OnSkill1CostChange(int cost) => SetIntText(GetActiveCostText(0), cost);
+        public void SetAbilityManaCosts(int c1, int c2, int c3, int c4, bool showCostSlot1 = true, bool showCostSlot2 = true, bool showCostSlot3 = true, bool showCostSlot4 = true)
+        {
+            ApplySkillCostCell(0, c1, showCostSlot1);
+            ApplySkillCostCell(1, c2, showCostSlot2);
+            ApplySkillCostCell(2, c3, showCostSlot3);
+            ApplySkillCostCell(3, c4, showCostSlot4);
+        }
 
-        public void OnSkill2CostChange(int cost) => SetIntText(GetActiveCostText(1), cost);
+        public void OnSkill1CostChange(int cost) => ApplySkillCostCell(0, cost, true);
 
-        public void OnSkill3CostChange(int cost) => SetIntText(GetActiveCostText(2), cost);
+        public void OnSkill2CostChange(int cost) => ApplySkillCostCell(1, cost, true);
 
-        public void OnSkill4CostChange(int cost) => SetIntText(GetActiveCostText(3), cost);
+        public void OnSkill3CostChange(int cost) => ApplySkillCostCell(2, cost, true);
+
+        public void OnSkill4CostChange(int cost) => ApplySkillCostCell(3, cost, true);
 
         public void OnSkill1NameChange(string name) { }
 
@@ -783,6 +796,36 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
             if (slotIndex < 0 || slotIndex >= container.childCount) return;
             var button = container.GetChild(slotIndex).GetComponent<Button>();
             Bind(button, callback);
+        }
+
+        private GameObject GetSkillCostDisplayRoot(int slotIndex)
+        {
+            var configuredList = _showBookSkillsTheme ? _bookSkillCostDisplayRoots : _erzaSkillCostDisplayRoots;
+            return At(configuredList, slotIndex);
+        }
+
+        private void ApplySkillCostCell(int slotIndex, int cost, bool showCostDisplay)
+        {
+            GameObject root = GetSkillCostDisplayRoot(slotIndex);
+            if (root != null)
+            {
+                root.SetActive(showCostDisplay);
+                if (showCostDisplay)
+                {
+                    var t = root.GetComponentInChildren<TMP_Text>(true);
+                    SetIntText(t, cost);
+                }
+
+                return;
+            }
+
+            TMP_Text text = GetActiveCostText(slotIndex);
+            if (text != null)
+            {
+                text.gameObject.SetActive(showCostDisplay);
+                if (showCostDisplay)
+                    SetIntText(text, cost);
+            }
         }
 
         private TMP_Text GetActiveCostText(int slotIndex)

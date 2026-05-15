@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using System.Linq;
+using Logic.Scripts.GameDomain.MVC.ExplorationLoadout;
 using Logic.Scripts.GameDomain.Services.Skills;
 
 public class ExplorationLoadoutUIController : IExplorationLoadoutUIController
@@ -7,6 +10,7 @@ public class ExplorationLoadoutUIController : IExplorationLoadoutUIController
 
     private SkillLoadoutUnitType _selectedUnitType = SkillLoadoutUnitType.Player;
     private int _selectedSlotIndex;
+    private ExplorationLoadoutSkillFilter _catalogFilter = ExplorationLoadoutSkillFilter.All;
 
     public ExplorationLoadoutUIController(ExplorationLoadoutUIView view, INewSkillSystemSkillLoadoutService loadoutService)
     {
@@ -18,7 +22,7 @@ public class ExplorationLoadoutUIController : IExplorationLoadoutUIController
     {
         if (_view == null) return;
         _view.Init();
-        _view.RegisterCallbacks(Hide, OnPlayerSlotClicked, OnBookSlotClicked);
+        _view.RegisterCallbacks(Hide, OnPlayerSlotClicked, OnBookSlotClicked, OnCatalogFilterChanged);
         RebuildCatalog();
         RefreshSlots();
         _view.SetSelectedSlot(_selectedUnitType, _selectedSlotIndex);
@@ -37,6 +41,7 @@ public class ExplorationLoadoutUIController : IExplorationLoadoutUIController
     {
         if (_view == null) return;
         RefreshSlots();
+        RebuildCatalog();
         _view.SetVisible(true);
     }
 
@@ -46,16 +51,34 @@ public class ExplorationLoadoutUIController : IExplorationLoadoutUIController
         _view.SetVisible(false);
     }
 
+    private void OnCatalogFilterChanged(ExplorationLoadoutSkillFilter filter)
+    {
+        _catalogFilter = filter;
+        RebuildCatalog();
+    }
+
     private void RebuildCatalog()
     {
         if (_view == null || _loadoutService == null) return;
         _view.ClearCatalog();
-        foreach (SkillDataSO skill in _loadoutService.AllSkills)
+        foreach (SkillDataSO skill in EnumerateFilteredCatalogSkills())
         {
             var item = _view.CreateCatalogItem();
             if (item == null) continue;
             item.Bind(skill, OnCatalogSkillSelected, OnCatalogSkillHovered);
         }
+        _view.FinalizeCatalogScroll();
+    }
+
+    private IEnumerable<SkillDataSO> EnumerateFilteredCatalogSkills()
+    {
+        IEnumerable<SkillDataSO> q = _loadoutService.AllSkills
+            .Where(s => s != null && ExplorationLoadoutSkillFilterUtil.Matches(s, _catalogFilter));
+        if (_catalogFilter == ExplorationLoadoutSkillFilter.All)
+            return q
+                .OrderBy(s => ExplorationLoadoutSkillFilterUtil.AllViewSortGroup(s.SkillType))
+                .ThenBy(s => s.SkillName ?? string.Empty, System.StringComparer.OrdinalIgnoreCase);
+        return q.OrderBy(s => s.SkillName ?? string.Empty, System.StringComparer.OrdinalIgnoreCase);
     }
 
     private void RefreshSlots()

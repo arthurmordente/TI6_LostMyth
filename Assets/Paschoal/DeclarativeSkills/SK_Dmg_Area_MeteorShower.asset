@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6a7b8c9d0e1f23456789abcdef0123ab, type: 3}
-  m_Name: SK_Area_NosPes0a0
+  m_Name: SK_Dmg_Area_MeteorShower
   m_EditorClassIdentifier: 
   _skillType: 0
   _castType: 1
@@ -20,17 +20,17 @@ MonoBehaviour:
   _projectileAimPrefab: {fileID: 0}
   _projectilePrefab: {fileID: 0}
   _areaMinRange: 0
-  _areaMaxRange: 0
+  _areaMaxRange: 8
   _areaRadius: 2
   _areaAimPrefab: {fileID: 1607142820532151380, guid: 6feee9629db8db94f83b1e6771d787d1, type: 3}
   _areaImpactPrefab: {fileID: 2224025274982176450, guid: caa4a69375bd38348901ddadba2f8953, type: 3}
   _selfAimPrefab: {fileID: 0}
   _selfCastPrefab: {fileID: 0}
-  Power: 30
-  Cost: 1
+  Power: 35
+  Cost: 2
   Icon: {fileID: 21300000, guid: c0de9e55624845a42b8ad06684976429, type: 3}
-  SkillName: Self Explosion
-  Description: "Explos\xE3o centrada no jogador"
+  SkillName: Chuva de raios
+  Description: "Ataque em \xE1rea"
   _effects:
   - {fileID: 11400000, guid: a47ac10b58cc4372a5670e02b2c3d472, type: 2}
   _runtimeModifiers: []

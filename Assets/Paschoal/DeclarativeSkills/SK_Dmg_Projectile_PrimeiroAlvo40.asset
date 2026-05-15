@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6a7b8c9d0e1f23456789abcdef0123ab, type: 3}
-  m_Name: SK_Projectile_PrimeiroAlvo40
+  m_Name: SK_Dmg_Projectile_PrimeiroAlvo40
   m_EditorClassIdentifier: 
   CoolDown: 0
   CastTime: 0

@@ -40,6 +40,9 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
         void OnSkill2CostChange(int cost);
         void OnSkill3CostChange(int cost);
         void OnSkill4CostChange(int cost);
+
+        /// <summary>Nara HUD: per-slot mana label + optional root (see cost display lists on the view).</summary>
+        void SetAbilityManaCosts(int c1, int c2, int c3, int c4, bool showCostSlot1 = true, bool showCostSlot2 = true, bool showCostSlot3 = true, bool showCostSlot4 = true);
         void OnSkill1NameChange(string name);
         void OnSkill2NameChange(string name);
         void ShowBookSkillsTheme(bool showBookSkillsTheme);

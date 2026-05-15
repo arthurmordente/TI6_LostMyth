@@ -65,7 +65,7 @@ public class NewSkillSystemDefaultSkillCastFlow : ISkillCastFlow
         prepareResult = new SkillCastPrepareResult
         {
             AbilityIndex = index,
-            Cost = _currentSkill.SkillType == Logic.Scripts.GameDomain.Services.Skills.SkillType.Passive ? 0 : Mathf.Max(0, _currentSkill.Cost),
+            Cost = Mathf.Max(0, _currentSkill.Cost),
             AnimatorAttackType = index + 1
         };
         return true;
