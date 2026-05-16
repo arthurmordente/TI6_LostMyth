@@ -20,7 +20,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: SHDRMAT_Crystal
+  m_Name: SHDRMAT_RouletteNeutral
   m_Shader: {fileID: -6465566751694194690, guid: aaa419e5d4493c5469d126514772f3a7, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -51,16 +51,16 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Alpha: 1
-    - _BottonLine: 0.6
-    - _Metallic: 0.5
+    - _Alpha: 0.5
+    - _BottonLine: 0.318
+    - _Metallic: 1
     - _QueueControl: 0
     - _QueueOffset: 0
-    - _Smoothness: 0.45
-    - _TopLine: 0.5
+    - _Smoothness: 0
+    - _TopLine: 0.42
     m_Colors:
-    - _BaseColor: {r: 0, g: 0.25, b: 0.05851066, a: 1}
-    - _BottonColor: {r: 1.9810905, g: 0, b: 4, a: 1}
-    - _TopColor: {r: 0, g: 1.0634441, b: 4, a: 1}
+    - _BaseColor: {r: 0.35257208, g: 0.42032024, b: 0.5377358, a: 1}
+    - _BottonColor: {r: 0.9221843, g: 1.0946623, b: 4.344512, a: 1}
+    - _TopColor: {r: 0.9221843, g: 1.0946623, b: 4.344512, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
