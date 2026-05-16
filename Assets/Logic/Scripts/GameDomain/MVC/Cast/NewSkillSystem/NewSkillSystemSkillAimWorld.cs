@@ -1,3 +1,4 @@
+using Logic.Scripts.GameDomain.MVC.Environment;
 using Logic.Scripts.GameDomain.MVC.Shared;
 using UnityEngine;
 
@@ -84,7 +85,9 @@ namespace Logic.Scripts.GameDomain.MVC.Cast.NewSkillSystem {
                 return origin + GetPlanarDirectionFromOriginToAim(playable, caster) * Mathf.Min(maxDist, 2f);
             Vector3 dir = delta / mag;
             float travel = Mathf.Min(maxDist, mag);
-            return origin + dir * travel;
+            Vector3 end = origin + dir * travel;
+            CombatArenaBoundaryRuntime.TryClampVoluntaryWorldPosition(ref end);
+            return end;
         }
 
         public static Vector3 GetAreaClampedAimPoint(IPlayableUnit playable, IEffectable caster, SkillDataSO skill)
@@ -100,7 +103,9 @@ namespace Logic.Scripts.GameDomain.MVC.Cast.NewSkillSystem {
             float minDist = skill.GetAreaMinCastDistance();
             float maxDist = skill.GetAreaMaxCastDistance();
             float clamped = Mathf.Clamp(dist, minDist, maxDist);
-            return origin + delta.normalized * clamped;
+            Vector3 result = origin + delta.normalized * clamped;
+            CombatArenaBoundaryRuntime.TryClampVoluntaryWorldPosition(ref result);
+            return result;
         }
     }
 }

@@ -1,3 +1,4 @@
+using Logic.Scripts.GameDomain.MVC.Environment;
 using Logic.Scripts.GameDomain.Services.Skills;
 using UnityEngine;
 
@@ -18,6 +19,7 @@ public class MoveCasterToTargetSkillEffectSO : SkillEffectSO
         if (root == null) return;
         Vector3 destination = context.TargetPoint;
         destination.y += _yOffset;
+        CombatArenaBoundaryRuntime.TryClampVoluntaryWorldPosition(ref destination);
         root.position = destination;
     }
 }

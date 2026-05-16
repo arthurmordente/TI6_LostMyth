@@ -1,4 +1,5 @@
 using Logic.Scripts.GameDomain.MVC.Cast.NewSkillSystem;
+using Logic.Scripts.GameDomain.MVC.Environment;
 using Logic.Scripts.GameDomain.MVC.Nara;
 using Logic.Scripts.GameDomain.MVC.Shared;
 using Logic.Scripts.GameDomain.Services.Skills;
@@ -139,6 +140,7 @@ public class NewSkillSystemDefaultSkillCastFlow : ISkillCastFlow
             point = NewSkillSystemSkillAimWorld.ClampDirectedEnd(origin, point, _currentSkill != null ? _currentSkill.GetProjectileRange() : 500f);
         }
 
+        CombatArenaBoundaryRuntime.TryClampVoluntaryWorldPosition(ref point);
         _fallbackTarget.position = point;
         Vector3 direction = point - origin;
         direction.y = 0f;

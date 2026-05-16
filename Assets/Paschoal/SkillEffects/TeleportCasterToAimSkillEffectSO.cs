@@ -1,3 +1,4 @@
+using Logic.Scripts.GameDomain.MVC.Environment;
 using Logic.Scripts.GameDomain.MVC.Shared;
 using Logic.Scripts.GameDomain.Services.Skills;
 using UnityEngine;
@@ -34,6 +35,7 @@ public class TeleportCasterToAimSkillEffectSO : SkillEffectSO
                 QueryTriggerInteraction.Ignore))
             destination = hit.point;
 
+        CombatArenaBoundaryRuntime.TryClampVoluntaryWorldPosition(ref destination);
         teleport.TeleportToWorldPosition(destination);
     }
 }

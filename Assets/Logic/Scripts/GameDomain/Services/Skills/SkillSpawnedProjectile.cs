@@ -1,3 +1,4 @@
+using Logic.Scripts.GameDomain.MVC.Environment;
 using Logic.Scripts.GameDomain.MVC.Shared;
 using UnityEngine;
 
@@ -137,6 +138,7 @@ namespace Logic.Scripts.GameDomain.Services.Skills
             Vector3 dest = targetCenter + fromTarget * standoffMeters;
             if (caster != null && caster.GetReferenceTransform() != null)
                 dest.y = caster.GetReferenceTransform().position.y;
+            CombatArenaBoundaryRuntime.TryClampVoluntaryWorldPosition(ref dest);
             return dest;
         }
 

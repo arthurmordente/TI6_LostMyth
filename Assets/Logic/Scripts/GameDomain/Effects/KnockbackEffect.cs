@@ -4,6 +4,7 @@ using DG.Tweening;
 using Logic.Scripts.GameDomain.MVC.Abilitys;
 using Logic.Scripts.GameDomain.MVC.Nara;
 using Logic.Scripts.GameDomain.MVC.Boss;
+using Logic.Scripts.GameDomain.MVC.Environment;
 using Logic.Scripts.Services.AudioService;
 using Zenject;
 
@@ -78,6 +79,7 @@ namespace Logic.Scripts.GameDomain.Effects
             Vector3 start = rb.position;
             Vector3 end   = start + dir * scaledForce;
             end.y = start.y;
+            CombatArenaBoundaryRuntime.TryClampForcedWorldPosition(ref end);
 
             float duration = 0.45f;
             DOTween.Kill(rb, complete: false);
@@ -144,6 +146,7 @@ namespace Logic.Scripts.GameDomain.Effects
             Vector3 start = rb.position;
             Vector3 end = start + dir * scaledForce;
             end.y = start.y;
+            CombatArenaBoundaryRuntime.TryClampForcedWorldPosition(ref end);
             float duration = 0.45f;
             float elapsed = 0f;
             while (elapsed < duration)

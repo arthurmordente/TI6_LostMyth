@@ -1,4 +1,5 @@
 using Logic.Scripts.GameDomain.MVC.Abilitys;
+using Logic.Scripts.GameDomain.MVC.Environment;
 using System;
 using UnityEngine;
 using Logic.Scripts.GameDomain.MVC.Nara;
@@ -56,6 +57,7 @@ namespace Assets.Logic.Scripts.GameDomain.Effects {
         {
             Vector3 startPos = t.position;
             Vector3 endPos = startPos + delta;
+            CombatArenaBoundaryRuntime.TryClampForcedWorldPosition(ref endPos);
             float elapsed = 0f;
             while (elapsed < duration)
             {

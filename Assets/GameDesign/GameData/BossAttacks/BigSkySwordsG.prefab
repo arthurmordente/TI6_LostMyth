@@ -47,7 +47,6 @@ MonoBehaviour:
   _effects:
   - rid: 2599984782535819372
   - rid: 2599984789869297870
-  - rid: 1723426629190942869
   _attackType: 5
   _displacementPriority: 0
   _protean:
@@ -82,14 +81,6 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 1723426629190942869
-      type: {class: GrappleEffect, ns: Logic.Scripts.GameDomain.Effects, asm: Assembly-CSharp}
-      data:
-        Name: 
-        Description: 
-        IsAutoCast: 0
-        _force: 3
-        _stopDistance: 1
     - rid: 2599984782535819372
       type: {class: DamageEffect, ns: Assets.Logic.Scripts.GameDomain.Effects, asm: Assembly-CSharp}
       data:

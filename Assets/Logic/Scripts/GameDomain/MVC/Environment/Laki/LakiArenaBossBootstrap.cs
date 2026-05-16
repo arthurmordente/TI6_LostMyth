@@ -5,6 +5,7 @@ using Logic.Scripts.Services.CommandFactory;
 using Logic.Scripts.GameDomain.MVC.Nara;
 using Logic.Scripts.GameDomain.MVC.Boss.Laki.Chips;
 using Logic.Scripts.GameDomain.MVC.Boss.Visuals;
+using Logic.Scripts.GameDomain.MVC.Environment;
 using System.Threading.Tasks;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -12,8 +13,12 @@ using UnityEditor;
 
 namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 {
+	[ExecuteAlways]
 	public class LakiArenaBossBootstrap : MonoBehaviour
 	{
+		[Header("Debug gizmos (temporary — tuning)")]
+		[SerializeField] private bool _drawArenaBoundsGizmo = true;
+
 		private TurnStateService _turnStateService;
 		private INaraController _naraController;
 		private ICommandFactory _commandFactory;
@@ -82,6 +87,15 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 			catch { Debug.LogError("[LakiArenaBossBootstrap] INaraController not bound."); LakiRouletteArenaFightIntro.SignalBoardIntroComplete(); return; }
 			try { _commandFactory = container.Resolve<ICommandFactory>(); }
 			catch { Debug.LogError("[LakiArenaBossBootstrap] ICommandFactory not bound."); LakiRouletteArenaFightIntro.SignalBoardIntroComplete(); return; }
+
+			CombatArenaBoundaryRuntime.RegisterLaki(new CombatArenaLakiGeometry
+			{
+				CenterWorld = _centerWorld,
+				InnerRadius = _innerRadius,
+				OuterRadius = _outerRadius,
+				ArcStartDeg = _arcStartDeg,
+				ArcDeg = _arcDeg,
+			});
 
 			var arenaService = new RouletteArenaService(_innerRadius, _outerRadius, _radialSplit01, _arcStartDeg, _arcDeg);
 			arenaService.SetLayoutConfigs(
@@ -174,10 +188,44 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 
 		private void OnDestroy()
 		{
+			CombatArenaBoundaryRuntime.Clear();
 			LakiRouletteArenaFightIntro.CancelWait();
 			LakiBossShieldRuntime.Reset();
 			try { Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.Reset(); } catch { }
 			try { Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.MinigameRuntimeService.Reset(); } catch { }
+		}
+
+		private void OnDrawGizmosSelected()
+		{
+			if (!_drawArenaBoundsGizmo) return;
+			DrawLakiArenaGizmo();
+		}
+
+		private void OnDrawGizmos()
+		{
+			if (!_drawArenaBoundsGizmo) return;
+			DrawLakiArenaGizmo();
+		}
+
+		private void OnValidate()
+		{
+#if UNITY_EDITOR
+			if (_drawArenaBoundsGizmo)
+				UnityEditor.SceneView.RepaintAll();
+#endif
+		}
+
+		private void DrawLakiArenaGizmo()
+		{
+			Vector3 center = _centerWorld;
+			if (center == Vector3.zero)
+				center = transform.position;
+			CombatArenaBoundaryGizmoDrawer.DrawLaki(
+				center,
+				_innerRadius,
+				_outerRadius,
+				_arcStartDeg,
+				_arcDeg);
 		}
 	}
 }

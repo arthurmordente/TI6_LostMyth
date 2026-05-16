@@ -4,6 +4,7 @@ using DG.Tweening;
 using Logic.Scripts.GameDomain.MVC.Abilitys;
 using Logic.Scripts.GameDomain.MVC.Nara;
 using Logic.Scripts.GameDomain.MVC.Boss;
+using Logic.Scripts.GameDomain.MVC.Environment;
 
 namespace Logic.Scripts.GameDomain.Effects
 {
@@ -65,6 +66,7 @@ namespace Logic.Scripts.GameDomain.Effects
             Vector3 start = rb.position;
             Vector3 end = start + dir * step;
             end.y = start.y;
+            CombatArenaBoundaryRuntime.TryClampForcedWorldPosition(ref end);
 
             float duration = 0.45f; // a little less than the handler's 0.5s wait
             DOTween.Kill(rb, complete: false);
@@ -120,6 +122,8 @@ namespace Logic.Scripts.GameDomain.Effects
             Vector3 dir = toLine / Mathf.Max(1e-6f, dist);
             Vector3 start = rb.position;
             Vector3 end = start + dir * step;
+            end.y = start.y;
+            CombatArenaBoundaryRuntime.TryClampForcedWorldPosition(ref end);
             float duration = 0.45f;
             Debug.Log($"GrappleEffect calc (routine) -> base={_force:0.###} stacks={stacks} stacksFactor={stacksFactor:0.00} distM={dMeters:0.###}/{maxMeters:0.###} distFactor={distanceFactor:0.00} step={step:0.###}");
             float elapsed = 0f;

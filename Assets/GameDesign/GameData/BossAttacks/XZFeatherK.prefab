@@ -47,7 +47,6 @@ MonoBehaviour:
   _effects:
   - rid: 2599984782535819375
   - rid: 2599984789869297873
-  - rid: 2599984789869297806
   _attackType: 1
   _protean:
     radius: 6
@@ -78,13 +77,6 @@ MonoBehaviour:
         Name: 
         Description: 
         amount: 15
-    - rid: 2599984789869297806
-      type: {class: KnockbackEffect, ns: Logic.Scripts.GameDomain.Effects, asm: Assembly-CSharp}
-      data:
-        Name: 
-        Description: 
-        _force: 2
-        _speed: 6
     - rid: 2599984789869297873
       type: {class: AddDebuffStacksEffect, ns: Logic.Scripts.GameDomain.Effects, asm: Assembly-CSharp}
       data:

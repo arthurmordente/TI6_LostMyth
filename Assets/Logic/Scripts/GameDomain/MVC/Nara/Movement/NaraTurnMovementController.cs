@@ -1,3 +1,4 @@
+using Logic.Scripts.GameDomain.MVC.Environment;
 using Logic.Scripts.GameDomain.MVC.Nara;
 using UnityEngine;
 using Logic.Scripts.Turns;
@@ -80,6 +81,12 @@ public class NaraTurnMovementController : NaraMovementController {
             Vector3 directionFromCenter = (NaraTransform.position - _movementCenter).normalized;
             Vector3 radiusLimit = _movementCenter + directionFromCenter * _movementRadius;
             NaraRigidbody.MovePosition(new Vector3(radiusLimit.x, NaraTransform.position.y, radiusLimit.z));
+        }
+
+        if (CombatArenaBoundaryRuntime.ClampVoluntaryDisplacement) {
+            Vector3 p = NaraRigidbody.position;
+            if (CombatArenaBoundaryRuntime.TryClampVoluntaryWorldPosition(ref p))
+                NaraRigidbody.MovePosition(p);
         }
     }
 

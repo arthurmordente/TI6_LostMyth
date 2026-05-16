@@ -10,6 +10,7 @@ using Logic.Scripts.GameDomain.Commands;
 using Logic.Scripts.Services.CommandFactory;
 using Logic.Scripts.Services.AudioService;
 using Logic.Scripts.GameDomain.MVC.Boss.Visuals;
+using Logic.Scripts.GameDomain.MVC.Environment;
 using Zenject;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -279,15 +280,16 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
             if (_effects != null)
             {
                 System.Collections.Generic.List<AbilityEffect> effectsToRun = _effects;
-                if ((_attackType == AttackType.WingSlash || !_displacementEnabled) && _effects != null)
+                bool stripForcedMove = !_displacementEnabled
+                    || _attackType == AttackType.WingSlash
+                    || CombatArenaBoundaryRuntime.Policy == CombatArenaDispositionPolicy.HokariVoluntaryPlusRingOut;
+                if (stripForcedMove && _effects != null)
                 {
                     var filtered = new System.Collections.Generic.List<AbilityEffect>(_effects.Count);
                     foreach (var fx in _effects)
                     {
                         if (!IsForcedMovementEffect(fx))
-                        {
                             filtered.Add(fx);
-                        }
                     }
                     effectsToRun = filtered;
                 }

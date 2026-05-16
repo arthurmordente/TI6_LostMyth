@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 8953824343904534656}
   - component: {fileID: 2980076121009688399}
   - component: {fileID: 5606840884547437125}
+  - component: {fileID: 1036894158454948369}
   m_Layer: 6
   m_Name: HokariBoss
   m_TagString: Untagged
@@ -156,6 +157,26 @@ MonoBehaviour:
   _modelRoot: {fileID: 3448328581731096150}
   _overrideMainColor: 0
   _mainColor: {r: 8, g: 0, b: 0, a: 1}
+--- !u!114 &1036894158454948369
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3005417857088838520}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2a0adaa988b366a4f9a4cea8058f427c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Logic.Scripts.GameDomain.MVC.Environment.Hokari.HokariArenaBossBootstrap
+  _drawArenaBoundsGizmo: 1
+  _useTransformPositionAsCenter: 0
+  _centerWorld: {x: 0, y: 0, z: 0}
+  _voluntaryClampRadius: 21
+  _ringOutFallY: -2
+  _ringOutOutsideRadiusXZ: 0
+  _ringOutConsecutiveFrames: 0
+  _hazardPattern: {fileID: 0}
 --- !u!1 &5860620743470976194
 GameObject:
   m_ObjectHideFlags: 0
