@@ -36,7 +36,7 @@ MonoBehaviour:
   Power: 0
   Cost: 2
   Icon: {fileID: 21300000, guid: f1f774d82f1bae14a95b9197cb85239d, type: 3}
-  SkillName: Blink
+  SkillName: Teleporte
   Description: "Teleporta at\xE9 a \xE1rea alvo."
   _effects:
   - {fileID: 11400000, guid: 697ae35b4c5cfb0439a41ec694d04329, type: 2}

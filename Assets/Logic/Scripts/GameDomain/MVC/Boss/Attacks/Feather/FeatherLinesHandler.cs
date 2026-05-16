@@ -76,7 +76,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Feather
             _params.telegraphStripUniformScale > 1e-4f ? _params.telegraphStripUniformScale : 1f;
 
         /// <summary>Strip mesh: local +Z along the faixa. X / Z / XZ usam (0.3,1,1) — mesmo local após rotação por eixo.</summary>
-        private const float FeatherStripNarrowAxisScale = 0.3f;
+        private const float FeatherStripNarrowAxisScale = 0.5f;
 
         private Vector3 TelegraphStripLocalScale(float diagonalUniformScale)
         {

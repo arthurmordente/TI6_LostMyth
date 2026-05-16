@@ -36,7 +36,7 @@ MonoBehaviour:
   Power: 0
   Cost: 2
   Icon: {fileID: 21300000, guid: f1f774d82f1bae14a95b9197cb85239d, type: 3}
-  SkillName: Grapple
+  SkillName: "Pluma da aproxima\xE7\xE3o"
   Description: "Arremessa uma pluma m\xE1gica que puxa o conjurador at\xE9 o primeiro
     alvo atingido."
   _effects: []

@@ -36,7 +36,7 @@ MonoBehaviour:
   Power: 40
   Cost: 1
   Icon: {fileID: 21300000, guid: abcd2cdfb73542b428f25b2007050ade, type: 3}
-  SkillName: Energy blast
+  SkillName: Orbe de energia
   Description: Dispara uma onda de energia, causando dano massivo ao primeiro alvo
     atingido.
   _effects:
