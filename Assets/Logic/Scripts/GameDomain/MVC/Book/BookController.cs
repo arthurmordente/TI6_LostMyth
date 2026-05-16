@@ -217,10 +217,18 @@ namespace Logic.Scripts.GameDomain.MVC.Book
                 onComplete?.Invoke();
                 return;
             }
+
+            Freeeze();
+
             var displacer = _bookView.GetComponent<ArenaSkillPathDisplacer>();
             if (displacer == null)
                 displacer = _bookView.gameObject.AddComponent<ArenaSkillPathDisplacer>();
-            displacer.Begin(_bookView.GetRigidbody(), worldTarget, durationSeconds, onComplete);
+
+            Rigidbody rb = _bookView.GetRigidbody();
+            displacer.Begin(rb, worldTarget, durationSeconds, () => {
+                ArenaBoundedPlanarDisplacement.ZeroPlanarVelocity(rb);
+                onComplete?.Invoke();
+            });
         }
 
         public void OnAbilityExecuted()

@@ -51,7 +51,10 @@ public class NewSkillSystemDefaultSkillCastFlow : ISkillCastFlow
         if (_currentSkill.CastType == SkillCastType.Area && _currentSkill.AreaAimPrefab != null)
             _currentPreview = Object.Instantiate(_currentSkill.AreaAimPrefab, spawn.position, spawn.rotation);
         else if (_currentSkill.CastType == SkillCastType.Projectile && _currentSkill.ProjectileAimPrefab != null)
-            _currentPreview = Object.Instantiate(_currentSkill.ProjectileAimPrefab, spawn.position, spawn.rotation);
+        {
+            Vector3 castOrigin = NewSkillSystemSkillAimWorld.GetSkillOrigin(caster, caster);
+            _currentPreview = Object.Instantiate(_currentSkill.ProjectileAimPrefab, castOrigin, Quaternion.identity);
+        }
         else if (_currentSkill.CastType == SkillCastType.Self && _currentSkill.SelfAimPrefab != null)
         {
             Vector3 foot = NewSkillSystemSkillAimWorld.GetSelfCastFootWorld(caster);
@@ -134,13 +137,26 @@ public class NewSkillSystemDefaultSkillCastFlow : ISkillCastFlow
         {
             point = NewSkillSystemSkillAimWorld.GetAreaClampedAimPoint(caster, caster, _currentSkill);
         }
+        else if (_currentSkill != null && _currentSkill.CastType == SkillCastType.Projectile)
+        {
+            point = NewSkillSystemSkillAimWorld.GetPlanarClampedAimEnd(caster, caster, _currentSkill);
+        }
         else
         {
-            point = TryGetMouseWorldPoint(out Vector3 worldPoint) ? worldPoint : (origin + fallbackForward * 2f);
+            if (NewSkillSystemSkillAimWorld.TryMouseHitPoint(out Vector3 worldPoint))
+                point = worldPoint;
+            else
+            {
+                Vector3 planarFwd = Vector3.ProjectOnPlane(fallbackForward, Vector3.up);
+                if (planarFwd.sqrMagnitude < 1e-8f) planarFwd = Vector3.forward;
+                point = origin + planarFwd.normalized * 2f;
+            }
             point = NewSkillSystemSkillAimWorld.ClampDirectedEnd(origin, point, _currentSkill != null ? _currentSkill.GetProjectileRange() : 500f);
         }
 
-        CombatArenaBoundaryRuntime.TryClampVoluntaryWorldPosition(ref point);
+        if (_currentSkill == null || _currentSkill.CastType == SkillCastType.Self)
+            CombatArenaBoundaryRuntime.TryClampVoluntaryWorldPosition(ref point);
+
         _fallbackTarget.position = point;
         Vector3 direction = point - origin;
         direction.y = 0f;
@@ -149,18 +165,6 @@ public class NewSkillSystemDefaultSkillCastFlow : ISkillCastFlow
         }
         if (direction.sqrMagnitude > 1e-6f)
             _fallbackTarget.rotation = Quaternion.LookRotation(direction.normalized, Vector3.up);
-    }
-
-    private static bool TryGetMouseWorldPoint(out Vector3 worldPoint)
-    {
-        worldPoint = Vector3.zero;
-        if (Camera.main == null) return false;
-
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if (!Physics.Raycast(ray, out RaycastHit hitInfo)) return false;
-
-        worldPoint = hitInfo.point;
-        return true;
     }
 
     private void CleanupPreviewAndTarget()

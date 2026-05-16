@@ -15,9 +15,11 @@ namespace Logic.Scripts.GameDomain.Services.Skills
             SkillDataSO skill = context.Skill;
             if (skill == null || skill.ProjectilePrefab == null || context.Caster == null) return;
 
+            var playableCaster = context.Caster as IPlayableUnit;
+
             Vector3 origin;
-            if (context.Caster is IPlayableUnit playable)
-                origin = NewSkillSystemSkillAimWorld.GetSkillOrigin(playable, context.Caster);
+            if (playableCaster != null)
+                origin = NewSkillSystemSkillAimWorld.GetSkillOrigin(playableCaster, context.Caster);
             else if (context.Caster.GetTransformCastPoint() != null)
                 origin = context.Caster.GetTransformCastPoint().position;
             else if (context.Caster.GetReferenceTransform() != null)
@@ -25,8 +27,14 @@ namespace Logic.Scripts.GameDomain.Services.Skills
             else
                 origin = context.TargetPoint;
 
-            Vector3 dir = context.TargetPoint - origin;
-            dir.y = 0f;
+            Vector3 dir;
+            if (playableCaster != null && skill.CastType == SkillCastType.Projectile)
+                dir = NewSkillSystemSkillAimWorld.GetPlanarDirectionFromOriginToAim(playableCaster, context.Caster);
+            else
+            {
+                dir = context.TargetPoint - origin;
+                dir.y = 0f;
+            }
             if (dir.sqrMagnitude < 1e-8f && context.Caster.GetReferenceTransform() != null)
                 dir = Vector3.ProjectOnPlane(context.Caster.GetReferenceTransform().forward, Vector3.up);
             if (dir.sqrMagnitude < 1e-8f) dir = Vector3.forward;

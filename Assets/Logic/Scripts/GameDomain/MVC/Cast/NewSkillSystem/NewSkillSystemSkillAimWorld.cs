@@ -1,22 +1,20 @@
-using Logic.Scripts.GameDomain.MVC.Environment;
 using Logic.Scripts.GameDomain.MVC.Shared;
 using UnityEngine;
 
 namespace Logic.Scripts.GameDomain.MVC.Cast.NewSkillSystem {
     internal static class NewSkillSystemSkillAimWorld {
-        public static bool TryMouseHitPoint(out Vector3 worldPoint) {
-            worldPoint = Vector3.zero;
-            if (Camera.main == null) return false;
-            var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            if (!Physics.Raycast(ray, out RaycastHit hit)) return false;
-            worldPoint = hit.point;
-            return true;
-        }
+        /// <summary>World point on the arena floor under the cursor (Ground layer only).</summary>
+        public static bool TryMouseHitPoint(out Vector3 worldPoint) =>
+            NewSkillSystemGroundAreaPhysics.TryRaycastMouseToGround(out worldPoint);
 
         public static Vector3 GetFallbackAimPoint(IPlayableUnit playable) {
+            Vector3 foot = GetSelfCastFootWorld(playable);
             var t = playable?.UnitViewGO != null ? playable.UnitViewGO.transform : null;
-            if (t == null) return Vector3.zero;
-            return t.position + t.forward * 2f;
+            if (t == null) return foot;
+            Vector3 planarForward = Vector3.ProjectOnPlane(t.forward, Vector3.up);
+            if (planarForward.sqrMagnitude < 1e-8f)
+                planarForward = Vector3.forward;
+            return foot + planarForward.normalized * 2f;
         }
 
         public static Vector3 ResolveAimPoint(IPlayableUnit playable, out bool fromMouse) {
@@ -29,12 +27,14 @@ namespace Logic.Scripts.GameDomain.MVC.Cast.NewSkillSystem {
         }
 
         public static Vector3 GetSkillOrigin(IPlayableUnit playable, IEffectable caster) {
+            if (caster != null) {
+                Transform castPoint = caster.GetTransformCastPoint();
+                if (castPoint != null) return castPoint.position;
+            }
             if (playable?.UnitSkillSpotTransform != null)
                 return playable.UnitSkillSpotTransform.position;
-            if (caster != null)
-                return caster.GetTransformCastPoint() != null
-                    ? caster.GetTransformCastPoint().position
-                    : caster.GetReferenceTransform().position;
+            if (caster?.GetReferenceTransform() != null)
+                return caster.GetReferenceTransform().position;
             return Vector3.zero;
         }
 
@@ -85,9 +85,7 @@ namespace Logic.Scripts.GameDomain.MVC.Cast.NewSkillSystem {
                 return origin + GetPlanarDirectionFromOriginToAim(playable, caster) * Mathf.Min(maxDist, 2f);
             Vector3 dir = delta / mag;
             float travel = Mathf.Min(maxDist, mag);
-            Vector3 end = origin + dir * travel;
-            CombatArenaBoundaryRuntime.TryClampVoluntaryWorldPosition(ref end);
-            return end;
+            return origin + dir * travel;
         }
 
         public static Vector3 GetAreaClampedAimPoint(IPlayableUnit playable, IEffectable caster, SkillDataSO skill)
@@ -103,9 +101,38 @@ namespace Logic.Scripts.GameDomain.MVC.Cast.NewSkillSystem {
             float minDist = skill.GetAreaMinCastDistance();
             float maxDist = skill.GetAreaMaxCastDistance();
             float clamped = Mathf.Clamp(dist, minDist, maxDist);
-            Vector3 result = origin + delta.normalized * clamped;
-            CombatArenaBoundaryRuntime.TryClampVoluntaryWorldPosition(ref result);
-            return result;
+            return origin + delta.normalized * clamped;
+        }
+
+        /// <summary>Artist projectile aim prefab length at scale 1 along local +Y.</summary>
+        public const float ProjectileAimPrefabBaseLengthAlongLocalY = 1f;
+
+        /// <summary>Projectile aim VFX anchor (ability cast point when available).</summary>
+        public static Vector3 GetProjectileAimVisualAnchor(IPlayableUnit playable, IEffectable caster) =>
+            GetSkillOrigin(playable, caster);
+
+        public static void ApplyProjectileGroundDiscAimTransform(
+            Transform aimRoot,
+            Vector3 castOrigin,
+            Vector3 planarFireDirection,
+            float rangeMeters) {
+            if (aimRoot == null) return;
+
+            aimRoot.position = castOrigin;
+
+            Vector3 dir = planarFireDirection;
+            dir.y = 0f;
+            if (dir.sqrMagnitude < 1e-8f)
+                dir = Vector3.forward;
+            else
+                dir.Normalize();
+
+            // Artist length along local +Y: pitch 90° maps +Y → +Z, then LookRotation aims +Z at the mouse ground point.
+            Quaternion layLengthAlongForward = Quaternion.Euler(90f, 0f, 0f);
+            aimRoot.rotation = Quaternion.LookRotation(dir, Vector3.up) * layLengthAlongForward;
+
+            float yScale = Mathf.Max(0.01f, rangeMeters) / Mathf.Max(0.01f, ProjectileAimPrefabBaseLengthAlongLocalY);
+            aimRoot.localScale = new Vector3(1f, yScale, 1f);
         }
     }
 }

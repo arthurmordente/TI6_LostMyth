@@ -22,4 +22,4 @@ MonoBehaviour:
     TriggerType: 0
     HealthPercentThreshold: 0.5
     HealthAbsoluteThreshold: 50
-    Behavior: {fileID: 11400000, guid: e5e4d3b9f62c54048aafc4e91cc75ae8, type: 2}
+    Behavior: {fileID: 11400000, guid: 8891cde9d1acb7848ae24523b9f4c6ed, type: 2}

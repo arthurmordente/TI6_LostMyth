@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Logic.Scripts.GameDomain.Services.Skills
 {
     /// <summary>
-    /// Smoothly moves a Rigidbody to a world position (skill-driven displacement, e.g. projectile arrival).
+    /// Smoothly moves a Rigidbody to a world position (skill-driven displacement, e.g. projectile pull).
     /// </summary>
     [DisallowMultipleComponent]
     public class ArenaSkillPathDisplacer : MonoBehaviour
@@ -21,25 +21,13 @@ namespace Logic.Scripts.GameDomain.Services.Skills
             }
             if (_active != null)
                 StopCoroutine(_active);
-            _active = StartCoroutine(Run(rb, targetWorld, Mathf.Max(0.05f, durationSeconds), onComplete));
+            _active = StartCoroutine(RunWrapped(rb, targetWorld, durationSeconds, onComplete));
         }
 
-        IEnumerator Run(Rigidbody rb, Vector3 targetWorld, float duration, Action onComplete)
+        IEnumerator RunWrapped(Rigidbody rb, Vector3 targetWorld, float durationSeconds, Action onComplete)
         {
-            Vector3 start = rb.position;
-            rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
-            float elapsed = 0f;
-            while (elapsed < duration)
-            {
-                elapsed += Time.fixedDeltaTime;
-                float u = Mathf.Clamp01(elapsed / duration);
-                Vector3 p = Vector3.Lerp(start, targetWorld, u);
-                rb.MovePosition(p);
-                yield return new WaitForFixedUpdate();
-            }
-            rb.MovePosition(targetWorld);
+            yield return ArenaBoundedPlanarDisplacement.Run(rb, targetWorld, durationSeconds, onComplete);
             _active = null;
-            onComplete?.Invoke();
         }
     }
 }

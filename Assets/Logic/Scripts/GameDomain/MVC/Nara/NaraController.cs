@@ -461,10 +461,18 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
                 onComplete?.Invoke();
                 return;
             }
+
+            Freeeze();
+
             var displacer = _naraView.GetComponent<ArenaSkillPathDisplacer>();
             if (displacer == null)
                 displacer = _naraView.gameObject.AddComponent<ArenaSkillPathDisplacer>();
-            displacer.Begin(_naraView.GetRigidbody(), worldTarget, durationSeconds, onComplete);
+
+            Rigidbody rb = _naraView.GetRigidbody();
+            displacer.Begin(rb, worldTarget, durationSeconds, () => {
+                ArenaBoundedPlanarDisplacement.ZeroPlanarVelocity(rb);
+                onComplete?.Invoke();
+            });
         }
 
         #endregion

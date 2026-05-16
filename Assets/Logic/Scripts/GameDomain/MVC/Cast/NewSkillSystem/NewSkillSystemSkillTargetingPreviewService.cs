@@ -77,25 +77,15 @@ namespace Logic.Scripts.GameDomain.MVC.Cast.NewSkillSystem {
             _aimVisualRoot.localScale = new Vector3(uniform, uniform, uniform);
         }
 
-        /// <summary>
-        /// Stretches the projectile aim prefab along the planar cast segment (origin → clamped aim end). Scale.z = segmentLength / base length.
-        /// </summary>
         private void SyncDirectedAimVisualRoot() {
             if (_aimVisualRoot == null || _skill == null || _playable == null) return;
-            Vector3 origin = NewSkillSystemSkillAimWorld.GetSkillOrigin(_playable, _caster);
-            Vector3 end = NewSkillSystemSkillAimWorld.GetPlanarClampedAimEnd(_playable, _caster, _skill);
-            Vector3 dir = end - origin;
-            float len = dir.magnitude;
-            _aimVisualRoot.position = origin;
-            if (len > 0.0001f)
-                _aimVisualRoot.rotation = Quaternion.LookRotation(dir / len, Vector3.up);
-            else {
-                Vector3 fallback = NewSkillSystemSkillAimWorld.GetPlanarDirectionFromOriginToAim(_playable, _caster);
-                _aimVisualRoot.rotation = Quaternion.LookRotation(fallback, Vector3.up);
-            }
-            const float baseLen = 1f;
-            float zScale = len > 0.0001f ? len / Mathf.Max(0.01f, baseLen) : 0.01f;
-            _aimVisualRoot.localScale = new Vector3(1f, 1f, zScale);
+            Vector3 castOrigin = NewSkillSystemSkillAimWorld.GetSkillOrigin(_playable, _caster);
+            Vector3 dir = NewSkillSystemSkillAimWorld.GetPlanarDirectionFromOriginToAim(_playable, _caster);
+            NewSkillSystemSkillAimWorld.ApplyProjectileGroundDiscAimTransform(
+                _aimVisualRoot,
+                castOrigin,
+                dir,
+                _skill.GetProjectileRange());
         }
 
         private void SyncSelfFootAimRoot() {

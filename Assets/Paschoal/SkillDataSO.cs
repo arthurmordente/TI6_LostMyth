@@ -18,6 +18,7 @@ public abstract class SkillDataSO : ScriptableObject
     [SerializeField] private float _projectileRange = 8f;
     [SerializeField] private int _projectileNumberOfTargets = 1;
     [SerializeField] private float _projectileTravelSpeed = 12f;
+    [Tooltip("Ground aim VFX at ability cast point: artist length along local +Y at scale 1; runtime lays flat and yaws to mouse, scale.y = projectile range.")]
     [SerializeField, FormerlySerializedAs("ProjectileAimPreviewPrefab")]
     private GameObject _projectileAimPrefab;
     [SerializeField, FormerlySerializedAs("AttackPrefab")]

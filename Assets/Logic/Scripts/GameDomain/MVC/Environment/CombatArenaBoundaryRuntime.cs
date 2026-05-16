@@ -82,6 +82,10 @@ namespace Logic.Scripts.GameDomain.MVC.Environment
             return _hokariValid && EnableRingOutLoss;
         }
 
+        /// <summary>
+        /// Clamps a world position to where the player may stand (Laki: tile annulus from inner radius outward).
+        /// Use for walk, teleport, grapple pull end, and projectile pull — not for skill aim markers.
+        /// </summary>
         public static bool TryClampVoluntaryWorldPosition(ref Vector3 worldPosition)
         {
             if (!ClampVoluntaryDisplacement) return false;

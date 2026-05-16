@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _skillType: 0
   _castType: 0
-  _projectileRange: 16
+  _projectileRange: 18
   _projectileNumberOfTargets: 3
   _projectileTravelSpeed: 12
-  _projectileAimPrefab: {fileID: 8272950397043843596, guid: 8058bca71956f704e915ec3e0b22aabd, type: 3}
+  _projectileAimPrefab: {fileID: 5171449077471736857, guid: 5a96a15201f481c488a06861525f72e4, type: 3}
   _projectilePrefab: {fileID: 4470363709726842422, guid: 05ecf4c11bd35014797b40e47735e1c1, type: 3}
   _moveCasterToProjectileHit: 0
   _projectilePullStandoffFromTargetMeters: 1.2
