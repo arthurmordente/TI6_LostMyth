@@ -194,6 +194,7 @@ namespace Logic.Scripts.GameDomain.MVC.Book
         public void TeleportToWorldPosition(Vector3 worldPosition)
         {
             if (_bookView == null) return;
+            worldPosition = Logic.Scripts.GameDomain.MVC.Environment.CombatGroundPositionSnap.SnapWorldPosition(worldPosition);
             var rb = _bookView.GetRigidbody();
             if (rb != null)
             {
@@ -201,6 +202,9 @@ namespace Logic.Scripts.GameDomain.MVC.Book
                 rb.linearVelocity = Vector3.zero;
                 rb.angularVelocity = Vector3.zero;
             }
+            _bookView.transform.position = worldPosition;
+            Physics.SyncTransforms();
+            _movementController?.RecenterMovementRingPreservingRadius();
         }
 
         public void SyncArenaMovementAfterMovementSkillDisplacement()

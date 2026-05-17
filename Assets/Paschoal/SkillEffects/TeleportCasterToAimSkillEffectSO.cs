@@ -26,16 +26,24 @@ public class TeleportCasterToAimSkillEffectSO : SkillEffectSO
         if (context.Caster is not ISkillCasterWorldTeleport teleport) return;
 
         Vector3 destination = context.TargetPoint;
-        if (_raycastDownToGround && Physics.Raycast(
+        if (_raycastDownToGround
+            && Physics.Raycast(
                 destination + Vector3.up * _groundRaycastHeight,
                 Vector3.down,
                 out RaycastHit hit,
                 _groundRaycastDistance,
                 _groundLayers,
                 QueryTriggerInteraction.Ignore))
+        {
             destination = hit.point;
+        }
+        else
+        {
+            destination = CombatGroundPositionSnap.SnapWorldPosition(destination);
+        }
 
         CombatArenaBoundaryRuntime.TryClampVoluntaryWorldPosition(ref destination);
+        destination = CombatGroundPositionSnap.SnapWorldPosition(destination);
         teleport.TeleportToWorldPosition(destination);
     }
 }

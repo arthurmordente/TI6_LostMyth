@@ -1,3 +1,4 @@
+using Logic.Scripts.GameDomain.MVC.Environment;
 using Logic.Scripts.GameDomain.MVC.Shared;
 using UnityEngine;
 
@@ -101,7 +102,9 @@ namespace Logic.Scripts.GameDomain.MVC.Cast.NewSkillSystem {
             float minDist = skill.GetAreaMinCastDistance();
             float maxDist = skill.GetAreaMaxCastDistance();
             float clamped = Mathf.Clamp(dist, minDist, maxDist);
-            return origin + delta.normalized * clamped;
+            Vector3 planar = origin + delta.normalized * clamped;
+            planar.y = aim.y;
+            return CombatGroundPositionSnap.SnapWorldPosition(planar);
         }
 
         /// <summary>Artist projectile aim prefab length at scale 1 along local +Y.</summary>

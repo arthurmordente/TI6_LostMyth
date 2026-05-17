@@ -1,6 +1,7 @@
 using System;
 using Logic.Scripts.GameDomain.MVC.Abilitys;
 using Logic.Scripts.GameDomain.MVC.Shared;
+using Logic.Scripts.GameDomain.MVC.Environment;
 using Logic.Scripts.GameDomain.MVC.Ui;
 using Logic.Scripts.Services.AudioService;
 using Logic.Scripts.Services.CommandFactory;
@@ -198,11 +199,17 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
 
         public void TeleportToWorldPosition(Vector3 worldPosition) {
             if (_naraView == null) return;
+            worldPosition = CombatGroundPositionSnap.SnapWorldPosition(worldPosition);
             var rb = _naraView.GetRigidbody();
             if (rb != null) {
                 rb.position = worldPosition;
-                rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
+                rb.linearVelocity = Vector3.zero;
+                rb.angularVelocity = Vector3.zero;
             }
+            _naraView.transform.position = worldPosition;
+            Physics.SyncTransforms();
+            if (_naraMovementController is NaraTurnMovementController ntm)
+                ntm.RecenterMovementRingPreservingRadius();
         }
 
         #region IEffectable Methods
