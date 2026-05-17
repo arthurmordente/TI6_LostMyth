@@ -94,6 +94,7 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 
 		private int             _lastRolledTurn    = int.MinValue;
 		private TileEffectType[] _effectsCurrentTurn = new TileEffectType[TILE_COUNT];
+		private LakiArenaTileDisposition _tileDisposition = LakiArenaTileDisposition.Default;
 
 		public RouletteArenaService(
 			float innerRadius   = INNER_RADIUS_DEFAULT,
@@ -120,6 +121,10 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 		public float InnerRadius => _innerRadius;
 		public float OuterRadius => _outerRadius;
 		public float SplitRadius => ComputeSplitRadius(_innerRadius, _outerRadius);
+		public LakiArenaTileDisposition CurrentTileDisposition => _tileDisposition;
+
+		public void SetTileDisposition(LakiArenaTileDisposition disposition) =>
+			_tileDisposition = disposition.NormalizeTo(TILE_COUNT);
 
 		// ─── Configuration ────────────────────────────────────────────────────────
 
@@ -168,9 +173,10 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 			if (rng == null) rng = new System.Random();
 
 			// Assign tile colour types (bag shuffle)
-			int positives = 5;
-			int negatives = 6;
-			int neutrals  = TILE_COUNT - positives - negatives;
+			var disposition = _tileDisposition.NormalizeTo(TILE_COUNT);
+			int positives = disposition.PositiveCount;
+			int negatives = disposition.NegativeCount;
+			int neutrals  = disposition.NeutralCount;
 
 			var bag = new List<TileEffectType>(TILE_COUNT);
 			for (int i = 0; i < positives; i++) bag.Add(TileEffectType.Positive);

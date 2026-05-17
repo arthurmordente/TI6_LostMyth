@@ -16,7 +16,6 @@ namespace Logic.Scripts.Turns {
         private readonly TurnStateService _turnStateService;
         private readonly ICommandFactory _commandFactory;
 		private readonly Logic.Scripts.GameDomain.MVC.Echo.ICloneUseLimiter _cloneUseLimiter;
-		private readonly Logic.Scripts.GameDomain.MVC.Boss.Laki.Chips.IChipService _chipService;
         private readonly INaraController _naraController;
         private readonly IDivideAbilityHandler _divideAbilityHandler;
         private readonly IGamePlayUiController _gamePlayUiController;
@@ -40,7 +39,6 @@ namespace Logic.Scripts.Turns {
             ICommandFactory commandFactory,
 			INaraController naraController,
 			Logic.Scripts.GameDomain.MVC.Echo.ICloneUseLimiter cloneUseLimiter,
-			Logic.Scripts.GameDomain.MVC.Boss.Laki.Chips.IChipService chipService,
             IDivideAbilityHandler divideAbilityHandler,
             [InjectOptional] IGamePlayUiController gamePlayUiController) {
             _actionPointsService = actionPointsService;
@@ -49,7 +47,6 @@ namespace Logic.Scripts.Turns {
             _commandFactory = commandFactory;
             _naraController = naraController;
 			_cloneUseLimiter = cloneUseLimiter;
-			_chipService = chipService;
             _divideAbilityHandler = divideAbilityHandler;
             _gamePlayUiController = gamePlayUiController;
         }

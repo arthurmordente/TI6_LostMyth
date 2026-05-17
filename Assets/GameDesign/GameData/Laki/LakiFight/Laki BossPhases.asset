@@ -18,8 +18,13 @@ MonoBehaviour:
     HealthPercentThreshold: 1
     HealthAbsoluteThreshold: 0
     Behavior: {fileID: 11400000, guid: 8891cde9d1acb7848ae24523b9f4c6ed, type: 2}
+  - Name: MidPhase
+    TriggerType: 0
+    HealthPercentThreshold: 0.66
+    HealthAbsoluteThreshold: 0
+    Behavior: {fileID: 11400000, guid: 8891cde9d1acb7848ae24523b9f4c6ed, type: 2}
   - Name: EnragedPhase
     TriggerType: 0
-    HealthPercentThreshold: 0.5
-    HealthAbsoluteThreshold: 50
+    HealthPercentThreshold: 0.33
+    HealthAbsoluteThreshold: 0
     Behavior: {fileID: 11400000, guid: 8891cde9d1acb7848ae24523b9f4c6ed, type: 2}

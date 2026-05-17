@@ -21,7 +21,6 @@ namespace Logic.Scripts.Turns
             Container.BindInterfacesAndSelfTo<EnviromentActionService>().AsSingle();
 			// OrbEnvironmentRule desabilitada: orb agora é executada como IEnvironmentTurnActor
 
-			Container.BindInterfacesAndSelfTo<Logic.Scripts.GameDomain.MVC.Boss.Laki.Chips.LakiChipRuntimeService>().AsSingle();
             Container.BindInterfacesAndSelfTo<TurnFlowController>().AsSingle();
         }
     }

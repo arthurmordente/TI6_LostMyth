@@ -3,7 +3,6 @@ using Zenject;
 using Logic.Scripts.Turns;
 using Logic.Scripts.Services.CommandFactory;
 using Logic.Scripts.GameDomain.MVC.Nara;
-using Logic.Scripts.GameDomain.MVC.Boss.Laki.Chips;
 using Logic.Scripts.GameDomain.MVC.Boss.Visuals;
 using Logic.Scripts.GameDomain.MVC.Environment;
 using System.Threading.Tasks;
@@ -45,9 +44,8 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 		[Tooltip("Weighted layouts for RED (negative) tiles.")]
 		[SerializeField] private TileTypeLayoutConfig _negativeTileConfig;
 
-		[Header("Chips (service only — no HUD)")]
-		[SerializeField] private int _initialPlayerChips = 3;
-		[SerializeField] private int _initialBossChips = 3;
+		[Header("Tile disposition per boss phase")]
+		[SerializeField] private LakiArenaPhaseTileDispositionSO _phaseTileDisposition;
 
 		[Header("Arena visuals")]
 		[Tooltip("Optional override for tile prefabs. When null, uses CombatAttackVisualCatalogSO from the scene Zenject container (same binding as GamePlayInstaller).")]
@@ -132,17 +130,17 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 			}
 			catch { Debug.LogWarning("[LakiArenaBossBootstrap] IBookController não encontrado no container – Livro não receberá efeitos de casa."); }
 
+			if (_phaseTileDisposition != null)
+				LakiArenaTileDispositionRuntime.Register(arenaService, _phaseTileDisposition);
+			else
+				arenaService.SetTileDisposition(LakiArenaTileDisposition.Default);
+
 			var actor = new LakiRouletteArenaActor(_turnStateService, _naraController, arenaService, _centerWorld, view, caster, bookEffectable);
 			var cmd = _commandFactory.CreateCommandVoid<Logic.Scripts.GameDomain.Commands.RegisterEnvironmentActorCommand>();
 			cmd.SetActor(actor);
 			cmd.Execute();
 
 			_ = RunFightBoardIntroThenReleaseTurnFlowAsync(arenaService, view);
-
-			IChipService chipSvc = null;
-			try { chipSvc = container.Resolve<IChipService>(); } catch { chipSvc = null; }
-			if (chipSvc != null) chipSvc.SetInitial(_initialPlayerChips, _initialBossChips);
-			// Legacy chips / pot / minigame HUD removed — use DiceAttack prompt prefab on BossAttack when needed.
 
 			LakiBossShieldRuntime.RegisterShieldRoot(_lakiShieldVfxRoot);
 			if (_turnStateService != null && _turnStateService.Active)
@@ -189,6 +187,7 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 		private void OnDestroy()
 		{
 			CombatArenaBoundaryRuntime.Clear();
+			LakiArenaTileDispositionRuntime.Clear();
 			LakiRouletteArenaFightIntro.CancelWait();
 			LakiBossShieldRuntime.Reset();
 			try { Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.Reset(); } catch { }

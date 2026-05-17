@@ -802,6 +802,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
             }
             PlayPhaseTransitionAnimation();
             _currentPhaseIndex = newIndex;
+            Logic.Scripts.GameDomain.MVC.Environment.Laki.LakiArenaTileDispositionRuntime.NotifyBossPhaseChanged(newIndex);
             // wait for the phase transition animation before continuing turn
             if (_bossView != null) {
                 float wait = Mathf.Max(0f, _bossView.GetPhaseTransitionDuration());

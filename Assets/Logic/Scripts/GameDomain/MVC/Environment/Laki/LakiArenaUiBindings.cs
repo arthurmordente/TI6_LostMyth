@@ -11,12 +11,6 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 		public TMP_Text MinigameNameText;
 		public TMP_Text PotText;
 
-		[Header("Chips Panels")]
-		public Image NaraChipIcon;
-		public TMP_Text NaraChipsText;
-		public Image LakiChipIcon;
-		public TMP_Text LakiChipsText;
-
 		[Header("Dice Panels - Laki")]
 		public GameObject LakiDicePanelRoot;
 		public Image LakiDiceImage;

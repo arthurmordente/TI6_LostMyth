@@ -520,32 +520,6 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
             try { arenaView = FindFirstObjectByType<Logic.Scripts.GameDomain.MVC.Environment.Laki.LakiRouletteArenaView>(); } catch { }
             try { if (sceneContainer != null) nara = sceneContainer.Resolve<Logic.Scripts.GameDomain.MVC.Nara.INaraController>(); } catch { }
             try { if (sceneContainer != null) bossCtrl = sceneContainer.Resolve<Logic.Scripts.GameDomain.MVC.Boss.IBossController>(); } catch { }
-            // DiceAttack no longer uses chips/pot. Legacy minigames keep the previous chip flow.
-            if (_attackType != AttackType.DiceAttack)
-            {
-                try
-                {
-                    var chipSvc = sceneContainer != null ? sceneContainer.Resolve<Logic.Scripts.GameDomain.MVC.Boss.Laki.Chips.IChipService>() : null;
-                    if (chipSvc != null && round != null)
-                    {
-                        if (nara != null)
-                        {
-                            int convertedPlayer;
-                            bool okP = chipSvc.TryPayPlayer(nara, round.ChipCost, out convertedPlayer);
-                            Debug.Log($"[Laki][Chips] Pay player cost={round.ChipCost} convertedHP={convertedPlayer} ok={okP}");
-                        }
-                        if (bossCtrl != null)
-                        {
-                            int convertedBoss;
-                            bool okB = chipSvc.TryPayBoss(bossCtrl, round.ChipCost, out convertedBoss);
-                            Debug.Log($"[Laki][Chips] Pay boss cost={round.ChipCost} convertedHP={convertedBoss} ok={okB}");
-                        }
-                        try { chipSvc.OnBetPlaced?.Invoke(round.ChipCost, round.ChipCost); } catch { }
-                        chipSvc.Refresh();
-                    }
-                }
-                catch { }
-            }
             _ = round.StartAsync(turnSvc, envReg, bossRelay, arenaView, nara, bossCtrl);
         }
 

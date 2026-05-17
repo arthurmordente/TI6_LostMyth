@@ -116,6 +116,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d78fc8acd88caf04ea0fd997a7dca121, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _drawArenaBoundsGizmo: 1
   _centerWorld: {x: 0, y: 0.1, z: 0}
   _innerRadius: 8
   _outerRadius: 26
@@ -127,54 +128,58 @@ MonoBehaviour:
   - rid: 5387295318499655772
   _smallPositiveEffects:
   - rid: 5387295318499655773
+  - rid: 8051478750538236120
   _largeNegativeEffects:
   - rid: 5387295318499655774
   - rid: 5387295318499655776
   _smallNegativeEffects:
   - rid: 5387295318499655777
+  - rid: 8051478750538236118
   _positiveTileConfig:
     Layouts:
-    - Weight: 50
-      Slots:
-      - Pool: 1
-    - Weight: 25
+    - Weight: 20
       Slots:
       - Pool: 0
       - Pool: 3
-    - Weight: 25
+    - Weight: 30
       Slots:
       - Pool: 1
-      - Pool: 2
+      - Pool: 1
+    - Weight: 50
+      Slots:
+      - Pool: 1
   _neutralTileConfig:
-    Layouts:
-    - Weight: 50
-      Slots:
-      - Pool: 1
-    - Weight: 50
-      Slots:
-      - Pool: 3
-  _negativeTileConfig:
     Layouts:
     - Weight: 30
       Slots:
       - Pool: 0
       - Pool: 2
+    - Weight: 30
+      Slots:
+      - Pool: 1
+      - Pool: 3
     - Weight: 20
       Slots:
       - Pool: 0
-      - Pool: 2
       - Pool: 3
-    - Weight: 25
+    - Weight: 20
       Slots:
-      - Pool: 1
-      - Pool: 3
-    - Weight: 0
-      Slots:
-      - Pool: 1
       - Pool: 2
-  _initialPlayerChips: 3
-  _initialBossChips: 3
-  _combatAttackVisualCatalog: {fileID: 0}
+      - Pool: 1
+  _negativeTileConfig:
+    Layouts:
+    - Weight: 30
+      Slots:
+      - Pool: 2
+    - Weight: 40
+      Slots:
+      - Pool: 3
+      - Pool: 3
+    - Weight: 30
+      Slots:
+      - Pool: 3
+  _phaseTileDisposition: {fileID: 11400000, guid: b2c4d6e8f0a1427395b6c7d8e9f0a1b2, type: 2}
+  _combatAttackVisualCatalog: {fileID: 11400000, guid: 291e6c82c38f51a49971a77680bb8271, type: 2}
   _lakiShieldVfxRoot: {fileID: 9018765071124092488}
   references:
     version: 2
@@ -227,6 +232,22 @@ MonoBehaviour:
         IsAutoCast: 0
         TileIcon: {fileID: 21300000, guid: f237d9b9db422b84fa7deba6d9252049, type: 3}
         amount: 10
+    - rid: 8051478750538236118
+      type: {class: RemoveActionPointsAbilityEffect, ns: Logic.Scripts.GameDomain.Effects, asm: Assembly-CSharp}
+      data:
+        Name: -1AP
+        Description: 
+        IsAutoCast: 0
+        TileIcon: {fileID: 21300000, guid: f1f774d82f1bae14a95b9197cb85239d, type: 3}
+        amount: 1
+    - rid: 8051478750538236120
+      type: {class: AddActionPointsAbilityEffect, ns: Logic.Scripts.GameDomain.Effects, asm: Assembly-CSharp}
+      data:
+        Name: +1
+        Description: 
+        IsAutoCast: 0
+        TileIcon: {fileID: 21300000, guid: 856d3e726be9055409ababe2a81d8ed2, type: 3}
+        amount: 1
 --- !u!114 &8695215367175580558
 MonoBehaviour:
   m_ObjectHideFlags: 0
