@@ -1,9 +1,13 @@
 using Logic.Scripts.GameDomain.Commands;
+using Logic.Scripts.GameDomain.MVC.Boss.Visuals;
 using Logic.Scripts.GameDomain.MVC.Nara;
 using Logic.Scripts.Services.CommandFactory;
 using Logic.Scripts.Turns;
 using UnityEngine;
 using Zenject;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace Logic.Scripts.GameDomain.MVC.Environment.Hokari
 {
@@ -29,6 +33,8 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Hokari
 
         [Header("Environment hazards")]
         [SerializeField] private HokariArenaHazardPatternSO _hazardPattern;
+        [Tooltip("Telegraphs for hazard definitions. Falls back to GamePlayInstaller catalog.")]
+        [SerializeField] private CombatAttackVisualCatalogSO _combatAttackVisualCatalog;
 
         CombatArenaEliminationWatcher _eliminationWatcher;
 
@@ -76,7 +82,15 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Hokari
 
             if (_hazardPattern != null && turnState != null && nara != null && commandFactory != null)
             {
-                var actor = new HokariArenaDisplacementActor(turnState, nara, _hazardPattern, _centerWorld);
+                var catalog = ResolveVisualCatalog(container);
+                var actor = new HokariArenaDisplacementActor(
+                    turnState,
+                    nara,
+                    _hazardPattern,
+                    catalog,
+                    _centerWorld,
+                    _voluntaryClampRadius);
+                HokariArenaHazardTurnBridge.Register(actor);
                 var cmd = commandFactory.CreateCommandVoid<RegisterEnvironmentActorCommand>();
                 cmd.SetActor(actor);
                 cmd.Execute();
@@ -90,7 +104,23 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Hokari
         void OnDestroy()
         {
             _eliminationWatcher?.Unregister();
+            HokariArenaHazardTurnBridge.Unregister();
             CombatArenaBoundaryRuntime.Clear();
+        }
+
+        CombatAttackVisualCatalogSO ResolveVisualCatalog(DiContainer container)
+        {
+            if (_combatAttackVisualCatalog != null) return _combatAttackVisualCatalog;
+            if (container != null)
+            {
+                try { return container.Resolve<CombatAttackVisualCatalogSO>(); } catch { }
+            }
+#if UNITY_EDITOR
+            return AssetDatabase.LoadAssetAtPath<CombatAttackVisualCatalogSO>(
+                "Assets/Logic/Scripts/GameDomain/MVC/Boss/Visuals/CombatAttackVisualCatalog.asset");
+#else
+            return null;
+#endif
         }
 
         void OnValidate()

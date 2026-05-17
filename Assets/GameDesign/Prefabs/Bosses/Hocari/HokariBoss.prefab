@@ -176,7 +176,8 @@ MonoBehaviour:
   _ringOutFallY: -2
   _ringOutOutsideRadiusXZ: 0
   _ringOutConsecutiveFrames: 0
-  _hazardPattern: {fileID: 0}
+  _hazardPattern: {fileID: 11400000, guid: 2a5e16480f956ca429e0932aad4f7b3f, type: 2}
+  _combatAttackVisualCatalog: {fileID: 11400000, guid: 291e6c82c38f51a49971a77680bb8271, type: 2}
 --- !u!1 &5860620743470976194
 GameObject:
   m_ObjectHideFlags: 0

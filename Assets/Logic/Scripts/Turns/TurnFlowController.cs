@@ -5,6 +5,8 @@ using Logic.Scripts.Services.CommandFactory;
 using Logic.Scripts.GameDomain.MVC.Nara;
 using Logic.Scripts.GameDomain.MVC.Book.Divide;
 using Logic.Scripts.GameDomain.MVC.Ui;
+using Logic.Scripts.GameDomain.MVC.Environment;
+using Logic.Scripts.GameDomain.MVC.Environment.Hokari;
 using Logic.Scripts.GameDomain.MVC.Environment.Laki;
 
 namespace Logic.Scripts.Turns {
@@ -27,6 +29,9 @@ namespace Logic.Scripts.Turns {
         private bool _waitingBoss;
         private bool _waitingPlayer;
         private TurnPhase _phase;
+
+        static bool UsesHokariArenaHazardTurnOrder =>
+            CombatArenaBoundaryRuntime.EnableRingOutLoss && HokariArenaHazardTurnBridge.IsRegistered;
 
 		public TurnFlowController(
             IActionPointsService actionPointsService,
@@ -120,6 +125,13 @@ namespace Logic.Scripts.Turns {
                     try { Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Dice.DiceUiRuntime.Reset(); } catch { }
                 }
             }
+            if (UsesHokariArenaHazardTurnOrder)
+            {
+                LogService.Log($"Turno {_turnNumber} - Fase: BossAct (Hokari telegraphs — resolve após jogador)");
+                StartPlayerPhase();
+                return;
+            }
+
             LogService.Log($"Turno {_turnNumber} - Fase: BossAct");
             _waitingBoss = true;
             await _bossActionService.ExecuteBossTurnAsync();
@@ -167,7 +179,10 @@ namespace Logic.Scripts.Turns {
             _gamePlayUiController?.EndFirstTurnPassTurnHint();
             _gamePlayUiController?.SetSkillsSlidableExpanded(false);
             _divideAbilityHandler?.OnPlayerTurnEnd();
-            StartEchoPhaseAsync();
+            if (UsesHokariArenaHazardTurnOrder)
+                StartHokariPostPlayerResolveAsync();
+            else
+                StartEchoPhaseAsync();
         }
 
         public void CompletePlayerAction() {
@@ -177,6 +192,21 @@ namespace Logic.Scripts.Turns {
             _gamePlayUiController?.SetSkillsSlidableExpanded(false);
             _divideAbilityHandler?.OnPlayerTurnEnd();
             _turnMovement?.ActivateNaraGravity();
+            if (UsesHokariArenaHazardTurnOrder)
+                StartHokariPostPlayerResolveAsync();
+            else
+                StartEchoPhaseAsync();
+        }
+
+        async void StartHokariPostPlayerResolveAsync()
+        {
+            _gamePlayUiController?.SetSkillsSlidableExpanded(false);
+            _naraController?.FreezeInputs();
+            _naraController?.Freeeze();
+            _naraController?.StopMovingAnim();
+
+            LogService.Log($"Turno {_turnNumber} - Fase: Arena hazard resolve (Hokari)");
+            await HokariArenaHazardTurnBridge.ExecuteScheduledForTurnAsync(_turnNumber);
             StartEchoPhaseAsync();
         }
 
@@ -194,7 +224,33 @@ namespace Logic.Scripts.Turns {
         }
 
         private void OnEchoesCompleted() {
-            StartEnviromentPhaseAsync();
+            if (UsesHokariArenaHazardTurnOrder)
+                StartHokariEndOfTurnAsync();
+            else
+                StartEnviromentPhaseAsync();
+        }
+
+        async void StartHokariEndOfTurnAsync()
+        {
+            _gamePlayUiController?.SetSkillsSlidableExpanded(false);
+            _naraController?.FreezeInputs();
+            _naraController?.Freeeze();
+            _naraController?.StopMovingAnim();
+            _turnMovement?.LineHandlerController.SetVisible(false);
+
+            LogService.Log($"Turno {_turnNumber} - Fase: EnviromentAct (Hokari — preparar telegraph arena)");
+            _phase = TurnPhase.EnviromentAct;
+            _turnStateService.AdvanceTurn(_turnNumber, _phase);
+            await _enviromentActionService.ExecuteEnviromentTurnAsync();
+
+            LogService.Log($"Turno {_turnNumber} - Fase: BossAct resolve (Hokari)");
+            _phase = TurnPhase.BossAct;
+            _turnStateService.AdvanceTurn(_turnNumber, _phase);
+            _waitingBoss = true;
+            await _bossActionService.ExecuteBossTurnAsync();
+            _waitingBoss = false;
+
+            AdvanceTurnAsync();
         }
 
         private async void StartEnviromentPhaseAsync() {
