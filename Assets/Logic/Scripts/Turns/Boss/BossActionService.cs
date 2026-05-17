@@ -24,6 +24,17 @@ namespace Logic.Scripts.Turns
             _bossController.PlanNextTurn();
             await _bossController.ExecuteTurnAsync();
         }
+
+        public async Task ExecuteBossPrepareTurnAsync()
+        {
+            _bossController.PlanNextTurn();
+            await _bossController.ExecutePrepareTurnAsync();
+        }
+
+        public async Task ExecuteBossResolveTurnAsync()
+        {
+            await _bossController.ExecuteResolveTurnAsync();
+        }
     }
 }
 

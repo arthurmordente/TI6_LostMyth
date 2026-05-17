@@ -9,9 +9,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4830519003573105392}
-  - component: {fileID: 4162083758434111994}
+  - component: {fileID: -5180875672858182064}
   m_Layer: 0
-  m_Name: FOOTDMG
+  m_Name: NEWDICE 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -32,7 +32,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4162083758434111994
+--- !u!114 &-5180875672858182064
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -43,10 +43,9 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bd88fb69c32f73948bbae5629112d0f2, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: 
-  _effects:
-  - rid: 4429000183207428188
-  _attackType: 7
+  m_EditorClassIdentifier: Assembly-CSharp::Logic.Scripts.GameDomain.MVC.Boss.BossAttack
+  _effects: []
+  _attackType: 9
   _displacementPriority: 0
   _protean:
     radius: 3
@@ -85,20 +84,12 @@ MonoBehaviour:
   _hokariAttackVisualId: 0
   _hokariArenaTelegraphHalfExtent: 10
   _minigameRoundPrefab: {fileID: 0}
-  _diceAttackDisplayName: DiceAttack
-  _diceAttackPlayerDiePrefab: {fileID: 0}
-  _diceAttackBossDiePrefab: {fileID: 0}
-  _diceAttackDieHp: 99
+  _diceAttackDisplayName: Dice Attack
+  _diceAttackPlayerDiePrefab: {fileID: 6735503299288627155, guid: a07f2265a248f6e49b3f05efc14c5b14, type: 3}
+  _diceAttackBossDiePrefab: {fileID: 2022372803364641405, guid: acad9a1ee0076cd41860f0687a346561, type: 3}
+  _diceAttackDieHp: 999
   _diceAttackPlayerRollInputConsumeDelay: 0.1
-  _diceAttackPlayerRollPromptPrefab: {fileID: 0}
+  _diceAttackPlayerRollPromptPrefab: {fileID: 367992611274707876, guid: bf0d1dd493df01949aae7425583e91be, type: 3}
   references:
     version: 2
-    RefIds:
-    - rid: 4429000183207428188
-      type: {class: DamageEffect, ns: Assets.Logic.Scripts.GameDomain.Effects, asm: Assembly-CSharp}
-      data:
-        Name: 
-        Description: 
-        IsAutoCast: 0
-        TileIcon: {fileID: 0}
-        amount: 10
+    RefIds: []

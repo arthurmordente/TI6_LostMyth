@@ -1,5 +1,7 @@
 using System;
 using Logic.Scripts.GameDomain.MVC.Abilitys;
+using Logic.Scripts.GameDomain.MVC.Nara;
+using UnityEngine;
 
 namespace Logic.Scripts.GameDomain.Effects
 {
@@ -10,11 +12,14 @@ namespace Logic.Scripts.GameDomain.Effects
 
 		public override void Execute(IEffectable caster, IEffectable target)
 		{
+			int delta = Mathf.Max(1, amount);
 			if (target is IEffectableAction act)
 			{
-				act.AddActionPoints(amount);
+				act.AddActionPoints(delta);
+				return;
 			}
-			// if not player (no IEffectableAction), ignore
+			if (target is INaraController nara)
+				nara.AddActionPoints(delta);
 		}
 	}
 }

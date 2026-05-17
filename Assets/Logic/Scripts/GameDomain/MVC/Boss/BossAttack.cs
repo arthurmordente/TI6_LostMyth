@@ -33,7 +33,8 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
             Minigame = 6,
             Circle = 7,
             Deprecated_PlayerFootCircle = 8,
-            DiceAttack = 9
+            DiceAttack = 9,
+            LakiArenaTileTelegraph = 10
         }
         [SerializeField] private AttackType _attackType = AttackType.ProteanCones;
 
@@ -103,6 +104,8 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
         private CombatAttackVisualCatalogSO _resolvedCombatAttackVisualCatalog;
 
         private IAudioService _audio;
+        private int _lakiTileTelegraphSelectionSalt;
+
         [Header("Laki Minigame (legacy)")]
         public GameObject _minigameRoundPrefab;
         [Header("Dice Attack (Laki — no round prefab)")]
@@ -112,6 +115,47 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
         [SerializeField] private int _diceAttackDieHp = 99;
         [SerializeField] private float _diceAttackPlayerRollInputConsumeDelay = 0.1f;
         [SerializeField] private GameObject _diceAttackPlayerRollPromptPrefab;
+
+        [System.Serializable]
+        private struct LakiArenaTileTelegraphParams
+        {
+            [Min(1), Tooltip("How many circular telegraphs to place on tile centers.")]
+            public int AreaCount;
+            [Range(0f, 1f), Tooltip("Per-area chance to target the tile the player is standing on.")]
+            public float PlayerTileChance;
+            [Min(0.1f), Tooltip("Scales the telegraph prefab root (X/Z). VFX children keep local scale (e.g. 0.15 on the VFX child).")]
+            public float TelegraphDiscRadius;
+            [Min(0.01f), Tooltip("World hit radius in meters when Telegraph Disc Radius = 1. Match what you see in play (e.g. 6 for a ~6m disc at radius 1).")]
+            public float HitRadiusMetersAtUnitDisc;
+            [Min(0f), Tooltip("Extra meters added to the computed hit radius.")]
+            public float HitRadiusPadding;
+            [Min(0f), Tooltip("Seconds between spawning each telegraph disc.")]
+            public float TelegraphSpawnInterval;
+            [Min(0f), Tooltip("Seconds between resolving damage for each area.")]
+            public float StrikeResolveInterval;
+        }
+
+        [Header("Laki arena — tile telegraphs")]
+        [SerializeField] private LakiArenaTileTelegraphParams _lakiArenaTileTelegraph = new LakiArenaTileTelegraphParams
+        {
+            AreaCount = 2,
+            PlayerTileChance = 0.35f,
+            TelegraphDiscRadius = 1f,
+            HitRadiusMetersAtUnitDisc = 3f,
+            HitRadiusPadding = 0f,
+            TelegraphSpawnInterval = 0.35f,
+            StrikeResolveInterval = 0.25f,
+        };
+
+        public float GetLakiArenaTileTelegraphDiscRadius() =>
+            Mathf.Max(0.1f, _lakiArenaTileTelegraph.TelegraphDiscRadius);
+
+        public float GetLakiArenaTileTelegraphHitRadiusMeters()
+        {
+            var p = _lakiArenaTileTelegraph;
+            float perUnit = p.HitRadiusMetersAtUnitDisc > 0.01f ? p.HitRadiusMetersAtUnitDisc : 3f;
+            return GetLakiArenaTileTelegraphDiscRadius() * perUnit + Mathf.Max(0f, p.HitRadiusPadding);
+        }
 
         public int GetDisplacementPriority() { return _displacementPriority; }
         public void SetDisplacementEnabled(bool enabled) { _displacementEnabled = enabled; }
@@ -136,6 +180,17 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
         }
         public bool IsMinigameAttack() => _attackType == AttackType.Minigame;
         public bool IsDiceAttack() => _attackType == AttackType.DiceAttack;
+        public bool IsLakiArenaTileTelegraph() => _attackType == AttackType.LakiArenaTileTelegraph;
+
+        public void SetLakiTileTelegraphSelectionSalt(int salt) => _lakiTileTelegraphSelectionSalt = salt;
+
+        int GetLakiTileTelegraphSelectionSeed()
+        {
+            int areaSalt = _attackType == AttackType.LakiArenaTileTelegraph
+                ? Mathf.Max(1, _lakiArenaTileTelegraph.AreaCount)
+                : 0;
+            return (GetInstanceID() * 7919) ^ (_lakiTileTelegraphSelectionSalt * 104729) ^ areaSalt;
+        }
         public int GetAnimationId() { return (int)_attackType; }
         public object GetAttackTypeBoxed() { return _attackType; } // for external mapping without exposing enum type
 
@@ -466,6 +521,22 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
                         skyDiscScale);
                     break;
                 }
+                case AttackType.LakiArenaTileTelegraph:
+                {
+                    _handler = new Logic.Scripts.GameDomain.MVC.Boss.Attacks.Laki.LakiArenaTileTelegraphAttackHandler(
+                        _lakiArenaTileTelegraph.AreaCount,
+                        _lakiArenaTileTelegraph.PlayerTileChance,
+                        _lakiArenaTileTelegraph.TelegraphDiscRadius,
+                        _lakiArenaTileTelegraph.HitRadiusMetersAtUnitDisc,
+                        _lakiArenaTileTelegraph.HitRadiusPadding,
+                        _lakiArenaTileTelegraph.TelegraphSpawnInterval,
+                        _lakiArenaTileTelegraph.StrikeResolveInterval,
+                        GetCombatAttackVisualCatalog(),
+                        null,
+                        this,
+                        GetLakiTileTelegraphSelectionSeed());
+                    break;
+                }
                 default:
                 {
                     _handler = null;
@@ -525,6 +596,11 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
 
         private void TryStartDiceAttack()
         {
+            if (Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.IsActive)
+            {
+                Debug.Log("[BossAttack][DiceAttack] Skipped — dice session already active.");
+                return;
+            }
             Zenject.DiContainer sceneContainer = null;
             try
             {

@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 4830519003573105392}
   - component: {fileID: 4162083758434111994}
   m_Layer: 0
-  m_Name: FOOTDMG
+  m_Name: LakiArenaTileTelegraph_Example
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -26,7 +26,7 @@ Transform:
   m_GameObject: {fileID: 2736674345041346023}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 415.94568, y: 287.55505, z: 170.06323}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -46,7 +46,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _effects:
   - rid: 4429000183207428188
-  _attackType: 7
+  _attackType: 10
   _displacementPriority: 0
   _protean:
     radius: 3
@@ -82,7 +82,7 @@ MonoBehaviour:
   _circle:
     radius: 3.5
     ringWidth: 0.25
-  _hokariAttackVisualId: 0
+  _hokariAttackVisualId: 18
   _hokariArenaTelegraphHalfExtent: 10
   _minigameRoundPrefab: {fileID: 0}
   _diceAttackDisplayName: DiceAttack
@@ -91,6 +91,11 @@ MonoBehaviour:
   _diceAttackDieHp: 99
   _diceAttackPlayerRollInputConsumeDelay: 0.1
   _diceAttackPlayerRollPromptPrefab: {fileID: 0}
+  _lakiArenaTileTelegraph:
+    AreaCount: 2
+    PlayerTileChance: 0.35
+    TelegraphDiscRadius: 3.5
+    HitRadiusPadding: 0.25
   references:
     version: 2
     RefIds:
@@ -101,4 +106,4 @@ MonoBehaviour:
         Description: 
         IsAutoCast: 0
         TileIcon: {fileID: 0}
-        amount: 10
+        amount: 12

@@ -6,6 +6,8 @@ namespace Logic.Scripts.Turns
     {
         void ExecuteBossTurn();
         Task ExecuteBossTurnAsync();
+        Task ExecuteBossPrepareTurnAsync();
+        Task ExecuteBossResolveTurnAsync();
     }
 }
 

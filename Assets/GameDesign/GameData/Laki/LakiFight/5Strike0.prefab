@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 4830519003573105392}
   - component: {fileID: -5180875672858182064}
   m_Layer: 0
-  m_Name: NEWDICE
+  m_Name: 5Strike0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -44,8 +44,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd88fb69c32f73948bbae5629112d0f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Logic.Scripts.GameDomain.MVC.Boss.BossAttack
-  _effects: []
-  _attackType: 9
+  _effects:
+  - rid: 8051478750538236127
+  _attackType: 10
   _displacementPriority: 0
   _protean:
     radius: 3
@@ -58,6 +59,8 @@ MonoBehaviour:
   _feather:
     featherCount: 3
     axisMode: 2
+    stripHalfExtent: 0
+    telegraphStripUniformScale: 1
     width: 2
     margin: 5
     forceBase: 2
@@ -79,13 +82,31 @@ MonoBehaviour:
   _circle:
     radius: 3.5
     ringWidth: 0.25
+  _hokariAttackVisualId: 18
+  _hokariArenaTelegraphHalfExtent: 10
   _minigameRoundPrefab: {fileID: 0}
   _diceAttackDisplayName: Dice Attack
   _diceAttackPlayerDiePrefab: {fileID: 6735503299288627155, guid: a07f2265a248f6e49b3f05efc14c5b14, type: 3}
   _diceAttackBossDiePrefab: {fileID: 2022372803364641405, guid: acad9a1ee0076cd41860f0687a346561, type: 3}
-  _diceAttackDieHp: 99
+  _diceAttackDieHp: 999
   _diceAttackPlayerRollInputConsumeDelay: 0.1
   _diceAttackPlayerRollPromptPrefab: {fileID: 367992611274707876, guid: bf0d1dd493df01949aae7425583e91be, type: 3}
+  _lakiArenaTileTelegraph:
+    AreaCount: 5
+    PlayerTileChance: 0
+    TelegraphDiscRadius: 1
+    HitRadiusMetersAtUnitDisc: 3
+    HitRadiusPadding: 0.15
+    TelegraphSpawnInterval: 0.35
+    StrikeResolveInterval: 0.25
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 8051478750538236127
+      type: {class: DamageEffect, ns: Assets.Logic.Scripts.GameDomain.Effects, asm: Assembly-CSharp}
+      data:
+        Name: 
+        Description: 
+        IsAutoCast: 0
+        TileIcon: {fileID: 0}
+        amount: 13

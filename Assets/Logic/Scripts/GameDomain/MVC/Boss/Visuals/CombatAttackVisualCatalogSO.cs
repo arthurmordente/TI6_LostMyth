@@ -52,6 +52,11 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Visuals
         [Header("Feather columns (telegraph de faixa / coluna)")]
         [SerializeField] private FeatherColumnVisuals _featherColumns;
 
+        [Header("Laki — tile strike (BossAttack LakiArenaTileTelegraph)")]
+        [SerializeField] private GameObject _lakiStrikeTelegraph;
+        [Tooltip("Optional impact VFX when a strike hits the player.")]
+        [SerializeField] private GameObject _lakiStrikeArea;
+
         [Header("Laki roulette — inner ring (index = TileEffectType: Neutral, Positive, Negative)")]
         [SerializeField] private GameObject[] _lakiRouletteInnerTilePrefabs = new GameObject[LakiRouletteTileTypes];
         [Header("Laki roulette — outer ring (same index order)")]
@@ -65,6 +70,8 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Visuals
         public DisplacementAttackVisuals Orb => _orb;
         public DisplacementAttackVisuals BigOrb => _bigOrb;
         public FeatherColumnVisuals FeatherColumns => _featherColumns;
+        public GameObject LakiStrikeTelegraph => _lakiStrikeTelegraph;
+        public GameObject LakiStrikeArea => _lakiStrikeArea;
 
         public GameObject GetTelegraph(HokariBossAttackVisualId id, bool isPull, bool isPush)
         {

@@ -12,19 +12,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7e23b7d52cfbbd24d81ad7ba44869bd0, type: 3}
   m_Name: Laki BossPhases
   m_EditorClassIdentifier: 
+  _maxHpFractionLossPerFightTurn: 0.35
   _phases:
   - Name: InitialPhase
     TriggerType: 0
     HealthPercentThreshold: 1
     HealthAbsoluteThreshold: 0
     Behavior: {fileID: 11400000, guid: 8891cde9d1acb7848ae24523b9f4c6ed, type: 2}
+    MaxHpFractionLossPerFightTurnOverride: 0
   - Name: MidPhase
     TriggerType: 0
-    HealthPercentThreshold: 0.66
+    HealthPercentThreshold: 0.65
     HealthAbsoluteThreshold: 0
-    Behavior: {fileID: 11400000, guid: 8891cde9d1acb7848ae24523b9f4c6ed, type: 2}
+    Behavior: {fileID: 11400000, guid: 4b0c0659677f63b45b2a4aadf5037e38, type: 2}
+    MaxHpFractionLossPerFightTurnOverride: 0
   - Name: EnragedPhase
     TriggerType: 0
-    HealthPercentThreshold: 0.33
+    HealthPercentThreshold: 0.3
     HealthAbsoluteThreshold: 0
-    Behavior: {fileID: 11400000, guid: 8891cde9d1acb7848ae24523b9f4c6ed, type: 2}
+    Behavior: {fileID: 11400000, guid: f703881078ae887438251a47c31df8d8, type: 2}
+    MaxHpFractionLossPerFightTurnOverride: 0

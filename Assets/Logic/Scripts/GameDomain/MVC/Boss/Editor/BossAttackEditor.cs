@@ -6,6 +6,8 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
     [CustomEditor(typeof(BossAttack))]
     public class BossAttackEditor : Editor
     {
+        const int LakiArenaTileTelegraphIndex = 10;
+
         public override void OnInspectorGUI()
         {
             serializedObject.Update();
@@ -28,8 +30,12 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
             SerializedProperty diceDieHp = serializedObject.FindProperty("_diceAttackDieHp");
             SerializedProperty diceInputDelay = serializedObject.FindProperty("_diceAttackPlayerRollInputConsumeDelay");
             SerializedProperty diceRollPrompt = serializedObject.FindProperty("_diceAttackPlayerRollPromptPrefab");
+            SerializedProperty lakiArenaTileTelegraph = serializedObject.FindProperty("_lakiArenaTileTelegraph");
+            bool isLakiTileTelegraph = attackType.enumValueIndex == LakiArenaTileTelegraphIndex;
 
-            EditorGUILayout.PropertyField(effects, true);
+            if (!isLakiTileTelegraph)
+                EditorGUILayout.PropertyField(effects, true);
+
             EditorGUILayout.PropertyField(attackType);
             EditorGUILayout.PropertyField(displacementPriority, new GUIContent("Displacement Priority"));
 
@@ -73,6 +79,19 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
                     EditorGUILayout.PropertyField(diceInputDelay, new GUIContent("Player Roll Input Consume Delay (s)"));
                     EditorGUILayout.PropertyField(diceRollPrompt, new GUIContent("Player Roll Prompt Prefab"));
                     EditorGUILayout.HelpBox("Dice count and face range come from LakiDiceAttackState at runtime (default 1 die each, 1..6). Assign the DicePrompt UI prefab (root Canvas).", MessageType.None);
+                    break;
+                case LakiArenaTileTelegraphIndex:
+                    EditorGUILayout.Space(4);
+                    EditorGUILayout.LabelField("Strike effects (damage, etc.)", EditorStyles.boldLabel);
+                    EditorGUILayout.PropertyField(effects, new GUIContent("Effects"), true);
+                    EditorGUILayout.Space(4);
+                    EditorGUILayout.LabelField("Tile targeting", EditorStyles.boldLabel);
+                    EditorGUILayout.PropertyField(lakiArenaTileTelegraph, true);
+                    EditorGUILayout.HelpBox(
+                        "Telegraph prefab: Combat Attack Visual Catalog → Laki Strike.\n" +
+                        "Telegraph Disc Radius = VFX root scale. Hit Radius Meters At Unit Disc = world hit radius when disc radius is 1 (e.g. 3 to match your VFX).\n" +
+                        "Hit = player within (Disc × MetersAtUnitDisc + padding) from each telegraph center. Tiles never repeat.",
+                        MessageType.None);
                     break;
                 default:
                     EditorGUILayout.HelpBox("Unknown attack type index.", MessageType.Warning);

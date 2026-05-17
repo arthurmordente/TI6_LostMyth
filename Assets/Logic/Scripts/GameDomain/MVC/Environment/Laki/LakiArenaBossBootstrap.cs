@@ -51,6 +51,12 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 		[Tooltip("Optional override for tile prefabs. When null, uses CombatAttackVisualCatalogSO from the scene Zenject container (same binding as GamePlayInstaller).")]
 		[SerializeField] private CombatAttackVisualCatalogSO _combatAttackVisualCatalog;
 
+		[Header("Turn flow pacing (Laki)")]
+		[SerializeField, Min(0f), Tooltip("Pause after arena tile apply, before boss resolves the prepared attack.")]
+		private float _postApplyBeforeBossResolveSeconds = 2f;
+		[SerializeField, Min(0f), Tooltip("Pause after boss resolve, before arena reroll/sorteio.")]
+		private float _postBossBeforeRerollSeconds = 2f;
+
 		[Header("Laki boss shield (prefab child)")]
 		[Tooltip("VFX root on the Laki boss prefab. While active: boss is immune and new skill system aim/fresnel on her is suppressed. Disabled on fight turns T and T+1 after the boss loses dice on turn T.")]
 		[SerializeField] private GameObject _lakiShieldVfxRoot;
@@ -136,6 +142,7 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 				arenaService.SetTileDisposition(LakiArenaTileDisposition.Default);
 
 			var actor = new LakiRouletteArenaActor(_turnStateService, _naraController, arenaService, _centerWorld, view, caster, bookEffectable);
+			LakiArenaTurnFlowBridge.Register(actor, _postApplyBeforeBossResolveSeconds, _postBossBeforeRerollSeconds);
 			var cmd = _commandFactory.CreateCommandVoid<Logic.Scripts.GameDomain.Commands.RegisterEnvironmentActorCommand>();
 			cmd.SetActor(actor);
 			cmd.Execute();
@@ -186,6 +193,8 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 
 		private void OnDestroy()
 		{
+			LakiArenaTurnFlowBridge.Unregister();
+			LakiArenaTileActionPointsBridge.Reset();
 			CombatArenaBoundaryRuntime.Clear();
 			LakiArenaTileDispositionRuntime.Clear();
 			LakiRouletteArenaFightIntro.CancelWait();

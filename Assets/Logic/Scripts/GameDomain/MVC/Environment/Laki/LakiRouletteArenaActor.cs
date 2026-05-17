@@ -5,7 +5,7 @@ using Logic.Scripts.GameDomain.MVC.Nara;
 
 namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 {
-	public sealed class LakiRouletteArenaActor : IEnvironmentTurnActor
+	public sealed class LakiRouletteArenaActor : IEnvironmentTurnActor, ILakiRouletteArenaTurnPhases
 	{
 		private readonly ITurnStateReader _turnState;
 		private readonly INaraController _nara;
@@ -28,20 +28,27 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 			_centerWorld = centerWorld ?? new Vector3(0f, 0.5f, -4f);
 		}
 
+		/// <summary>Legacy path when <see cref="LakiArenaTurnFlowBridge"/> is not used.</summary>
 		public async Task ExecuteAsync()
+		{
+			await ExecuteApplyPhaseAsync();
+			await Task.Delay(1000);
+			await ExecuteRerollPhaseAsync();
+		}
+
+		public async Task ExecuteApplyPhaseAsync()
 		{
 			int turn = _turnState != null ? _turnState.TurnNumber : 0;
 
 			Vector3 playerPos = (_nara != null && _nara.NaraViewGO != null) ? _nara.NaraViewGO.transform.position : Vector3.zero;
 			int playerTile = _arena.ComputeTileIndex(playerPos, _centerWorld);
-			System.Collections.Generic.HashSet<int> tilesToEmphasize = new System.Collections.Generic.HashSet<int>();
+			var tilesToEmphasize = new System.Collections.Generic.HashSet<int>();
 			if (playerTile >= 0) tilesToEmphasize.Add(playerTile);
 
-			// Detect the Book's tile for emphasis
 			int bookTile = -1;
 			try
 			{
-				var bookView = UnityEngine.Object.FindFirstObjectByType<Logic.Scripts.GameDomain.MVC.Book.BookView>();
+				var bookView = Object.FindFirstObjectByType<Logic.Scripts.GameDomain.MVC.Book.BookView>();
 				if (bookView != null)
 				{
 					bookTile = _arena.ComputeTileIndex(bookView.transform.position, _centerWorld);
@@ -52,45 +59,46 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 
 			if (_visual != null && tilesToEmphasize.Count > 0)
 			{
-				int steps = 20;
+				const int steps = 20;
 				for (int i = 0; i <= steps; i++)
 				{
 					float t = (float)i / steps;
 					_visual.SetEmphasis(tilesToEmphasize, t, 0.85f);
-					await System.Threading.Tasks.Task.Delay(100);
+					await Task.Delay(100);
 				}
 			}
 
-			// Apply tile effect to the player
 			if (playerTile >= 0)
 			{
 				var type = _arena.GetTileEffect(playerTile);
 				string applied = _arena.ApplyEffectToPlayer(_caster, _nara, playerTile, turn);
-				UnityEngine.Debug.Log($"[LakiRouletteArena][Jogador] Turn={turn} Tile={playerTile} Type={type} Effect={(applied ?? "None")}");
+				Debug.Log($"[LakiRouletteArena][Jogador] Turn={turn} Tile={playerTile} Type={type} Effect={(applied ?? "None")}");
 			}
 
-			// Apply tile effect to the Book separately (so it receives its own tile's effect)
 			if (bookTile >= 0 && _bookEffectable != null)
 			{
 				var btype = _arena.GetTileEffect(bookTile);
 				string bapplied = _arena.ApplyEffectToEffectable(_caster, _bookEffectable, bookTile, turn);
-				UnityEngine.Debug.Log($"[LakiRouletteArena][Livro] Turn={turn} Tile={bookTile} Type={btype} Effect={(bapplied ?? "None")}");
+				Debug.Log($"[LakiRouletteArena][Livro] Turn={turn} Tile={bookTile} Type={btype} Effect={(bapplied ?? "None")}");
 			}
+		}
 
-			await System.Threading.Tasks.Task.Delay(1000);
+		public async Task ExecuteRerollPhaseAsync()
+		{
+			int turn = _turnState != null ? _turnState.TurnNumber : 0;
+			Vector3 playerPos = (_nara != null && _nara.NaraViewGO != null) ? _nara.NaraViewGO.transform.position : Vector3.zero;
+			int playerTile = _arena.ComputeTileIndex(playerPos, _centerWorld);
 
 			for (int i = 0; i < 3; i++)
 			{
 				_arena.RandomizeVisualMapping(new System.Random((turn + i + 1) * 104729 + playerTile));
 				_visual?.RefreshFrom(_arena);
-				await System.Threading.Tasks.Task.Delay(150);
+				await Task.Delay(150);
 			}
 
 			int nextTurn = turn + 1;
 			_arena.RerollTiles(nextTurn, new System.Random(nextTurn * 7919 + 17));
 			_visual?.RefreshFrom(_arena);
-
-			await Task.CompletedTask;
 		}
 
 		public void SetCenter(Vector3 centerWorld)
@@ -99,5 +107,3 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 		}
 	}
 }
-
-

@@ -8,6 +8,8 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
         void PlanNextTurn();
         void ExecuteTurn();
         Task ExecuteTurnAsync();
+        Task ExecutePrepareTurnAsync();
+        Task ExecuteResolveTurnAsync();
         bool IsCasting { get; }
         int RemainingCastTurns { get; }
     }

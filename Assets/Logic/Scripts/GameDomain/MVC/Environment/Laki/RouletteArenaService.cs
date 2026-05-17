@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Logic.Scripts.GameDomain.MVC.Nara;
 using Logic.Scripts.GameDomain.MVC.Abilitys;
+using Logic.Scripts.GameDomain.Effects;
 
 namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 {
@@ -225,19 +226,39 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 		/// <summary>Applies all pre-assigned effects for this tile to the player.</summary>
 		public string ApplyEffectToPlayer(IEffectable caster, INaraController nara, int tileIndex, int turnNumber)
 		{
-			if (nara == null || tileIndex < 0 || tileIndex >= TILE_COUNT) return null;
-
-			var effects = _assignedEffects[tileIndex];
-			if (effects == null || effects.Length == 0)
-				return ApplyFallbackToPlayer(caster, nara, tileIndex);
-
-			var asEffectable = nara as IEffectable;
-			var names = new List<string>(effects.Length);
-			foreach (var e in effects)
+			if (nara == null || tileIndex < 0 || tileIndex >= TILE_COUNT)
 			{
-				if (e == null) continue;
-				e.Execute(caster, asEffectable);
-				names.Add(e.Name ?? "");
+				UnityEngine.Debug.LogWarning(
+					$"[LakiRouletteArena][ApplyPlayer] Skip nara={(nara != null)} tileIndex={tileIndex}");
+				return null;
+			}
+
+			var tileType = _effectsCurrentTurn[tileIndex];
+			var effects = _assignedEffects[tileIndex];
+			UnityEngine.Debug.Log(
+				$"[LakiRouletteArena][ApplyPlayer] Turn={turnNumber} Tile={tileIndex} Type={tileType} " +
+				$"assignedCount={(effects != null ? effects.Length : 0)}");
+
+			if (effects == null || effects.Length == 0)
+			{
+				string fallback = ApplyFallbackToPlayer(caster, nara, tileIndex);
+				UnityEngine.Debug.Log($"[LakiRouletteArena][ApplyPlayer] Used fallback -> {fallback ?? "None"}");
+				return fallback;
+			}
+
+			var names = new List<string>(effects.Length);
+			for (int i = 0; i < effects.Length; i++)
+			{
+				var e = effects[i];
+				if (e == null)
+				{
+					UnityEngine.Debug.LogWarning($"[LakiRouletteArena][ApplyPlayer] Tile={tileIndex} effect[{i}] is null");
+					continue;
+				}
+				UnityEngine.Debug.Log(
+					$"[LakiRouletteArena][ApplyPlayer] Tile={tileIndex} effect[{i}] {e.GetType().Name} name={e.Name}");
+				if (TryApplyPlayerTileEffect(caster, nara, e, out string appliedLabel))
+					names.Add(appliedLabel);
 			}
 			return string.Join(", ", names);
 		}
@@ -351,6 +372,29 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 		}
 
 		// Fallbacks used when no layout is configured
+		static bool TryApplyPlayerTileEffect(IEffectable caster, INaraController nara, AbilityEffect e, out string appliedLabel)
+		{
+			appliedLabel = null;
+			if (e is AddActionPointsAbilityEffect addAp)
+			{
+				int amount = Mathf.Max(1, addAp.amount);
+				LakiArenaTileActionPointsBridge.EnqueuePlayerDelta(amount);
+				appliedLabel = $"{e.Name ?? "AP+"}{amount} (next turn)";
+				return true;
+			}
+			if (e is RemoveActionPointsAbilityEffect removeAp)
+			{
+				int amount = Mathf.Max(1, removeAp.amount);
+				LakiArenaTileActionPointsBridge.EnqueuePlayerDelta(-amount);
+				appliedLabel = $"{e.Name ?? "AP-"}{amount} (next turn)";
+				return true;
+			}
+
+			e.Execute(caster, nara);
+			appliedLabel = e.Name ?? e.GetType().Name;
+			return true;
+		}
+
 		private string ApplyFallbackToPlayer(IEffectable caster, INaraController nara, int tileIndex)
 		{
 			var target = nara as IEffectable;
@@ -358,12 +402,12 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 			{
 				case TileEffectType.Positive:
 					target?.Heal(5);
-					(nara as IEffectableAction)?.AddActionPoints(1);
-					return "Heal5_AP+1";
+					LakiArenaTileActionPointsBridge.EnqueuePlayerDelta(1);
+					return "Heal5_AP+1 (next turn)";
 				case TileEffectType.Negative:
 					target?.TakeDamage(5);
-					(nara as IEffectableAction)?.SubtractActionPoints(1);
-					return "Damage5_AP-1";
+					LakiArenaTileActionPointsBridge.EnqueuePlayerDelta(-1);
+					return "Damage5_AP-1 (next turn)";
 				default: return null;
 			}
 		}

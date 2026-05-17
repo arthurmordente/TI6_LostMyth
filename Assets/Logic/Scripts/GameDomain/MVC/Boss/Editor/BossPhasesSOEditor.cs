@@ -17,6 +17,11 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
         {
             serializedObject.Update();
 
+            EditorGUILayout.PropertyField(
+                serializedObject.FindProperty("_maxHpFractionLossPerFightTurn"),
+                new GUIContent("Default HP Loss Cap / Fight Turn", "Fraction of max HP Laki can lose in one fight turn when damage is allowed."));
+            EditorGUILayout.Space(4f);
+
             if (_phasesProp != null)
             {
                 EditorGUILayout.LabelField("Phases", EditorStyles.boldLabel);
@@ -40,13 +45,18 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
                     BossPhasesSO.PhaseTriggerType mode = (BossPhasesSO.PhaseTriggerType)triggerType.enumValueIndex;
                     if (mode == BossPhasesSO.PhaseTriggerType.HealthPercentBelow)
                     {
-                        EditorGUILayout.PropertyField(elem.FindPropertyRelative("HealthPercentThreshold"), new GUIContent("Percent Threshold (0-1)"));
+                        EditorGUILayout.PropertyField(
+                            elem.FindPropertyRelative("HealthPercentThreshold"),
+                            new GUIContent("HP % Floor (0-1)", "Laki: boss stops taking damage once HP reaches this %. Also selects phase Behavior."));
                     }
                     else
                     {
                         EditorGUILayout.PropertyField(elem.FindPropertyRelative("HealthAbsoluteThreshold"), new GUIContent("Flat HP Threshold"));
                     }
                     EditorGUILayout.PropertyField(elem.FindPropertyRelative("Behavior"));
+                    EditorGUILayout.PropertyField(
+                        elem.FindPropertyRelative("MaxHpFractionLossPerFightTurnOverride"),
+                        new GUIContent("HP Loss Cap / Turn Override", "0 = use BossPhases default (e.g. 1/3 max HP per fight turn)."));
                     EditorGUILayout.EndVertical();
                 }
             }

@@ -68,6 +68,8 @@ MonoBehaviour:
     ColumnNormalAreaPrefab: {fileID: 0}
     ColumnPullAreaPrefab: {fileID: 0}
     ColumnPushAreaPrefab: {fileID: 0}
+  _lakiStrikeTelegraph: {fileID: 5954539462695391984, guid: 8093461c3e671a14b8ddcef193e84893, type: 3}
+  _lakiStrikeArea: {fileID: 0}
   _lakiRouletteInnerTilePrefabs:
   - {fileID: 342947753085768622, guid: 05b22af6fe05c3247b367a3c7342f824, type: 3}
   - {fileID: 150762638911987631, guid: 001460e9f8907fa4e930743feeadefa7, type: 3}

@@ -111,6 +111,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
             }
             _activeBehavior = GetBehaviorForPhaseIndex(0);
             _currentPhaseIndex = -1;
+            LakiBossShieldRuntime.ConfigureDamageCap(_bossPhases, maxHp, 0);
             _ = EvaluateAndMaybeSwitchPhaseAsync();
             if (_activeBehavior != null) {
                 _bossAbilityController.SetBehavior(_activeBehavior);
@@ -242,9 +243,30 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
         }
 
         public async Task ExecuteTurnAsync() {
-            bool resolvedThisTurn = false;
-            bool pauseThisTurn = false;
-            // Dedicated DiceAttack resolution first (new Laki flow).
+            bool pauseThisTurn = ConsumeBossTurnPauseFlags();
+            bool resolvedThisTurn = TryResolveLakiMinigamesAtBossTurn();
+            await RunBossResolveTurnCoreAsync(resolvedThisTurn, pauseThisTurn);
+            await RunBossPrepareTurnCoreAsync(pauseThisTurn);
+        }
+
+        public Task ExecutePrepareTurnAsync() {
+            bool pauseThisTurn = ConsumeBossTurnPauseFlags();
+            return RunBossPrepareTurnCoreAsync(pauseThisTurn);
+        }
+
+        public Task ExecuteResolveTurnAsync() {
+            bool pauseThisTurn = ConsumeBossTurnPauseFlags();
+            bool resolvedThisTurn = TryResolveLakiMinigamesAtBossTurn();
+            return RunBossResolveTurnCoreAsync(resolvedThisTurn, pauseThisTurn);
+        }
+
+        static bool ConsumeBossTurnPauseFlags() {
+            bool pauseDice = Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.ConsumePauseBossThisTurn();
+            bool pauseLegacy = Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.MinigameRuntimeService.ConsumePauseBossThisTurn();
+            return pauseDice || pauseLegacy;
+        }
+
+        bool TryResolveLakiMinigamesAtBossTurn() {
             if (Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.TryResolveAnyAtBossTurn(
                 out Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackResult diceResult,
                 out Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.IResolver diceResolver))
@@ -253,20 +275,32 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
                 int fightTurn = _turnStateService != null ? _turnStateService.TurnNumber : 0;
                 Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.NotifyPlayerWonDiceOpensShieldWindow(diceResult, fightTurn);
                 try { diceResolver?.DestroyDiceAttackRoot(); } catch { }
-                resolvedThisTurn = true;
+                return true;
             }
-            // Legacy minigame resolution path remains for old rounds.
-            if (!resolvedThisTurn && Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.MinigameRuntimeService.TryResolveAnyAtBossTurn(
+            if (Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.MinigameRuntimeService.TryResolveAnyAtBossTurn(
                 out Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.MinigameResult mgResult,
                 out Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.IMinigameResolver mgResolver))
             {
                 Debug.Log($"[Laki] Minigame resolved at Boss turn. PlayerWon={mgResult.PlayerWon} Chips: P+={mgResult.PlayerChipsDelta}, B+={mgResult.BossChipsDelta}");
                 try { mgResolver?.DestroyMinigameRoot(); } catch { }
-                resolvedThisTurn = true;
+                return true;
             }
-            bool pauseDice = Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.ConsumePauseBossThisTurn();
-            bool pauseLegacy = Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.MinigameRuntimeService.ConsumePauseBossThisTurn();
-            pauseThisTurn = pauseDice || pauseLegacy;
+            return false;
+        }
+
+        async Task RunBossPrepareTurnCoreAsync(bool pauseThisTurn) {
+            ResolvePendingCasts();
+            bool anyMinigameActive =
+                Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.IsActive ||
+                Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.MinigameRuntimeService.IsActive;
+            if (anyMinigameActive || pauseThisTurn) {
+                Debug.Log("[Laki] Minigame active/pause - boss prepare skipped this turn");
+                return;
+            }
+            await PrepareNextActionAsync();
+        }
+
+        async Task RunBossResolveTurnCoreAsync(bool resolvedThisTurn, bool pauseThisTurn) {
             bool anyMinigameActive =
                 Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.IsActive ||
                 Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.MinigameRuntimeService.IsActive;
@@ -277,15 +311,11 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
             if (!anyMinigameActive && !resolvedThisTurn && !pauseThisTurn) {
                 await ExecutePreparedActionAsync();
             }
-            // After executing the previously prepared action, evaluate phase change for this turn
-            bool didTransition = await EvaluateAndMaybeSwitchPhaseAsync();
+            await EvaluateAndMaybeSwitchPhaseAsync();
             await MoveTurnAsync();
-            // Garante Idle pós movimento antes de preparar o próximo ataque (timeout curto: animação costuma terminar rápido)
             if (_bossView != null) {
                 await _bossView.WaitUntilIdleAsync(1.5f);
             }
-            await PrepareNextActionAsync();
-            // Não esperamos AttackLoop: o telegraph já foi exibido no prep; passamos controle ao jogador logo.
             _executedTurnsCount++;
         }
 
@@ -451,7 +481,6 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
         }
 
         private async System.Threading.Tasks.Task PrepareNextActionAsync() {
-            // Se há minigame ativo, não agendar novo ataque
             if (Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.IsActive) return;
             if (Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.MinigameRuntimeService.IsActive) return;
             // Se a última rodada de um minigame acabou de sinalizar resolução no turno da Laki,
@@ -479,10 +508,20 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
 
 			// Primeiro criamos todos, depois escolhemos um vencedor de movimento por prioridade e configuramos telegraph/efeitos
 			var created = new System.Collections.Generic.List<(BossAttack atk, int idx, bool hasMove, int pri)>(indices.Length);
+			int lakiTileTelegraphCastIndex = 0;
 			for (int n = 0; n < indices.Length; n++) {
 				int attackIndex = Mathf.Clamp(indices[n], 0, pool.Length - 1);
+				BossAttack template = pool[attackIndex];
+				if (template != null && template.IsDiceAttack()
+				    && Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.IsActive)
+				{
+					Debug.Log("[Boss] Skipping dice attack prep — session already active.");
+					continue;
+				}
 				BossAttack inst = _bossAbilityController?.CreateAttackAtIndex(attackIndex, _bossView.transform);
 				if (inst == null) { Debug.LogWarning("Boss attack instantiated: null"); continue; }
+				if (inst.IsLakiArenaTileTelegraph())
+					inst.SetLakiTileTelegraphSelectionSalt(lakiTileTelegraphCastIndex++);
 				bool hasMove = inst.HasDisplacementEffect();
 				int pri = hasMove ? inst.GetDisplacementPriority() : int.MinValue;
 				created.Add((inst, attackIndex, hasMove, pri));
@@ -537,7 +576,12 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
                         // Exibir telegraph cedo no prep para reduzir espera antes de passar o turno
                         try {
                             await _bossView.WaitUntilStateTagNormalizedAsync("AttackPrep", 0.35f, 1.5f);
-                            primary.TrySetTelegraphVisible(true);
+                            for (int t = 0; t < created.Count; t++) {
+                                if (created[t].atk != null && created[t].atk.IsLakiArenaTileTelegraph())
+                                    created[t].atk.TrySetTelegraphVisible(true);
+                            }
+                            if (!primary.IsLakiArenaTileTelegraph())
+                                primary.TrySetTelegraphVisible(true);
                         } catch { }
                     }
                 }
@@ -551,6 +595,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
             // Map: Protean=0, Circle=1, FeatherLines=2, WingSlashLeft=3, WingSlashRight=4
             if (string.Equals(kind, "ProteanCones", StringComparison.OrdinalIgnoreCase)) return 0;
             if (string.Equals(kind, "Circle", StringComparison.OrdinalIgnoreCase)) return 1;
+            if (string.Equals(kind, "LakiArenaTileTelegraph", StringComparison.OrdinalIgnoreCase)) return 1;
             if (string.Equals(kind, "FeatherLines", StringComparison.OrdinalIgnoreCase)) return 2;
             if (string.Equals(kind, "WingSlash", StringComparison.OrdinalIgnoreCase)) {
                 // Decide left/right relative to boss forward and player position
@@ -678,16 +723,34 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
 
 
         public void TakeDamage(int amount) {
-            if (LakiBossShieldRuntime.IsLakiShieldBlockingCombatInteraction()) return;
-            _bossData.TakeDamage(amount);
+            int maxHp = _bossConfiguration != null ? _bossConfiguration.MaxHealth : Mathf.Max(1, _bossData.ActualHealth);
+            int currentHp = _bossData.ActualHealth;
+            var filter = LakiBossShieldRuntime.FilterBossDamage(
+                amount, maxHp, currentHp, _bossPhases, _currentPhaseIndex);
+
+            int applied = filter.AppliedDamage;
+            if (applied > 0)
+            {
+                _bossData.TakeDamage(applied);
+                LakiBossShieldRuntime.RecordBossDamageApplied(applied);
+            }
+
+            int phaseAfterDamage = _bossPhases != null
+                ? _bossPhases.GetPhaseIndexByHealth(_bossData.ActualHealth, maxHp)
+                : _currentPhaseIndex;
+            if (phaseAfterDamage >= 0 && phaseAfterDamage != _currentPhaseIndex)
+                ApplyBossPhaseChangeSync(phaseAfterDamage);
+            else if (filter.ShouldEngageShield)
+                LakiBossShieldRuntime.EngageShield();
+
+            if (applied <= 0) return;
             if (_bossView != null) {
                 var flash = _bossView.GetComponent<DamageFlashPresenter>();
                 if (flash == null) flash = _bossView.gameObject.AddComponent<DamageFlashPresenter>();
                 flash.TriggerFlash();
             }
             Debug.Log("Tomou dano!!!!!!!!!!!!!!!!");
-            int maxHp = _bossConfiguration != null ? _bossConfiguration.MaxHealth : Mathf.Max(1, _bossData.ActualHealth);
-            Debug.Log($"[Boss] Damage: -{amount} -> HP={_bossData.ActualHealth}/{maxHp}");
+            Debug.Log($"[Boss] Damage: -{applied} (requested {amount}) -> HP={_bossData.ActualHealth}/{maxHp}");
             // Update UI with percentage and absolute
             int pct = maxHp > 0 ? Mathf.RoundToInt((float)_bossData.ActualHealth / maxHp * 100f) : 0;
             _gamePlayUiController.OnBossHealthUpdate(_bossData.ActualHealth, maxHp);
@@ -712,8 +775,6 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
                 _commandFactory.CreateCommandVoid<GameOverCommand>().SetData(new GameOverCommandData(true)).Execute();
                 return;
             }
-            // Evaluate phase transition immediately after damage
-            _ = EvaluateAndMaybeSwitchPhaseAsync();
         }
 
         public void Heal(int amount) {
@@ -784,26 +845,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
                 Debug.Log($"[Boss] Phase unchanged (current={_currentPhaseIndex}) at HP={_bossData.ActualHealth}/{_bossConfiguration.MaxHealth}");
                 return false;
             }
-            var phases = _bossPhases.Phases;
-            string prevName = (_currentPhaseIndex >= 0 && phases != null && _currentPhaseIndex < phases.Length) ? phases[_currentPhaseIndex].Name : "(none)";
-            BossBehaviorSO newBehavior = GetBehaviorForPhaseIndex(newIndex);
-            string newName = (phases != null && newIndex < phases.Length) ? phases[newIndex].Name : "(unknown)";
-            Debug.Log($"[Boss] Phase change: {_currentPhaseIndex}:{prevName} -> {newIndex}:{newName} at HP={_bossData.ActualHealth}/{_bossConfiguration.MaxHealth}");
-            if (newBehavior != null && newBehavior != _activeBehavior) {
-                _activeBehavior = newBehavior;
-                _bossAbilityController.SetBehavior(_activeBehavior);
-                // Próxima preparação deve começar no primeiro passo do novo comportamento
-                _executedTurnsCount = 0;
-                // NÃO limpar _pendingCasts: ataques já preparados devem ser completados antes da nova fase iniciar seu padrão
-                Debug.Log("[Boss] Pending prepared attacks preserved to complete before new behavior pattern starts.");
-            }
-            else if (newBehavior == null) {
-                Debug.LogWarning($"[Boss] Phase '{newName}' has no Behavior assigned. Keeping current behavior.");
-            }
-            PlayPhaseTransitionAnimation();
-            _currentPhaseIndex = newIndex;
-            Logic.Scripts.GameDomain.MVC.Environment.Laki.LakiArenaTileDispositionRuntime.NotifyBossPhaseChanged(newIndex);
-            // wait for the phase transition animation before continuing turn
+            ApplyBossPhaseChangeSync(newIndex);
             if (_bossView != null) {
                 float wait = Mathf.Max(0f, _bossView.GetPhaseTransitionDuration());
                 if (wait > 0f) {
@@ -815,6 +857,36 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
                 }
             }
             return true;
+        }
+
+        void ApplyBossPhaseChangeSync(int newIndex) {
+            if (_bossPhases == null || newIndex < 0 || newIndex == _currentPhaseIndex) return;
+
+            var phases = _bossPhases.Phases;
+            string prevName = (_currentPhaseIndex >= 0 && phases != null && _currentPhaseIndex < phases.Length)
+                ? phases[_currentPhaseIndex].Name
+                : "(none)";
+            BossBehaviorSO newBehavior = GetBehaviorForPhaseIndex(newIndex);
+            string newName = (phases != null && newIndex < phases.Length) ? phases[newIndex].Name : "(unknown)";
+            int maxHp = _bossConfiguration != null ? _bossConfiguration.MaxHealth : Mathf.Max(1, _bossData.ActualHealth);
+            Debug.Log(
+                $"[Boss] Phase change: {_currentPhaseIndex}:{prevName} -> {newIndex}:{newName} " +
+                $"at HP={_bossData.ActualHealth}/{maxHp}");
+
+            if (newBehavior != null && newBehavior != _activeBehavior) {
+                _activeBehavior = newBehavior;
+                _bossAbilityController.SetBehavior(_activeBehavior);
+                _executedTurnsCount = 0;
+                Debug.Log("[Boss] Behavior switched — next boss prepare uses the new phase pattern.");
+            }
+            else if (newBehavior == null) {
+                Debug.LogWarning($"[Boss] Phase '{newName}' has no Behavior assigned. Keeping current behavior.");
+            }
+
+            PlayPhaseTransitionAnimation();
+            _currentPhaseIndex = newIndex;
+            LakiBossShieldRuntime.NotifyBossPhaseChanged(_bossPhases, newIndex, maxHp);
+            LakiArenaTileDispositionRuntime.NotifyBossPhaseChanged(newIndex);
         }
 
         private BossBehaviorSO GetBehaviorForPhaseIndex(int index) {
