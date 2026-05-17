@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8f4e2c1a9b7d6e5f4a3b2c1d0e9f8a7b, type: 3}
-  m_Name: HokariHazard_Pull4m_AtFeet
+  m_Name: HokariHazard_Push4m_Opposite
   m_EditorClassIdentifier: Assembly-CSharp::Logic.Scripts.GameDomain.MVC.Environment.Hokari.HokariArenaHazardDefinitionSO
   TurnMin: 2
   TurnMax: 99
-  DisplacementKind: 0
+  DisplacementKind: 1
   Push:
     DistanceMeters: 4
     DurationSeconds: 0.45
-    DirectionMode: 1
+    DirectionMode: 0
     ReferenceWorldPoint: {x: 0, y: 0, z: 0}
     WorldDirectionXZ: {x: 0, y: 0, z: 0}
     ReferenceTransform: {fileID: 0}
@@ -29,6 +29,6 @@ MonoBehaviour:
   DelayBeforePushSeconds: 0
   CatalogTelegraph:
     AttackVisualId: 18
-    Variant: 1
+    Variant: 2
   TelegraphDiscRadius: 0.4
-  TelegraphSpawn: 0
+  TelegraphSpawn: 1

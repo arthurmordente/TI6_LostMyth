@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Logic.Scripts.GameDomain.MVC.Environment.Hokari.HokariArenaHazardDefinitionSO
   TurnMin: 2
   TurnMax: 99
+  DisplacementKind: 0
   Push:
     DistanceMeters: 4
     DurationSeconds: 0.45
@@ -26,4 +27,8 @@ MonoBehaviour:
     MultiplyByDebuffStacks: 1
   ApplyToBook: 0
   DelayBeforePushSeconds: 0
+  CatalogTelegraph:
+    AttackVisualId: 18
+    Variant: 1
+  TelegraphDiscRadius: 0.4
   TelegraphSpawn: 3

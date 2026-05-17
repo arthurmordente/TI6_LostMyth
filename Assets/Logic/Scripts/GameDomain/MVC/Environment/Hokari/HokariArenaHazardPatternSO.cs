@@ -7,20 +7,26 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Hokari
     [CreateAssetMenu(fileName = "HokariArenaHazardPattern", menuName = "ScriptableObjects/Environment/Hokari Arena Hazard Pattern")]
     public sealed class HokariArenaHazardPatternSO : ScriptableObject
     {
-        [Header("Telegraph (Combat Attack Visual Catalog)")]
-        public HokariArenaHazardCatalogTelegraph CatalogTelegraph;
-        [Tooltip("Catalog disc XZ scale (arena mesh at 1 ≈ this radius in meters).")]
-        [Min(0.1f)] public float TelegraphDiscRadius = 3.5f;
+        [Tooltip("Used when a definition leaves Telegraph Disc Radius at 0.")]
+        [Min(0.1f)] public float DefaultTelegraphDiscRadius = 3.5f;
 
-        [Header("Hazard variants (position only; shared telegraph above)")]
+        [Header("Hazard pool (random pick per turn among matching entries)")]
         [SerializeField] private HokariArenaHazardDefinitionSO[] _definitions = System.Array.Empty<HokariArenaHazardDefinitionSO>();
 
         public IReadOnlyList<HokariArenaHazardDefinitionSO> Definitions => _definitions ?? System.Array.Empty<HokariArenaHazardDefinitionSO>();
 
+        public float ResolveTelegraphDiscRadius(HokariArenaHazardDefinitionSO definition)
+        {
+            if (definition != null && definition.TelegraphDiscRadius > 0f)
+                return definition.TelegraphDiscRadius;
+            return Mathf.Max(0.1f, DefaultTelegraphDiscRadius);
+        }
+
         void OnValidate()
         {
-            if (CatalogTelegraph.AttackVisualId == Boss.Visuals.HokariBossAttackVisualId.None)
-                CatalogTelegraph.AttackVisualId = Boss.Visuals.HokariBossAttackVisualId.Circle;
+            if (_definitions == null) return;
+            for (int i = 0; i < _definitions.Length; i++)
+                _definitions[i]?.SyncCatalogAndPushFromDisplacementKind();
         }
 
         public int CollectMatching(int turnNumber, List<HokariArenaHazardDefinitionSO> results)
@@ -49,7 +55,7 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Hokari
 
         public HokariArenaHazardDefinitionSO PickRandomForTurn(int turnNumber)
         {
-            var pool = new List<HokariArenaHazardDefinitionSO>(8);
+            var pool = new List<HokariArenaHazardDefinitionSO>(16);
             CollectMatching(turnNumber, pool);
             if (pool.Count == 0) return null;
             return pool[Random.Range(0, pool.Count)];

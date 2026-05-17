@@ -20,9 +20,9 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Hokari
             out Vector3 telegraphAnchorWorld)
         {
             telegraphAnchorWorld = arenaCenter;
-            if (definition == null || pattern == null || catalog == null) return null;
+            if (definition == null || catalog == null) return null;
 
-            GameObject prefab = pattern.CatalogTelegraph.ResolvePrefab(catalog);
+            GameObject prefab = definition.CatalogTelegraph.ResolvePrefab(catalog);
             if (prefab == null) return null;
 
             if (!TryResolveSpawnPosition(definition.TelegraphSpawn, arenaCenter, arenaRadiusXZ, nara, out Vector3 worldPos))
@@ -34,7 +34,9 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Hokari
             var instance = Object.Instantiate(prefab, worldPos, Quaternion.identity);
             instance.name = $"HokariHazardTelegraph_{definition.name}";
 
-            float scale = Mathf.Max(0.1f, pattern.TelegraphDiscRadius);
+            float scale = pattern != null
+                ? pattern.ResolveTelegraphDiscRadius(definition)
+                : Mathf.Max(0.1f, definition.TelegraphDiscRadius);
             instance.transform.localScale = new Vector3(scale, 1f, scale);
 
             var layering = TelegraphLayeringLocator.Service;

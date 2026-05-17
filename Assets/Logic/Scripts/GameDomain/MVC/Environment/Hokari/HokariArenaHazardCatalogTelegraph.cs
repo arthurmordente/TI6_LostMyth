@@ -24,5 +24,22 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Hokari
             string prefabName = prefab != null ? prefab.name : "(missing)";
             return $"{AttackVisualId} / {Variant} — {prefabName}";
         }
+
+        public void AlignToDisplacementKind(HokariArenaHazardDisplacementKind kind)
+        {
+            if (AttackVisualId == HokariBossAttackVisualId.None)
+                AttackVisualId = HokariBossAttackVisualId.Circle;
+            Variant = kind == HokariArenaHazardDisplacementKind.PullTowardTelegraph
+                ? HokariArenaHazardTelegraphVariant.Pull
+                : HokariArenaHazardTelegraphVariant.Push;
+        }
+
+        public bool MatchesDisplacementKind(HokariArenaHazardDisplacementKind kind)
+        {
+            var expected = kind == HokariArenaHazardDisplacementKind.PullTowardTelegraph
+                ? HokariArenaHazardTelegraphVariant.Pull
+                : HokariArenaHazardTelegraphVariant.Push;
+            return Variant == expected;
+        }
     }
 }
