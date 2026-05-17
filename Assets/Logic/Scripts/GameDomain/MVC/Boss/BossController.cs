@@ -239,13 +239,12 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
 
             // 3) Preparar ataque deste turno conforme padrão do behavior
             _ = QueuePreparedAttackFromBehaviorAsync();
-            _executedTurnsCount++;
+            AdvanceBossTurnPatternIndex();
         }
 
         public async Task ExecuteTurnAsync() {
             bool pauseThisTurn = ConsumeBossTurnPauseFlags();
-            bool resolvedThisTurn = TryResolveLakiMinigamesAtBossTurn();
-            await RunBossResolveTurnCoreAsync(resolvedThisTurn, pauseThisTurn);
+            await RunBossResolveTurnCoreAsync(pauseThisTurn);
             await RunBossPrepareTurnCoreAsync(pauseThisTurn);
         }
 
@@ -256,8 +255,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
 
         public Task ExecuteResolveTurnAsync() {
             bool pauseThisTurn = ConsumeBossTurnPauseFlags();
-            bool resolvedThisTurn = TryResolveLakiMinigamesAtBossTurn();
-            return RunBossResolveTurnCoreAsync(resolvedThisTurn, pauseThisTurn);
+            return RunBossResolveTurnCoreAsync(pauseThisTurn);
         }
 
         static bool ConsumeBossTurnPauseFlags() {
@@ -290,33 +288,43 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
 
         async Task RunBossPrepareTurnCoreAsync(bool pauseThisTurn) {
             ResolvePendingCasts();
-            bool anyMinigameActive =
-                Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.IsActive ||
-                Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.MinigameRuntimeService.IsActive;
-            if (anyMinigameActive || pauseThisTurn) {
-                Debug.Log("[Laki] Minigame active/pause - boss prepare skipped this turn");
+            if (pauseThisTurn) {
+                Debug.Log("[Laki] Boss prepare skipped — dice just resolved (shield window opened).");
                 return;
             }
             await PrepareNextActionAsync();
         }
 
-        async Task RunBossResolveTurnCoreAsync(bool resolvedThisTurn, bool pauseThisTurn) {
-            bool anyMinigameActive =
-                Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.IsActive ||
-                Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.MinigameRuntimeService.IsActive;
-            if (anyMinigameActive || resolvedThisTurn || pauseThisTurn) {
-                Debug.Log("[Laki] Minigame active/resolved - boss attacks paused this turn");
-            }
+        async Task RunBossResolveTurnCoreAsync(bool pauseThisTurn) {
             ResolvePendingCasts();
-            if (!anyMinigameActive && !resolvedThisTurn && !pauseThisTurn) {
+            if (pauseThisTurn) {
+                Debug.Log("[Laki] Boss resolve skipped — post-dice stun (no prepared attacks).");
+            }
+            else {
                 await ExecutePreparedActionAsync();
             }
+
+            if (TryResolveLakiMinigamesAtBossTurn()) {
+                Debug.Log("[Laki] Dice/minigame resolved after prepared attacks this boss resolve.");
+            }
+
             await EvaluateAndMaybeSwitchPhaseAsync();
             await MoveTurnAsync();
             if (_bossView != null) {
                 await _bossView.WaitUntilIdleAsync(1.5f);
             }
+            AdvanceBossTurnPatternIndex();
+        }
+
+        void AdvanceBossTurnPatternIndex() {
+            var behavior = GetCurrentBehavior();
+            int len = behavior?.TurnPattern != null ? behavior.TurnPattern.Length : 0;
+            int before = _executedTurnsCount;
             _executedTurnsCount++;
+            if (len > 0)
+                Debug.Log($"[Laki] Turn pattern index {before % len} -> {_executedTurnsCount % len} (executedTurns={_executedTurnsCount})");
+            else
+                Debug.Log($"[Laki] Turn pattern advanced executedTurns={_executedTurnsCount}");
         }
 
 		private async Task ExecutePreparedActionAsync() {
@@ -481,12 +489,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
         }
 
         private async System.Threading.Tasks.Task PrepareNextActionAsync() {
-            if (Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.IsActive) return;
             if (Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.MinigameRuntimeService.IsActive) return;
-            // Se a última rodada de um minigame acabou de sinalizar resolução no turno da Laki,
-            // pulamos UMA preparação neste turno
-            if (Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.ConsumeSkipOnBossTurn()) return;
-            if (Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.MinigameRuntimeService.ConsumeSkipOnBossTurn()) return;
             await QueuePreparedAttackFromBehaviorAsync();
         }
 
@@ -502,9 +505,15 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
 			// Coleta múltiplos índices (modelo atual). Se vier vazio, não agenda ataques neste turno.
 			int[] indices = entry.AttackIndices;
 			if (indices == null || indices.Length == 0) {
-				Debug.LogWarning("[BossBehavior] TurnPattern entry has empty AttackIndices; no attacks queued this turn.");
+				Debug.LogWarning($"[BossBehavior] TurnPattern[{indexInPattern}] empty — no attacks queued (pattern still advances on resolve).");
 				return;
 			}
+
+            bool diceSessionActive =
+                Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.IsActive;
+            Debug.Log(
+                $"[Laki] Queue turn pattern[{indexInPattern}/{pattern.Length}] attacks=[{string.Join(",", indices)}] " +
+                $"diceActive={diceSessionActive}");
 
 			// Primeiro criamos todos, depois escolhemos um vencedor de movimento por prioridade e configuramos telegraph/efeitos
 			var created = new System.Collections.Generic.List<(BossAttack atk, int idx, bool hasMove, int pri)>(indices.Length);
@@ -512,14 +521,18 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
 			for (int n = 0; n < indices.Length; n++) {
 				int attackIndex = Mathf.Clamp(indices[n], 0, pool.Length - 1);
 				BossAttack template = pool[attackIndex];
-				if (template != null && template.IsDiceAttack()
-				    && Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.IsActive)
+				if (template != null && template.IsDiceAttack() && diceSessionActive)
 				{
-					Debug.Log("[Boss] Skipping dice attack prep — session already active.");
+					Debug.Log($"[Laki] Skipping dice attack (pool[{attackIndex}]) — dice session already active; other attacks in this entry still queue.");
 					continue;
 				}
 				BossAttack inst = _bossAbilityController?.CreateAttackAtIndex(attackIndex, _bossView.transform);
 				if (inst == null) { Debug.LogWarning("Boss attack instantiated: null"); continue; }
+				if (inst.IsDiceAttack() && diceSessionActive)
+				{
+					Object.Destroy(inst.gameObject);
+					continue;
+				}
 				if (inst.IsLakiArenaTileTelegraph())
 					inst.SetLakiTileTelegraphSelectionSalt(lakiTileTelegraphCastIndex++);
 				bool hasMove = inst.HasDisplacementEffect();
@@ -563,6 +576,10 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
                 if (delay == 0) Debug.Log($"[Laki] Dice attack queued to execute this turn");
 				else Debug.Log($"Boss prepared attack index: {attackIndex} (executes next turn)");
 			}
+
+            if (created.Count == 0) {
+                Debug.LogWarning($"[Laki] TurnPattern[{indexInPattern}] produced no attacks (dice skipped or invalid indices).");
+            }
 
             // Escolhe o PRIMEIRO da lista como primário para animar (independente do winner)
             if (created.Count > 0 && _bossView != null) {
