@@ -15,14 +15,12 @@ MonoBehaviour:
   guideTitle: Changelog
   pages:
   - pageSprite: {fileID: 21300000, guid: 4342eb5d762203341abe650bf1c7f224, type: 3}
-    descriptionText: "Na primeira build deste ciclo come\xE7amos com uma mudan\xE7a
-      completa nos sistemas de clone e de habilidades. Al\xE9m disso refizemos a
-      personagem principal, atualizamos completamente a UI de combate e finalmente
-      adicionamos feedbacks necess\xE1rios em diversas \xE1reas do jogo. Listamos
-      brevemente na pr\xF3xima sess\xE3o."
+    descriptionText: "Nesta entrega implementamos o sistema de habilidades e build,
+      agora \xE9 poss\xEDvel selecionar quais skills equipar, filtrando por categorias,
+      e levar para as lutas. Tamb\xE9m atualizamos o sistema de mira para as habilidades
+      e implementamos mais feedbacks, principalmente atrav\xE9s de VFX."
   - pageSprite: {fileID: 0}
-    descriptionText: "- Sistema de clones\n- Sistema de habilidades base j\xE1 implementado\n-
-      UI de combate\n- Novo modelo da personagem principal\n- Implementa\xE7\xE3o
-      de Feedbacks: a maior parte como VFX e o restante na interface.\n- Sistema
-      de SFX em processo de reformula\xE7\xE3o, logo nenhum feedback sonoro foi incluido
-      na build"
+    descriptionText: "Al\xE9m disso refizemos a estrutura das duas lutas, alterando
+      como os chefes se comportam: \n- Hocari: Altera\xE7\xE3o dos golpes e da reestrutura\xE7\xE3o
+      de quando cada golpe pode acontecer;\n- Laki: Balanceamento das casas da roleta,
+      adi\xE7\xE3o de golpes novos e limita\xE7\xE3o da \xE1rea da arena."
