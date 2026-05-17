@@ -1,3 +1,4 @@
+using Logic.Scripts.GameDomain.Exploration.QuitConfirmation;
 using Logic.Scripts.GameDomain.GameInputActions;
 using Logic.Scripts.GameDomain.MVC.Nara;
 using UnityEngine;
@@ -30,5 +31,6 @@ public class ExplorationInstaller : MonoInstaller {
         Container.BindInterfacesTo<CustomizeUIController>().AsSingle().WithArguments(_customizeUiView).NonLazy();
         Container.Bind<ExplorationLoadoutUIView>().FromInstance(_explorationLoadoutUiView).AsSingle();
         Container.BindInterfacesTo<ExplorationLoadoutUIController>().AsSingle().NonLazy();
+        Container.BindInterfacesTo<ExplorationQuitConfirmationService>().AsSingle().NonLazy();
     }
 }

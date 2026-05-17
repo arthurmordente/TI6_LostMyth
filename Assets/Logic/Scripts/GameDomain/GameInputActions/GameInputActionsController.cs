@@ -143,6 +143,7 @@ namespace Logic.Scripts.GameDomain.GameInputActions {
             _commandFactory.CreateCommandVoid<UseAbility4InputCommand>().Execute();
         }
         private void OnRotateCamStarted(InputAction.CallbackContext obj) {
+            if (ExplorationModalInputGate.IsSuppressed) return;
             _commandFactory.CreateCommandVoid<RotateCamInputCommand>().Execute();
         }
         private void OnResetMovementStarted(InputAction.CallbackContext obj) {
@@ -155,6 +156,7 @@ namespace Logic.Scripts.GameDomain.GameInputActions {
             _commandFactory.CreateCommandVoid<PassTurnInputCommand>().Execute();
         }
         private void OnMoveStarted(InputAction.CallbackContext obj) {
+            if (ExplorationModalInputGate.IsSuppressed) return;
             _commandFactory.CreateCommandVoid<MoveInputCommand>().Execute();
         }
         private void OnCreateCopy2Started(InputAction.CallbackContext obj) {
@@ -173,6 +175,7 @@ namespace Logic.Scripts.GameDomain.GameInputActions {
         private void OnActivateCamAndCancelAbilityCanceled(InputAction.CallbackContext context) { _commandFactory.CreateCommandVoid<DeactivateCamInputCommand>().Execute(); }
         #endregion
         private void OnZoomPerformed(InputAction.CallbackContext context) {
+            if (ExplorationModalInputGate.IsSuppressed) return;
             _commandFactory.CreateCommandVoid<ZoomInputCommand>().Execute();
         }
 
@@ -209,6 +212,7 @@ namespace Logic.Scripts.GameDomain.GameInputActions {
         }
 
         private void OnActivateCamStarted(InputAction.CallbackContext obj) {
+            if (ExplorationModalInputGate.IsSuppressed) return;
             _commandFactory.CreateCommandVoid<ActivateCamInputCommand>().Execute();
         }
 
@@ -217,6 +221,7 @@ namespace Logic.Scripts.GameDomain.GameInputActions {
         }
 
         private void OnInteractStarted(InputAction.CallbackContext obj) {
+            if (ExplorationModalInputGate.IsSuppressed) return;
             if (obj.action == _gameInputActions.Exploration.Interact && ExplorationInteractInputGate.IsSuppressed)
                 return;
             _commandFactory.CreateCommandVoid<InteractInputCommand>().Execute();
