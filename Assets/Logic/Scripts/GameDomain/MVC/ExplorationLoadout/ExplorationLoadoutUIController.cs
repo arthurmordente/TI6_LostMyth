@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Logic.Scripts.GameDomain.MVC.ExplorationLoadout;
 using Logic.Scripts.GameDomain.Services.Skills;
+using UnityEngine.EventSystems;
 
 public class ExplorationLoadoutUIController : IExplorationLoadoutUIController
 {
@@ -98,8 +99,24 @@ public class ExplorationLoadoutUIController : IExplorationLoadoutUIController
     private void OnCatalogSkillSelected(SkillDataSO skill)
     {
         if (_loadoutService == null || skill == null) return;
-        _loadoutService.SetSlotSkill(_selectedUnitType, _selectedSlotIndex, skill);
-        _view?.ShowSkillDetails(skill);
+
+        if (!_loadoutService.CanAssignSkillToSlot(_selectedUnitType, _selectedSlotIndex, skill))
+        {
+            PlayInvalidAssignFeedback();
+            return;
+        }
+
+        if (_loadoutService.SetSlotSkill(_selectedUnitType, _selectedSlotIndex, skill))
+            _view?.ShowSkillDetails(skill);
+    }
+
+    private void PlayInvalidAssignFeedback()
+    {
+        _view?.PlayInvalidAssignFeedback();
+        _view?.ClearSlotSelection();
+        _view?.ShowSkillDetails(null);
+        if (EventSystem.current != null)
+            EventSystem.current.SetSelectedGameObject(null);
     }
 
     private void OnCatalogSkillHovered(SkillDataSO skill)

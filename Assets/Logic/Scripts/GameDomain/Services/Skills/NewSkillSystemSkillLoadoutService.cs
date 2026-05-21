@@ -32,9 +32,11 @@ namespace Logic.Scripts.GameDomain.Services.Skills
             _selectedBookSlots = new SkillDataSO[safeSlotCount];
             _requiredPlayerSlotTypes = new SkillType?[safeSlotCount];
             _requiredBookSlotTypes = new SkillType?[safeSlotCount];
-            InitializeDefaultSelection(_selectedPlayerSlots);
-            InitializeDefaultSelection(_selectedBookSlots);
+            InitializePlayerDefaultSelection(_selectedPlayerSlots);
+            InitializeBookDefaultSelection(_selectedBookSlots);
             LoadFromPlayerPrefs();
+            SanitizePlayerLoadout();
+            SanitizeBookLoadout();
         }
 
         public bool TryGetSelectedSkill(SkillLoadoutUnitType unitType, int slotIndex, out SkillDataSO skill)
@@ -49,7 +51,10 @@ namespace Logic.Scripts.GameDomain.Services.Skills
         public SkillDataSO[] BuildRuntimeSlotsArray(SkillLoadoutUnitType unitType)
         {
             SkillDataSO[] selectedSlots = ResolveSlots(unitType);
-            EnsureSlotsFilledWithDefaults(selectedSlots);
+            if (unitType == SkillLoadoutUnitType.Book)
+                EnsureBookSlotsFilledWithAllowedDefaults(selectedSlots);
+            else
+                EnsurePlayerSlotsFilledWithAllowedDefaults(selectedSlots);
             var clone = new SkillDataSO[selectedSlots.Length];
             Array.Copy(selectedSlots, clone, selectedSlots.Length);
             return clone;
@@ -71,6 +76,8 @@ namespace Logic.Scripts.GameDomain.Services.Skills
             SkillDataSO[] selectedSlots = ResolveSlots(unitType);
             if (slotIndex < 0 || slotIndex >= selectedSlots.Length) return false;
             if (skill == null) return true;
+            if (unitType == SkillLoadoutUnitType.Book && !IsBookAllowedSkill(skill)) return false;
+            if (unitType == SkillLoadoutUnitType.Player && !IsPlayerAllowedSkill(skill)) return false;
             if (!AreSlotRestrictionsEnabled) return true;
             if (!TryGetRequiredSkillType(unitType, slotIndex, out SkillType requiredSkillType)) return true;
             return skill.SkillType == requiredSkillType;
@@ -119,21 +126,90 @@ namespace Logic.Scripts.GameDomain.Services.Skills
             return unitType == SkillLoadoutUnitType.Book ? _requiredBookSlotTypes : _requiredPlayerSlotTypes;
         }
 
-        private void InitializeDefaultSelection(SkillDataSO[] target)
+        private void InitializePlayerDefaultSelection(SkillDataSO[] target)
         {
-            int count = Math.Min(target.Length, _catalog.Length);
-            for (int i = 0; i < count; i++)
-                target[i] = _catalog[i];
+            for (int i = 0; i < target.Length; i++)
+                target[i] = FindDefaultPlayerSkillForSlot(i);
         }
 
-        private void EnsureSlotsFilledWithDefaults(SkillDataSO[] target)
+        private void InitializeBookDefaultSelection(SkillDataSO[] target)
         {
-            int count = Math.Min(target.Length, _catalog.Length);
-            for (int i = 0; i < count; i++)
+            for (int i = 0; i < target.Length; i++)
+                target[i] = FindDefaultBookSkillForSlot(i);
+        }
+
+        private void SanitizePlayerLoadout()
+        {
+            bool changed = false;
+            for (int i = 0; i < _selectedPlayerSlots.Length; i++)
             {
-                if (target[i] == null)
-                    target[i] = _catalog[i];
+                if (_selectedPlayerSlots[i] == null || IsPlayerAllowedSkill(_selectedPlayerSlots[i])) continue;
+                _selectedPlayerSlots[i] = null;
+                changed = true;
             }
+            EnsurePlayerSlotsFilledWithAllowedDefaults(_selectedPlayerSlots);
+            if (changed)
+                SaveToPlayerPrefs(SkillLoadoutUnitType.Player, _selectedPlayerSlots);
+        }
+
+        private void SanitizeBookLoadout()
+        {
+            bool changed = false;
+            for (int i = 0; i < _selectedBookSlots.Length; i++)
+            {
+                if (_selectedBookSlots[i] == null || IsBookAllowedSkill(_selectedBookSlots[i])) continue;
+                _selectedBookSlots[i] = null;
+                changed = true;
+            }
+            EnsureBookSlotsFilledWithAllowedDefaults(_selectedBookSlots);
+            if (changed)
+                SaveToPlayerPrefs(SkillLoadoutUnitType.Book, _selectedBookSlots);
+        }
+
+        private static bool IsBookAllowedSkill(SkillDataSO skill) =>
+            skill != null && skill.SkillType != SkillType.Passive;
+
+        private static bool IsPlayerAllowedSkill(SkillDataSO skill) =>
+            skill != null && skill.SkillType != SkillType.SelfBuff;
+
+        private void EnsurePlayerSlotsFilledWithAllowedDefaults(SkillDataSO[] target)
+        {
+            for (int i = 0; i < target.Length; i++)
+            {
+                if (target[i] != null && IsPlayerAllowedSkill(target[i])) continue;
+                target[i] = FindDefaultPlayerSkillForSlot(i);
+            }
+        }
+
+        private SkillDataSO FindDefaultPlayerSkillForSlot(int slotIndex)
+        {
+            if (slotIndex >= 0 && slotIndex < _catalog.Length && IsPlayerAllowedSkill(_catalog[slotIndex]))
+                return _catalog[slotIndex];
+            for (int i = 0; i < _catalog.Length; i++)
+            {
+                if (IsPlayerAllowedSkill(_catalog[i])) return _catalog[i];
+            }
+            return null;
+        }
+
+        private void EnsureBookSlotsFilledWithAllowedDefaults(SkillDataSO[] target)
+        {
+            for (int i = 0; i < target.Length; i++)
+            {
+                if (target[i] != null && IsBookAllowedSkill(target[i])) continue;
+                target[i] = FindDefaultBookSkillForSlot(i);
+            }
+        }
+
+        private SkillDataSO FindDefaultBookSkillForSlot(int slotIndex)
+        {
+            if (slotIndex >= 0 && slotIndex < _catalog.Length && IsBookAllowedSkill(_catalog[slotIndex]))
+                return _catalog[slotIndex];
+            for (int i = 0; i < _catalog.Length; i++)
+            {
+                if (IsBookAllowedSkill(_catalog[i])) return _catalog[i];
+            }
+            return null;
         }
 
         private void SaveToPlayerPrefs(SkillLoadoutUnitType unitType, SkillDataSO[] slots)
@@ -212,7 +288,10 @@ namespace Logic.Scripts.GameDomain.Services.Skills
                     migratedToV2 = true;
                 }
             }
-            EnsureSlotsFilledWithDefaults(target);
+            if (unitType == SkillLoadoutUnitType.Book)
+                EnsureBookSlotsFilledWithAllowedDefaults(target);
+            else
+                EnsurePlayerSlotsFilledWithAllowedDefaults(target);
             if (usedLegacy || migratedToV2)
                 SaveToPlayerPrefs(unitType, target);
         }

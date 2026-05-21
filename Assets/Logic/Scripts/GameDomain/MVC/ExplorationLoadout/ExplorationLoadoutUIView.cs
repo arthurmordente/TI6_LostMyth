@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using DG.Tweening;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -129,6 +130,21 @@ public class ExplorationLoadoutUIView : MonoBehaviour
 
         SkillSlotUiRef selected = GetSlot(unitType, slotIndex);
         if (selected?.SelectionOutline != null) selected.SelectionOutline.enabled = true;
+    }
+
+    public void ClearSlotSelection()
+    {
+        SetSelectionState(_playerSlots, false);
+        SetSelectionState(_bookSlots, false);
+    }
+
+    public void PlayInvalidAssignFeedback()
+    {
+        if (_rootPanel == null) return;
+        var rect = _rootPanel.GetComponent<RectTransform>();
+        if (rect == null) return;
+        DOTween.Kill(rect, true);
+        rect.DOShakeAnchorPos(0.35f, strength: 14f, vibrato: 14, randomness: 50f, fadeOut: true);
     }
 
     public void ClearCatalog()
