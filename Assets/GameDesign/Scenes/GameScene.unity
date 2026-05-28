@@ -374,7 +374,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 5b91df082e7286a4db5caf468c7fcc40, type: 2}
   - {fileID: 11400000, guid: 5b91df082e7286a4db5caf468c7fcc40, type: 2}
   PointData: {fileID: 11400000, guid: 9e946bc4bff420943a724d914a258b15, type: 2}
-  _gameplayAudioClips: {fileID: 0}
+  _gameplayAudioClips: {fileID: 11400000, guid: de32ad9f37d71f748a607de1eb325792, type: 2}
   _loadView: {fileID: 1181922116}
   _guideView: {fileID: 1074250751}
   _cheatsView: {fileID: 1880283124}
