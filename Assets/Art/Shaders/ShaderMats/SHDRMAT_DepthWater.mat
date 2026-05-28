@@ -54,8 +54,8 @@ Material:
     - _CellsSpeed: 1
     - _Depth: 5
     - _Float: 0
-    - _FoamAmount: 20
-    - _FoamCut: 1
+    - _FoamAmount: 151.32
+    - _FoamCut: 3.9
     - _HightFrequency: 1.1
     - _Metalic: 0
     - _NoiseScale: 20
@@ -78,7 +78,7 @@ Material:
     - _BaseSurfaceColor: {r: 0.049839832, g: 1.3589678, b: 1.509434, a: 0.22745098}
     - _DeepColor: {r: 0.021359876, g: 0.12361019, b: 1.509434, a: 0.5019608}
     - _FoamColor: {r: 0.9066462, g: 0.88394445, b: 0.9811321, a: 0.78039217}
-    - _FoamSpeed: {r: 0, g: 0, b: 0, a: 0}
+    - _FoamSpeed: {r: 0.03, g: 0.01, b: 0, a: 0}
     - _FoamTiling: {r: 1, g: 1, b: 0, a: 0}
     - _RefractionSpeed: {r: 0.05, g: 0.01, b: 0, a: 0}
     - _RefractionTiling: {r: 1, g: 1, b: 0, a: 0}
