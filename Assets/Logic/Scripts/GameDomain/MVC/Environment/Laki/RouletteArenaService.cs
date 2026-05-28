@@ -235,14 +235,14 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 
 			var tileType = _effectsCurrentTurn[tileIndex];
 			var effects = _assignedEffects[tileIndex];
-			UnityEngine.Debug.Log(
-				$"[LakiRouletteArena][ApplyPlayer] Turn={turnNumber} Tile={tileIndex} Type={tileType} " +
-				$"assignedCount={(effects != null ? effects.Length : 0)}");
+			// UnityEngine.Debug.Log(
+			// 	$"[LakiRouletteArena][ApplyPlayer] Turn={turnNumber} Tile={tileIndex} Type={tileType} " +
+			// 	$"assignedCount={(effects != null ? effects.Length : 0)}");
 
 			if (effects == null || effects.Length == 0)
 			{
 				string fallback = ApplyFallbackToPlayer(caster, nara, tileIndex);
-				UnityEngine.Debug.Log($"[LakiRouletteArena][ApplyPlayer] Used fallback -> {fallback ?? "None"}");
+				// UnityEngine.Debug.Log($"[LakiRouletteArena][ApplyPlayer] Used fallback -> {fallback ?? "None"}");
 				return fallback;
 			}
 
@@ -255,8 +255,8 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 					UnityEngine.Debug.LogWarning($"[LakiRouletteArena][ApplyPlayer] Tile={tileIndex} effect[{i}] is null");
 					continue;
 				}
-				UnityEngine.Debug.Log(
-					$"[LakiRouletteArena][ApplyPlayer] Tile={tileIndex} effect[{i}] {e.GetType().Name} name={e.Name}");
+				// UnityEngine.Debug.Log(
+				// 	$"[LakiRouletteArena][ApplyPlayer] Tile={tileIndex} effect[{i}] {e.GetType().Name} name={e.Name}");
 				if (TryApplyPlayerTileEffect(caster, nara, e, out string appliedLabel))
 					names.Add(appliedLabel);
 			}

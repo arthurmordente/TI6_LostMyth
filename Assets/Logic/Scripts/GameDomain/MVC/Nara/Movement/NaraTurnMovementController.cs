@@ -81,7 +81,7 @@ public class NaraTurnMovementController : NaraMovementController {
         float distance = Vector3.Distance(NaraTransform.position, _movementCenter);
 
         if (distance > _movementRadius) {
-            Debug.Log("Passou Raio");
+            // Debug.Log("Passou Raio");
             Vector3 directionFromCenter = (NaraTransform.position - _movementCenter).normalized;
             Vector3 radiusLimit = _movementCenter + directionFromCenter * _movementRadius;
             NaraRigidbody.MovePosition(new Vector3(radiusLimit.x, NaraTransform.position.y, radiusLimit.z));
@@ -109,8 +109,6 @@ public class NaraTurnMovementController : NaraMovementController {
 
         Vector3 worldDir = camF * direction.y + camR * direction.x;
         if (worldDir.sqrMagnitude > 1e-6f) worldDir.Normalize();
-
-        float distance = Vector3.Distance(NaraTransform.position, _movementCenter);
 
         Vector3 vel = worldDir * velocity;
         NaraRigidbody.linearVelocity = new Vector3(vel.x, NaraRigidbody.linearVelocity.y, vel.z);

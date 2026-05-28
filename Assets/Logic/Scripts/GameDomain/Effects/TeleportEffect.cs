@@ -1,9 +1,11 @@
+using System;
 using Logic.Scripts.GameDomain.MVC.Abilitys;
 using Logic.Scripts.GameDomain.MVC.Environment;
 using Logic.Scripts.GameDomain.MVC.Nara;
 using Logic.Scripts.GameDomain.MVC.Shared;
 using UnityEngine;
 
+[Serializable]
 public class TeleportEffect : AbilityEffect {
     [HideInInspector] public Vector3 _destination;
 

@@ -72,7 +72,7 @@ public class GamePlayInstaller : MonoInstaller {
             .WithArguments(_divideTargetingData);
 
         if (_telegraphMaterials != null) {
-            Debug.Log($"[GamePlayInstaller] Binding TelegraphMaterialConfig: {_telegraphMaterials.name}");
+            // Debug.Log($"[GamePlayInstaller] Binding TelegraphMaterialConfig: {_telegraphMaterials.name}");
             Container.Bind<TelegraphMaterialConfig>().FromInstance(_telegraphMaterials).AsSingle();
             Container.BindInterfacesAndSelfTo<TelegraphMaterialProvider>().AsSingle();
             Container.BindInterfacesAndSelfTo<TelegraphLayeringService>().AsSingle();
@@ -92,7 +92,7 @@ public class GamePlayInstaller : MonoInstaller {
 #endif
         if (catalog != null) {
             Container.Bind<CombatAttackVisualCatalogSO>().FromInstance(catalog).AsSingle();
-            Debug.Log($"[GamePlayInstaller] Bound CombatAttackVisualCatalogSO: {catalog.name}");
+            // Debug.Log($"[GamePlayInstaller] Bound CombatAttackVisualCatalogSO: {catalog.name}");
         }
         else {
             Debug.LogWarning("[GamePlayInstaller] CombatAttackVisualCatalogSO is NULL — boss telegraphs from catalog will not resolve (placeholders / procedural fallbacks). Assign _combatAttackVisualCatalog for builds.");

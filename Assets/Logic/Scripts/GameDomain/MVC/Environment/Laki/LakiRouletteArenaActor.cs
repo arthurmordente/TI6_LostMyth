@@ -72,14 +72,14 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 			{
 				var type = _arena.GetTileEffect(playerTile);
 				string applied = _arena.ApplyEffectToPlayer(_caster, _nara, playerTile, turn);
-				Debug.Log($"[LakiRouletteArena][Jogador] Turn={turn} Tile={playerTile} Type={type} Effect={(applied ?? "None")}");
+				// Debug.Log($"[LakiRouletteArena][Jogador] Turn={turn} Tile={playerTile} Type={type} Effect={(applied ?? "None")}");
 			}
 
 			if (bookTile >= 0 && _bookEffectable != null)
 			{
 				var btype = _arena.GetTileEffect(bookTile);
 				string bapplied = _arena.ApplyEffectToEffectable(_caster, _bookEffectable, bookTile, turn);
-				Debug.Log($"[LakiRouletteArena][Livro] Turn={turn} Tile={bookTile} Type={btype} Effect={(bapplied ?? "None")}");
+				// Debug.Log($"[LakiRouletteArena][Livro] Turn={turn} Tile={bookTile} Type={btype} Effect={(bapplied ?? "None")}");
 			}
 		}
 

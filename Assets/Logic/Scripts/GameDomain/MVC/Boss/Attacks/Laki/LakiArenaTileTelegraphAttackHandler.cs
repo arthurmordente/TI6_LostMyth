@@ -88,9 +88,9 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Laki
             Transform originTransform,
             IEffectable caster)
         {
-            Debug.Log(
-                $"[LakiTileTelegraph] ExecuteEffects begin strikes={_strikes.Count} " +
-                $"effects={(effects != null ? effects.Count : 0)} caster={(caster != null ? caster.GetType().Name : "null")}");
+            // Debug.Log(
+            //     $"[LakiTileTelegraph] ExecuteEffects begin strikes={_strikes.Count} " +
+            //     $"effects={(effects != null ? effects.Count : 0)} caster={(caster != null ? caster.GetType().Name : "null")}");
 
             if (effects == null || effects.Count == 0)
             {
@@ -116,22 +116,22 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Laki
                 float hitRadius = GetLiveStrikeHitRadius(strike);
                 if (!DoesStrikeHitPlayer(arenaReference, strike, hitRadius, out string hitReason))
                 {
-                    Debug.Log(
-                        $"[LakiTileTelegraph] Area {s + 1}/{_strikes.Count} MISS tile={strike.TileIndex} ({hitReason})");
+                    // Debug.Log(
+                    //     $"[LakiTileTelegraph] Area {s + 1}/{_strikes.Count} MISS tile={strike.TileIndex} ({hitReason})");
                     if (_strikeResolveInterval > 0f)
                         yield return new WaitForSeconds(_strikeResolveInterval);
                     continue;
                 }
 
-                Debug.Log(
-                    $"[LakiTileTelegraph] Area {s + 1}/{_strikes.Count} HIT tile={strike.TileIndex} ({hitReason}) " +
-                    $"target={target.GetType().Name}");
+                // Debug.Log(
+                //     $"[LakiTileTelegraph] Area {s + 1}/{_strikes.Count} HIT tile={strike.TileIndex} ({hitReason}) " +
+                //     $"target={target.GetType().Name}");
 
                 for (int i = 0; i < effects.Count; i++)
                 {
                     var fx = effects[i];
                     if (fx == null) continue;
-                    Debug.Log($"[LakiTileTelegraph] Applying effect[{i}] {fx.GetType().Name} amount/name={fx.Name}");
+                    // Debug.Log($"[LakiTileTelegraph] Applying effect[{i}] {fx.GetType().Name} amount/name={fx.Name}");
                     if (fx is IAsyncEffect asyncFx) yield return asyncFx.ExecuteRoutine(caster, target);
                     else fx.Execute(caster, target);
                 }
@@ -140,7 +140,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Laki
                     yield return new WaitForSeconds(_strikeResolveInterval);
             }
 
-            Debug.Log("[LakiTileTelegraph] ExecuteEffects end");
+            // Debug.Log("[LakiTileTelegraph] ExecuteEffects end");
         }
 
         public void Cleanup()
@@ -196,7 +196,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Laki
             int tileCount = Mathf.Max(1, arenaView.TileCount);
             int areasToPlace = Mathf.Min(_areaCount, tileCount);
             yield return SpawnStrikeTilesRoutine(arenaView, telegraphPrefab, areasToPlace, _telegraphSpawnInterval);
-            Debug.Log($"[LakiTileTelegraph] Spawn complete count={_strikes.Count} seed={_tileSelectionSeed}");
+            // Debug.Log($"[LakiTileTelegraph] Spawn complete count={_strikes.Count} seed={_tileSelectionSeed}");
             _spawnRoutine = null;
         }
 
@@ -270,9 +270,9 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Laki
                 Telegraph = SpawnTelegraphInstance(telegraphPrefab, tile, center),
                 HitRadius = hitRadius,
             });
-            Debug.Log(
-                $"[LakiTileTelegraph] Spawned area {areaIndex}/{areasToPlace} tile={tile} seed={_tileSelectionSeed} " +
-                $"playerTile={playerTile} aimPlayer={rollPlayer} hitRadius={hitRadius:F2}m");
+            // Debug.Log(
+            //     $"[LakiTileTelegraph] Spawned area {areaIndex}/{areasToPlace} tile={tile} seed={_tileSelectionSeed} " +
+            //     $"playerTile={playerTile} aimPlayer={rollPlayer} hitRadius={hitRadius:F2}m");
             return true;
         }
 

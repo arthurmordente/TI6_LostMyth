@@ -217,6 +217,14 @@ Implementacao do swap:
   - `Moving`
   - `Running` (quando fornecido)
 
+## 3b) Alternancia de idle (player)
+
+- `ErzahlerPlayerIdleController` (auto no `NaraView` junto do driver)
+- A cada `_intervalSeconds` (default 8s), se **parado**, **sem cast** e com controllers Erza:
+  - `IdleVariant` alterna `1 <-> 2` via `ErzahlerPlayerAnimatorDriver.SetIdleVariant`
+- **So tem efeito** no controller solo `ERZ_Erzahler` (`Idle_1` / `Idle_2`)
+- Com livro (`ERZ_ErzahlerBook`) ha um unico estado Idle (sem segunda variante no builder)
+
 ## 4) Clone Book
 
 - Setup controller:
@@ -226,20 +234,72 @@ Implementacao do swap:
 - Ability:
   - `BookView.TriggerExecute()` e `SetAttackType(type > 0)` disparam trigger `Ability`
 
-## 5) Laki
+## 5) Laki (dados + ataques comuns apenas)
 
-Fonte: `Assets/Logic/Scripts/GameDomain/MVC/Boss/Laki/LakiBossAnimatorView.cs`
+Controller: `LKI_Animator` (`Idle_1`, performance `Idle_2`/`Idle_3`, `Ability`).
 
-- Entrar performance:
-  - `PlayPerformancePrep(int performanceId)` seta `PerformanceId` e trigger `PerformancePrep`
-- Manter loop:
-  - `SetPerformanceLoop(bool)`
-- Sair da performance:
-  - `PlayPerformanceFinish()` seta `PerformanceLoop = false` e trigger `PerformanceFinish`
-- Cast:
-  - `PlayAbility()` trigger `Ability`
-- Cast legado (opcional):
-  - `PlaySpotlight()` trigger `Spotlight`
+**Nao usar** `MinigameRuntimeService` / Suit / Naipe para animacao da Laki.
+
+### Fases de animacao (Laki)
+
+**Prepare** (`OnBossPrepareTurnStartedAsync`):
+1. `PerformanceFinish` se ainda em performance → espera tag `Idle`
+2. Sorteia idle 2/3 → `PerformancePrep` + `PerformanceLoop`
+3. Telegraphs (sem `Ability`)
+
+**PlayerAct:** mantém o idle sorteado no prepare.
+
+**Resolve** (`BeginResolveAttackAnimation` antes de `ExecuteAsync`):
+1. `PerformanceFinish` → `Idle_1`
+2. `Ability` uma vez enquanto os ataques aplicam dano
+3. Fica em `Idle_1` (sem novo sorteio aqui)
+
+**Proximo prepare:** novo sorteio (passo 1–2).
+
+### Dice Attack
+
+- So UI/turn gates — **nao** dispara `BeginResolveAttackAnimation`
+
+### Rebuild Laki (menu Unity)
+
+- `TI6 > Animation > Build > LKI_Animator (Laki boss)` — so este controller + slot `LakiBoss` no SO
+- Outros controllers têm entradas separadas em `TI6 > Animation > Build/...`
+
+Fonte: `LakiBossAnimatorView.cs`, `LakiBossAnimationBridge.cs`
+
+## 6) Hocari (boss legado — `1HOC_Hocari.controller`)
+
+Controller em `Assets/Art/Animations/Hocari/1HOC_Hocari.controller` (nao gerado pelo builder Erza/Laki).
+
+### Parametros (Animator)
+
+| Parametro | Tipo | Uso no codigo (`BossView` / `BossController`) |
+|-----------|------|--------------------------------------------------|
+| `AttackId` | int | Escolhe sub-ataque (0 Protean, 1 Circle, 2 FeatherLines, 3/4 Wing L/R) |
+| `AttackPrep` | trigger | Inicio do telegraph de ataque |
+| `AttackLoop` | bool | Mantem loop do telegraph ate resolver |
+| `AttackFinish` | trigger | Fecha ataque no turno de resolucao |
+| `Moving` | bool | Locomotion |
+| `MovePrep` / `MoveFinish` | trigger | Deslocamento por turno |
+| `Idle` | trigger | Volta ao idle (`BossResetStateBehaviour` no fim dos ataques) |
+
+### Estrutura da maquina (alto nivel)
+
+- **Idle de combate**: `HOC_CombatIdle` (+ variantes Phase2 / defesa L/R com Prep-Loop-Finish)
+- **Movimento**: sub-FSM `HOC_Movement` (Prep / Loop / Finish)
+- **Ataques**: sub-FSM `HOC_Attacks` → `HOC_AttackChooser` → por `AttackId`:
+  - `HOC_Protean`, `HOC_Circle`, `HOC_Swords` (FeatherLines), `HOC_WingsLeft`, `HOC_WingsRight`
+  - Cada ataque: Prep → Loop (`AttackLoop`) → Finish (`AttackFinish`) → reset
+- **Reset**: estado com `BossResetStateBehaviour` limpa flags e dispara `Idle`
+- Clips extras: `HOC_IdleDefaultRest`, `HOC_PhaseTransition*`, `HOC_Phase2*` (fase 2 no asset, wiring no controller)
+
+### Diferenca vs Laki
+
+| | Hocari | Laki (`LKI_Animator`) |
+|---|--------|----------------------|
+| Telegraph ataque | `AttackId` + Prep/Loop/Finish | `Ability` one-shot |
+| Idle de turno | `CombatIdle` fixo no controller | Sorteio `Idle_2` / `Idle_3` por turno |
+| Movimento | Sub-FSM Movement | (sem movimento no LKI atual) |
 
 ## Bootstrap e carregamento automatico
 

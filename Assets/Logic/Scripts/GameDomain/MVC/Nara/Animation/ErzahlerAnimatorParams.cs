@@ -11,6 +11,7 @@ namespace Logic.Scripts.GameDomain.MVC.Nara.Animation
         public const string ConjuringPrep = "ConjuringPrep";
         public const string ConjuringLoop = "ConjuringLoop";
         public const string ConjuringFinish = "ConjuringFinish";
+        public const string ConjuringCancel = "ConjuringCancel";
 
         public const string TagIdle = "Idle";
         public const string TagLocomotion = "Locomotion";

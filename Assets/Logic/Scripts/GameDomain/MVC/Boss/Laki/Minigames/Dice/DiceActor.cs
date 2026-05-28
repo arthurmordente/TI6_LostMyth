@@ -4,6 +4,7 @@ using UnityEngine;
 using Logic.Scripts.Turns;
 using Logic.Scripts.GameDomain.VisualFeedback;
 using Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack;
+using Logic.Scripts.GameDomain.MVC.Environment;
 using TMPro;
 
 namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Dice
@@ -52,6 +53,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Dice
 			_moveInProgress = false;
 			_moveTargetTileIndex = -1;
 			transform.position = spawnPosition;
+			EnsureDicePhysics();
 			CreateOrUpdateFaceLabels();
 			if (_arena != null)
 			{
@@ -106,6 +108,22 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Dice
 
 		public void SetSkillTargetingHighlight(bool active) {
 			SkillTargetingHighlightBridge.SetHighlighted(this, active);
+		}
+
+		/// <summary>Kinematic dice + solid collider: blocks the player without being pushed.</summary>
+		private void EnsureDicePhysics()
+		{
+			foreach (var rb in GetComponentsInChildren<Rigidbody>(true))
+			{
+				rb.isKinematic = true;
+				rb.useGravity = false;
+			}
+			var solid = GetComponent<BoxCollider>();
+			if (solid == null)
+				solid = gameObject.AddComponent<BoxCollider>();
+			solid.isTrigger = false;
+			solid.center = Vector3.zero;
+			solid.size = new Vector3(0.9f, 0.9f, 0.9f);
 		}
 
 		private void StartMove(Vector3 target, float duration, int targetTileIndex)

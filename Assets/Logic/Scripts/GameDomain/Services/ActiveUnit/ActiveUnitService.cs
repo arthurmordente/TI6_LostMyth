@@ -1,5 +1,6 @@
 using Logic.Scripts.Core.Mvc.WorldCamera;
 using Logic.Scripts.GameDomain.MVC.Book;
+using Logic.Scripts.GameDomain.MVC.Environment;
 using Logic.Scripts.GameDomain.MVC.Nara;
 using Logic.Scripts.GameDomain.MVC.Shared;
 using Logic.Scripts.GameDomain.MVC.Ui;
@@ -117,6 +118,7 @@ namespace Logic.Scripts.GameDomain.Services.ActiveUnit
         {
             _bookUnit = book;
             _bookUnit.SetMovementActive(false);
+            SyncPlayableKinematicState();
         }
 
         public void UnregisterBook()
@@ -136,6 +138,7 @@ namespace Logic.Scripts.GameDomain.Services.ActiveUnit
                 _gamePlayUiController.ShowBookSkillsTheme(false);
                 PushAbilityCostsToHud();
                 FollowActiveUnit();
+                SyncPlayableKinematicState();
                 return;
             }
 
@@ -148,6 +151,7 @@ namespace Logic.Scripts.GameDomain.Services.ActiveUnit
             _gamePlayUiController.ShowBookSkillsTheme(false);
             PushAbilityCostsToHud();
             FollowActiveUnit();
+            SyncPlayableKinematicState();
         }
 
         public void SetBookAsActiveUnit(IPlayableUnit book)
@@ -163,6 +167,7 @@ namespace Logic.Scripts.GameDomain.Services.ActiveUnit
             _gamePlayUiController.ShowBookSkillsTheme(true);
             PushAbilityCostsToHud();
             FollowActiveUnit();
+            SyncPlayableKinematicState();
         }
 
         public void ToggleActiveUnit()
@@ -174,6 +179,16 @@ namespace Logic.Scripts.GameDomain.Services.ActiveUnit
                 SetBookAsActiveUnit(_bookUnit);
             else
                 SetNaraAsActiveUnit();
+        }
+
+        private void SyncPlayableKinematicState()
+        {
+            bool bookActive = IsBookDeployed && _bookUnit != null && ActiveUnit == _bookUnit;
+            CombatPlayablePairKinematic.Sync(
+                _naraController as IPlayableUnit,
+                _bookUnit,
+                IsBookDeployed,
+                bookActive);
         }
 
         // Redirects the camera to orbit the unit that just became active.

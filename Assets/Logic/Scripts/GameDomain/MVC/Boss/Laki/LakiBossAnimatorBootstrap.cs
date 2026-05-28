@@ -7,7 +7,7 @@ using UnityEditor;
 namespace Logic.Scripts.GameDomain.MVC.Boss.Laki
 {
     /// <summary>
-    /// Ensures the Laki boss Animator uses the rebuilt LKI_Animator controller at runtime.
+    /// Ensures the Laki boss Animator uses LKI_Animator and runtime animation drivers.
     /// </summary>
     public class LakiBossAnimatorBootstrap : MonoBehaviour
     {
@@ -23,8 +23,14 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki
             if (_animator != null && lakiController != null)
                 _animator.runtimeAnimatorController = lakiController;
 
-            if (GetComponent<LakiBossAnimatorView>() == null)
-                gameObject.AddComponent<LakiBossAnimatorView>();
+            var view = GetComponent<LakiBossAnimatorView>();
+            if (view == null)
+                view = gameObject.AddComponent<LakiBossAnimatorView>();
+            if (_animator != null)
+                view.SetAnimator(_animator);
+
+            if (GetComponent<LakiBossAnimationBridge>() == null)
+                gameObject.AddComponent<LakiBossAnimationBridge>();
         }
 
         private RuntimeAnimatorController ResolveLakiController()

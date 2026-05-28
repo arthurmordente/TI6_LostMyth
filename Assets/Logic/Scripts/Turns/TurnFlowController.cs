@@ -114,13 +114,13 @@ namespace Logic.Scripts.Turns {
             _naraController?.StopMovingAnim();
             if (!UsesLakiArenaTurnFlowOrder
                 && Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.IsActive) {
-                LogService.Log("[Laki] DiceAttack ativo - aguardando resolução no turno da boss");
+                // LogService.Log("[Laki] DiceAttack ativo - aguardando resolução no turno da boss");
                 var sp = Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.StatusProvider;
-                if (sp != null) LogService.Log("[Laki] " + sp.GetStatus());
+                // if (sp != null) LogService.Log("[Laki] " + sp.GetStatus());
                 Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackResult tfResult;
                 Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.IResolver tfResolver;
                 if (Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.TryResolveAnyAtBossTurn(out tfResult, out tfResolver)) {
-                    UnityEngine.Debug.Log($"[Laki] DiceAttack resolved at TurnFlow begin. PlayerWon={tfResult.PlayerWon}");
+                    // UnityEngine.Debug.Log($"[Laki] DiceAttack resolved at TurnFlow begin. PlayerWon={tfResult.PlayerWon}");
                     Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.NotifyPlayerWonDiceOpensShieldWindow(tfResult, _turnNumber);
                     try { tfResolver?.DestroyDiceAttackRoot(); } catch { }
                     try { Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Dice.DiceUiRuntime.Reset(); } catch { }
@@ -128,21 +128,21 @@ namespace Logic.Scripts.Turns {
             }
             if (UsesHokariArenaHazardTurnOrder)
             {
-                LogService.Log($"Turno {_turnNumber} - Fase: BossAct (Hokari telegraphs — resolve após jogador)");
+                // LogService.Log($"Turno {_turnNumber} - Fase: BossAct (Hokari telegraphs — resolve após jogador)");
                 StartPlayerPhase();
                 return;
             }
 
             if (UsesLakiArenaTurnFlowOrder)
             {
-                LogService.Log($"Turno {_turnNumber} - Fase: BossAct (Laki prepare)");
+                // LogService.Log($"Turno {_turnNumber} - Fase: BossAct (Laki prepare)");
                 _waitingBoss = true;
                 await _bossActionService.ExecuteBossPrepareTurnAsync();
                 OnBossCompleted();
                 return;
             }
 
-            LogService.Log($"Turno {_turnNumber} - Fase: BossAct");
+            // LogService.Log($"Turno {_turnNumber} - Fase: BossAct");
             _waitingBoss = true;
             await _bossActionService.ExecuteBossTurnAsync();
             OnBossCompleted();
@@ -157,28 +157,26 @@ namespace Logic.Scripts.Turns {
         private async void StartPlayerPhase() {
             _actionPointsService.GainTurnPoints();
             if (LakiArenaTileActionPointsBridge.ApplyPendingToPlayer(_actionPointsService))
-                LogService.Log("[Laki] Tile AP modifier applied at PlayerAct start.");
+            {
+                // LogService.Log("[Laki] Tile AP modifier applied at PlayerAct start.");
+            }
             _phase = TurnPhase.PlayerAct;
             _turnMovement?.ResetMovementArea();
             _turnStateService.AdvanceTurn(_turnNumber, _phase);
-            // Minigame gates run before player inputs are unlocked, so gate input is never consumed as gameplay action.
+            _naraController?.UnfreezeInputs();
+            _naraController?.Unfreeeze();
+            _turnMovement?.LineHandlerController.SetVisible(true);
+            _turnMovement?.DeactivateNaraGravity();
+            _commandFactory.CreateCommandVoid<Logic.Scripts.GameDomain.Commands.RecenterNaraMovementOnPlayerTurnCommand>().Execute();
+            // Dice prompt after movement is unlocked (gate may still wait for roll input).
             try { await Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.RunPlayerTurnGatesAsync(); } catch { }
             _gamePlayUiController?.SetSkillsSlidableExpanded(true, instant: false);
             _gamePlayUiController?.PlayPlayerTurnAnnouncement(_turnNumber);
-            // Unlock player controls and animations on PlayerAct
-            _naraController?.UnfreezeInputs();
-            _naraController?.Unfreeeze();
-            // Garantir que todos os telegraphs preparados estejam visíveis para o jogador
             Logic.Scripts.GameDomain.MVC.Boss.Telegraph.TelegraphVisibilityRegistry.SetAllVisible(true);
 			_cloneUseLimiter?.ResetForPlayerTurn();
             _gamePlayUiController?.SyncBookCloneActionHud();
-            // Tick divide ability cooldown and grant Book its AP for this turn
             _divideAbilityHandler?.OnPlayerTurnStart();
-            LogService.Log($"Turno {_turnNumber} - Fase: PlayerAct");
             _waitingPlayer = true;
-            _commandFactory.CreateCommandVoid<Logic.Scripts.GameDomain.Commands.RecenterNaraMovementOnPlayerTurnCommand>().Execute();
-            _turnMovement?.LineHandlerController.SetVisible(true);
-            _turnMovement?.DeactivateNaraGravity();
             _turnStateService.RequestPlayerAction();
 
             if (_turnNumber == 1)
@@ -217,7 +215,7 @@ namespace Logic.Scripts.Turns {
             _naraController?.Freeeze();
             _naraController?.StopMovingAnim();
 
-            LogService.Log($"Turno {_turnNumber} - Fase: Arena hazard resolve (Hokari)");
+            // LogService.Log($"Turno {_turnNumber} - Fase: Arena hazard resolve (Hokari)");
             await HokariArenaHazardTurnBridge.ExecuteScheduledForTurnAsync(_turnNumber);
             StartEchoPhaseAsync();
         }
@@ -230,7 +228,7 @@ namespace Logic.Scripts.Turns {
             _naraController?.FreezeInputs();
             _naraController?.Freeeze();
             _naraController?.StopMovingAnim();
-            LogService.Log($"Turno {_turnNumber} - Fase: EchoesAct");
+            // LogService.Log($"Turno {_turnNumber} - Fase: EchoesAct");
             await _echoService.ResolveDueEchoesAsync();
             OnEchoesCompleted();
         }
@@ -252,19 +250,19 @@ namespace Logic.Scripts.Turns {
             _naraController?.StopMovingAnim();
             _turnMovement?.LineHandlerController.SetVisible(false);
 
-            LogService.Log($"Turno {_turnNumber} - Fase: EnviromentAct (Laki apply)");
+            // LogService.Log($"Turno {_turnNumber} - Fase: EnviromentAct (Laki apply)");
             _phase = TurnPhase.EnviromentAct;
             _turnStateService.AdvanceTurn(_turnNumber, _phase);
             await LakiArenaTurnFlowBridge.ExecuteApplyPhaseAsync();
             await LakiArenaTurnFlowBridge.DelayPostApplyAsync();
 
-            LogService.Log($"Turno {_turnNumber} - Fase: BossAct (Laki resolve)");
+            // LogService.Log($"Turno {_turnNumber} - Fase: BossAct (Laki resolve)");
             _phase = TurnPhase.BossAct;
             _turnStateService.AdvanceTurn(_turnNumber, _phase);
             await _bossActionService.ExecuteBossResolveTurnAsync();
             await LakiArenaTurnFlowBridge.DelayPostBossAsync();
 
-            LogService.Log($"Turno {_turnNumber} - Fase: EnviromentAct (Laki reroll)");
+            // LogService.Log($"Turno {_turnNumber} - Fase: EnviromentAct (Laki reroll)");
             await LakiArenaTurnFlowBridge.ExecuteRerollPhaseAsync();
 
             AdvanceTurnAsync();
@@ -278,12 +276,12 @@ namespace Logic.Scripts.Turns {
             _naraController?.StopMovingAnim();
             _turnMovement?.LineHandlerController.SetVisible(false);
 
-            LogService.Log($"Turno {_turnNumber} - Fase: EnviromentAct (Hokari — preparar telegraph arena)");
+            // LogService.Log($"Turno {_turnNumber} - Fase: EnviromentAct (Hokari — preparar telegraph arena)");
             _phase = TurnPhase.EnviromentAct;
             _turnStateService.AdvanceTurn(_turnNumber, _phase);
             await _enviromentActionService.ExecuteEnviromentTurnAsync();
 
-            LogService.Log($"Turno {_turnNumber} - Fase: BossAct resolve (Hokari)");
+            // LogService.Log($"Turno {_turnNumber} - Fase: BossAct resolve (Hokari)");
             _phase = TurnPhase.BossAct;
             _turnStateService.AdvanceTurn(_turnNumber, _phase);
             _waitingBoss = true;
@@ -301,7 +299,7 @@ namespace Logic.Scripts.Turns {
             _naraController?.FreezeInputs();
             _naraController?.Freeeze();
             _naraController?.StopMovingAnim();
-            LogService.Log($"Turno {_turnNumber} - Fase: EnviromentAct");
+            // LogService.Log($"Turno {_turnNumber} - Fase: EnviromentAct");
             _turnMovement?.LineHandlerController.SetVisible(false);
             await _enviromentActionService.ExecuteEnviromentTurnAsync();
             OnEnviromentCompleted();

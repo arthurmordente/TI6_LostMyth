@@ -17,7 +17,7 @@ GameObject:
   - component: {fileID: 8235568759756076123}
   - component: {fileID: 9151136286419900480}
   m_Layer: 0
-  m_Name: LakiBoss
+  m_Name: LKI_LakiPrefabBoss
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -103,6 +103,7 @@ MonoBehaviour:
   _rigidbody: {fileID: 6848104616740789463}
   _collider: {fileID: 6820227577075520871}
   _animator: {fileID: 5729420308865477600}
+  _lakiAnimatorView: {fileID: 172926066645270346}
   _phaseTransitionDuration: 1
 --- !u!114 &3114752621752471854
 MonoBehaviour:
@@ -419,6 +420,12 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: e8f4239849587e44d95bf79fc4458a55, type: 3}
       insertIndex: -1
       addedObject: {fileID: 5729420308865477600}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: e8f4239849587e44d95bf79fc4458a55, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6279738489744850422}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: e8f4239849587e44d95bf79fc4458a55, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 172926066645270346}
   m_SourcePrefab: {fileID: 100100000, guid: e8f4239849587e44d95bf79fc4458a55, type: 3}
 --- !u!4 &5925520250068082098 stripped
 Transform:
@@ -452,3 +459,31 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &6279738489744850422
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6444789507857401608}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 55eadd6daf6ff4146b195320c3917bd6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Logic.Scripts.GameDomain.MVC.Boss.Laki.LakiBossAnimationBridge
+  _view: {fileID: 172926066645270346}
+  _turnPerformancePool: 0200000003000000
+  _includeIdle1InPool: 0
+--- !u!114 &172926066645270346
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6444789507857401608}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ad7c0074807a0f4ab1539faa34c923b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Logic.Scripts.GameDomain.MVC.Boss.Laki.LakiBossAnimatorView
+  _animator: {fileID: 5729420308865477600}

@@ -1,6 +1,8 @@
+using System;
 using Logic.Scripts.GameDomain.MVC.Abilitys;
 using UnityEngine;
 
+[Serializable]
 public class SummonEffect : AbilityEffect {
     [HideInInspector] public Vector3 _spawnPoint;
 

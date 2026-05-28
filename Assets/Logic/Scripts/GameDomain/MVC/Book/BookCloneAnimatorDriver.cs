@@ -71,6 +71,7 @@ namespace Logic.Scripts.GameDomain.MVC.Book
             if (_useErzahlerStyle)
             {
                 _animator.ResetTrigger(ErzahlerAnimatorParams.ConjuringFinish);
+                _animator.ResetTrigger(ErzahlerAnimatorParams.ConjuringCancel);
                 _animator.SetBool(ErzahlerAnimatorParams.ConjuringLoop, false);
                 _animator.SetTrigger(ErzahlerAnimatorParams.ConjuringPrep);
             }
@@ -86,6 +87,7 @@ namespace Logic.Scripts.GameDomain.MVC.Book
             if (_useErzahlerStyle)
             {
                 _animator.SetBool(ErzahlerAnimatorParams.ConjuringLoop, false);
+                _animator.ResetTrigger(ErzahlerAnimatorParams.ConjuringCancel);
                 _animator.SetTrigger(ErzahlerAnimatorParams.ConjuringFinish);
             }
             else
@@ -100,7 +102,8 @@ namespace Logic.Scripts.GameDomain.MVC.Book
             if (_useErzahlerStyle)
             {
                 _animator.SetBool(ErzahlerAnimatorParams.ConjuringLoop, false);
-                _animator.SetTrigger(ErzahlerAnimatorParams.ConjuringFinish);
+                _animator.ResetTrigger(ErzahlerAnimatorParams.ConjuringFinish);
+                _animator.SetTrigger(ErzahlerAnimatorParams.ConjuringCancel);
             }
         }
 

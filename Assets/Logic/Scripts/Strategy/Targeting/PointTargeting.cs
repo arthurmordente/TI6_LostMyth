@@ -1,6 +1,8 @@
+using System;
 using Logic.Scripts.GameDomain.MVC.Abilitys;
 using UnityEngine;
 
+[Serializable]
 public class PointTargeting : TargetingStrategy {
     public LayerMask GroundLayerMask;
     private Transform _previewTransform;
@@ -9,7 +11,7 @@ public class PointTargeting : TargetingStrategy {
         SubscriptionService.RegisterUpdatable(this);
         PointPlotTwistData plotData = data.PlotData as PointPlotTwistData;
         if (plotData != null && plotData.ObjectToSummon != null) {
-            _previewTransform = Object.Instantiate(plotData.ObjectToSummon.VisualRoot).transform;
+            _previewTransform = UnityEngine.Object.Instantiate(plotData.ObjectToSummon.VisualRoot).transform;
         }
     }
     public override void ManagedUpdate() {
@@ -32,7 +34,7 @@ public class PointTargeting : TargetingStrategy {
     public override Vector3 LockAim(out IEffectable[] targets) {
         base.LockAim(out targets);
         PointPlotTwistData plotData = Ability.PlotData as PointPlotTwistData;
-        AbilitySummon summonObject = Object.Instantiate(plotData.ObjectToSummon, _previewTransform.position, _previewTransform.rotation);
+        AbilitySummon summonObject = UnityEngine.Object.Instantiate(plotData.ObjectToSummon, _previewTransform.position, _previewTransform.rotation);
         CommandFactory.CreateCommandVoid<SummonSkillCommand>().SetData(new SummonSkillCommandData(summonObject)).Execute();
         summonObject.SetUp(plotData.Duration, plotData.HealAmount, Caster);
         return _previewTransform.position;

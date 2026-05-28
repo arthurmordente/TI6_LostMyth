@@ -10,6 +10,8 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames
 		private static readonly System.Collections.Generic.List<IMinigameResolver> _resolvers = new System.Collections.Generic.List<IMinigameResolver>(2);
 		public static string ActiveMinigameName { get; private set; }
 		public static System.Action<string> OnMinigameNameChanged;
+		public static event System.Action MinigameStarted;
+		public static event System.Action MinigameEnded;
 
 		public static bool IsActive => _activeCount > 0;
 
@@ -36,7 +38,8 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames
 		public static void Begin()
 		{
 			_activeCount++;
-			UnityEngine.Debug.Log($"[Laki] MinigameRuntime: Begin (active={_activeCount})");
+			MinigameStarted?.Invoke();
+			// UnityEngine.Debug.Log($"[Laki] MinigameRuntime: Begin (active={_activeCount})");
 		}
 
 		public static void SetActiveName(string name)
@@ -50,34 +53,38 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames
 			if (_activeCount > 0) _activeCount--;
 			_skipOnceOnBossTurn = true;
 			_pauseBossOnce = true;
-			if (_activeCount <= 0) StatusProvider = null;
+			if (_activeCount <= 0)
+			{
+				StatusProvider = null;
+				MinigameEnded?.Invoke();
+			}
 			SetActiveName(null);
-			UnityEngine.Debug.Log($"[Laki] MinigameRuntime: End (active={_activeCount}) -> will skip next boss prep");
+			// UnityEngine.Debug.Log($"[Laki] MinigameRuntime: End (active={_activeCount}) -> will skip next boss prep");
 		}
 
 		public static void RegisterResolver(IMinigameResolver r)
 		{
 			if (r == null) return;
 			if (!_resolvers.Contains(r)) _resolvers.Add(r);
-			UnityEngine.Debug.Log($"[Laki] MinigameRuntime: Resolver registered (count={_resolvers.Count})");
+			// UnityEngine.Debug.Log($"[Laki] MinigameRuntime: Resolver registered (count={_resolvers.Count})");
 		}
 		public static void UnregisterResolver(IMinigameResolver r)
 		{
 			if (r == null) return;
 			_resolvers.Remove(r);
-			UnityEngine.Debug.Log($"[Laki] MinigameRuntime: Resolver unregistered (count={_resolvers.Count})");
+			// UnityEngine.Debug.Log($"[Laki] MinigameRuntime: Resolver unregistered (count={_resolvers.Count})");
 		}
 
 		public static bool TryResolveAnyAtBossTurn(out MinigameResult result, out IMinigameResolver resolver)
 		{
-			UnityEngine.Debug.Log($"[Laki] MinigameRuntime: TryResolveAnyAtBossTurn resolvers={_resolvers.Count}");
+			// UnityEngine.Debug.Log($"[Laki] MinigameRuntime: TryResolveAnyAtBossTurn resolvers={_resolvers.Count}");
 			for (int i = 0; i < _resolvers.Count; i++)
 			{
 				var r = _resolvers[i];
 				if (r != null)
 				{
 					bool ok = r.TryResolveAtBossTurn(out result);
-					UnityEngine.Debug.Log($"[Laki] MinigameRuntime: Resolver[{i}] -> {(ok ? "RESOLVED" : "pending")}");
+					// UnityEngine.Debug.Log($"[Laki] MinigameRuntime: Resolver[{i}] -> {(ok ? "RESOLVED" : "pending")}");
 					if (ok)
 					{
 						resolver = r;
@@ -97,7 +104,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames
 			_pauseBossOnce = false;
 			StatusProvider = null;
 			_resolvers.Clear();
-			UnityEngine.Debug.Log("[Laki] MinigameRuntime: RESET");
+			// UnityEngine.Debug.Log("[Laki] MinigameRuntime: RESET");
 		}
 	}
 }

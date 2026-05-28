@@ -45,6 +45,7 @@ GameObject:
   - component: {fileID: 4155627956653398034}
   - component: {fileID: 3104613125686185044}
   - component: {fileID: 3769153713029738673}
+  - component: {fileID: 2700992460982928634}
   m_Layer: 0
   m_Name: ERZA_PREFAB
   m_TagString: Untagged
@@ -139,6 +140,7 @@ MonoBehaviour:
   _collider: {fileID: 5589792799600363805}
   _animator: {fileID: 6603862259124301899}
   _erzahlerAnimatorDriver: {fileID: 3769153713029738673}
+  _erzahlerIdleController: {fileID: 2700992460982928634}
   _activeUnitCirclePrefab: {fileID: 6801296049556183179, guid: 9915bf54ad81bb246927f2e5cc3c8751, type: 3}
 --- !u!114 &3104613125686185044
 MonoBehaviour:
@@ -171,6 +173,23 @@ MonoBehaviour:
   _animator: {fileID: 6603862259124301899}
   _bookVisualRoot: {fileID: 7418787239668005390}
   _hideBookMeshWhenCloneDeployed: 1
+--- !u!114 &2700992460982928634
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2140739287603440378}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ab12d8ffa81bcb74290e5ccc911fa7da, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Logic.Scripts.GameDomain.MVC.Nara.Animation.ErzahlerPlayerIdleController
+  _driver: {fileID: 3769153713029738673}
+  _enabled: 1
+  _intervalSeconds: 8
+  _alternateIdle: 1
+  _pauseWhileCasting: 1
 --- !u!1 &2376470481348735176
 GameObject:
   m_ObjectHideFlags: 0

@@ -73,6 +73,12 @@ namespace Logic.Scripts.GameDomain.MVC.Nara.Animation
             _animator.SetInteger(ErzahlerAnimatorParams.IdleVariant, variant);
         }
 
+        public int GetIdleVariant()
+        {
+            if (_animator == null || !UsesErzahlerControllers) return 1;
+            return _animator.GetInteger(ErzahlerAnimatorParams.IdleVariant);
+        }
+
         public void PlayConjuringFast()
         {
             if (_animator == null || !UsesErzahlerControllers) return;
@@ -83,6 +89,7 @@ namespace Logic.Scripts.GameDomain.MVC.Nara.Animation
         {
             if (_animator == null || !UsesErzahlerControllers) return;
             _animator.ResetTrigger(ErzahlerAnimatorParams.ConjuringFinish);
+            _animator.ResetTrigger(ErzahlerAnimatorParams.ConjuringCancel);
             _animator.SetBool(ErzahlerAnimatorParams.ConjuringLoop, false);
             _animator.SetTrigger(ErzahlerAnimatorParams.ConjuringPrep);
         }
@@ -97,7 +104,16 @@ namespace Logic.Scripts.GameDomain.MVC.Nara.Animation
         {
             if (_animator == null || !UsesErzahlerControllers) return;
             _animator.SetBool(ErzahlerAnimatorParams.ConjuringLoop, false);
+            _animator.ResetTrigger(ErzahlerAnimatorParams.ConjuringCancel);
             _animator.SetTrigger(ErzahlerAnimatorParams.ConjuringFinish);
+        }
+
+        public void CancelConjuring()
+        {
+            if (_animator == null || !UsesErzahlerControllers) return;
+            _animator.SetBool(ErzahlerAnimatorParams.ConjuringLoop, false);
+            _animator.ResetTrigger(ErzahlerAnimatorParams.ConjuringFinish);
+            _animator.SetTrigger(ErzahlerAnimatorParams.ConjuringCancel);
         }
 
         private void InitializeDefaultController()

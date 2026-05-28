@@ -12,6 +12,7 @@ namespace Logic.Scripts.GameDomain.MVC.Nara
         [SerializeField] private Collider _collider;
         [SerializeField] private Animator _animator;
         [SerializeField] private ErzahlerPlayerAnimatorDriver _erzahlerAnimatorDriver;
+        [SerializeField] private ErzahlerPlayerIdleController _erzahlerIdleController;
 
         [Header("Active Unit Circle")]
         [SerializeField] private GameObject _activeUnitCirclePrefab;
@@ -30,6 +31,7 @@ namespace Logic.Scripts.GameDomain.MVC.Nara
                 _animator = GetComponentInChildren<Animator>(true);
             if (_erzahlerAnimatorDriver == null)
                 _erzahlerAnimatorDriver = GetComponent<ErzahlerPlayerAnimatorDriver>();
+            EnsureErzahlerIdleController();
         }
 
         public void ConfigureErzahlerAnimation(ErzahlerAnimatorControllersSO controllers)
@@ -37,6 +39,17 @@ namespace Logic.Scripts.GameDomain.MVC.Nara
             if (_erzahlerAnimatorDriver == null)
                 _erzahlerAnimatorDriver = gameObject.AddComponent<ErzahlerPlayerAnimatorDriver>();
             _erzahlerAnimatorDriver.Configure(controllers, _animator);
+            EnsureErzahlerIdleController();
+        }
+
+        private void EnsureErzahlerIdleController()
+        {
+            if (_erzahlerAnimatorDriver == null) return;
+            if (_erzahlerIdleController == null)
+                _erzahlerIdleController = GetComponent<ErzahlerPlayerIdleController>();
+            if (_erzahlerIdleController == null)
+                _erzahlerIdleController = gameObject.AddComponent<ErzahlerPlayerIdleController>();
+            _erzahlerIdleController.SetDriver(_erzahlerAnimatorDriver);
         }
 
         public void SetBookCloneDeployed(bool cloneDeployed)
@@ -113,8 +126,7 @@ namespace Logic.Scripts.GameDomain.MVC.Nara
         {
             if (_erzahlerAnimatorDriver != null && _erzahlerAnimatorDriver.UsesErzahlerControllers)
             {
-                _erzahlerAnimatorDriver.SetConjuringLoop(false);
-                _erzahlerAnimatorDriver.PlayConjuringSlowFinish();
+                _erzahlerAnimatorDriver.CancelConjuring();
                 ResetAttackType();
                 return;
             }

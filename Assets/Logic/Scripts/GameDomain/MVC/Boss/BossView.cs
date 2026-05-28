@@ -3,12 +3,15 @@ using UnityEngine;
 using System.Threading.Tasks;
 using Logic.Scripts.GameDomain.VisualFeedback;
 using Logic.Scripts.GameDomain.MVC.Environment.Laki;
+using Logic.Scripts.GameDomain.MVC.Boss.Laki;
+using Logic.Scripts.GameDomain.MVC.Nara.Animation;
 
 namespace Logic.Scripts.GameDomain.MVC.Boss {
     public class BossView : MonoBehaviour, IEffectable {
         [SerializeField] private Rigidbody _rigidbody;
         [SerializeField] private Collider _collider;
         [SerializeField] private Animator _animator;
+        [SerializeField] private LakiBossAnimatorView _lakiAnimatorView;
         [SerializeField] private float _phaseTransitionDuration = 1.0f;
 
         private Action<int> _onPreviewHeal;
@@ -78,17 +81,20 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
         }
 
         public void PlayAttackPrep(int attackId) {
+            if (UsesLakiAnimator()) return;
             if (_animator == null) return;
             _animator.SetInteger("AttackId", attackId);
             _animator.SetTrigger("AttackPrep");
         }
 
         public void SetAttackLoop(bool looping) {
+            if (UsesLakiAnimator()) return;
             if (_animator == null) return;
             _animator.SetBool("AttackLoop", looping);
         }
 
         public void PlayAttackFinish() {
+            if (UsesLakiAnimator()) return;
             if (_animator == null) return;
             _animator.SetTrigger("AttackFinish");
         }
@@ -128,6 +134,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
 				bool inTransition = _animator.IsInTransition(layer);
 				var st = _animator.GetCurrentAnimatorStateInfo(layer);
 				if (!inTransition && st.IsTag("Idle")) return;
+				if (UsesLakiAnimator() && !inTransition && st.IsTag(LakiAnimatorParams.TagPerformanceLoop)) return;
 				elapsed += Time.deltaTime;
 				await Task.Yield();
 			}
@@ -135,6 +142,8 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
 
 		public async Task WaitUntilStateTagNormalizedAsync(string tag, float normalizedTime, float timeoutSeconds = 3f, int layer = 0)
 		{
+			if (UsesLakiAnimator() && string.Equals(tag, "AttackPrep", StringComparison.Ordinal))
+				tag = LakiAnimatorParams.TagAbility;
 			if (_animator == null) return;
 			normalizedTime = Mathf.Clamp01(normalizedTime);
 			float elapsed = 0f;
@@ -186,6 +195,41 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
             if (active && LakiBossShieldRuntime.IsLakiShieldBlockingCombatInteraction()) return;
             SkillTargetingHighlightBridge.SetHighlighted(this, active);
         }
+
+        private bool UsesLakiAnimator()
+        {
+            if (ResolveLakiAnimatorView() != null) return true;
+            if (_animator == null) return false;
+            return AnimatorHasParameter(LakiAnimatorParams.PerformancePrep)
+                && !AnimatorHasParameter("AttackPrep");
+        }
+
+        public void PlayLakiAttackImpact()
+        {
+            if (!UsesLakiAnimator()) return;
+            ResolveLakiAnimatorView()?.PlayAbility();
+        }
+
+        private LakiBossAnimatorView ResolveLakiAnimatorView()
+        {
+            if (_lakiAnimatorView != null) return _lakiAnimatorView;
+            _lakiAnimatorView = GetComponent<LakiBossAnimatorView>();
+            if (_lakiAnimatorView == null)
+                _lakiAnimatorView = GetComponentInChildren<LakiBossAnimatorView>(true);
+            return _lakiAnimatorView;
+        }
+
+        private bool AnimatorHasParameter(string name)
+        {
+            if (_animator == null || string.IsNullOrEmpty(name)) return false;
+            var parameters = _animator.parameters;
+            for (int i = 0; i < parameters.Length; i++)
+            {
+                if (parameters[i].name == name) return true;
+            }
+            return false;
+        }
+
     }
 }
 

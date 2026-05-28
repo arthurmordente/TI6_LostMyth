@@ -419,7 +419,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
             Material lineDisp = ResolveTelegraphLineMaterialFor(true);
             Material meshBase = ResolveTelegraphMeshMaterialFor(false);
             Material meshDisp = ResolveTelegraphMeshMaterialFor(true);
-            UnityEngine.Debug.Log($"[BossAttack] Using telegraph materials | mesh={(meshMat != null ? meshMat.name : "NULL")} lineBase={(lineBase != null ? lineBase.name : "NULL")} lineDisp={(lineDisp != null ? lineDisp.name : "NULL")}");
+            // UnityEngine.Debug.Log($"[BossAttack] Using telegraph materials | mesh={(meshMat != null ? meshMat.name : "NULL")} lineBase={(lineBase != null ? lineBase.name : "NULL")} lineDisp={(lineDisp != null ? lineDisp.name : "NULL")}");
             switch (_attackType)
             {
                 case AttackType.ProteanCones:

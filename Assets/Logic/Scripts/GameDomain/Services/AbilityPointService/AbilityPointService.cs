@@ -82,7 +82,7 @@ public class AbilityPointService : IAbilityPointService {
             }
         }
         PlayerPrefs.Save();
-        Debug.Log("Habilidades salvas no PlayerPrefs.");
+        // Debug.Log("Habilidades salvas no PlayerPrefs.");
     }
 
     public void LoadStats() {
@@ -96,7 +96,7 @@ public class AbilityPointService : IAbilityPointService {
                 ability.SetModifierStatValue(stat, loadedValue);
             }
         }
-        Debug.Log("Habilidades carregadas do PlayerPrefs.");
+        // Debug.Log("Habilidades carregadas do PlayerPrefs.");
         RecomputeStats();
     }
 
@@ -111,7 +111,7 @@ public class AbilityPointService : IAbilityPointService {
             }
         }
         PlayerPrefs.Save();
-        Debug.Log("Dados de habilidades salvos foram deletados do PlayerPrefs.");
+        // Debug.Log("Dados de habilidades salvos foram deletados do PlayerPrefs.");
         ResetAllAbilities();
     }
     #endregion
