@@ -8,10 +8,11 @@ namespace Logic.Scripts.GameDomain.MVC.Ui.Shared
         [SerializeField] private GameObject _rootPanel;
         [SerializeField] private CanvasGroup _canvasGroup;
 
-        protected virtual void Awake()
-        {
-            HideImmediate();
-        }
+        /// <summary>Subclasses may override for runtime UI setup. Do not auto-hide here — use <c>InitEntryPoint</c> or <see cref="HideUntilOpened"/>.</summary>
+        protected virtual void Awake() { }
+
+        /// <summary>Oculta o painel até <see cref="Show"/>. Funciona mesmo com o GameObject inativo (sem depender de Awake).</summary>
+        public void HideUntilOpened() => Hide();
 
         public virtual void Show()
         {
@@ -47,12 +48,26 @@ namespace Logic.Scripts.GameDomain.MVC.Ui.Shared
 
         protected void HideImmediate() => Hide();
 
+        public virtual bool IsVisible
+        {
+            get
+            {
+                if (_rootPanel != null)
+                    return _rootPanel.activeInHierarchy;
+                return gameObject.activeInHierarchy;
+            }
+        }
+
         protected static Button ResolveButton(Button serialized, Transform root, string childName)
         {
             if (serialized != null) return serialized;
             if (root == null) return null;
-            var t = root.Find(childName);
-            return t != null ? t.GetComponent<Button>() : null;
+            foreach (var button in root.GetComponentsInChildren<Button>(true))
+            {
+                if (button.name == childName)
+                    return button;
+            }
+            return null;
         }
     }
 }

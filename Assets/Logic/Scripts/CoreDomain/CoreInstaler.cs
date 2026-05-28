@@ -18,7 +18,7 @@ public class CoreInstaler : MonoInstaller
     [SerializeField] private CoreAudioClipsScriptableObject _coreAudioClipsScriptableObject;
     [SerializeField] private UpdateSubscriptionService _updateSubscriptionService;
     [SerializeField] private AudioService _audioService;
-    [SerializeField] private LoadingScreenView _loadingScreenView;
+    [SerializeField] private LoadingScreenCanvasView _loadingScreenView;
     [SerializeField] private UICameraView _uiCameraView;
     [SerializeField] private WorldCameraView _worldCameraView;
     

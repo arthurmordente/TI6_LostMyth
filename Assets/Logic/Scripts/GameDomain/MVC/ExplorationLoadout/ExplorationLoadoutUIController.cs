@@ -1,19 +1,21 @@
 using System.Collections.Generic;
 using System.Linq;
+using Logic.Scripts.GameDomain.Exploration;
 using Logic.Scripts.GameDomain.MVC.ExplorationLoadout;
 using Logic.Scripts.GameDomain.Services.Skills;
 using UnityEngine.EventSystems;
 
 public class ExplorationLoadoutUIController : IExplorationLoadoutUIController
 {
-    private readonly ExplorationLoadoutUIView _view;
+    private readonly IExplorationLoadoutView _view;
     private readonly INewSkillSystemSkillLoadoutService _loadoutService;
 
     private SkillLoadoutUnitType _selectedUnitType = SkillLoadoutUnitType.Player;
     private int _selectedSlotIndex;
     private ExplorationLoadoutSkillFilter _catalogFilter = ExplorationLoadoutSkillFilter.All;
+    private bool _modalGateActive;
 
-    public ExplorationLoadoutUIController(ExplorationLoadoutUIView view, INewSkillSystemSkillLoadoutService loadoutService)
+    public ExplorationLoadoutUIController(IExplorationLoadoutView view, INewSkillSystemSkillLoadoutService loadoutService)
     {
         _view = view;
         _loadoutService = loadoutService;
@@ -40,7 +42,10 @@ public class ExplorationLoadoutUIController : IExplorationLoadoutUIController
 
     public void Show()
     {
-        if (_view == null) return;
+        if (_view == null || _view.IsVisible) return;
+        ExplorationModalInputGate.Push();
+        ExplorationInteractInputGate.Push();
+        _modalGateActive = true;
         RefreshSlots();
         RebuildCatalog();
         _view.SetVisible(true);
@@ -48,8 +53,14 @@ public class ExplorationLoadoutUIController : IExplorationLoadoutUIController
 
     public void Hide()
     {
-        if (_view == null) return;
+        if (_view == null || !_view.IsVisible) return;
         _view.SetVisible(false);
+        if (_modalGateActive)
+        {
+            ExplorationInteractInputGate.Pop();
+            ExplorationModalInputGate.Pop();
+            _modalGateActive = false;
+        }
     }
 
     private void OnCatalogFilterChanged(ExplorationLoadoutSkillFilter filter)

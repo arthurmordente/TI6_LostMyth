@@ -17,11 +17,7 @@ namespace Logic.Scripts.GameDomain.ZenjectInstallers {
         public AbilityPointData PointData;
 
         [SerializeField] private AudioClipsScriptableObject _gameplayAudioClips;
-        [SerializeField] private LoadUIView _loadView;
-        [SerializeField] private GuideUIView _guideView;
-        [SerializeField] private CheatsUIView _cheatsView;
-        [SerializeField] private CreditsUIView _creditsUIView;
-        [SerializeField] private OptionsUIView _optionsView;
+        [SerializeField] private UniversalUiSceneViews _universalUiSceneViews;
 
         [Header("New Skill System — catálogo global")]
         [Tooltip("Uma única lista de SkillDataSO para todo o jogo. Exploração e Luta usam este serviço via Zenject (parent GameScene → CoreScene).")]
@@ -36,8 +32,8 @@ namespace Logic.Scripts.GameDomain.ZenjectInstallers {
             Container.BindFactory<ExplorationInitiatorEnterData, ExplorationState, ExplorationState.Factory>();
             Container.BindInterfacesTo<LevelsDataService>().AsSingle().NonLazy();
             Container.BindFactory<LobbyInitiatorEnterData, LobbyState, LobbyState.Factory>().AsSingle().NonLazy();
-            Container.BindInterfacesTo<UniversalUIController>().AsSingle().WithArguments(_loadView, _guideView,
-                _cheatsView, _creditsUIView, _optionsView).NonLazy();
+
+            BindUniversalUi();
 
             Container.Bind<INewSkillSystemSkillLoadoutService>().To<NewSkillSystemSkillLoadoutService>().AsSingle()
                 .WithArguments(_newSkillSystemSkillCatalog, 4).NonLazy();
@@ -57,6 +53,33 @@ namespace Logic.Scripts.GameDomain.ZenjectInstallers {
                 if (pack != null) Container.BindInstance(pack).IfNotBound();
             }
 #endif
+        }
+
+        private void BindUniversalUi() {
+            if (_universalUiSceneViews == null)
+                _universalUiSceneViews = GetComponent<UniversalUiSceneViews>();
+
+            if (_universalUiSceneViews == null) {
+                var go = new GameObject(nameof(UniversalUiSceneViews));
+                go.transform.SetParent(transform);
+                _universalUiSceneViews = go.AddComponent<UniversalUiSceneViews>();
+            }
+
+            _universalUiSceneViews.EnsureViews();
+            Container.Bind<UniversalUiSceneViews>().FromInstance(_universalUiSceneViews).AsSingle();
+
+            if (_universalUiSceneViews.Options != null)
+                Container.Bind<IOptionsView>().FromInstance(_universalUiSceneViews.Options).AsSingle();
+            if (_universalUiSceneViews.Credits != null)
+                Container.Bind<ICreditsView>().FromInstance(_universalUiSceneViews.Credits).AsSingle();
+            if (_universalUiSceneViews.Load != null)
+                Container.Bind<ILoadScreenView>().FromInstance(_universalUiSceneViews.Load).AsSingle();
+            if (_universalUiSceneViews.Guide != null)
+                Container.Bind<IGuideScreenView>().FromInstance(_universalUiSceneViews.Guide).AsSingle();
+            if (_universalUiSceneViews.Cheats != null)
+                Container.Bind<ICheatsScreenView>().FromInstance(_universalUiSceneViews.Cheats).AsSingle();
+
+            Container.BindInterfacesTo<UniversalUIController>().AsSingle().NonLazy();
         }
     }
 }

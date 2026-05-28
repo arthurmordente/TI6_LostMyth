@@ -5,10 +5,10 @@ using Zenject;
 
 namespace Logic.Scripts.Core.Mvc.LoadingScreen {
     public class LoadingScreenController : ILoadingScreenController {
-        private readonly LoadingScreenView _loadingScreenView;
+        private readonly LoadingScreenCanvasView _loadingScreenView;
 
         [Inject]
-        public LoadingScreenController(LoadingScreenView loadingScreenView) {
+        public LoadingScreenController(LoadingScreenCanvasView loadingScreenView) {
             _loadingScreenView = loadingScreenView;
         }
 
@@ -32,7 +32,7 @@ namespace Logic.Scripts.Core.Mvc.LoadingScreen {
         }
 
         public async Awaitable SetLoadingSlider(float valueBetween0To1, CancellationTokenSource cancellationTokenSource) {
-            await _loadingScreenView.SetLoadingSlider((valueBetween0To1 * 100), cancellationTokenSource);
+            await _loadingScreenView.SetLoadingSlider(valueBetween0To1, cancellationTokenSource);
         }
     }
 }

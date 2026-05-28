@@ -3,6 +3,7 @@ using Logic.Scripts.GameDomain.Commands;
 using Logic.Scripts.GameDomain.MVC.Echo;
 using Logic.Scripts.GameDomain.MVC.Shared;
 using Logic.Scripts.GameDomain.States;
+using Logic.Scripts.GameDomain.Utilities;
 using Logic.Scripts.Services.AudioService;
 using Logic.Scripts.Services.CommandFactory;
 using Logic.Scripts.Services.StateMachineService;
@@ -17,8 +18,8 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
         private readonly IUICameraController _uiCameraController;
         private readonly IAudioService _audioService;
         private readonly IGamePlayHudView _gamePlayHud;
-        private readonly PauseUiView _pauseUiView;
-        private readonly GameOverUIView _gameOverUIView;
+        private readonly IPauseMenuView _pauseMenuView;
+        private readonly IGameOverView _gameOverView;
         private readonly IUniversalUIController _universalUIController;
         private readonly ICommandFactory _commandFactory;
         private readonly ILevelsDataService _levelsDataService;
@@ -26,8 +27,8 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
         private readonly ICloneUseLimiter _cloneUseLimiter;
 
         public GamePlayUiController(IStateMachineService stateMachineService, ExplorationState.Factory explorationStateFactory,
-            IUICameraController uiCameraController, IGamePlayHudView gamePlayHud, IAudioService audioService, PauseUiView pauseUiView,
-            IUniversalUIController universalUIController, ICommandFactory commandFactory, GameOverUIView gameOverUIView,
+            IUICameraController uiCameraController, IGamePlayHudView gamePlayHud, IAudioService audioService, IPauseMenuView pauseMenuView,
+            IUniversalUIController universalUIController, ICommandFactory commandFactory, IGameOverView gameOverView,
             [InjectOptional] ILevelsDataService levelsDataService = null,
             [InjectOptional] IGamePlayDataService gamePlayDataService = null,
             [InjectOptional] ICloneUseLimiter cloneUseLimiter = null) {
@@ -36,25 +37,29 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
             _uiCameraController = uiCameraController;
             _gamePlayHud = gamePlayHud;
             _audioService = audioService;
-            _pauseUiView = pauseUiView;
+            _pauseMenuView = pauseMenuView;
             _universalUIController = universalUIController;
             _commandFactory = commandFactory;
-            _gameOverUIView = gameOverUIView;
+            _gameOverView = gameOverView;
             _levelsDataService = levelsDataService;
             _gamePlayDataService = gamePlayDataService;
             _cloneUseLimiter = cloneUseLimiter;
         }
 
         public void InitEntryPoint() {
-            _pauseUiView.InitEntryPoint();
-            _pauseUiView.RegisterCallbacks(_universalUIController.ShowGuideScreen, _universalUIController.ShowOptionsScreen,
-                _universalUIController.ShowLoadScreen, _universalUIController.ShowCheatsScreen, ResumeGame, BackToLobby);
+            _pauseMenuView.InitEntryPoint();
+            _pauseMenuView.RegisterCallbacks(
+                _universalUIController.ShowOptionsScreen,
+                _universalUIController.ShowCreditsScreen,
+                ResumeGame,
+                BackToLobby,
+                OnQuitGame);
             _gamePlayHud.InitStartPoint();
             _gamePlayHud.RegisterCallbacks(OnClickNextTurn, OnClickAbility1, OnClickAbility2, OnClickAbility3, OnClickAbility4);
             _gamePlayHud.RegisterOpenPauseMenuCallback(OnOpenPauseMenu);
             SyncBossHudNameFromCurrentLevel();
-            _gameOverUIView.InitEntryPoint();
-            _gameOverUIView.RegisterCallbacks(OnClickPlayAgain, OnClickPlayAgain, BackToLobby);
+            _gameOverView.InitEntryPoint();
+            _gameOverView.RegisterCallbacks(OnClickPlayAgain, OnClickPlayAgain, BackToLobby);
         }
 
         /// <summary>
@@ -102,12 +107,12 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
 
         #region GameOver
         public void ShowGameOver(bool IsWin) {
-            _gameOverUIView.Show(IsWin);
+            _gameOverView.Show(IsWin);
         }
         public async void OnClickPlayAgain() {
             _commandFactory.CreateCommandVoid<ResumeGameplayInputCommand>().Execute();
             await _commandFactory.CreateCommandAsync<ReloadLevelCommand>().Execute(CancellationTokenSource.CreateLinkedTokenSource(Application.exitCancellationToken));
-            _gameOverUIView.Hide();
+            _gameOverView.Hide();
         }
         public void OnLoad() {
             Debug.LogWarning("Clicou no load");
@@ -115,17 +120,18 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
         #endregion
 
         #region Pause
-        public void ShowPauseScreen() {
-            _pauseUiView.Show();
-        }
-        public void HidePauseScreen() {
-            _pauseUiView.Hide();
-        }
+        public void ShowPauseScreen() => _pauseMenuView.Show();
+        public void HidePauseScreen() => _pauseMenuView.Hide();
+
+        private void OnQuitGame() => QuitApplicationUtility.Quit();
+
         private void ResumeGame() {
+            _universalUIController.CloseAllOverlays();
             _commandFactory.CreateCommandVoid<ResumeGameplayInputCommand>().Execute();
         }
 
         private void BackToLobby() {
+            _universalUIController.CloseAllOverlays();
             _commandFactory.CreateCommandVoid<ResumeGameplayInputCommand>().Execute();
             _stateMachineService.SwitchState(_explorationStateFactory.Create(new ExplorationInitiatorEnterData(0)));
         }

@@ -7,6 +7,7 @@ using Logic.Scripts.GameDomain.MVC.Book.Divide;
 using Logic.Scripts.GameDomain.Services.ActiveUnit;
 using Zenject;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.Serialization;
 using Logic.Scripts.GameDomain.MVC.Cast.NewSkillSystem;
 using Logic.Scripts.GameDomain.MVC.Ui;
@@ -24,8 +25,8 @@ public class GamePlayInstaller : MonoInstaller {
     [SerializeField] private NaraConfigurationSO _naraConfiguration;
 
     [SerializeField] private GamePlayUiCanvasView _gamePlayHud;
-    [SerializeField] private PauseUiView _pauseUiView;
-    [SerializeField] private GameOverUIView _gameOverUIView;
+    [SerializeField] private PauseMenuCanvasView _pauseMenuView;
+    [SerializeField] private GameOverCanvasView _gameOverView;
 
     [SerializeField] private AbilityData[] _skills;
 
@@ -114,7 +115,10 @@ public class GamePlayInstaller : MonoInstaller {
     private void BindControllers() {
         Container.BindInterfacesTo<GameInputActionsController>().AsSingle().NonLazy();
         Container.Bind<Logic.Scripts.GameDomain.MVC.Ui.IGamePlayHudView>().FromInstance(_gamePlayHud).AsSingle();
-        Container.BindInterfacesTo<GamePlayUiController>().AsSingle().WithArguments(_pauseUiView, _gameOverUIView).NonLazy();
+        Container.Bind<IPauseMenuView>().FromInstance(ResolvePauseMenuView()).AsSingle();
+        Container.Bind<IGameOverView>().FromInstance(ResolveGameOverView()).AsSingle();
+
+        Container.BindInterfacesTo<GamePlayUiController>().AsSingle().NonLazy();
         Container.BindInterfacesTo<LevelScenarioController>().AsSingle().NonLazy();
         Container.BindInterfacesTo<NaraController>().AsSingle().WithArguments(_naraViewPrefab, _naraConfiguration, _skills).NonLazy();
         Container.BindInterfacesTo<CastController>().AsSingle().NonLazy();
@@ -130,5 +134,34 @@ public class GamePlayInstaller : MonoInstaller {
         var resolvedBookSkills = (_bookSkills != null && _bookSkills.Length > 0) ? _bookSkills : _skills;
         Container.BindInterfacesTo<BookController>().AsSingle()
             .WithArguments(_bookViewPrefab, bookCfg, resolvedBookSkills).NonLazy();
+    }
+
+    private IPauseMenuView ResolvePauseMenuView() {
+        if (_pauseMenuView != null)
+            return _pauseMenuView;
+        var existing = GetComponentInChildren<PauseMenuCanvasView>(true);
+        if (existing != null)
+            return existing;
+        return CreateOverlayRoot<PauseMenuCanvasView>(nameof(PauseMenuCanvasView), sortingOrder: 100);
+    }
+
+    private IGameOverView ResolveGameOverView() {
+        if (_gameOverView != null)
+            return _gameOverView;
+        var existing = GetComponentInChildren<GameOverCanvasView>(true);
+        if (existing != null)
+            return existing;
+        return CreateOverlayRoot<GameOverCanvasView>(nameof(GameOverCanvasView), sortingOrder: 110);
+    }
+
+    private T CreateOverlayRoot<T>(string objectName, int sortingOrder) where T : Component {
+        var root = new GameObject(objectName, typeof(RectTransform));
+        root.transform.SetParent(transform, false);
+        var canvas = root.AddComponent<Canvas>();
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvas.sortingOrder = sortingOrder;
+        root.AddComponent<CanvasScaler>().uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        root.AddComponent<GraphicRaycaster>();
+        return root.AddComponent<T>();
     }
 }

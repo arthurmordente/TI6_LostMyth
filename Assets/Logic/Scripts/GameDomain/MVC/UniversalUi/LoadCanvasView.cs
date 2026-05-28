@@ -5,9 +5,17 @@ using UnityEngine.UI;
 
 public sealed class LoadCanvasView : UguiCanvasViewBase, ILoadScreenView
 {
+    public override bool IsVisible => base.IsVisible;
+
     [SerializeField] private Button _closeButton;
 
-    public void InitEntryPoint() => Hide();
+    protected override void Awake()
+    {
+        base.Awake();
+        HideUntilOpened();
+    }
+
+    public void InitEntryPoint() => HideUntilOpened();
 
     public void RegisterCallbacks(Action onGuide, Action onCheats, Action onCredits, Action onExit, Action onOptions)
     {

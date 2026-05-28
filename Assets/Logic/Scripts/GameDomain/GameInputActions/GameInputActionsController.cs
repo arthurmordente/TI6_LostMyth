@@ -61,8 +61,20 @@ namespace Logic.Scripts.GameDomain.GameInputActions {
             _gameInputActions.UI.ResumeGameplay.started -= OnResumeGameplayStarted;
         }
 
+        public void RegisterUIExplorationInputListeners() {
+            _gameInputActions.UI.ResumeExploration.started += OnResumeExplorationStarted;
+        }
+
+        public void UnregisterUIExplorationInputListeners() {
+            _gameInputActions.UI.ResumeExploration.started -= OnResumeExplorationStarted;
+        }
+
         private void OnResumeGameplayStarted(InputAction.CallbackContext context) {
-            _commandFactory.CreateCommandVoid<ResumeGameplayInputCommand>().Execute();
+            _commandFactory.CreateCommandVoid<DismissGameplayPauseEscapeInputCommand>().Execute();
+        }
+
+        private void OnResumeExplorationStarted(InputAction.CallbackContext context) {
+            _commandFactory.CreateCommandVoid<ResumeExplorationInputCommand>().Execute();
         }
         #endregion
 

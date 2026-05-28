@@ -21,7 +21,7 @@ public class LobbyInitiator : ISceneInitiator, ILobbyInitiator {
 
     public Awaitable InitExitPoint(CancellationTokenSource cancellationTokenSource) {
         _sceneInitiatorsService.UnregisterInitiator(this);
-        //To-Do Adicionar comando de saida do lobby
+        _controller.HideMenu();
         return AwaitableUtils.CompletedTask;
     }
 

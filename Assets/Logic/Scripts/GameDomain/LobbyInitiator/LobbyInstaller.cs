@@ -2,10 +2,14 @@ using UnityEngine;
 using Zenject;
 
 public class LobbyInstaller : MonoInstaller {
-    [SerializeField] private LobbyUiView _lobbyView;
+    [SerializeField] private LobbyMainMenuCanvasView _lobbyMenuView;
 
     public override void InstallBindings() {
         Container.Bind<ILobbyInitiator>().To<LobbyInitiator>().AsSingle().NonLazy();
-        Container.Bind<ILobbyController>().To<LobbyUiController>().AsSingle().WithArguments(_lobbyView).NonLazy();
+        if (_lobbyMenuView != null)
+            Container.Bind<ILobbyMenuView>().FromInstance(_lobbyMenuView).AsSingle();
+        else
+            Container.Bind<ILobbyMenuView>().FromComponentInHierarchy().AsSingle();
+        Container.Bind<ILobbyController>().To<LobbyUiController>().AsSingle().NonLazy();
     }
 }

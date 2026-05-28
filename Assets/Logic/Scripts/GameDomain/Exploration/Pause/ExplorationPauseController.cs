@@ -1,9 +1,10 @@
 using Logic.Scripts.GameDomain.Exploration;
+using Logic.Scripts.GameDomain.GameInputActions;
 using Logic.Scripts.GameDomain.States;
+using Logic.Scripts.GameDomain.Utilities;
 using Logic.Scripts.Services.AudioService;
 using Logic.Scripts.Services.CommandFactory;
 using Logic.Scripts.Services.StateMachineService;
-using UnityEngine;
 using Zenject;
 
 namespace Logic.Scripts.GameDomain.Exploration.Pause
@@ -16,6 +17,7 @@ namespace Logic.Scripts.GameDomain.Exploration.Pause
         private readonly LobbyState.Factory _lobbyStateFactory;
         private readonly ICommandFactory _commandFactory;
         private readonly IAudioService _audioService;
+        private readonly IGameInputActionsController _gameInputActionsController;
 
         private bool _isVisible;
 
@@ -27,7 +29,8 @@ namespace Logic.Scripts.GameDomain.Exploration.Pause
             IStateMachineService stateMachineService,
             LobbyState.Factory lobbyStateFactory,
             ICommandFactory commandFactory,
-            IAudioService audioService)
+            IAudioService audioService,
+            IGameInputActionsController gameInputActionsController)
         {
             _pauseMenuView = pauseMenuView;
             _universalUIController = universalUIController;
@@ -35,6 +38,7 @@ namespace Logic.Scripts.GameDomain.Exploration.Pause
             _lobbyStateFactory = lobbyStateFactory;
             _commandFactory = commandFactory;
             _audioService = audioService;
+            _gameInputActionsController = gameInputActionsController;
         }
 
         public void InitEntryPoint()
@@ -55,13 +59,18 @@ namespace Logic.Scripts.GameDomain.Exploration.Pause
             ExplorationModalInputGate.Push();
             ExplorationInteractInputGate.Push();
             _commandFactory.CreateCommandVoid<StopMoveInputCommand>().Execute();
+            _gameInputActionsController.EnableUIInputs();
+            _gameInputActionsController.RegisterUIExplorationInputListeners();
             _pauseMenuView.Show();
         }
 
         public void HidePauseScreen()
         {
             if (!_isVisible) return;
+            _universalUIController.TryCloseTopOverlay();
             _pauseMenuView.Hide();
+            _gameInputActionsController.UnregisterUIExplorationInputListeners();
+            _gameInputActionsController.DisableUIInputs();
             ExplorationInteractInputGate.Pop();
             ExplorationModalInputGate.Pop();
             _isVisible = false;
@@ -69,8 +78,24 @@ namespace Logic.Scripts.GameDomain.Exploration.Pause
 
         public void TogglePauseScreen()
         {
-            if (_isVisible) HidePauseScreen();
-            else ShowPauseScreen();
+            if (_isVisible)
+                HandleEscapeWhilePaused();
+            else
+                ShowPauseScreen();
+        }
+
+        public void HandleEscapeWhilePaused()
+        {
+            if (!_isVisible) return;
+            if (_universalUIController.TryCloseTopOverlay())
+                return;
+            HidePauseScreen();
+        }
+
+        public void ForceHide()
+        {
+            if (_isVisible)
+                HidePauseScreen();
         }
 
         private void OnResume()
@@ -101,7 +126,7 @@ namespace Logic.Scripts.GameDomain.Exploration.Pause
         private void OnQuit()
         {
             PlayClick();
-            Application.Quit();
+            QuitApplicationUtility.Quit();
         }
 
         private void PlayClick() =>

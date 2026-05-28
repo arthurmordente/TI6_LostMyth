@@ -8,6 +8,8 @@ using UnityEngine.UI;
 
 public sealed class GuideCanvasView : UguiCanvasViewBase, IGuideScreenView
 {
+    public override bool IsVisible => base.IsVisible;
+
     [SerializeField] private string _guideLabel = "Guides";
     [SerializeField] private Button _closeButton;
     [SerializeField] private TMP_Text _titleText;
@@ -22,9 +24,15 @@ public sealed class GuideCanvasView : UguiCanvasViewBase, IGuideScreenView
     private int _currentPageIndex;
     private readonly List<Button> _guideButtons = new List<Button>();
 
+    protected override void Awake()
+    {
+        base.Awake();
+        HideUntilOpened();
+    }
+
     public async Awaitable InitEntryPoint()
     {
-        Hide();
+        HideUntilOpened();
         if (_guideListRoot == null) return;
 
         foreach (Transform child in _guideListRoot)

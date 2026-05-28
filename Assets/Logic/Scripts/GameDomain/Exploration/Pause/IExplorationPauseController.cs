@@ -5,4 +5,6 @@ public interface IExplorationPauseController
     void ShowPauseScreen();
     void HidePauseScreen();
     void TogglePauseScreen();
+    void HandleEscapeWhilePaused();
+    void ForceHide();
 }

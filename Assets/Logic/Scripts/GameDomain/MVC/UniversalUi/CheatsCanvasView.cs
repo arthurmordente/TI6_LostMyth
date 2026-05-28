@@ -5,12 +5,20 @@ using UnityEngine.UI;
 
 public sealed class CheatsCanvasView : UguiCanvasViewBase, ICheatsScreenView
 {
+    public override bool IsVisible => base.IsVisible;
+
     [SerializeField] private Button _closeButton;
     [SerializeField] private Toggle _lifeToggle;
     [SerializeField] private Toggle _actionPointsToggle;
     [SerializeField] private Toggle _movementToggle;
 
-    public void InitEntryPoint() => Hide();
+    protected override void Awake()
+    {
+        base.Awake();
+        HideUntilOpened();
+    }
+
+    public void InitEntryPoint() => HideUntilOpened();
 
     public void RegisterCallbacks(Action onGuide, Action onLoad, Action onCredits, Action onExit, Action onOptions,
         Action<bool> onLifeToggle, Action<bool> onActionToggle, Action<bool> onMovementToggle)

@@ -1,6 +1,7 @@
 using System.Threading;
 using DG.Tweening;
 using Logic.Scripts.Utils;
+using UnityEngine;
 
 namespace Logic.Scripts.Extensions
 {
