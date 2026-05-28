@@ -17,6 +17,8 @@ public class PauseGameplayInputCommand : BaseCommand, ICommandVoid {
         Time.timeScale = 0f;
         _gamePlayUiController.ShowPauseScreen();
         _gameInputActionsController.UnregisterGameplayInputListeners();
+        _gameInputActionsController.DisableGameplayInputs();
+        _gameInputActionsController.EnableUIInputs();
         _gameInputActionsController.RegisterUIGameplayInputListeners();
     }
 }

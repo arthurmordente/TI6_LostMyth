@@ -11,6 +11,8 @@ namespace Logic.Scripts.GameDomain.GameInputActions {
         void DisableExplorationInputs();
         void RegisterUIGameplayInputListeners();
         void UnregisterUIGameplayInputListeners();
+        void RegisterUIExplorationInputListeners();
+        void UnregisterUIExplorationInputListeners();
         void RegisterGameplayInputListeners();
         void UnregisterGameplayInputListeners();
         void RegisterExplorationInputListeners();

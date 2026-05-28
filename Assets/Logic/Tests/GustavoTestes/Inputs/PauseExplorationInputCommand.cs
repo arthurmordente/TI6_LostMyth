@@ -1,17 +1,17 @@
-using Logic.Scripts.GameDomain.Exploration.QuitConfirmation;
+using Logic.Scripts.GameDomain.Exploration.Pause;
 using Logic.Scripts.Services.CommandFactory;
 
 public class PauseExplorationInputCommand : BaseCommand, ICommandVoid
 {
-    private IExplorationQuitConfirmationService _quitConfirmation;
+    private IExplorationPauseController _pauseController;
 
     public override void ResolveDependencies()
     {
-        _quitConfirmation = _diContainer.Resolve<IExplorationQuitConfirmationService>();
+        _pauseController = _diContainer.Resolve<IExplorationPauseController>();
     }
 
     public void Execute()
     {
-        _quitConfirmation?.HandleEscapePressed();
+        _pauseController?.TogglePauseScreen();
     }
 }
