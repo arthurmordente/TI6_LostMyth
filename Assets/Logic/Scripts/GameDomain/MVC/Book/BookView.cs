@@ -1,3 +1,4 @@
+using Logic.Scripts.GameDomain.MVC.Nara.Animation;
 using UnityEngine;
 
 namespace Logic.Scripts.GameDomain.MVC.Book
@@ -10,6 +11,7 @@ namespace Logic.Scripts.GameDomain.MVC.Book
 
         [SerializeField] private Rigidbody _rigidbody;
         [SerializeField] private Animator _animator;
+        [SerializeField] private BookCloneAnimatorDriver _bookAnimatorDriver;
 
         [Header("Active Unit Circle")]
         [SerializeField] private GameObject _activeUnitCirclePrefab;
@@ -18,39 +20,65 @@ namespace Logic.Scripts.GameDomain.MVC.Book
 
         public Rigidbody GetRigidbody() => _rigidbody;
 
+        private void Awake()
+        {
+            if (_animator == null)
+                _animator = GetComponentInChildren<Animator>(true);
+            if (_bookAnimatorDriver == null)
+                _bookAnimatorDriver = GetComponent<BookCloneAnimatorDriver>();
+        }
+
+        public void ConfigureBookAnimation(RuntimeAnimatorController bookController, bool useErzahlerStyle = false)
+        {
+            if (_bookAnimatorDriver == null)
+                _bookAnimatorDriver = gameObject.AddComponent<BookCloneAnimatorDriver>();
+            _bookAnimatorDriver.Configure(bookController, useErzahlerStyle, _animator);
+        }
+
         public void SetMoving(bool isMoving)
         {
-            if (_animator != null) _animator.SetBool("Moving", isMoving);
+            if (_bookAnimatorDriver != null)
+            {
+                _bookAnimatorDriver.SetMoving(isMoving);
+                return;
+            }
+
+            if (_animator != null)
+                _animator.SetBool(BookAnimatorParams.Moving, isMoving);
         }
 
         public void PlayDeath()
         {
-            if (_animator != null) _animator.SetTrigger("Dead");
+            // No death clip on Book rig yet.
         }
 
         public void SetAttackType(int type)
         {
-            if (_animator != null) _animator.SetInteger("AKY_AttackType", type);
+            if (type > 0 && _bookAnimatorDriver != null)
+                _bookAnimatorDriver.BeginCast();
+            else if (type > 0 && _animator != null)
+                _animator.SetTrigger(BookAnimatorParams.Ability);
         }
 
         public void ResetAttackType()
         {
-            if (_animator != null) _animator.SetInteger("AKY_AttackType", 0);
+            _bookAnimatorDriver?.ResetToIdle();
         }
 
         public void TriggerExecute()
         {
-            if (_animator != null) _animator.SetTrigger("Execute");
+            if (_bookAnimatorDriver != null)
+                _bookAnimatorDriver.FinishCast();
+            else if (_animator != null)
+                _animator.SetTrigger(BookAnimatorParams.Ability);
         }
 
-        public void ResetExecuteTrigger()
-        {
-            if (_animator != null) _animator.ResetTrigger("Execute");
-        }
+        public void ResetExecuteTrigger() { }
 
         public void TriggerCancel()
         {
-            if (_animator != null) _animator.SetTrigger("Cancel");
+            _bookAnimatorDriver?.CancelCast();
+            ResetAttackType();
         }
     }
 }

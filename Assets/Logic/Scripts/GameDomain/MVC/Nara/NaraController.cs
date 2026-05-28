@@ -12,6 +12,7 @@ using Zenject;
 using Logic.Scripts.Turns;
 using Logic.Scripts.GameDomain.VisualFeedback;
 using Logic.Scripts.GameDomain.Services.Skills;
+using Logic.Scripts.GameDomain.MVC.Nara.Animation;
 
 namespace Logic.Scripts.GameDomain.MVC.Nara {
     // INaraController now extends IPlayableUnit, IEffectable and IEffectableAction,
@@ -25,6 +26,7 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
         private readonly NaraConfigurationSO _naraConfiguration;
         private readonly ICheatController _cheatController;
         private readonly INewSkillSystemSkillLoadoutService _newSkillSystemSkillLoadoutService;
+        private readonly ErzahlerAnimatorControllersSO _erzahlerAnimatorControllers;
         public GameObject NaraViewGO => _naraView.gameObject;
         public Transform NaraSkillSpotTransform => _naraView.transform;
         public NaraMovementController NaraMove => _naraMovementController;
@@ -44,7 +46,9 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
             IAudioService audioService, ICommandFactory commandFactory,
             IResourcesLoaderService resourcesLoaderService, NaraView naraViewPrefab,
             NaraConfigurationSO naraConfiguration, ICheatController cheatController,
-            AbilityData[] abilities, [InjectOptional] INewSkillSystemSkillLoadoutService newSkillSystemSkillLoadoutService = null) {
+            AbilityData[] abilities,
+            [InjectOptional] INewSkillSystemSkillLoadoutService newSkillSystemSkillLoadoutService = null,
+            [InjectOptional] ErzahlerAnimatorControllersSO erzahlerAnimatorControllers = null) {
             _naraData = new NaraData(naraConfiguration);
             _naraConfiguration = naraConfiguration;
             _updateSubscriptionService = updateSubscriptionService;
@@ -54,6 +58,7 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
             _cheatController = cheatController;
             _abilities = abilities ?? System.Array.Empty<AbilityData>();
             _newSkillSystemSkillLoadoutService = newSkillSystemSkillLoadoutService;
+            _erzahlerAnimatorControllers = erzahlerAnimatorControllers;
         }
 
         public void RegisterListeners() {
@@ -105,6 +110,8 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
         public void CreateNara(NaraMovementController movementController) {
             _naraView = UnityEngine.Object.Instantiate(_naraViewPrefab);
             InstallNewSkillSystemSkillComponents();
+            if (_erzahlerAnimatorControllers != null)
+                _naraView.ConfigureErzahlerAnimation(_erzahlerAnimatorControllers);
             _naraData.ResetData();
             _naraView.SetMoving(false);
             _naraMovementController = movementController;
@@ -455,12 +462,17 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
         }
 
         public void OnAbilityExecuted() {
+            _naraView?.ReleaseConjuring();
             if (_naraMovementController is NaraTurnMovementController ntm) {
                 ntm.RecalculateRadiusAfterAbility();
                 ntm.SetMovementRadiusCenter();
                 ntm.Refresh();
             }
             Unfreeeze();
+        }
+
+        public void SetBookCloneDeployed(bool cloneDeployed) {
+            _naraView?.SetBookCloneDeployed(cloneDeployed);
         }
 
         public void BeginSkillGuidedDisplacementToWorldPosition(Vector3 worldTarget, float durationSeconds, Action onComplete) {

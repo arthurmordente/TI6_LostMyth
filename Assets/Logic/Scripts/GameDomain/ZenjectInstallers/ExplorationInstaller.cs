@@ -1,14 +1,19 @@
 using Logic.Scripts.GameDomain.Exploration.QuitConfirmation;
 using Logic.Scripts.GameDomain.GameInputActions;
 using Logic.Scripts.GameDomain.MVC.Nara;
+using Logic.Scripts.GameDomain.MVC.Nara.Animation;
 using UnityEngine;
 using Zenject;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 public class ExplorationInstaller : MonoInstaller {
     [SerializeField] private NaraView _naraViewPrefab;
     [SerializeField] private NaraConfigurationSO _naraConfiguration;
     [SerializeField] private CustomizeUIView _customizeUiView;
     [SerializeField] private ExplorationLoadoutUIView _explorationLoadoutUiView;
+    [SerializeField] private ErzahlerAnimatorControllersSO _erzahlerAnimatorControllers;
 
     public override void InstallBindings() {
         BindServices();
@@ -20,6 +25,16 @@ public class ExplorationInstaller : MonoInstaller {
         Container.BindInterfacesTo<LevelCancellationTokenService>().AsSingle().NonLazy();
         Container.Bind<INaraMovementControllerFactory>().To<NaraMovementControllerFactory>().AsSingle();
         Container.BindInterfacesTo<GamePlayDataService>().AsSingle().NonLazy();
+
+        var erzControllers = _erzahlerAnimatorControllers;
+#if UNITY_EDITOR
+        if (erzControllers == null) {
+            erzControllers = AssetDatabase.LoadAssetAtPath<ErzahlerAnimatorControllersSO>(
+                "Assets/Logic/Scripts/GameDomain/MVC/Nara/Animation/ErzahlerAnimatorControllers.asset");
+        }
+#endif
+        if (erzControllers != null)
+            Container.Bind<ErzahlerAnimatorControllersSO>().FromInstance(erzControllers).AsSingle();
     }
 
     private void BindControllers() {

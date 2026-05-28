@@ -8,6 +8,7 @@ using Logic.Scripts.Services.UpdateService;
 using Logic.Scripts.Turns;
 using UnityEngine;
 using Logic.Scripts.GameDomain.VisualFeedback;
+using Logic.Scripts.GameDomain.MVC.Nara.Animation;
 using Zenject;
 
 namespace Logic.Scripts.GameDomain.MVC.Book
@@ -21,6 +22,7 @@ namespace Logic.Scripts.GameDomain.MVC.Book
         private readonly ICommandFactory _commandFactory;
         private readonly ICheatController _cheatController;
         private readonly INewSkillSystemSkillLoadoutService _newSkillSystemSkillLoadoutService;
+        private readonly ErzahlerAnimatorControllersSO _erzahlerAnimatorControllers;
         // The Book's own ability set — configured separately in the inspector.
         // Initially points to the same abilities as Nara; swap to a dedicated array to diverge.
         private readonly AbilityData[] _abilities;
@@ -48,7 +50,8 @@ namespace Logic.Scripts.GameDomain.MVC.Book
             IUpdateSubscriptionService updateSubscriptionService,
             ICommandFactory commandFactory,
             ICheatController cheatController,
-            [InjectOptional] INewSkillSystemSkillLoadoutService newSkillSystemSkillLoadoutService = null)
+            [InjectOptional] INewSkillSystemSkillLoadoutService newSkillSystemSkillLoadoutService = null,
+            [InjectOptional] ErzahlerAnimatorControllersSO erzahlerAnimatorControllers = null)
         {
             _bookViewPrefab = bookViewPrefab;
             _config = config;
@@ -58,6 +61,7 @@ namespace Logic.Scripts.GameDomain.MVC.Book
             _commandFactory = commandFactory;
             _cheatController = cheatController;
             _newSkillSystemSkillLoadoutService = newSkillSystemSkillLoadoutService;
+            _erzahlerAnimatorControllers = erzahlerAnimatorControllers;
         }
 
         public void CreateBook(Vector3 position)
@@ -67,6 +71,8 @@ namespace Logic.Scripts.GameDomain.MVC.Book
             // after a plain Instantiate() only moves the Transform; the Rigidbody's position
             // stays at the spawn origin and the physics loop snaps the object back next FixedUpdate.
             _bookView = UnityEngine.Object.Instantiate(_bookViewPrefab, position, Quaternion.identity);
+            if (_erzahlerAnimatorControllers?.ErzahlerWithBook != null)
+                _bookView.ConfigureBookAnimation(_erzahlerAnimatorControllers.ErzahlerWithBook, useErzahlerStyle: true);
             InstallNewSkillSystemSkillComponents();
 
             // Extra guarantee: zero out any velocity the prefab might carry and lock the

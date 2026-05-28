@@ -5,6 +5,7 @@ using Logic.Scripts.Services.CommandFactory;
 using Logic.Scripts.GameDomain.MVC.Nara;
 using Logic.Scripts.GameDomain.MVC.Boss.Visuals;
 using Logic.Scripts.GameDomain.MVC.Environment;
+using Logic.Scripts.GameDomain.MVC.Boss.Laki;
 using System.Threading.Tasks;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -150,11 +151,20 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 			_ = RunFightBoardIntroThenReleaseTurnFlowAsync(arenaService, view);
 
 			LakiBossShieldRuntime.RegisterShieldRoot(_lakiShieldVfxRoot);
+			EnsureLakiBossAnimatorBootstrap();
 			if (_turnStateService != null && _turnStateService.Active)
 			{
 				_lastSyncedFightTurn = _turnStateService.TurnNumber;
 				LakiBossShieldRuntime.SyncFightTurn(_turnStateService.TurnNumber);
 			}
+		}
+
+		private void EnsureLakiBossAnimatorBootstrap()
+		{
+			if (_lakiShieldVfxRoot == null) return;
+			var bossRoot = _lakiShieldVfxRoot.transform.root.gameObject;
+			if (bossRoot.GetComponent<LakiBossAnimatorBootstrap>() == null)
+				bossRoot.AddComponent<LakiBossAnimatorBootstrap>();
 		}
 
 		private async Task RunFightBoardIntroThenReleaseTurnFlowAsync(RouletteArenaService arenaService, LakiRouletteArenaView view)

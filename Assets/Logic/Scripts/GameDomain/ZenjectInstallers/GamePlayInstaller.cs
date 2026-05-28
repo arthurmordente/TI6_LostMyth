@@ -13,6 +13,7 @@ using Logic.Scripts.GameDomain.MVC.Ui;
 using Logic.Scripts.GameDomain.MVC.Echo;
 using Logic.Scripts.GameDomain.MVC.Boss.Telegraph;
 using Logic.Scripts.GameDomain.MVC.Boss.Visuals;
+using Logic.Scripts.GameDomain.MVC.Nara.Animation;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -34,6 +35,9 @@ public class GamePlayInstaller : MonoInstaller {
 
     [SerializeField] private LayerMask _layerMaskMouse;
     [SerializeField] private EchoView _echoviewPrefab;
+
+    [Header("Erzahler Animation")]
+    [SerializeField] private ErzahlerAnimatorControllersSO _erzahlerAnimatorControllers;
 
     [Header("Book System")]
     [SerializeField] private BookView _bookViewPrefab;
@@ -93,6 +97,18 @@ public class GamePlayInstaller : MonoInstaller {
         else {
             Debug.LogWarning("[GamePlayInstaller] CombatAttackVisualCatalogSO is NULL — boss telegraphs from catalog will not resolve (placeholders / procedural fallbacks). Assign _combatAttackVisualCatalog for builds.");
         }
+
+        var erzControllers = _erzahlerAnimatorControllers;
+#if UNITY_EDITOR
+        if (erzControllers == null) {
+            erzControllers = AssetDatabase.LoadAssetAtPath<ErzahlerAnimatorControllersSO>(
+                "Assets/Logic/Scripts/GameDomain/MVC/Nara/Animation/ErzahlerAnimatorControllers.asset");
+        }
+#endif
+        if (erzControllers != null)
+            Container.Bind<ErzahlerAnimatorControllersSO>().FromInstance(erzControllers).AsSingle();
+        else
+            Debug.LogWarning("[GamePlayInstaller] ErzahlerAnimatorControllersSO is NULL — run TI6/Animation/Build Erzahler & Laki Animator Controllers in the Editor.");
     }
 
     private void BindControllers() {

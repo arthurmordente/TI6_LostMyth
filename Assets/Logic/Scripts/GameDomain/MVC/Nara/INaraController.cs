@@ -29,5 +29,8 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
 
         /// <summary>End self-damage aim visual. Call before <see cref="Logic.Scripts.GameDomain.Effects.IEffectable.ResetPreview"/> on cancel/commit.</summary>
         void EndSelfDamageCastAimPreview(bool cancel);
+
+        /// <summary>Swap player Animator between Erz+Book (false) and Erzahler solo (true) when Divide deploys the Book clone.</summary>
+        void SetBookCloneDeployed(bool cloneDeployed);
     }
 }

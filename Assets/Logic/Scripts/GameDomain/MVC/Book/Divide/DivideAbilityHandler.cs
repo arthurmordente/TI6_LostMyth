@@ -130,6 +130,7 @@ namespace Logic.Scripts.GameDomain.MVC.Book.Divide
         private void DeployBook(Vector3 position)
         {
             _bookController.CreateBook(position);
+            _naraController.SetBookCloneDeployed(true);
             // Grant the Book its first turn's AP immediately so the player
             // can cast abilities on the same turn it is deployed.
             _bookController.GainTurnActionPoints();
@@ -142,6 +143,7 @@ namespace Logic.Scripts.GameDomain.MVC.Book.Divide
             _activeUnitService.SetNaraAsActiveUnit();
             _activeUnitService.UnregisterBook();
             _bookController.DestroyBook();
+            _naraController.SetBookCloneDeployed(false);
             _cooldownRemaining = 0;
         }
     }

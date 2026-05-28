@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e00ed8b761952e64196657557efd3e04, type: 3}
+  m_Name: ErzahlerAnimatorControllers
+  m_EditorClassIdentifier: Assembly-CSharp::Logic.Scripts.GameDomain.MVC.Nara.Animation.ErzahlerAnimatorControllersSO
+  ErzahlerWithBook: {fileID: 9100000, guid: c2ccf5c71e992ac44abb3efc88b969e6, type: 2}
+  ErzahlerSolo: {fileID: 9100000, guid: 112459c869e7e644aac0f7033113a1ae, type: 2}
+  BookClone: {fileID: 9100000, guid: 16c68d4ac3500e54a9b978241706c6f8, type: 2}
+  LakiBoss: {fileID: 9100000, guid: 8a9b98068b47f6f489f43f952cd7a40d, type: 2}

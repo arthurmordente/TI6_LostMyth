@@ -1,3 +1,4 @@
+using Logic.Scripts.GameDomain.MVC.Nara.Animation;
 using UnityEngine;
 
 namespace Logic.Scripts.GameDomain.MVC.Nara
@@ -10,81 +11,123 @@ namespace Logic.Scripts.GameDomain.MVC.Nara
         [SerializeField] private Rigidbody _rigidbody;
         [SerializeField] private Collider _collider;
         [SerializeField] private Animator _animator;
+        [SerializeField] private ErzahlerPlayerAnimatorDriver _erzahlerAnimatorDriver;
 
         [Header("Active Unit Circle")]
         [SerializeField] private GameObject _activeUnitCirclePrefab;
 
         public GameObject ActiveUnitCirclePrefab => _activeUnitCirclePrefab;
 
-        public Rigidbody GetRigidbody()
+        public Rigidbody GetRigidbody() => _rigidbody;
+
+        public Camera GetCamera() => Camera.main;
+
+        public ErzahlerPlayerAnimatorDriver ErzahlerAnimatorDriver => _erzahlerAnimatorDriver;
+
+        private void Awake()
         {
-            return _rigidbody;
+            if (_animator == null)
+                _animator = GetComponentInChildren<Animator>(true);
+            if (_erzahlerAnimatorDriver == null)
+                _erzahlerAnimatorDriver = GetComponent<ErzahlerPlayerAnimatorDriver>();
         }
 
-        public Camera GetCamera()
+        public void ConfigureErzahlerAnimation(ErzahlerAnimatorControllersSO controllers)
         {
-            return Camera.main;
+            if (_erzahlerAnimatorDriver == null)
+                _erzahlerAnimatorDriver = gameObject.AddComponent<ErzahlerPlayerAnimatorDriver>();
+            _erzahlerAnimatorDriver.Configure(controllers, _animator);
         }
 
-        public void SetMoving(bool isMoving)
+        public void SetBookCloneDeployed(bool cloneDeployed)
         {
-            if (_animator != null)
+            _erzahlerAnimatorDriver?.SetBookCloneActive(cloneDeployed);
+        }
+
+        public void SetMoving(bool isMoving, bool running = false)
+        {
+            if (_erzahlerAnimatorDriver != null && _erzahlerAnimatorDriver.UsesErzahlerControllers)
             {
-                _animator.SetBool("Moving", isMoving);
+                _erzahlerAnimatorDriver.SetMoving(isMoving, running);
+                return;
             }
+
+            if (_animator != null)
+                _animator.SetBool("Moving", isMoving);
         }
 
         public void PlayDeath()
         {
             if (_animator != null)
-            {
                 _animator.SetTrigger("Dead");
-            }
         }
 
         public void SetAttackType(int type)
         {
-            if (_animator != null)
+            if (_erzahlerAnimatorDriver != null && _erzahlerAnimatorDriver.UsesErzahlerControllers)
             {
-                _animator.SetInteger("AKY_AttackType", type);
+                if (type > 0)
+                    _erzahlerAnimatorDriver.PlayConjuringSlowPrep();
+                return;
             }
+
+            if (_animator != null)
+                _animator.SetInteger("AKY_AttackType", type);
         }
 
         public void ResetAttackType()
         {
-            if (_animator != null)
+            if (_erzahlerAnimatorDriver != null && _erzahlerAnimatorDriver.UsesErzahlerControllers)
             {
-                _animator.SetInteger("AKY_AttackType", 0);
+                _erzahlerAnimatorDriver.SetConjuringLoop(false);
+                return;
             }
+
+            if (_animator != null)
+                _animator.SetInteger("AKY_AttackType", 0);
         }
 
         public void TriggerExecute()
         {
-            if (_animator != null)
+            if (_erzahlerAnimatorDriver != null && _erzahlerAnimatorDriver.UsesErzahlerControllers)
             {
-                _animator.SetTrigger("Execute");
+                _erzahlerAnimatorDriver.SetConjuringLoop(true);
+                _erzahlerAnimatorDriver.PlayConjuringSlowFinish();
+                return;
             }
+
+            if (_animator != null)
+                _animator.SetTrigger("Execute");
         }
 
         public void ResetExecuteTrigger()
         {
+            if (_erzahlerAnimatorDriver != null && _erzahlerAnimatorDriver.UsesErzahlerControllers)
+                return;
+
             if (_animator != null)
-            {
                 _animator.ResetTrigger("Execute");
-            }
         }
 
-		public void TriggerCancel()
-		{
-			if (_animator != null)
-			{
-				_animator.SetTrigger("Cancel");
-			}
-		}
-
-        public LineRenderer GetPointLineRenderer()
+        public void TriggerCancel()
         {
-            return CastLineRenderer;
+            if (_erzahlerAnimatorDriver != null && _erzahlerAnimatorDriver.UsesErzahlerControllers)
+            {
+                _erzahlerAnimatorDriver.SetConjuringLoop(false);
+                _erzahlerAnimatorDriver.PlayConjuringSlowFinish();
+                ResetAttackType();
+                return;
+            }
+
+            if (_animator != null)
+                _animator.SetTrigger("Cancel");
         }
+
+        public void ReleaseConjuring()
+        {
+            _erzahlerAnimatorDriver?.PlayConjuringSlowFinish();
+        }
+
+        public LineRenderer GetPointLineRenderer() => CastLineRenderer;
     }
 }
