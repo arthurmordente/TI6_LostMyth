@@ -38,7 +38,7 @@ MonoBehaviour:
   Cost: 0
   Icon: {fileID: 21300000, guid: 636254e507f1d2346a16a9436cf1aade, type: 3}
   SkillName: Ataque infusionado
-  Description: "Grante um multiplicador de dano aleat\xF3rio para o pr\xF3ximo ataque.
+  Description: "Garante um multiplicador de dano aleat\xF3rio para o pr\xF3ximo ataque.
     Viva a sorte!"
   _effects:
   - {fileID: 11400000, guid: a7b7f6e2e38a90e4d9f1d814975fc12c, type: 2}

@@ -38,9 +38,10 @@ MonoBehaviour:
   Cost: 1
   Icon: {fileID: 21300000, guid: 432210c08292a1942935ebc8fcad4608, type: 3}
   SkillName: Orbe de energia
-  Description: Dispara uM dado que explode ao colidir.
+  Description: Dispara um dado que explode ao colidir.
   _effects:
   - {fileID: 0}
   _passiveModifiers: []
   _passiveTurnBehavior: {fileID: 0}
+  _passiveCombatBehavior: {fileID: 0}
   _runtimeModifiers: []

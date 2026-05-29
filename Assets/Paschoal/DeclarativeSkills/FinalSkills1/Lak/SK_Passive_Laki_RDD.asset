@@ -43,4 +43,5 @@ MonoBehaviour:
   _effects: []
   _passiveModifiers: []
   _passiveTurnBehavior: {fileID: 11400000, guid: 0621b3c125a3a0a4d9012d1873093777, type: 2}
+  _passiveCombatBehavior: {fileID: 0}
   _runtimeModifiers: []
