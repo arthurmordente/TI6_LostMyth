@@ -57,7 +57,7 @@ Material:
     - _FoamAmount: 10
     - _FoamCut: 1.5
     - _HightFrequency: 1
-    - _Metalic: 0
+    - _Metalic: 0.28
     - _NoiseScale: 20
     - _NormalStreght: 0.1
     - _NormalStrenght: 20
@@ -70,7 +70,7 @@ Material:
     - _VertexDisplace: 2
     - _VoronolDensity: 2
     - _VoronolPower: 10
-    - _WaterDepth: 5
+    - _WaterDepth: 10
     - _WaveAmplitude: 1
     - _WaveSpeed: 5
     m_Colors:
