@@ -15,6 +15,8 @@ public class DeclarativeSkillDataSO : SkillDataSO
     {
         if (!IsCastable) return;
 
+        OutgoingDamageLifestealRuntime.ClearForCaster(caster);
+
         List<IEffectable> targets = new List<IEffectable>();
         IReadOnlyList<IEffectable> resolved = ResolveTargets(caster, target);
         if (resolved != null)

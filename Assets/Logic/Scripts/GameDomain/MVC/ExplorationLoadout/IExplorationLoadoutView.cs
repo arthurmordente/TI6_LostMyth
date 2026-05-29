@@ -8,10 +8,11 @@ using Logic.Scripts.GameDomain.Services.Skills;
 public interface IExplorationLoadoutView
 {
     bool IsVisible { get; }
-    void Init();
+    void Init(ISkillVisualCatalog visualCatalog = null);
     void SetVisible(bool visible);
     void RegisterCallbacks(Action onClose, Action<int> onPlayerSlotClicked, Action<int> onBookSlotClicked,
-        Action<ExplorationLoadoutSkillFilter> onCatalogFilterChanged = null);
+        Action<ExplorationLoadoutSkillFilter> onCatalogFilterChanged = null,
+        Action<ExplorationLoadoutDivinityFilter> onDivinityFilterChanged = null);
     void SetSlotData(SkillLoadoutUnitType unitType, int slotIndex, SkillDataSO skill);
     void SetSelectedSlot(SkillLoadoutUnitType unitType, int slotIndex);
     void ClearSlotSelection();

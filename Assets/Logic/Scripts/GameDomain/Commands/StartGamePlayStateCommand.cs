@@ -7,6 +7,7 @@ using Logic.Scripts.GameDomain.Services.ActiveUnit;
 using Logic.Scripts.GameDomain.Audio;
 using Logic.Scripts.Services.AudioService;
 using Logic.Scripts.Services.CommandFactory;
+using Logic.Scripts.GameDomain.Services.Skills;
 using Logic.Scripts.Turns;
 using System.Threading;
 using UnityEngine;
@@ -22,6 +23,8 @@ namespace Logic.Scripts.GameDomain.Commands {
         private IActiveUnitService _activeUnitService;
         private IActionPointsService _actionPointsService;
         private ILevelsDataService _levelsDataService;
+        private IRandomTurnPassiveService _randomTurnPassiveService;
+        private ILowHealthOutgoingDamageService _lowHealthOutgoingDamageService;
 
         private GamePlayInitatorEnterData _enterData;
 
@@ -40,12 +43,16 @@ namespace Logic.Scripts.GameDomain.Commands {
             _activeUnitService = _diContainer.Resolve<IActiveUnitService>();
             _actionPointsService = _diContainer.Resolve<IActionPointsService>();
             _levelsDataService = _diContainer.Resolve<ILevelsDataService>();
+            _randomTurnPassiveService = _diContainer.TryResolve<IRandomTurnPassiveService>();
+            _lowHealthOutgoingDamageService = _diContainer.TryResolve<ILowHealthOutgoingDamageService>();
         }
 
         public async Awaitable Execute(CancellationTokenSource cancellationTokenSource) {
             _gameInputActionsController.RegisterGameplayInputListeners();
             _naraController.InitEntryPointGamePlay(_gamePlayUiController);
             _naraController.ApplyCombatLoadoutPassivesAndActionPoints(_actionPointsService);
+            _randomTurnPassiveService?.RefreshFromLoadout();
+            _lowHealthOutgoingDamageService?.RefreshFromLoadout();
             await _commandFactory.CreateCommandAsync<StartLevelCommand>().StartBoss().Execute(cancellationTokenSource);
 
             var levelData = _levelsDataService.GetLevelData(_enterData.LevelNumberToEnter) as LevelTurnData;

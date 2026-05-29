@@ -1,3 +1,4 @@
+using Logic.Scripts.GameDomain.Services.Skills;
 using Zenject;
 using Logic.Scripts.GameDomain.MVC.Boss;
 using Logic.Scripts.GameDomain.MVC.Environment.Orb;
@@ -21,6 +22,8 @@ namespace Logic.Scripts.Turns
             Container.BindInterfacesAndSelfTo<EnviromentActionService>().AsSingle();
 			// OrbEnvironmentRule desabilitada: orb agora é executada como IEnvironmentTurnActor
 
+            Container.BindInterfacesAndSelfTo<RandomTurnPassiveService>().AsSingle();
+            Container.BindInterfacesAndSelfTo<LowHealthOutgoingDamageService>().AsSingle();
             Container.BindInterfacesAndSelfTo<TurnFlowController>().AsSingle();
         }
     }

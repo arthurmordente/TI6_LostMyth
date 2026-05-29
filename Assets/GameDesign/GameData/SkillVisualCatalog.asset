@@ -1,0 +1,95 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7f38db640dbee3f4896b22e1bd3f72e8, type: 3}
+  m_Name: SkillVisualCatalog
+  m_EditorClassIdentifier: Assembly-CSharp::Logic.Scripts.GameDomain.Services.Skills.SkillVisualCatalogSO
+  _entries:
+  - Divinity: 0
+    SkillType: 0
+    BackgroundPaint: {fileID: 21300000, guid: a3fa08d9c68cd024187b872e946013c6, type: 3}
+    Frame: {fileID: 21300000, guid: 169e026a760e47f4ca7a15ea06d11f5f, type: 3}
+  - Divinity: 0
+    SkillType: 1
+    BackgroundPaint: {fileID: 21300000, guid: c8d44a6a96ee54c4881310d9b4253881, type: 3}
+    Frame: {fileID: 21300000, guid: b1ad7f52b5a217f4dab1736a8fc388f8, type: 3}
+  - Divinity: 0
+    SkillType: 2
+    BackgroundPaint: {fileID: 21300000, guid: 87cfc9f9d397a984485f8c27c5e13f39, type: 3}
+    Frame: {fileID: 21300000, guid: d67b7bcb4cd918f44aed1c0992777a83, type: 3}
+  - Divinity: 0
+    SkillType: 3
+    BackgroundPaint: {fileID: 21300000, guid: 25749c037ee4ede4b89d5f7e9de06be7, type: 3}
+    Frame: {fileID: 21300000, guid: d67b7bcb4cd918f44aed1c0992777a83, type: 3}
+  - Divinity: 1
+    SkillType: 0
+    BackgroundPaint: {fileID: 21300000, guid: 3e2bacbc42058de4ea34ffc61fff3b61, type: 3}
+    Frame: {fileID: 21300000, guid: ba681d0c09c4c8b4c8f4b26885084399, type: 3}
+  - Divinity: 1
+    SkillType: 1
+    BackgroundPaint: {fileID: 21300000, guid: 5faf50af1acba3e42b365ec9fcfcac92, type: 3}
+    Frame: {fileID: 21300000, guid: 1e5a46fffde438d45b380bb99f58a923, type: 3}
+  - Divinity: 1
+    SkillType: 2
+    BackgroundPaint: {fileID: 21300000, guid: 51634253c1d9b4145873130bbfb50a76, type: 3}
+    Frame: {fileID: 21300000, guid: a8d4cbfa3ed4c22419876f0eac7fde21, type: 3}
+  - Divinity: 1
+    SkillType: 3
+    BackgroundPaint: {fileID: 21300000, guid: 06c0aa69996469b4fbfbf2c94e599493, type: 3}
+    Frame: {fileID: 21300000, guid: 4d2ce2bab9c6fce47bdb53b7bd26f042, type: 3}
+  - Divinity: 2
+    SkillType: 0
+    BackgroundPaint: {fileID: 21300000, guid: 71f21a6e5369d60408faa32c33a052ee, type: 3}
+    Frame: {fileID: 21300000, guid: 0bed2216935aac844aecaac286680704, type: 3}
+  - Divinity: 2
+    SkillType: 1
+    BackgroundPaint: {fileID: 21300000, guid: 2b3146d50acd9d34aa2ffe35d7df6ed2, type: 3}
+    Frame: {fileID: 21300000, guid: 14ec5c246d0401b43bda7fe44feb12eb, type: 3}
+  - Divinity: 2
+    SkillType: 2
+    BackgroundPaint: {fileID: 21300000, guid: cecdac95630f9ba4ca12e989522503d9, type: 3}
+    Frame: {fileID: 21300000, guid: cef9bd35e29855f4abb1c3010c931b65, type: 3}
+  - Divinity: 2
+    SkillType: 3
+    BackgroundPaint: {fileID: 21300000, guid: 7bb088b7458eeb142ac278717915f100, type: 3}
+    Frame: {fileID: 21300000, guid: 60dcf183ea1a06843aac9abd4e3c39ee, type: 3}
+  - Divinity: 3
+    SkillType: 0
+    BackgroundPaint: {fileID: 21300000, guid: c8287d4c98553854a93d475ffeb373ae, type: 3}
+    Frame: {fileID: 21300000, guid: e8e42929ca6b09949a4bd72ff8012508, type: 3}
+  - Divinity: 3
+    SkillType: 1
+    BackgroundPaint: {fileID: 21300000, guid: c92d533040a42ca42a93a506a866b923, type: 3}
+    Frame: {fileID: 21300000, guid: d61cefd6cdd6ec74d960cf6fbeda7101, type: 3}
+  - Divinity: 3
+    SkillType: 2
+    BackgroundPaint: {fileID: 21300000, guid: 57d64f5e1650c7b45a419b1583589271, type: 3}
+    Frame: {fileID: 21300000, guid: db7f95ae254769e49a67416107ba53d8, type: 3}
+  - Divinity: 3
+    SkillType: 3
+    BackgroundPaint: {fileID: 21300000, guid: f2e4c428f70e40a42820931dc8619665, type: 3}
+    Frame: {fileID: 21300000, guid: f13956c19396c464f869c0152cf2a371, type: 3}
+  - Divinity: 4
+    SkillType: 0
+    BackgroundPaint: {fileID: 21300000, guid: d550d7ed131c32c40acc33cda90b99b1, type: 3}
+    Frame: {fileID: 21300000, guid: 596a828b45d4bb0449ecd1a93f2d2e03, type: 3}
+  - Divinity: 4
+    SkillType: 1
+    BackgroundPaint: {fileID: 21300000, guid: cf9c7c5ffa1afc846899acd8cfb6d128, type: 3}
+    Frame: {fileID: 21300000, guid: 50014e2bf585e41418fa5e81cf9fda7a, type: 3}
+  - Divinity: 4
+    SkillType: 2
+    BackgroundPaint: {fileID: 21300000, guid: 6a796b1a29f396348868ec0e8dbd9d13, type: 3}
+    Frame: {fileID: 21300000, guid: ac074e848679e0342a1a55e222c7842e, type: 3}
+  - Divinity: 4
+    SkillType: 3
+    BackgroundPaint: {fileID: 21300000, guid: 716282f4d97ec044487e5815cf154889, type: 3}
+    Frame: {fileID: 21300000, guid: 0c0f5b3b638d8a14e8b1887a2409450e, type: 3}

@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a7b8c9d0e1f23456789abcdef0123ab, type: 3}
+  m_Name: SK_Passive_Laki_RDD
+  m_EditorClassIdentifier: Assembly-CSharp::DeclarativeSkillDataSO
+  _divinity: 1
+  _skillType: 3
+  _castType: 2
+  _projectileRange: 8
+  _projectileNumberOfTargets: 1
+  _projectileTravelSpeed: 12
+  _projectileAimPrefab: {fileID: 0}
+  _projectilePrefab: {fileID: 0}
+  _moveCasterToProjectileHit: 0
+  _projectilePullStandoffFromTargetMeters: 1.2
+  _projectileDealsDamage: 1
+  _projectileDefersArenaSyncUntilHit: 0
+  _projectileSpawnForwardOffset: 0.35
+  _projectileMinTravelBeforeHitMeters: 0.45
+  _projectileHitDisplacementDurationSeconds: 0.35
+  _areaMinRange: 0
+  _areaMaxRange: 8
+  _areaRadius: 2
+  _areaAimPrefab: {fileID: 0}
+  _areaImpactPrefab: {fileID: 0}
+  _selfAimPrefab: {fileID: 0}
+  _selfCastPrefab: {fileID: 0}
+  Power: 0
+  Cost: 0
+  Icon: {fileID: 21300000, guid: d70afe988852bbc439d6538999761d9b, type: 3}
+  SkillName: Roll Da Dice!
+  Description: "A cada turno, ganha aleatoriamente um buff entre: mais mana, mais
+    dano, ou mais movimenta\xE7\xE3o"
+  _effects: []
+  _passiveModifiers: []
+  _passiveTurnBehavior: {fileID: 11400000, guid: 0621b3c125a3a0a4d9012d1873093777, type: 2}
+  _runtimeModifiers: []

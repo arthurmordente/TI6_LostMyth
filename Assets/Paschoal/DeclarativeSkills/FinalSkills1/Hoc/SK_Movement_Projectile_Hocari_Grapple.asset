@@ -10,8 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6a7b8c9d0e1f23456789abcdef0123ab, type: 3}
-  m_Name: SK_Movement_Projectile_Grapple
+  m_Name: SK_Movement_Projectile_Hocari_Grapple
   m_EditorClassIdentifier: 
+  _divinity: 0
   _skillType: 2
   _castType: 0
   _projectileRange: 18
@@ -35,10 +36,9 @@ MonoBehaviour:
   _selfCastPrefab: {fileID: 1607142820532151380, guid: 6190cf774033c09479d45e3c13b935d7, type: 3}
   Power: 0
   Cost: 2
-  Icon: {fileID: 21300000, guid: f1f774d82f1bae14a95b9197cb85239d, type: 3}
+  Icon: {fileID: 21300000, guid: d40a558aa94823b49841218f31b64373, type: 3}
   SkillName: "Pluma da aproxima\xE7\xE3o"
-  Description: "Arremessa uma pluma m\xE1gica que puxa o conjurador at\xE9 o primeiro
-    alvo atingido."
+  Description: "Utiliza o poder de suc\xE7\xE3o para ir at\xE9 o alvo atingido."
   _effects: []
   _passiveModifiers: []
   _runtimeModifiers: []

@@ -10,15 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6a7b8c9d0e1f23456789abcdef0123ab, type: 3}
-  m_Name: SK_Dmg_Area_MeteorShower
-  m_EditorClassIdentifier: 
+  m_Name: SK_Dmg_Projectile_Boris_1x15LS
+  m_EditorClassIdentifier: Assembly-CSharp::DeclarativeSkillDataSO
+  _divinity: 2
   _skillType: 0
-  _castType: 1
-  _projectileRange: 8
+  _castType: 0
+  _projectileRange: 15
   _projectileNumberOfTargets: 1
   _projectileTravelSpeed: 12
-  _projectileAimPrefab: {fileID: 0}
-  _projectilePrefab: {fileID: 0}
+  _projectileAimPrefab: {fileID: 5171449077471736857, guid: 5a96a15201f481c488a06861525f72e4, type: 3}
+  _projectilePrefab: {fileID: 4470363709726842422, guid: 05ecf4c11bd35014797b40e47735e1c1, type: 3}
   _moveCasterToProjectileHit: 0
   _projectilePullStandoffFromTargetMeters: 1.2
   _projectileDealsDamage: 1
@@ -29,16 +30,18 @@ MonoBehaviour:
   _areaMinRange: 0
   _areaMaxRange: 8
   _areaRadius: 2
-  _areaAimPrefab: {fileID: 1607142820532151380, guid: 6feee9629db8db94f83b1e6771d787d1, type: 3}
-  _areaImpactPrefab: {fileID: 2224025274982176450, guid: caa4a69375bd38348901ddadba2f8953, type: 3}
+  _areaAimPrefab: {fileID: 0}
+  _areaImpactPrefab: {fileID: 0}
   _selfAimPrefab: {fileID: 0}
   _selfCastPrefab: {fileID: 0}
-  Power: 25
-  Cost: 2
-  Icon: {fileID: 21300000, guid: c0de9e55624845a42b8ad06684976429, type: 3}
-  SkillName: Chuva de raios
-  Description: "Invoca raio dos c\xE9us, causando muito dano em tudo na \xE1rea selecionada."
+  Power: 20
+  Cost: 3
+  Icon: {fileID: 21300000, guid: 8f9e4fb2e31ce5c41a5f5aec2d3b6838, type: 3}
+  SkillName: Sugada vital
+  Description: Rouba parte da energia vital do primeiro alvo atingido.
   _effects:
-  - {fileID: 11400000, guid: a47ac10b58cc4372a5670e02b2c3d472, type: 2}
+  - {fileID: 11400000, guid: b1ce42d1f87ea114f93d58402bb3939f, type: 2}
   _passiveModifiers: []
+  _passiveTurnBehavior: {fileID: 0}
+  _passiveCombatBehavior: {fileID: 0}
   _runtimeModifiers: []

@@ -11,28 +11,33 @@ public class ExplorationLoadoutUIController : IExplorationLoadoutUIController
 {
     private readonly IExplorationLoadoutView _view;
     private readonly INewSkillSystemSkillLoadoutService _loadoutService;
+    private readonly ISkillVisualCatalog _visualCatalog;
     private readonly IAudioService _audioService;
 
     private SkillLoadoutUnitType _selectedUnitType = SkillLoadoutUnitType.Player;
     private int _selectedSlotIndex;
     private ExplorationLoadoutSkillFilter _catalogFilter = ExplorationLoadoutSkillFilter.All;
+    private ExplorationLoadoutDivinityFilter _divinityFilter = ExplorationLoadoutDivinityFilter.All;
     private bool _modalGateActive;
 
     public ExplorationLoadoutUIController(
         IExplorationLoadoutView view,
         INewSkillSystemSkillLoadoutService loadoutService,
+        ISkillVisualCatalog visualCatalog,
         [InjectOptional] IAudioService audioService = null)
     {
         _view = view;
         _loadoutService = loadoutService;
+        _visualCatalog = visualCatalog;
         _audioService = audioService;
     }
 
     public void InitEntryPoint()
     {
         if (_view == null) return;
-        _view.Init();
-        _view.RegisterCallbacks(Hide, OnPlayerSlotClicked, OnBookSlotClicked, OnCatalogFilterChanged);
+        _view.Init(_visualCatalog);
+        _view.RegisterCallbacks(Hide, OnPlayerSlotClicked, OnBookSlotClicked,
+            OnCatalogFilterChanged, OnDivinityFilterChanged);
         RebuildCatalog();
         RefreshSlots();
         _view.SetSelectedSlot(_selectedUnitType, _selectedSlotIndex);
@@ -77,6 +82,12 @@ public class ExplorationLoadoutUIController : IExplorationLoadoutUIController
         RebuildCatalog();
     }
 
+    private void OnDivinityFilterChanged(ExplorationLoadoutDivinityFilter filter)
+    {
+        _divinityFilter = filter;
+        RebuildCatalog();
+    }
+
     private void RebuildCatalog()
     {
         if (_view == null || _loadoutService == null) return;
@@ -85,7 +96,7 @@ public class ExplorationLoadoutUIController : IExplorationLoadoutUIController
         {
             var item = _view.CreateCatalogItem();
             if (item == null) continue;
-            item.Bind(skill, OnCatalogSkillSelected, OnCatalogSkillHovered);
+            item.Bind(skill, _visualCatalog, OnCatalogSkillSelected, OnCatalogSkillHovered);
         }
         _view.FinalizeCatalogScroll();
     }
@@ -93,7 +104,9 @@ public class ExplorationLoadoutUIController : IExplorationLoadoutUIController
     private IEnumerable<SkillDataSO> EnumerateFilteredCatalogSkills()
     {
         IEnumerable<SkillDataSO> q = _loadoutService.AllSkills
-            .Where(s => s != null && ExplorationLoadoutSkillFilterUtil.Matches(s, _catalogFilter));
+            .Where(s => s != null
+                && ExplorationLoadoutSkillFilterUtil.Matches(s, _catalogFilter)
+                && ExplorationLoadoutDivinityFilterUtil.Matches(s, _divinityFilter));
         if (_catalogFilter == ExplorationLoadoutSkillFilter.All)
             return q
                 .OrderBy(s => ExplorationLoadoutSkillFilterUtil.AllViewSortGroup(s.SkillType))

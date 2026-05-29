@@ -14,9 +14,11 @@ public class ExplorationLoadoutUIView : MonoBehaviour, IExplorationLoadoutView
     public class SkillSlotUiRef
     {
         public Button Button;
+        public Image BackgroundImage;
+        public Image FrameImage;
+        public Image IconImage;
         public TMP_Text NameText;
         public TMP_Text CostText;
-        public Image IconImage;
         public Image SelectionOutline;
     }
 
@@ -34,15 +36,21 @@ public class ExplorationLoadoutUIView : MonoBehaviour, IExplorationLoadoutView
     [SerializeField] private ExplorationSkillCatalogItemView _catalogItemPrefab;
     [Tooltip("Opcional. Dropdown TMP no prefab da cena (mesma ordem que ExplorationLoadoutSkillFilter).")]
     [SerializeField] private TMP_Dropdown _skillCategoryDropdown;
+    [Tooltip("Opcional. Dropdown TMP para filtrar por divindade.")]
+    [SerializeField] private TMP_Dropdown _divinityCategoryDropdown;
 
     [Header("Details")]
     [SerializeField] private TMP_Text _detailNameText;
+    [SerializeField] private TMP_Text _detailDivinityText;
     [SerializeField] private TMP_Text _detailDescriptionText;
     [SerializeField] private TMP_Text _detailPowerText;
     [SerializeField] private TMP_Text _detailCostText;
     [SerializeField] private TMP_Text _detailRangeText;
+    [SerializeField] private Image _detailBackgroundImage;
+    [SerializeField] private Image _detailFrameImage;
     [SerializeField] private Image _detailIconImage;
 
+    private ISkillVisualCatalog _visualCatalog;
     private TMP_Text _debugFilterHeaderText;
     private GameObject _debugFilterListRoot;
     private GameObject _debugFilterClickBlocker;
@@ -50,6 +58,9 @@ public class ExplorationLoadoutUIView : MonoBehaviour, IExplorationLoadoutView
     private Transform _catalogPanelTransform;
     private ScrollRect _catalogScrollRect;
     private Action<ExplorationLoadoutSkillFilter> _onCatalogFilterChanged;
+    private Action<ExplorationLoadoutDivinityFilter> _onDivinityFilterChanged;
+    private TMP_Text _debugDivinityFilterHeaderText;
+    private GameObject _debugDivinityFilterListRoot;
 
     private void Awake()
     {
@@ -65,13 +76,15 @@ public class ExplorationLoadoutUIView : MonoBehaviour, IExplorationLoadoutView
 
     public bool IsVisible => _rootPanel != null && _rootPanel.activeSelf;
 
-    public void Init()
+    public void Init(ISkillVisualCatalog visualCatalog = null)
     {
+        _visualCatalog = visualCatalog;
         SetVisible(false);
     }
 
     public void RegisterCallbacks(Action onClose, Action<int> onPlayerSlotClicked, Action<int> onBookSlotClicked,
-        Action<ExplorationLoadoutSkillFilter> onCatalogFilterChanged = null)
+        Action<ExplorationLoadoutSkillFilter> onCatalogFilterChanged = null,
+        Action<ExplorationLoadoutDivinityFilter> onDivinityFilterChanged = null)
     {
         if (_closeButton != null)
         {
@@ -83,7 +96,9 @@ public class ExplorationLoadoutUIView : MonoBehaviour, IExplorationLoadoutView
         RegisterSlotCallbacks(_bookSlots, onBookSlotClicked);
 
         _onCatalogFilterChanged = onCatalogFilterChanged;
+        _onDivinityFilterChanged = onDivinityFilterChanged;
         WireSkillCategoryDropdown();
+        WireDivinityCategoryDropdown();
     }
 
     private void WireSkillCategoryDropdown()
@@ -105,6 +120,25 @@ public class ExplorationLoadoutUIView : MonoBehaviour, IExplorationLoadoutView
         _onCatalogFilterChanged?.Invoke((ExplorationLoadoutSkillFilter)index);
     }
 
+    private void WireDivinityCategoryDropdown()
+    {
+        if (_divinityCategoryDropdown == null) return;
+        _divinityCategoryDropdown.onValueChanged.RemoveListener(OnDivinityCategoryDropdownValueChanged);
+        _divinityCategoryDropdown.ClearOptions();
+        var opts = new List<string>(6);
+        for (int i = 0; i <= (int)ExplorationLoadoutDivinityFilter.Iara; i++)
+            opts.Add(ExplorationLoadoutDivinityFilterUtil.DisplayLabel((ExplorationLoadoutDivinityFilter)i));
+        _divinityCategoryDropdown.AddOptions(opts);
+        _divinityCategoryDropdown.SetValueWithoutNotify(0);
+        _divinityCategoryDropdown.onValueChanged.AddListener(OnDivinityCategoryDropdownValueChanged);
+    }
+
+    private void OnDivinityCategoryDropdownValueChanged(int index)
+    {
+        if (index < 0 || index > (int)ExplorationLoadoutDivinityFilter.Iara) return;
+        _onDivinityFilterChanged?.Invoke((ExplorationLoadoutDivinityFilter)index);
+    }
+
     public void SetVisible(bool visible)
     {
         if (_rootPanel != null) _rootPanel.SetActive(visible);
@@ -122,10 +156,61 @@ public class ExplorationLoadoutUIView : MonoBehaviour, IExplorationLoadoutView
             else if (skill.SkillType == SkillType.Passive) slot.CostText.SetText("-");
             else slot.CostText.SetText(skill.Cost.ToString());
         }
-        if (slot.IconImage != null)
-        {
-            slot.IconImage.sprite = skill != null ? skill.Icon : null;
-            slot.IconImage.enabled = slot.IconImage.sprite != null;
+        ApplySlotVisualLayers(slot, skill);
+    }
+
+    private void ApplySlotVisualLayers(SkillSlotUiRef slot, SkillDataSO skill)
+    {
+        if (slot == null) return;
+
+        if (skill == null) {
+            ClearSlotVisualLayers(slot);
+            return;
+        }
+
+        if (_visualCatalog != null && _visualCatalog.TryGetLayerSprites(skill.Divinity, skill.SkillType,
+                out var bg, out var frame)) {
+            if (slot.BackgroundImage != null) {
+                slot.BackgroundImage.sprite = bg;
+                slot.BackgroundImage.enabled = bg != null;
+                if (bg != null) slot.BackgroundImage.color = Color.white;
+            }
+            if (slot.FrameImage != null) {
+                slot.FrameImage.sprite = frame;
+                slot.FrameImage.enabled = frame != null;
+                if (frame != null) slot.FrameImage.color = Color.white;
+            }
+        } else {
+            if (slot.BackgroundImage != null) {
+                slot.BackgroundImage.sprite = null;
+                slot.BackgroundImage.enabled = false;
+            }
+            if (slot.FrameImage != null) {
+                slot.FrameImage.sprite = null;
+                slot.FrameImage.enabled = false;
+            }
+        }
+
+        if (slot.IconImage != null) {
+            slot.IconImage.sprite = skill.Icon;
+            slot.IconImage.enabled = skill.Icon != null;
+            if (skill.Icon != null) slot.IconImage.color = Color.white;
+        }
+    }
+
+    private static void ClearSlotVisualLayers(SkillSlotUiRef slot)
+    {
+        if (slot.BackgroundImage != null) {
+            slot.BackgroundImage.sprite = null;
+            slot.BackgroundImage.enabled = false;
+        }
+        if (slot.FrameImage != null) {
+            slot.FrameImage.sprite = null;
+            slot.FrameImage.enabled = false;
+        }
+        if (slot.IconImage != null) {
+            slot.IconImage.sprite = null;
+            slot.IconImage.enabled = false;
         }
     }
 
@@ -180,6 +265,7 @@ public class ExplorationLoadoutUIView : MonoBehaviour, IExplorationLoadoutView
     private void CloseDebugFilterDropdown()
     {
         if (_debugFilterListRoot != null) _debugFilterListRoot.SetActive(false);
+        if (_debugDivinityFilterListRoot != null) _debugDivinityFilterListRoot.SetActive(false);
         if (_debugFilterClickBlocker != null) _debugFilterClickBlocker.SetActive(false);
         if (_filterDropdownModalBlocker != null) _filterDropdownModalBlocker.SetActive(false);
     }
@@ -216,6 +302,8 @@ public class ExplorationLoadoutUIView : MonoBehaviour, IExplorationLoadoutView
     public void ShowSkillDetails(SkillDataSO skill)
     {
         if (_detailNameText != null) _detailNameText.SetText(skill != null ? skill.SkillName : "-");
+        if (_detailDivinityText != null)
+            _detailDivinityText.SetText(skill != null ? SkillDivinityUtil.DisplayLabel(skill.Divinity) : "-");
         if (_detailDescriptionText != null) _detailDescriptionText.SetText(skill != null ? skill.Description : string.Empty);
         if (_detailPowerText != null) _detailPowerText.SetText(skill != null ? skill.Power.ToString() : "-");
         if (_detailCostText != null)
@@ -225,10 +313,54 @@ public class ExplorationLoadoutUIView : MonoBehaviour, IExplorationLoadoutView
             else _detailCostText.SetText(skill.Cost.ToString());
         }
         if (_detailRangeText != null) _detailRangeText.SetText(skill != null ? skill.Range.ToString("0.##") : "-");
-        if (_detailIconImage != null)
-        {
-            _detailIconImage.sprite = skill != null ? skill.Icon : null;
-            _detailIconImage.enabled = _detailIconImage.sprite != null;
+        ApplyDetailVisualLayers(skill);
+    }
+
+    private void ApplyDetailVisualLayers(SkillDataSO skill)
+    {
+        if (skill == null) {
+            if (_detailBackgroundImage != null) {
+                _detailBackgroundImage.sprite = null;
+                _detailBackgroundImage.enabled = false;
+            }
+            if (_detailFrameImage != null) {
+                _detailFrameImage.sprite = null;
+                _detailFrameImage.enabled = false;
+            }
+            if (_detailIconImage != null) {
+                _detailIconImage.sprite = null;
+                _detailIconImage.enabled = false;
+            }
+            return;
+        }
+
+        if (_visualCatalog != null && _visualCatalog.TryGetLayerSprites(skill.Divinity, skill.SkillType,
+                out var bg, out var frame)) {
+            if (_detailBackgroundImage != null) {
+                _detailBackgroundImage.sprite = bg;
+                _detailBackgroundImage.enabled = bg != null;
+                if (bg != null) _detailBackgroundImage.color = Color.white;
+            }
+            if (_detailFrameImage != null) {
+                _detailFrameImage.sprite = frame;
+                _detailFrameImage.enabled = frame != null;
+                if (frame != null) _detailFrameImage.color = Color.white;
+            }
+        } else {
+            if (_detailBackgroundImage != null) {
+                _detailBackgroundImage.sprite = null;
+                _detailBackgroundImage.enabled = false;
+            }
+            if (_detailFrameImage != null) {
+                _detailFrameImage.sprite = null;
+                _detailFrameImage.enabled = false;
+            }
+        }
+
+        if (_detailIconImage != null) {
+            _detailIconImage.sprite = skill.Icon;
+            _detailIconImage.enabled = skill.Icon != null;
+            if (skill.Icon != null) _detailIconImage.color = Color.white;
         }
     }
 
@@ -422,6 +554,79 @@ public class ExplorationLoadoutUIView : MonoBehaviour, IExplorationLoadoutView
             bool open = _debugFilterListRoot == null || !_debugFilterListRoot.activeSelf;
             SetDebugFilterDropdownOpen(open);
         });
+
+        BuildDebugDivinityFilterRow(catalogParent);
+    }
+
+    private void BuildDebugDivinityFilterRow(Transform catalogParent)
+    {
+        var row = CreateUiObject("DivinityFilterRow", catalogParent);
+        StretchRect(row.GetComponent<RectTransform>(), new Vector2(0.04f, 0.655f), new Vector2(0.96f, 0.748f));
+        row.AddComponent<Image>().color = new Color(0f, 0f, 0f, 0.18f);
+        AddPanelOutline(row, new Color(1f, 1f, 1f, 0.2f));
+        CreateText(row.transform, "Lbl", "Divindade", new Vector2(0.03f, 0.2f), new Vector2(0.24f, 0.8f), 14f);
+        var hdrGo = CreateUiObject("DivinityFilterHeaderBtn", row.transform);
+        StretchRect(hdrGo.GetComponent<RectTransform>(), new Vector2(0.26f, 0.12f), new Vector2(0.97f, 0.88f));
+        hdrGo.AddComponent<Image>().color = new Color(1f, 1f, 1f, 0.1f);
+        var hdrBtn = hdrGo.AddComponent<Button>();
+        _debugDivinityFilterHeaderText = CreateText(hdrGo.transform, "Txt", "Todas ▼", new Vector2(0.05f, 0.12f), new Vector2(0.95f, 0.88f), 16f);
+        _debugDivinityFilterHeaderText.alignment = TextAlignmentOptions.Left;
+
+        _debugDivinityFilterListRoot = CreateUiObject("DivinityFilterList", catalogParent);
+        var listRt = _debugDivinityFilterListRoot.GetComponent<RectTransform>();
+        listRt.anchorMin = new Vector2(0.06f, 0.655f);
+        listRt.anchorMax = new Vector2(0.94f, 0.655f);
+        listRt.pivot = new Vector2(0.5f, 1f);
+        listRt.anchoredPosition = Vector2.zero;
+        listRt.sizeDelta = Vector2.zero;
+        var listBg = _debugDivinityFilterListRoot.AddComponent<Image>();
+        listBg.color = new Color(0.08f, 0.08f, 0.1f, 0.98f);
+        listBg.raycastTarget = true;
+        AddPanelOutline(_debugDivinityFilterListRoot, new Color(0.9f, 0.9f, 1f, 0.4f));
+        var vlg = _debugDivinityFilterListRoot.AddComponent<VerticalLayoutGroup>();
+        vlg.padding = new RectOffset(10, 10, 8, 8);
+        vlg.spacing = 6f;
+        vlg.childControlWidth = true;
+        vlg.childControlHeight = true;
+        vlg.childForceExpandWidth = true;
+        vlg.childForceExpandHeight = false;
+        _debugDivinityFilterListRoot.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+        _debugDivinityFilterListRoot.SetActive(false);
+
+        for (int i = 0; i <= (int)ExplorationLoadoutDivinityFilter.Iara; i++)
+        {
+            int idx = i;
+            var label = ExplorationLoadoutDivinityFilterUtil.DisplayLabel((ExplorationLoadoutDivinityFilter)idx);
+            var optGo = CreateUiObject("DivOpt" + i, _debugDivinityFilterListRoot.transform);
+            optGo.AddComponent<Image>().color = new Color(1f, 1f, 1f, 0.1f);
+            var le = optGo.AddComponent<LayoutElement>();
+            le.minHeight = 34f;
+            le.preferredHeight = 34f;
+            var optBtn = optGo.AddComponent<Button>();
+            var optTxt = CreateText(optGo.transform, "Txt", label, new Vector2(0.05f, 0.1f), new Vector2(0.95f, 0.9f), 15f);
+            optTxt.alignment = TextAlignmentOptions.Left;
+            optBtn.onClick.AddListener(() =>
+            {
+                if (_divinityCategoryDropdown != null)
+                    _divinityCategoryDropdown.SetValueWithoutNotify(idx);
+                _onDivinityFilterChanged?.Invoke((ExplorationLoadoutDivinityFilter)idx);
+                _debugDivinityFilterHeaderText?.SetText(label + " ▼");
+                _debugDivinityFilterListRoot.SetActive(false);
+                if (_debugFilterListRoot != null) _debugFilterListRoot.SetActive(false);
+                if (_debugFilterClickBlocker != null) _debugFilterClickBlocker.SetActive(false);
+                if (_filterDropdownModalBlocker != null) _filterDropdownModalBlocker.SetActive(false);
+            });
+        }
+
+        hdrBtn.onClick.AddListener(() =>
+        {
+            bool open = _debugDivinityFilterListRoot == null || !_debugDivinityFilterListRoot.activeSelf;
+            if (_debugDivinityFilterListRoot != null) _debugDivinityFilterListRoot.SetActive(open);
+            if (_debugFilterListRoot != null && open) _debugFilterListRoot.SetActive(false);
+            if (_debugFilterClickBlocker != null) _debugFilterClickBlocker.SetActive(open);
+            if (_filterDropdownModalBlocker != null) _filterDropdownModalBlocker.SetActive(open);
+            if (open) BringCatalogAndDropdownToFront();
+        });
     }
 
     private void BuildSlotRow(Transform parent, List<SkillSlotUiRef> targetSlots, string title, string prefix)
@@ -437,8 +642,8 @@ public class ExplorationLoadoutUIView : MonoBehaviour, IExplorationLoadoutView
             StretchRect(slotObj.GetComponent<RectTransform>(), new Vector2(minX, 0.08f), new Vector2(maxX, 0.76f));
 
             var button = slotObj.AddComponent<Button>();
-            var image = slotObj.AddComponent<Image>();
-            image.color = new Color(1f, 1f, 1f, 0.12f);
+            var slotBg = slotObj.AddComponent<Image>();
+            slotBg.color = new Color(1f, 1f, 1f, 0.12f);
             AddPanelOutline(slotObj, new Color(1f, 1f, 1f, 0.28f));
             var outlineObj = CreateUiObject("Selected", slotObj.transform);
             var outline = outlineObj.AddComponent<Image>();
@@ -446,19 +651,32 @@ public class ExplorationLoadoutUIView : MonoBehaviour, IExplorationLoadoutView
             StretchRect(outlineObj.GetComponent<RectTransform>(), Vector2.zero, Vector2.one);
             outline.enabled = false;
 
-            var name = CreateText(slotObj.transform, "Name", "-", new Vector2(0.06f, 0.55f), new Vector2(0.94f, 0.92f), 16f, ellipsis: true);
-            var cost = CreateText(slotObj.transform, "Cost", "0", new Vector2(0.06f, 0.1f), new Vector2(0.42f, 0.48f), 16f);
-            var iconObj = CreateUiObject("Icon", slotObj.transform);
+            var visualStack = CreateUiObject("VisualStack", slotObj.transform);
+            StretchRect(visualStack.GetComponent<RectTransform>(), new Vector2(0.48f, 0.12f), new Vector2(0.93f, 0.92f));
+            var backgroundObj = CreateUiObject("BackgroundPaint", visualStack.transform);
+            var background = backgroundObj.AddComponent<Image>();
+            StretchRect(backgroundObj.GetComponent<RectTransform>(), Vector2.zero, Vector2.one);
+            background.enabled = false;
+            var frameObj = CreateUiObject("Frame", visualStack.transform);
+            var frame = frameObj.AddComponent<Image>();
+            StretchRect(frameObj.GetComponent<RectTransform>(), Vector2.zero, Vector2.one);
+            frame.enabled = false;
+            var iconObj = CreateUiObject("Icon", visualStack.transform);
             var icon = iconObj.AddComponent<Image>();
-            StretchRect(iconObj.GetComponent<RectTransform>(), new Vector2(0.48f, 0.14f), new Vector2(0.93f, 0.52f));
+            StretchRect(iconObj.GetComponent<RectTransform>(), new Vector2(0.12f, 0.12f), new Vector2(0.88f, 0.88f));
             icon.enabled = false;
+
+            var name = CreateText(slotObj.transform, "Name", "-", new Vector2(0.06f, 0.55f), new Vector2(0.44f, 0.92f), 16f, ellipsis: true);
+            var cost = CreateText(slotObj.transform, "Cost", "0", new Vector2(0.06f, 0.1f), new Vector2(0.42f, 0.48f), 16f);
 
             targetSlots.Add(new SkillSlotUiRef
             {
                 Button = button,
+                BackgroundImage = background,
+                FrameImage = frame,
+                IconImage = icon,
                 NameText = name,
                 CostText = cost,
-                IconImage = icon,
                 SelectionOutline = outline
             });
         }
@@ -468,28 +686,39 @@ public class ExplorationLoadoutUIView : MonoBehaviour, IExplorationLoadoutView
     {
         CreateText(parent, "NameLabel", "Nome", new Vector2(0.04f, 0.80f), new Vector2(0.96f, 0.87f), 13f);
         _detailNameText = CreateText(parent, "Name", "-", new Vector2(0.04f, 0.70f), new Vector2(0.96f, 0.79f), 22f, ellipsis: true);
+        CreateText(parent, "DivinityLabel", "Divindade", new Vector2(0.04f, 0.62f), new Vector2(0.30f, 0.69f), 13f);
+        _detailDivinityText = CreateText(parent, "Divinity", "-", new Vector2(0.32f, 0.62f), new Vector2(0.96f, 0.69f), 16f);
 
-        CreateText(parent, "DescriptionLabel", "Descricao", new Vector2(0.04f, 0.62f), new Vector2(0.96f, 0.69f), 13f);
-        _detailDescriptionText = CreateText(parent, "Description", "", new Vector2(0.04f, 0.38f), new Vector2(0.96f, 0.61f), 16f);
+        CreateText(parent, "DescriptionLabel", "Descricao", new Vector2(0.04f, 0.54f), new Vector2(0.96f, 0.61f), 13f);
+        _detailDescriptionText = CreateText(parent, "Description", "", new Vector2(0.04f, 0.30f), new Vector2(0.96f, 0.53f), 16f);
         if (_detailDescriptionText != null)
         {
             _detailDescriptionText.enableWordWrapping = true;
             _detailDescriptionText.overflowMode = TextOverflowModes.Ellipsis;
         }
 
-        CreateText(parent, "PowerLabel", "Poder", new Vector2(0.04f, 0.30f), new Vector2(0.30f, 0.36f), 13f);
-        _detailPowerText = CreateText(parent, "Power", "-", new Vector2(0.04f, 0.23f), new Vector2(0.30f, 0.29f), 16f);
+        CreateText(parent, "PowerLabel", "Poder", new Vector2(0.04f, 0.22f), new Vector2(0.30f, 0.28f), 13f);
+        _detailPowerText = CreateText(parent, "Power", "-", new Vector2(0.04f, 0.15f), new Vector2(0.30f, 0.21f), 16f);
 
-        CreateText(parent, "CostLabel", "Custo", new Vector2(0.32f, 0.30f), new Vector2(0.58f, 0.36f), 13f);
-        _detailCostText = CreateText(parent, "Cost", "-", new Vector2(0.32f, 0.23f), new Vector2(0.58f, 0.29f), 16f);
+        CreateText(parent, "CostLabel", "Custo", new Vector2(0.32f, 0.22f), new Vector2(0.58f, 0.28f), 13f);
+        _detailCostText = CreateText(parent, "Cost", "-", new Vector2(0.32f, 0.15f), new Vector2(0.58f, 0.21f), 16f);
 
-        CreateText(parent, "RangeLabel", "Alcance", new Vector2(0.60f, 0.30f), new Vector2(0.86f, 0.36f), 13f);
-        _detailRangeText = CreateText(parent, "Range", "-", new Vector2(0.60f, 0.23f), new Vector2(0.86f, 0.29f), 16f);
+        CreateText(parent, "RangeLabel", "Alcance", new Vector2(0.60f, 0.22f), new Vector2(0.86f, 0.28f), 13f);
+        _detailRangeText = CreateText(parent, "Range", "-", new Vector2(0.60f, 0.15f), new Vector2(0.86f, 0.21f), 16f);
 
-        var iconObj = CreateUiObject("Icon", parent);
-        _detailIconImage = iconObj.AddComponent<Image>();
-        AddPanelOutline(iconObj, new Color(1f, 1f, 1f, 0.25f));
-        StretchRect(iconObj.GetComponent<RectTransform>(), new Vector2(0.74f, 0.06f), new Vector2(0.96f, 0.22f));
+        var detailVisual = CreateUiObject("DetailVisual", parent);
+        StretchRect(detailVisual.GetComponent<RectTransform>(), new Vector2(0.68f, 0.04f), new Vector2(0.96f, 0.28f));
+        var detailBgObj = CreateUiObject("BackgroundPaint", detailVisual.transform);
+        _detailBackgroundImage = detailBgObj.AddComponent<Image>();
+        StretchRect(detailBgObj.GetComponent<RectTransform>(), Vector2.zero, Vector2.one);
+        _detailBackgroundImage.enabled = false;
+        var detailFrameObj = CreateUiObject("Frame", detailVisual.transform);
+        _detailFrameImage = detailFrameObj.AddComponent<Image>();
+        StretchRect(detailFrameObj.GetComponent<RectTransform>(), Vector2.zero, Vector2.one);
+        _detailFrameImage.enabled = false;
+        var detailIconObj = CreateUiObject("Icon", detailVisual.transform);
+        _detailIconImage = detailIconObj.AddComponent<Image>();
+        StretchRect(detailIconObj.GetComponent<RectTransform>(), new Vector2(0.12f, 0.12f), new Vector2(0.88f, 0.88f));
         _detailIconImage.enabled = false;
     }
 
@@ -588,15 +817,20 @@ public class ExplorationLoadoutUIView : MonoBehaviour, IExplorationLoadoutView
         image.color = new Color(1f, 1f, 1f, 0.11f);
         AddPanelOutline(row, new Color(1f, 1f, 1f, 0.22f));
 
-        var name = CreateText(row.transform, "Name", "-", new Vector2(0.11f, 0.18f), new Vector2(0.96f, 0.82f), 18f, ellipsis: true);
-        var iconObj = CreateUiObject("Icon", row.transform);
+        var name = CreateText(row.transform, "Name", "", new Vector2(0.22f, 0.18f), new Vector2(0.96f, 0.82f), 16f, ellipsis: true);
+        if (name != null) name.gameObject.SetActive(false);
+
+        var frameObj = CreateUiObject("Frame", row.transform);
+        var frame = frameObj.AddComponent<Image>();
+        StretchRect(frameObj.GetComponent<RectTransform>(), new Vector2(0.03f, 0.12f), new Vector2(0.20f, 0.88f));
+        frame.enabled = false;
+        var iconObj = CreateUiObject("Icon", frameObj.transform);
         var icon = iconObj.AddComponent<Image>();
-        StretchRect(iconObj.GetComponent<RectTransform>(), new Vector2(0.03f, 0.18f), new Vector2(0.10f, 0.82f));
-        AddPanelOutline(iconObj, new Color(1f, 1f, 1f, 0.15f));
+        StretchRect(iconObj.GetComponent<RectTransform>(), new Vector2(0.12f, 0.12f), new Vector2(0.88f, 0.88f));
         icon.enabled = false;
 
         var view = row.AddComponent<ExplorationSkillCatalogItemView>();
-        view.ConfigureRuntimeReferences(button, name, icon);
+        view.ConfigureRuntimeReferences(button, frame, icon, name);
         return view;
     }
 

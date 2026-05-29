@@ -32,5 +32,8 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
 
         /// <summary>Swap player Animator between Erz+Book (false) and Erzahler solo (true) when Divide deploys the Book clone.</summary>
         void SetBookCloneDeployed(bool cloneDeployed);
+
+        int CurrentHealth { get; }
+        int MaxHealth { get; }
     }
 }

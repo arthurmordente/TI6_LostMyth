@@ -17,7 +17,7 @@ using Logic.Scripts.GameDomain.MVC.Nara.Animation;
 namespace Logic.Scripts.GameDomain.MVC.Nara {
     // INaraController now extends IPlayableUnit, IEffectable and IEffectableAction,
     // so we no longer need to list those separately here.
-    public class NaraController : INaraController, IFixedUpdatable, INextHitDamageShield, ISkillCasterWorldTeleport {
+    public class NaraController : INaraController, IFixedUpdatable, INextHitDamageShield, IOutgoingDamageModifier, IOutgoingDamageLifesteal, ISkillCasterWorldTeleport {
         private readonly IUpdateSubscriptionService _updateSubscriptionService;
         private readonly IAudioService _audioService;
         private readonly ICommandFactory _commandFactory;
@@ -30,6 +30,8 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
         public GameObject NaraViewGO => _naraView.gameObject;
         public Transform NaraSkillSpotTransform => _naraView.transform;
         public NaraMovementController NaraMove => _naraMovementController;
+        public int CurrentHealth => _naraData.ActualHealth;
+        public int MaxHealth => _naraConfiguration.MaxHealth;
 
         private IGamePlayUiController _gamePlayUiController;
         private NaraView _naraView;
@@ -41,6 +43,9 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
 
         private GameObject _activeUnitCircleInstance;
         private bool _hasNextHitShield;
+        private bool _hasNextOutgoingDamageModifier;
+        private float _nextOutgoingDamageMultiplier = 1f;
+        private float _outgoingLifestealPercent;
         private bool _footstepsPlaying;
         private const float FootstepLoopSegmentSeconds = 0.5f;
 
@@ -136,6 +141,9 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
 
             _activeUnitCircleInstance = null;
             _hasNextHitShield = false;
+            _hasNextOutgoingDamageModifier = false;
+            _nextOutgoingDamageMultiplier = 1f;
+            _outgoingLifestealPercent = 0f;
             _gamePlayUiController?.OnPlayerNextHitShieldChanged(false);
         }
 
@@ -258,6 +266,31 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
         }
 
         public bool HasNextHitShieldActive => _hasNextHitShield;
+
+        public void GrantNextOutgoingDamageMultiplier(float multiplier)
+        {
+            _nextOutgoingDamageMultiplier = Mathf.Max(0f, multiplier);
+            _hasNextOutgoingDamageModifier = true;
+        }
+
+        public bool HasNextOutgoingDamageMultiplier => _hasNextOutgoingDamageModifier;
+
+        public float PendingNextOutgoingDamageMultiplier =>
+            _hasNextOutgoingDamageModifier ? _nextOutgoingDamageMultiplier : 1f;
+
+        public bool TryConsumeNextOutgoingDamageMultiplier(ref float multiplier)
+        {
+            if (!_hasNextOutgoingDamageModifier) return false;
+            multiplier *= _nextOutgoingDamageMultiplier;
+            _hasNextOutgoingDamageModifier = false;
+            _nextOutgoingDamageMultiplier = 1f;
+            return true;
+        }
+
+        public float OutgoingLifestealPercent => _outgoingLifestealPercent;
+
+        public void SetOutgoingLifestealPercent(float percentOfDamageDealt) =>
+            _outgoingLifestealPercent = Mathf.Max(0f, percentOfDamageDealt);
 
         public void TakeDamage(int damageAmound) {
             if (damageAmound <= 0) return;

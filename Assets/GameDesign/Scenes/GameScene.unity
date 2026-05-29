@@ -250,6 +250,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 2325b20b41e54ce4d9f1a13401122072, type: 2}
   - {fileID: 11400000, guid: 2c210c926633a654faae7dd53f0b2d25, type: 2}
   - {fileID: 11400000, guid: f08ba4d22e326294898f1a2c7d0e0ba6, type: 2}
+  _skillVisualCatalog: {fileID: 11400000, guid: ca520d6c0d2ac3a44baa811fb9dd6de8, type: 2}
 --- !u!1001 &921906173
 PrefabInstance:
   m_ObjectHideFlags: 0

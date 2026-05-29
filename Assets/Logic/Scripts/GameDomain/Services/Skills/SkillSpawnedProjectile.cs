@@ -100,10 +100,7 @@ namespace Logic.Scripts.GameDomain.Services.Skills
             _canResolveHits = false;
 
             if (_damage > 0)
-            {
-                hit.TakeDamage(_damage);
-                hit.PreviewDamage(_damage);
-            }
+                OutgoingDamageApplier.Apply(_caster, hit, _damage);
 
             if (_caster is IPlayableUnit playable)
             {
@@ -154,10 +151,7 @@ namespace Logic.Scripts.GameDomain.Services.Skills
         void ApplyHit(IEffectable hit)
         {
             if (_damage > 0)
-            {
-                hit.TakeDamage(_damage);
-                hit.PreviewDamage(_damage);
-            }
+                OutgoingDamageApplier.Apply(_caster, hit, _damage);
             RegisterHitDestroy();
         }
 

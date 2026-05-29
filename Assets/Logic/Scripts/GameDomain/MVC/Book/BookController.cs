@@ -14,7 +14,7 @@ using Zenject;
 
 namespace Logic.Scripts.GameDomain.MVC.Book
 {
-    public class BookController : IBookController, IFixedUpdatable, INextHitDamageShield, ISkillCasterWorldTeleport
+    public class BookController : IBookController, IFixedUpdatable, INextHitDamageShield, IOutgoingDamageModifier, IOutgoingDamageLifesteal, ISkillCasterWorldTeleport
     {
         private readonly BookView _bookViewPrefab;
         private readonly NaraConfigurationSO _config;
@@ -39,6 +39,9 @@ namespace Logic.Scripts.GameDomain.MVC.Book
 
         private GameObject _activeUnitCircleInstance;
         private bool _hasNextHitShield;
+        private bool _hasNextOutgoingDamageModifier;
+        private float _nextOutgoingDamageMultiplier = 1f;
+        private float _outgoingLifestealPercent;
         private bool _movementSfxPlaying;
 
         private const float MovementLoopSegmentSeconds = 0.35f;
@@ -364,6 +367,31 @@ namespace Logic.Scripts.GameDomain.MVC.Book
         public void GrantNextHitShield() => _hasNextHitShield = true;
 
         public bool HasNextHitShieldActive => _hasNextHitShield;
+
+        public void GrantNextOutgoingDamageMultiplier(float multiplier)
+        {
+            _nextOutgoingDamageMultiplier = Mathf.Max(0f, multiplier);
+            _hasNextOutgoingDamageModifier = true;
+        }
+
+        public bool HasNextOutgoingDamageMultiplier => _hasNextOutgoingDamageModifier;
+
+        public float PendingNextOutgoingDamageMultiplier =>
+            _hasNextOutgoingDamageModifier ? _nextOutgoingDamageMultiplier : 1f;
+
+        public bool TryConsumeNextOutgoingDamageMultiplier(ref float multiplier)
+        {
+            if (!_hasNextOutgoingDamageModifier) return false;
+            multiplier *= _nextOutgoingDamageMultiplier;
+            _hasNextOutgoingDamageModifier = false;
+            _nextOutgoingDamageMultiplier = 1f;
+            return true;
+        }
+
+        public float OutgoingLifestealPercent => _outgoingLifestealPercent;
+
+        public void SetOutgoingLifestealPercent(float percentOfDamageDealt) =>
+            _outgoingLifestealPercent = Mathf.Max(0f, percentOfDamageDealt);
 
         #endregion
 

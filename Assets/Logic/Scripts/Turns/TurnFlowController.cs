@@ -8,6 +8,7 @@ using Logic.Scripts.GameDomain.MVC.Ui;
 using Logic.Scripts.GameDomain.MVC.Environment;
 using Logic.Scripts.GameDomain.MVC.Environment.Hokari;
 using Logic.Scripts.GameDomain.MVC.Environment.Laki;
+using Logic.Scripts.GameDomain.Services.Skills;
 
 namespace Logic.Scripts.Turns {
     public class TurnFlowController : System.IDisposable {
@@ -19,6 +20,7 @@ namespace Logic.Scripts.Turns {
         private readonly INaraController _naraController;
         private readonly IDivideAbilityHandler _divideAbilityHandler;
         private readonly IGamePlayUiController _gamePlayUiController;
+        private readonly IRandomTurnPassiveService _randomTurnPassiveService;
 
         private IBossActionService _bossActionService;
         private IEnviromentActionService _enviromentActionService;
@@ -43,7 +45,8 @@ namespace Logic.Scripts.Turns {
 			INaraController naraController,
 			Logic.Scripts.GameDomain.MVC.Echo.ICloneUseLimiter cloneUseLimiter,
             IDivideAbilityHandler divideAbilityHandler,
-            [InjectOptional] IGamePlayUiController gamePlayUiController) {
+            [InjectOptional] IGamePlayUiController gamePlayUiController,
+            [InjectOptional] IRandomTurnPassiveService randomTurnPassiveService) {
             _actionPointsService = actionPointsService;
             _echoService = echoService;
             _turnStateService = turnStateService;
@@ -52,6 +55,7 @@ namespace Logic.Scripts.Turns {
 			_cloneUseLimiter = cloneUseLimiter;
             _divideAbilityHandler = divideAbilityHandler;
             _gamePlayUiController = gamePlayUiController;
+            _randomTurnPassiveService = randomTurnPassiveService;
         }
 
         public void Initialize(IBossActionService bossActionService,
@@ -162,6 +166,7 @@ namespace Logic.Scripts.Turns {
             }
             _phase = TurnPhase.PlayerAct;
             _turnMovement?.ResetMovementArea();
+            _randomTurnPassiveService?.ApplyPlayerTurnStart(_actionPointsService, _turnMovement);
             _turnStateService.AdvanceTurn(_turnNumber, _phase);
             _naraController?.UnfreezeInputs();
             _naraController?.Unfreeeze();

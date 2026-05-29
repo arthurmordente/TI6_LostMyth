@@ -14,8 +14,7 @@ public class DamageTargetsSkillEffectSO : SkillEffectSO
         {
             IEffectable target = context.Targets[i];
             if (target == null) continue;
-            target.TakeDamage(amount);
-            target.PreviewDamage(amount);
+            OutgoingDamageApplier.Apply(context.Caster, target, amount);
         }
     }
 }

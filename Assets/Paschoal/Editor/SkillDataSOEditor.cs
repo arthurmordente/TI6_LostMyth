@@ -9,6 +9,13 @@ public class SkillDataSOEditor : Editor
     {
         serializedObject.Update();
 
+        EditorGUILayout.LabelField("Loadout UI", EditorStyles.boldLabel);
+        EditorGUILayout.PropertyField(serializedObject.FindProperty("_divinity"), new GUIContent("Divinity"));
+        EditorGUILayout.HelpBox(
+            "Divindade + Skill Type definem background e frame no menu de loadout (SkillVisualCatalog).",
+            MessageType.None);
+
+        EditorGUILayout.Space(4f);
         var skillTypeProp = serializedObject.FindProperty("_skillType");
         var castProp = serializedObject.FindProperty("_castType");
 
@@ -35,6 +42,8 @@ public class SkillDataSOEditor : Editor
             EditorGUILayout.Space(4f);
             EditorGUILayout.LabelField("Passive — modificadores de combate", EditorStyles.boldLabel);
             EditorGUILayout.PropertyField(serializedObject.FindProperty("_passiveModifiers"), new GUIContent("Passive modifiers"), true);
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("_passiveTurnBehavior"), new GUIContent("Passive turn behavior"), true);
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("_passiveCombatBehavior"), new GUIContent("Passive combat behavior"), true);
         }
         else
         {

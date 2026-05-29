@@ -6,6 +6,9 @@ using System.Collections.Generic;
 
 public abstract class SkillDataSO : ScriptableObject
 {
+    [Header("Divinity")]
+    [SerializeField] private SkillDivinity _divinity = SkillDivinity.Hocari;
+
     [Header("Skill Type")]
     [SerializeField, FormerlySerializedAs("_skillTypeOverride")]
     private SkillType _skillType = SkillType.Damage;
@@ -68,7 +71,12 @@ public abstract class SkillDataSO : ScriptableObject
     [Header("Passive (Skill Type = Passive)")]
     [Tooltip("Applied once when the player starts a fight (Nara movement ring + mana gained per turn).")]
     [SerializeField] private PassiveStatModifierEntry[] _passiveModifiers = Array.Empty<PassiveStatModifierEntry>();
+    [Tooltip("Optional per-turn passive logic (e.g. random roulette buff at each player turn start).")]
+    [SerializeField] private PassiveTurnBehaviorSO _passiveTurnBehavior;
+    [Tooltip("Optional fight-long passive logic (e.g. low-HP outgoing damage scaling).")]
+    [SerializeField] private PassiveCombatBehaviorSO _passiveCombatBehavior;
 
+    public SkillDivinity Divinity => _divinity;
     public SkillType SkillType => _skillType;
 
     /// <summary>Passive skills always behave as <see cref="SkillCastType.Self"/> at runtime (serialized cast is forced in <see cref="OnValidate"/>).</summary>
@@ -80,6 +88,12 @@ public abstract class SkillDataSO : ScriptableObject
 
     /// <summary>Entries for <see cref="SkillType.Passive"/>; ignored for other skill types at runtime.</summary>
     public PassiveStatModifierEntry[] PassiveModifiers => _passiveModifiers ?? Array.Empty<PassiveStatModifierEntry>();
+
+    /// <summary>Per-turn passive behavior for <see cref="SkillType.Passive"/> (e.g. roulette).</summary>
+    public PassiveTurnBehaviorSO PassiveTurnBehavior => _passiveTurnBehavior;
+
+    /// <summary>Fight-long passive behavior for <see cref="SkillType.Passive"/> (e.g. low-HP damage scaling).</summary>
+    public PassiveCombatBehaviorSO PassiveCombatBehavior => _passiveCombatBehavior;
 
     public bool IsCastable => SkillType != SkillType.Passive;
 
@@ -211,6 +225,7 @@ public abstract class SkillDataSO : ScriptableObject
     public virtual void OnCast(IEffectable caster = null, Transform target = null)
     {
         if (!IsCastable) return;
+        OutgoingDamageLifestealRuntime.ClearForCaster(caster);
         IReadOnlyList<IEffectable> targets = ResolveTargets(caster, target);
         SkillEffectsRunner.Execute(this, caster, target, targets);
     }

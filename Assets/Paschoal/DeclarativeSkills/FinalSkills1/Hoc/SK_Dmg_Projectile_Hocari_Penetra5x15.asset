@@ -10,12 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6a7b8c9d0e1f23456789abcdef0123ab, type: 3}
-  m_Name: SK_Dmg_Projectile_PrimeiroAlvo40
+  m_Name: SK_Dmg_Projectile_Hocari_Penetra5x15
   m_EditorClassIdentifier: 
+  _divinity: 0
   _skillType: 0
   _castType: 0
-  _projectileRange: 10
-  _projectileNumberOfTargets: 1
+  _projectileRange: 25
+  _projectileNumberOfTargets: 5
   _projectileTravelSpeed: 12
   _projectileAimPrefab: {fileID: 5171449077471736857, guid: 5a96a15201f481c488a06861525f72e4, type: 3}
   _projectilePrefab: {fileID: 4470363709726842422, guid: 05ecf4c11bd35014797b40e47735e1c1, type: 3}
@@ -33,12 +34,12 @@ MonoBehaviour:
   _areaImpactPrefab: {fileID: 0}
   _selfAimPrefab: {fileID: 0}
   _selfCastPrefab: {fileID: 0}
-  Power: 40
+  Power: 15
   Cost: 1
-  Icon: {fileID: 21300000, guid: abcd2cdfb73542b428f25b2007050ade, type: 3}
-  SkillName: Orbe de energia
-  Description: Dispara uma onda de energia, causando dano massivo ao primeiro alvo
-    atingido.
+  Icon: {fileID: 21300000, guid: 84fd325531c382e49a6e5ca447e45938, type: 3}
+  SkillName: Flecha penetrante
+  Description: Dispara uma flecha que perfura os dois primeiros alvos, causando dano
+    em tudo ao seu caminho.
   _effects:
   - {fileID: 0}
   _passiveModifiers: []

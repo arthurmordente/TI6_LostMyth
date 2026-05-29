@@ -22,6 +22,9 @@ namespace Logic.Scripts.GameDomain.ZenjectInstallers {
         [FormerlySerializedAs("_paschoalSkillCatalog")]
         [SerializeField] private SkillDataSO[] _newSkillSystemSkillCatalog;
 
+        [Header("Skill visuals — divindade × tipo")]
+        [SerializeField] private SkillVisualCatalogSO _skillVisualCatalog;
+
         public override void InstallBindings() {
             Container.Bind<IGameInitiator>().To<GameInitiator.GameInitiator>().AsSingle().NonLazy();
             Container.BindInterfacesTo<CheatController>().AsSingle().NonLazy();
@@ -35,6 +38,12 @@ namespace Logic.Scripts.GameDomain.ZenjectInstallers {
 
             Container.Bind<INewSkillSystemSkillLoadoutService>().To<NewSkillSystemSkillLoadoutService>().AsSingle()
                 .WithArguments(_newSkillSystemSkillCatalog, 4).NonLazy();
+
+            if (_skillVisualCatalog != null)
+                Container.Bind<ISkillVisualCatalog>().To<SkillVisualCatalogService>().AsSingle()
+                    .WithArguments(_skillVisualCatalog).NonLazy();
+            else
+                Container.Bind<ISkillVisualCatalog>().FromInstance(NullSkillVisualCatalog.Instance).AsSingle();
 
             Container.Bind<IAudioService>()
                 .To<AudioService>()
