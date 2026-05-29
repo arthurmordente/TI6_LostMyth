@@ -100,36 +100,31 @@ namespace Logic.Scripts.GameDomain.Exploration.Pause
 
         private void OnResume()
         {
-            PlayClick();
+            GeneralSfxFeedback.PlayMenuClick(_audioService);
             HidePauseScreen();
         }
 
         private void OnRetreat()
         {
-            PlayClick();
+            GeneralSfxFeedback.PlayMenuClick(_audioService, secondary: true);
             HidePauseScreen();
             _stateMachineService.SwitchState(_lobbyStateFactory.Create(new LobbyInitiatorEnterData()));
         }
 
         private void OnConfig()
         {
-            PlayClick();
             _universalUIController.ShowOptionsScreen();
         }
 
         private void OnCredits()
         {
-            PlayClick();
             _universalUIController.ShowCreditsScreen();
         }
 
         private void OnQuit()
         {
-            PlayClick();
+            GeneralSfxFeedback.PlayMenuClick(_audioService, secondary: true);
             QuitApplicationUtility.Quit();
         }
-
-        private void PlayClick() =>
-            _audioService?.PlaySfx(SfxIds.UI_Clique, AudioChannelType.SfxUi);
     }
 }

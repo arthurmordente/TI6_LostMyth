@@ -51,15 +51,15 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
             _pauseMenuView.RegisterCallbacks(
                 _universalUIController.ShowOptionsScreen,
                 _universalUIController.ShowCreditsScreen,
-                ResumeGame,
-                BackToLobby,
+                OnResumeFromPause,
+                OnBackToLobby,
                 OnQuitGame);
             _gamePlayHud.InitStartPoint();
             _gamePlayHud.RegisterCallbacks(OnClickNextTurn, OnClickAbility1, OnClickAbility2, OnClickAbility3, OnClickAbility4);
             _gamePlayHud.RegisterOpenPauseMenuCallback(OnOpenPauseMenu);
             SyncBossHudNameFromCurrentLevel();
             _gameOverView.InitEntryPoint();
-            _gameOverView.RegisterCallbacks(OnClickPlayAgain, OnClickPlayAgain, BackToLobby);
+            _gameOverView.RegisterCallbacks(OnClickPlayAgainWithSfx, OnClickPlayAgainWithSfx, OnBackToLobbyFromGameOver);
         }
 
         /// <summary>
@@ -114,6 +114,11 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
             await _commandFactory.CreateCommandAsync<ReloadLevelCommand>().Execute(CancellationTokenSource.CreateLinkedTokenSource(Application.exitCancellationToken));
             _gameOverView.Hide();
         }
+
+        private void OnClickPlayAgainWithSfx() {
+            GeneralSfxFeedback.PlayMenuClick(_audioService);
+            OnClickPlayAgain();
+        }
         public void OnLoad() {
             Debug.LogWarning("Clicou no load");
         }
@@ -123,11 +128,29 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
         public void ShowPauseScreen() => _pauseMenuView.Show();
         public void HidePauseScreen() => _pauseMenuView.Hide();
 
-        private void OnQuitGame() => QuitApplicationUtility.Quit();
+        private void OnQuitGame() {
+            GeneralSfxFeedback.PlayMenuClick(_audioService, secondary: true);
+            QuitApplicationUtility.Quit();
+        }
+
+        private void OnResumeFromPause() {
+            GeneralSfxFeedback.PlayMenuClick(_audioService);
+            ResumeGame();
+        }
 
         private void ResumeGame() {
             _universalUIController.CloseAllOverlays();
             _commandFactory.CreateCommandVoid<ResumeGameplayInputCommand>().Execute();
+        }
+
+        private void OnBackToLobbyFromGameOver() {
+            GeneralSfxFeedback.PlayMenuClick(_audioService, secondary: true);
+            BackToLobby();
+        }
+
+        private void OnBackToLobby() {
+            GeneralSfxFeedback.PlayMenuClick(_audioService, secondary: true);
+            BackToLobby();
         }
 
         private void BackToLobby() {
@@ -214,8 +237,10 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
         public void SetSkillsSlidableExpanded(bool expanded, bool instant = false) =>
             _gamePlayHud.SetSkillsSlidableExpanded(expanded, instant);
 
-        public void PlayPlayerTurnAnnouncement(int turnNumber) =>
+        public void PlayPlayerTurnAnnouncement(int turnNumber) {
+            GeneralSfxFeedback.PlayNewTurn(_audioService);
             _gamePlayHud.PlayPlayerTurnAnnouncement(turnNumber);
+        }
 
         public void BeginFirstTurnPassTurnHint(int fightTurnNumber) =>
             _gamePlayHud.BeginFirstTurnPassTurnHint(fightTurnNumber);

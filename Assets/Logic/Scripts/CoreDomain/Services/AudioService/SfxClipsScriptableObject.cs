@@ -45,10 +45,10 @@ namespace Logic.Scripts.Services.AudioService {
         public const string UI_Clique2 = "UI_Clique2";
         public const string UI_Tela_Vitoria = "UI_Tela_Vitoria";
         public const string UI_Tela_Derrota = "UI_Tela_Derrota";
-        public const string Portal = "Portal";
-        public const string Novo_Turno = "Novo_Turno";
+        public const string UI_Portal = "UI_Portal";
+        public const string UI_Novo_Turno = "UI_Novo_Turno";
+        public const string UI_Dados = "UI_Dados";
         public const string NPC_Falando = "NPC_Falando";
-        public const string Dados = "Dados";
 
         public const string Erza_Atingida = "Erza_Atingida";
         public const string Erza_Cast = "Erza_Cast";

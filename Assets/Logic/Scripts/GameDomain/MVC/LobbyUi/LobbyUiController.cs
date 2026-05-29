@@ -28,16 +28,15 @@ public class LobbyUiController : ILobbyController {
 
     public void OnClickPlay() {
         _stateMachineService.SwitchState(_explorationStateFactory.Create(new ExplorationInitiatorEnterData(0)));
-        _audioService.PlaySfx(SfxIds.UI_Clique, AudioChannelType.SfxUi);
+        GeneralSfxFeedback.PlayMenuClick(_audioService);
     }
 
     public void OnClickConfig() {
         _universalUIController.ShowOptionsScreen();
-        _audioService.PlaySfx(SfxIds.UI_Clique, AudioChannelType.SfxUi);
     }
 
     public void OnExitPlay() {
-        _audioService.PlaySfx(SfxIds.UI_Clique2, AudioChannelType.SfxUi);
+        GeneralSfxFeedback.PlayMenuClick(_audioService, secondary: true);
         QuitApplicationUtility.Quit();
     }
 }

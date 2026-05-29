@@ -3,22 +3,29 @@ using System.Linq;
 using Logic.Scripts.GameDomain.Exploration;
 using Logic.Scripts.GameDomain.MVC.ExplorationLoadout;
 using Logic.Scripts.GameDomain.Services.Skills;
+using Logic.Scripts.Services.AudioService;
 using UnityEngine.EventSystems;
+using Zenject;
 
 public class ExplorationLoadoutUIController : IExplorationLoadoutUIController
 {
     private readonly IExplorationLoadoutView _view;
     private readonly INewSkillSystemSkillLoadoutService _loadoutService;
+    private readonly IAudioService _audioService;
 
     private SkillLoadoutUnitType _selectedUnitType = SkillLoadoutUnitType.Player;
     private int _selectedSlotIndex;
     private ExplorationLoadoutSkillFilter _catalogFilter = ExplorationLoadoutSkillFilter.All;
     private bool _modalGateActive;
 
-    public ExplorationLoadoutUIController(IExplorationLoadoutView view, INewSkillSystemSkillLoadoutService loadoutService)
+    public ExplorationLoadoutUIController(
+        IExplorationLoadoutView view,
+        INewSkillSystemSkillLoadoutService loadoutService,
+        [InjectOptional] IAudioService audioService = null)
     {
         _view = view;
         _loadoutService = loadoutService;
+        _audioService = audioService;
     }
 
     public void InitEntryPoint()
@@ -43,6 +50,7 @@ public class ExplorationLoadoutUIController : IExplorationLoadoutUIController
     public void Show()
     {
         if (_view == null || _view.IsVisible) return;
+        GeneralSfxFeedback.PlayNpcTalking(_audioService);
         ExplorationModalInputGate.Push();
         ExplorationInteractInputGate.Push();
         _modalGateActive = true;
@@ -117,8 +125,10 @@ public class ExplorationLoadoutUIController : IExplorationLoadoutUIController
             return;
         }
 
-        if (_loadoutService.SetSlotSkill(_selectedUnitType, _selectedSlotIndex, skill))
+        if (_loadoutService.SetSlotSkill(_selectedUnitType, _selectedSlotIndex, skill)) {
+            GeneralSfxFeedback.PlayMenuClick(_audioService);
             _view?.ShowSkillDetails(skill);
+        }
     }
 
     private void PlayInvalidAssignFeedback()

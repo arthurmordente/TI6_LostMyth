@@ -9,6 +9,7 @@ using Logic.Scripts.Turns;
 using UnityEngine;
 using Logic.Scripts.GameDomain.VisualFeedback;
 using Logic.Scripts.GameDomain.MVC.Nara.Animation;
+using Logic.Scripts.Services.AudioService;
 using Zenject;
 
 namespace Logic.Scripts.GameDomain.MVC.Book
@@ -23,6 +24,7 @@ namespace Logic.Scripts.GameDomain.MVC.Book
         private readonly ICheatController _cheatController;
         private readonly INewSkillSystemSkillLoadoutService _newSkillSystemSkillLoadoutService;
         private readonly ErzahlerAnimatorControllersSO _erzahlerAnimatorControllers;
+        private readonly IAudioService _audioService;
         // The Book's own ability set — configured separately in the inspector.
         // Initially points to the same abilities as Nara; swap to a dedicated array to diverge.
         private readonly AbilityData[] _abilities;
@@ -37,6 +39,9 @@ namespace Logic.Scripts.GameDomain.MVC.Book
 
         private GameObject _activeUnitCircleInstance;
         private bool _hasNextHitShield;
+        private bool _movementSfxPlaying;
+
+        private const float MovementLoopSegmentSeconds = 0.35f;
 
         public bool IsDeployed => _isDeployed;
         public GameObject UnitViewGO => _bookView != null ? _bookView.gameObject : null;
@@ -51,7 +56,8 @@ namespace Logic.Scripts.GameDomain.MVC.Book
             ICommandFactory commandFactory,
             ICheatController cheatController,
             [InjectOptional] INewSkillSystemSkillLoadoutService newSkillSystemSkillLoadoutService = null,
-            [InjectOptional] ErzahlerAnimatorControllersSO erzahlerAnimatorControllers = null)
+            [InjectOptional] ErzahlerAnimatorControllersSO erzahlerAnimatorControllers = null,
+            [InjectOptional] IAudioService audioService = null)
         {
             _bookViewPrefab = bookViewPrefab;
             _config = config;
@@ -62,6 +68,7 @@ namespace Logic.Scripts.GameDomain.MVC.Book
             _cheatController = cheatController;
             _newSkillSystemSkillLoadoutService = newSkillSystemSkillLoadoutService;
             _erzahlerAnimatorControllers = erzahlerAnimatorControllers;
+            _audioService = audioService;
         }
 
         public void CreateBook(Vector3 position)
@@ -127,6 +134,7 @@ namespace Logic.Scripts.GameDomain.MVC.Book
 
             _isDeployed = false;
             _canMove = false;
+            StopMovementSfx();
 
             _updateSubscriptionService.UnregisterFixedUpdatable(this);
 
@@ -176,7 +184,11 @@ namespace Logic.Scripts.GameDomain.MVC.Book
             try { _movementController?.EnableInputs(); } catch { }
         }
 
-        public void StopMovingAnim() => _bookView?.SetMoving(false);
+        public void StopMovingAnim()
+        {
+            _bookView?.SetMoving(false);
+            StopMovementSfx();
+        }
         public void PlayAttackType(int type) => _bookView?.SetAttackType(type);
 
         public void TriggerExecute() => _bookView?.TriggerExecute();
@@ -331,6 +343,8 @@ namespace Logic.Scripts.GameDomain.MVC.Book
                 return;
             }
             _bookData.TakeDamage(amount);
+            if (amount > 0)
+                _audioService?.PlaySfx(SfxIds.Livro_Atingido, AudioChannelType.SfxCombat);
             if (_bookView != null)
             {
                 var flash = _bookView.GetComponent<DamageFlashPresenter>();
@@ -377,13 +391,33 @@ namespace Logic.Scripts.GameDomain.MVC.Book
             {
                 _movementController.Move(Vector2.zero, 0f, 0f);
                 _bookView?.SetMoving(false);
+                StopMovementSfx();
             }
             else
             {
                 bool movementAllowed = _movementController.IsMovementAllowed();
                 _movementController.Move(dir, _config.MoveSpeed, _config.RotationSpeed);
-                _bookView?.SetMoving(movementAllowed && dir.sqrMagnitude > 0.0001f);
+                bool willMove = movementAllowed && dir.sqrMagnitude > 0.0001f;
+                _bookView?.SetMoving(willMove);
+                if (willMove)
+                    StartMovementSfx();
+                else
+                    StopMovementSfx();
             }
+        }
+
+        private void StartMovementSfx()
+        {
+            if (_movementSfxPlaying) return;
+            _movementSfxPlaying = true;
+            _audioService?.SetSegmentLoopingSfx(SfxIds.Livro_Movimento, AudioChannelType.SfxAmbience, MovementLoopSegmentSeconds, true);
+        }
+
+        private void StopMovementSfx()
+        {
+            if (!_movementSfxPlaying) return;
+            _movementSfxPlaying = false;
+            _audioService?.StopLoopingSfx(AudioChannelType.SfxAmbience);
         }
 
         public void RegisterListeners() => _updateSubscriptionService.RegisterFixedUpdatable(this);

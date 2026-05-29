@@ -46,6 +46,8 @@ namespace Logic.Scripts.Services.AudioService {
 
         public void InitEntryPoint() {
 
+            ValidateChannelConfiguration();
+
             ResolveMissingSources();
 
             _audioSourceByChannel.Clear();
@@ -59,6 +61,42 @@ namespace Logic.Scripts.Services.AudioService {
             RegisterChannel(AudioChannelType.SfxBoss, _sfxBossAudioSource);
 
             RegisterChannel(AudioChannelType.SfxAmbience, _sfxAmbienceAudioSource);
+
+        }
+
+
+
+        private void ValidateChannelConfiguration() {
+
+            if (_musicAudioSource == null)
+
+                LogService.LogError("[Audio] Music AudioSource not assigned on AudioService.");
+
+            if (_sfxCombatAudioSource == null)
+
+                LogService.LogError("[Audio] SfxCombat AudioSource not assigned on AudioService.");
+
+            if (_sfxUiAudioSource == null)
+
+                LogService.LogWarning("[Audio] SfxUi AudioSource not assigned — will fall back to SfxCombat.");
+
+            if (_sfxBossAudioSource == null)
+
+                LogService.LogWarning("[Audio] SfxBoss AudioSource not assigned — will fall back to SfxCombat.");
+
+            if (_sfxAmbienceAudioSource == null)
+
+                LogService.LogWarning("[Audio] SfxAmbience AudioSource not assigned — will fall back to SfxCombat.");
+
+
+
+            if (_sfxUiAudioSource != null && _sfxCombatAudioSource != null
+
+                && _sfxUiAudioSource == _sfxCombatAudioSource
+
+                && (_sfxBossAudioSource == null || _sfxBossAudioSource == _sfxCombatAudioSource))
+
+                LogService.LogWarning("[Audio] SfxUi and SfxBoss share SfxCombat AudioSource — UI/boss SFX may overlap.");
 
         }
 
@@ -195,6 +233,34 @@ namespace Logic.Scripts.Services.AudioService {
         public void PlaySfx(string sfxId, AudioChannelType channel, AudioPlayType playType = AudioPlayType.OneShot) {
 
             TryPlaySfxClip(sfxId, channel, playType, out _);
+
+        }
+
+
+
+        public bool HasSfx(string sfxId) {
+
+            if (string.IsNullOrEmpty(sfxId)) return false;
+
+            foreach (var pack in _sfxPacks) {
+
+                if (pack != null && pack.TryGetClip(sfxId, out _))
+
+                    return true;
+
+            }
+
+            return false;
+
+        }
+
+
+
+        public bool TryPlaySfx(string sfxId, AudioChannelType channel, AudioPlayType playType = AudioPlayType.OneShot) {
+
+            if (!HasSfx(sfxId)) return false;
+
+            return TryPlaySfxClip(sfxId, channel, playType, out _);
 
         }
 

@@ -5,7 +5,9 @@ using Logic.Scripts.Turns;
 using Logic.Scripts.GameDomain.VisualFeedback;
 using Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack;
 using Logic.Scripts.GameDomain.MVC.Environment;
+using Logic.Scripts.Services.AudioService;
 using TMPro;
+using Zenject;
 
 namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Dice
 {
@@ -30,6 +32,14 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Dice
 		private readonly System.Random _rng = new System.Random();
 		private TextMeshPro[] _faceLabels;
 		private bool _labelsCreated;
+		private bool _rollSfxPlayed;
+		private static IAudioService _audio;
+		private static IAudioService Audio => _audio ??= TryResolveAudio();
+		private static IAudioService TryResolveAudio()
+		{
+			try { return ProjectContext.Instance.Container.Resolve<IAudioService>(); }
+			catch { return null; }
+		}
 		public bool RemoveAfterRun => true;
 		public bool IsBossDie => _isBoss;
 
@@ -61,15 +71,23 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Dice
 				StartMove(target, 2.0f, _tileIndex);
 			}
 			if (!_reportRollOnEnvironmentExecute)
-				_callbacks?.OnDiceRolled(_isBoss, _rollSlotIndex, _value);
+				ReportDiceRoll();
 		}
 
 		public async Task ExecuteAsync()
 		{
 			if (_reportRollOnEnvironmentExecute)
-				_callbacks?.OnDiceRolled(_isBoss, _rollSlotIndex, _value);
+				ReportDiceRoll();
 			Destroy(gameObject);
 			await Task.CompletedTask;
+		}
+
+		private void ReportDiceRoll()
+		{
+			if (_rollSfxPlayed) return;
+			_rollSfxPlayed = true;
+			GeneralSfxFeedback.PlayDiceRoll(Audio);
+			_callbacks?.OnDiceRolled(_isBoss, _rollSlotIndex, _value);
 		}
 
 		public Transform GetReferenceTransform() { return transform; }

@@ -9,6 +9,8 @@ namespace Logic.Scripts.Services.AudioService {
         void PlayMusic(string musicId);
         void StopMusic();
         void PlaySfx(string sfxId, AudioChannelType channel, AudioPlayType playType = AudioPlayType.OneShot);
+        bool HasSfx(string sfxId);
+        bool TryPlaySfx(string sfxId, AudioChannelType channel, AudioPlayType playType = AudioPlayType.OneShot);
         bool TryGetSfxDuration(string sfxId, out float durationSeconds);
         void SetSegmentLoopingSfx(string sfxId, AudioChannelType channel, float segmentLengthSeconds, bool play);
         void StopLoopingSfx(AudioChannelType channel);

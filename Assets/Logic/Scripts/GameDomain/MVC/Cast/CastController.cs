@@ -28,6 +28,7 @@ public class CastController : ICastController {
     private bool _lastCastWasMovementSkill;
     private int _currentAbilityIndex = -1;
     private int _currentAbilityCost = 0;
+    private int _currentAnimatorAttackType = 1;
 
     public Transform PlayerTransform;
 
@@ -93,6 +94,7 @@ public class CastController : ICastController {
         _currentCaster = caster;
         _currentAbilityIndex = prepareResult.AbilityIndex;
         _currentAbilityCost = isBook ? 0 : prepareResult.Cost;
+        _currentAnimatorAttackType = prepareResult.AnimatorAttackType;
 
         var loadout = caster.UnitViewGO != null ? caster.UnitViewGO.GetComponent<NewSkillSystemSkillLoadout>() : null;
         SkillDataSO skillForPreview = null;
@@ -117,6 +119,7 @@ public class CastController : ICastController {
         _currentCaster = null;
         _currentAbilityIndex = -1;
         _currentAbilityCost = 0;
+        _currentAnimatorAttackType = 1;
     }
 
     public void UseAbility(IPlayableUnit caster) {
@@ -138,6 +141,7 @@ public class CastController : ICastController {
 
         caster?.TriggerExecute();
         PlayCastSfx(caster);
+        PlayBookPageSfx(caster);
 
         _deferredArenaSyncAfterProjectileCast = false;
         _lastCastWasMovementSkill = false;
@@ -175,6 +179,12 @@ public class CastController : ICastController {
     private void PlayCastSfx(IPlayableUnit caster) {
         if (_audio == null) return;
         _audio.PlaySfx(MapCastClip(caster), AudioChannelType.SfxCombat);
+    }
+
+    private void PlayBookPageSfx(IPlayableUnit caster) {
+        if (_audio == null || caster is not IBookController) return;
+        string clip = _currentAnimatorAttackType > 1 ? SfxIds.Livro_Paginas : SfxIds.Livro_Pagina;
+        _audio.PlaySfx(clip, AudioChannelType.SfxCombat);
     }
 
     private static string MapCastClip(IPlayableUnit caster) {

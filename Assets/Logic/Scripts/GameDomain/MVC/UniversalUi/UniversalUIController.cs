@@ -1,4 +1,5 @@
 using Logic.Scripts.GameDomain.Utilities;
+using Logic.Scripts.Services.AudioService;
 using UnityEngine;
 using Zenject;
 
@@ -9,6 +10,7 @@ public class UniversalUIController : IUniversalUIController {
     private readonly ICreditsView _creditsView;
     private readonly IOptionsView _optionsView;
     private readonly ICheatController _cheatController;
+    private readonly IAudioService _audioService;
 
     public UniversalUIController(
         [InjectOptional] ILoadScreenView loadView,
@@ -16,13 +18,15 @@ public class UniversalUIController : IUniversalUIController {
         [InjectOptional] ICheatsScreenView cheatsView,
         [InjectOptional] ICreditsView creditsView,
         [InjectOptional] IOptionsView optionsView,
-        ICheatController cheatController) {
+        ICheatController cheatController,
+        [InjectOptional] IAudioService audioService = null) {
         _loadView = loadView;
         _guideView = guideView;
         _cheatsView = cheatsView;
         _creditsView = creditsView;
         _optionsView = optionsView;
         _cheatController = cheatController;
+        _audioService = audioService;
     }
 
     public async Awaitable InitEntryPoint() {
@@ -59,22 +63,27 @@ public class UniversalUIController : IUniversalUIController {
     /// </summary>
     public bool TryCloseTopOverlay() {
         if (_creditsView != null && _creditsView.IsVisible) {
+            GeneralSfxFeedback.PlayMenuClick(_audioService);
             _creditsView.Hide();
             return true;
         }
         if (_optionsView != null && _optionsView.IsVisible) {
+            GeneralSfxFeedback.PlayMenuClick(_audioService);
             _optionsView.Hide();
             return true;
         }
         if (_cheatsView != null && _cheatsView.IsVisible) {
+            GeneralSfxFeedback.PlayMenuClick(_audioService);
             _cheatsView.Hide();
             return true;
         }
         if (_guideView != null && _guideView.IsVisible) {
+            GeneralSfxFeedback.PlayMenuClick(_audioService);
             _guideView.Hide();
             return true;
         }
         if (_loadView != null && _loadView.IsVisible) {
+            GeneralSfxFeedback.PlayMenuClick(_audioService);
             _loadView.Hide();
             return true;
         }
@@ -86,15 +95,33 @@ public class UniversalUIController : IUniversalUIController {
         while (TryCloseTopOverlay()) { }
     }
 
-    public void ShowLoadScreen() => _loadView?.Show();
+    public void ShowLoadScreen() {
+        GeneralSfxFeedback.PlayMenuClick(_audioService);
+        _loadView?.Show();
+    }
 
-    public void ShowGuideScreen() => _guideView?.Show();
+    public void ShowGuideScreen() {
+        GeneralSfxFeedback.PlayMenuClick(_audioService);
+        _guideView?.Show();
+    }
 
-    public void ShowCheatsScreen() => _cheatsView?.Show();
+    public void ShowCheatsScreen() {
+        GeneralSfxFeedback.PlayMenuClick(_audioService);
+        _cheatsView?.Show();
+    }
 
-    public void ShowCreditsScreen() => _creditsView?.Show();
+    public void ShowCreditsScreen() {
+        GeneralSfxFeedback.PlayMenuClick(_audioService);
+        _creditsView?.Show();
+    }
 
-    public void ShowOptionsScreen() => _optionsView?.Show();
+    public void ShowOptionsScreen() {
+        GeneralSfxFeedback.PlayMenuClick(_audioService);
+        _optionsView?.Show();
+    }
 
-    private void OnClickExit() => QuitApplicationUtility.Quit();
+    private void OnClickExit() {
+        GeneralSfxFeedback.PlayMenuClick(_audioService, secondary: true);
+        QuitApplicationUtility.Quit();
+    }
 }
