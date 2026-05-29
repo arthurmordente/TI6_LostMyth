@@ -10,10 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6a7b8c9d0e1f23456789abcdef0123ab, type: 3}
-  m_Name: SK_Dmg_Area_SelfExplosion
-  m_EditorClassIdentifier: 
-  _skillType: 0
-  _castType: 1
+  m_Name: SK_Passive_Cypher_Moveafterdmg
+  m_EditorClassIdentifier: Assembly-CSharp::DeclarativeSkillDataSO
+  _divinity: 3
+  _skillType: 3
+  _castType: 2
   _projectileRange: 8
   _projectileNumberOfTargets: 1
   _projectileTravelSpeed: 12
@@ -27,20 +28,20 @@ MonoBehaviour:
   _projectileMinTravelBeforeHitMeters: 0.45
   _projectileHitDisplacementDurationSeconds: 0.35
   _areaMinRange: 0
-  _areaMaxRange: 0
+  _areaMaxRange: 8
   _areaRadius: 2
-  _areaAimPrefab: {fileID: 1607142820532151380, guid: 6feee9629db8db94f83b1e6771d787d1, type: 3}
-  _areaImpactPrefab: {fileID: 2224025274982176450, guid: caa4a69375bd38348901ddadba2f8953, type: 3}
+  _areaAimPrefab: {fileID: 0}
+  _areaImpactPrefab: {fileID: 0}
   _selfAimPrefab: {fileID: 0}
   _selfCastPrefab: {fileID: 0}
-  Power: 50
-  Cost: 3
-  Icon: {fileID: 21300000, guid: c0de9e55624845a42b8ad06684976429, type: 3}
-  SkillName: "Explos\xE3o elemental"
-  Description: "Explode tudo em sua volta, causando dano GIGANTESCO a inimigos mas
-    sofrendo 25 voc\xEA mesma."
-  _effects:
-  - {fileID: 11400000, guid: a47ac10b58cc4372a5670e02b2c3d472, type: 2}
-  - {fileID: 11400000, guid: eb42f10539757554f99d828bcb5c266d, type: 2}
+  Power: 0
+  Cost: 0
+  Icon: {fileID: 21300000, guid: 21538d184d5839c4caa964dbf7c64e0e, type: 3}
+  SkillName: "Refor\xE7o Nanita"
+  Description: "Ap\xF3s sofrer dano, aumenta a movimenta\xE7\xE3o no turno seguinte."
+  _effects: []
   _passiveModifiers: []
+  _passiveTurnBehavior: {fileID: 0}
+  _passiveCombatBehavior: {fileID: 0}
+  _passiveOnDamageTakenBehavior: {fileID: 11400000, guid: 249e9b636e8de2445b1dd8b6f86d6a4e, type: 2}
   _runtimeModifiers: []

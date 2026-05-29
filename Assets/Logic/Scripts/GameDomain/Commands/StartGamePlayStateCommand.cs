@@ -25,6 +25,7 @@ namespace Logic.Scripts.GameDomain.Commands {
         private ILevelsDataService _levelsDataService;
         private IRandomTurnPassiveService _randomTurnPassiveService;
         private ILowHealthOutgoingDamageService _lowHealthOutgoingDamageService;
+        private IDamageStackMovementPassiveService _damageStackMovementPassiveService;
 
         private GamePlayInitatorEnterData _enterData;
 
@@ -45,6 +46,7 @@ namespace Logic.Scripts.GameDomain.Commands {
             _levelsDataService = _diContainer.Resolve<ILevelsDataService>();
             _randomTurnPassiveService = _diContainer.TryResolve<IRandomTurnPassiveService>();
             _lowHealthOutgoingDamageService = _diContainer.TryResolve<ILowHealthOutgoingDamageService>();
+            _damageStackMovementPassiveService = _diContainer.TryResolve<IDamageStackMovementPassiveService>();
         }
 
         public async Awaitable Execute(CancellationTokenSource cancellationTokenSource) {
@@ -53,6 +55,7 @@ namespace Logic.Scripts.GameDomain.Commands {
             _naraController.ApplyCombatLoadoutPassivesAndActionPoints(_actionPointsService);
             _randomTurnPassiveService?.RefreshFromLoadout();
             _lowHealthOutgoingDamageService?.RefreshFromLoadout();
+            _damageStackMovementPassiveService?.RefreshFromLoadout();
             await _commandFactory.CreateCommandAsync<StartLevelCommand>().StartBoss().Execute(cancellationTokenSource);
 
             var levelData = _levelsDataService.GetLevelData(_enterData.LevelNumberToEnter) as LevelTurnData;

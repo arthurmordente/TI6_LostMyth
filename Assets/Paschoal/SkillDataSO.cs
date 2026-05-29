@@ -75,6 +75,8 @@ public abstract class SkillDataSO : ScriptableObject
     [SerializeField] private PassiveTurnBehaviorSO _passiveTurnBehavior;
     [Tooltip("Optional fight-long passive logic (e.g. low-HP outgoing damage scaling).")]
     [SerializeField] private PassiveCombatBehaviorSO _passiveCombatBehavior;
+    [Tooltip("Optional passive logic when the player takes damage (e.g. stack movement bonus next turn).")]
+    [SerializeField] private PassiveOnDamageTakenBehaviorSO _passiveOnDamageTakenBehavior;
 
     public SkillDivinity Divinity => _divinity;
     public SkillType SkillType => _skillType;
@@ -94,6 +96,9 @@ public abstract class SkillDataSO : ScriptableObject
 
     /// <summary>Fight-long passive behavior for <see cref="SkillType.Passive"/> (e.g. low-HP damage scaling).</summary>
     public PassiveCombatBehaviorSO PassiveCombatBehavior => _passiveCombatBehavior;
+
+    /// <summary>Passive behavior triggered when the player takes damage.</summary>
+    public PassiveOnDamageTakenBehaviorSO PassiveOnDamageTakenBehavior => _passiveOnDamageTakenBehavior;
 
     public bool IsCastable => SkillType != SkillType.Passive;
 

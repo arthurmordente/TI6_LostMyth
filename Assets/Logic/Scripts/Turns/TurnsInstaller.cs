@@ -24,6 +24,7 @@ namespace Logic.Scripts.Turns
 
             Container.BindInterfacesAndSelfTo<RandomTurnPassiveService>().AsSingle();
             Container.BindInterfacesAndSelfTo<LowHealthOutgoingDamageService>().AsSingle();
+            Container.BindInterfacesAndSelfTo<DamageStackMovementPassiveService>().AsSingle();
             Container.BindInterfacesAndSelfTo<TurnFlowController>().AsSingle();
         }
     }

@@ -44,6 +44,7 @@ public class SkillDataSOEditor : Editor
             EditorGUILayout.PropertyField(serializedObject.FindProperty("_passiveModifiers"), new GUIContent("Passive modifiers"), true);
             EditorGUILayout.PropertyField(serializedObject.FindProperty("_passiveTurnBehavior"), new GUIContent("Passive turn behavior"), true);
             EditorGUILayout.PropertyField(serializedObject.FindProperty("_passiveCombatBehavior"), new GUIContent("Passive combat behavior"), true);
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("_passiveOnDamageTakenBehavior"), new GUIContent("Passive on damage taken"), true);
         }
         else
         {

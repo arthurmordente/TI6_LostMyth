@@ -18,7 +18,8 @@ public interface IExplorationLoadoutView
     void ClearSlotSelection();
     void PlayInvalidAssignFeedback();
     void ClearCatalog();
-    ExplorationSkillCatalogItemView CreateCatalogItem();
+    LoadoutSkillFrameView CreateCatalogItem();
     void FinalizeCatalogScroll();
     void ShowSkillDetails(SkillDataSO skill);
+    void SetSelectedCatalogSkill(SkillDataSO skill);
 }
