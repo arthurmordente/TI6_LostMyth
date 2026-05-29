@@ -21,6 +21,8 @@ public class ExplorationLoadoutUIController : IExplorationLoadoutUIController
     private ExplorationLoadoutDivinityFilter _divinityFilter = ExplorationLoadoutDivinityFilter.All;
     private bool _modalGateActive;
 
+    public bool IsVisible => _view != null && _view.IsVisible;
+
     public ExplorationLoadoutUIController(
         IExplorationLoadoutView view,
         INewSkillSystemSkillLoadoutService loadoutService,
