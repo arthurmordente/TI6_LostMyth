@@ -183,6 +183,15 @@ public class NaraTurnMovementController : NaraMovementController {
         LineHandlerController?.Refresh(_movementCenter, _movementRadius, NaraTransform.position);
     }
 
+    /// <summary>Turn-only compound multiplier applied on the current ring radius (for stacking passives).</summary>
+    public void ApplyTurnMovementRadiusMultiplierCompound(float multiplier) {
+        if (multiplier <= 1.0001f || float.IsNaN(multiplier) || float.IsInfinity(multiplier)) return;
+        _movementRadius = Mathf.Max(1, Mathf.RoundToInt(_movementRadius * multiplier));
+        if (NaraTransform == null) return;
+        SetMovementRadiusCenter();
+        LineHandlerController?.Refresh(_movementCenter, _movementRadius, NaraTransform.position);
+    }
+
     public void RemoveMovementRadius() {
         _movementRadius = 10000;
     }

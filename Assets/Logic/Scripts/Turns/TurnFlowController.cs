@@ -21,6 +21,7 @@ namespace Logic.Scripts.Turns {
         private readonly IDivideAbilityHandler _divideAbilityHandler;
         private readonly IGamePlayUiController _gamePlayUiController;
         private readonly IRandomTurnPassiveService _randomTurnPassiveService;
+        private readonly IDamageStackMovementPassiveService _damageStackMovementPassiveService;
 
         private IBossActionService _bossActionService;
         private IEnviromentActionService _enviromentActionService;
@@ -46,7 +47,8 @@ namespace Logic.Scripts.Turns {
 			Logic.Scripts.GameDomain.MVC.Echo.ICloneUseLimiter cloneUseLimiter,
             IDivideAbilityHandler divideAbilityHandler,
             [InjectOptional] IGamePlayUiController gamePlayUiController,
-            [InjectOptional] IRandomTurnPassiveService randomTurnPassiveService) {
+            [InjectOptional] IRandomTurnPassiveService randomTurnPassiveService,
+            [InjectOptional] IDamageStackMovementPassiveService damageStackMovementPassiveService) {
             _actionPointsService = actionPointsService;
             _echoService = echoService;
             _turnStateService = turnStateService;
@@ -56,6 +58,7 @@ namespace Logic.Scripts.Turns {
             _divideAbilityHandler = divideAbilityHandler;
             _gamePlayUiController = gamePlayUiController;
             _randomTurnPassiveService = randomTurnPassiveService;
+            _damageStackMovementPassiveService = damageStackMovementPassiveService;
         }
 
         public void Initialize(IBossActionService bossActionService,
@@ -167,6 +170,7 @@ namespace Logic.Scripts.Turns {
             _phase = TurnPhase.PlayerAct;
             _turnMovement?.ResetMovementArea();
             _randomTurnPassiveService?.ApplyPlayerTurnStart(_actionPointsService, _turnMovement);
+            _damageStackMovementPassiveService?.ApplyPlayerTurnStart(_turnMovement);
             _turnStateService.AdvanceTurn(_turnNumber, _phase);
             _naraController?.UnfreezeInputs();
             _naraController?.Unfreeeze();

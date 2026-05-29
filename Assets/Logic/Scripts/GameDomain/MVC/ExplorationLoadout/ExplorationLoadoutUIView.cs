@@ -32,8 +32,10 @@ public class ExplorationLoadoutUIView : MonoBehaviour, IExplorationLoadoutView
     [SerializeField] private List<SkillSlotUiRef> _bookSlots = new List<SkillSlotUiRef>(4);
 
     [Header("Catalog")]
+    [Tooltip("Parent transform where skill frames are spawned (Grid/Layout group in your scene).")]
     [SerializeField] private Transform _catalogContainer;
-    [SerializeField] private ExplorationSkillCatalogItemView _catalogItemPrefab;
+    [Tooltip("SkillFrame.prefab — must include LoadoutSkillFrameView.")]
+    [SerializeField] private LoadoutSkillFrameView _skillFramePrefab;
     [Tooltip("Opcional. Dropdown TMP no prefab da cena (mesma ordem que ExplorationLoadoutSkillFilter).")]
     [SerializeField] private TMP_Dropdown _skillCategoryDropdown;
     [Tooltip("Opcional. Dropdown TMP para filtrar por divindade.")]
@@ -51,16 +53,9 @@ public class ExplorationLoadoutUIView : MonoBehaviour, IExplorationLoadoutView
     [SerializeField] private Image _detailIconImage;
 
     private ISkillVisualCatalog _visualCatalog;
-    private TMP_Text _debugFilterHeaderText;
-    private GameObject _debugFilterListRoot;
-    private GameObject _debugFilterClickBlocker;
-    private GameObject _filterDropdownModalBlocker;
-    private Transform _catalogPanelTransform;
-    private ScrollRect _catalogScrollRect;
     private Action<ExplorationLoadoutSkillFilter> _onCatalogFilterChanged;
     private Action<ExplorationLoadoutDivinityFilter> _onDivinityFilterChanged;
-    private TMP_Text _debugDivinityFilterHeaderText;
-    private GameObject _debugDivinityFilterListRoot;
+    private readonly List<LoadoutSkillFrameView> _catalogItems = new List<LoadoutSkillFrameView>(16);
 
     private void Awake()
     {
@@ -240,63 +235,35 @@ public class ExplorationLoadoutUIView : MonoBehaviour, IExplorationLoadoutView
 
     public void ClearCatalog()
     {
+        _catalogItems.Clear();
         if (_catalogContainer == null) return;
         for (int i = _catalogContainer.childCount - 1; i >= 0; i--)
             Destroy(_catalogContainer.GetChild(i).gameObject);
     }
 
-    public ExplorationSkillCatalogItemView CreateCatalogItem()
+    public LoadoutSkillFrameView CreateCatalogItem()
     {
-        if (_catalogContainer == null) return null;
-        if (_catalogItemPrefab == null)
-            return CreateRuntimeCatalogItem(_catalogContainer);
-        return Instantiate(_catalogItemPrefab, _catalogContainer);
+        if (_catalogContainer == null || _skillFramePrefab == null) return null;
+        LoadoutSkillFrameView frame = Instantiate(_skillFramePrefab, _catalogContainer);
+        _catalogItems.Add(frame);
+        return frame;
+    }
+
+    public void SetSelectedCatalogSkill(SkillDataSO skill)
+    {
+        for (int i = 0; i < _catalogItems.Count; i++)
+        {
+            LoadoutSkillFrameView frame = _catalogItems[i];
+            if (frame == null) continue;
+            frame.SetCatalogSelected(frame.BoundSkill == skill);
+        }
     }
 
     public void FinalizeCatalogScroll()
     {
-        if (_catalogScrollRect == null || _catalogScrollRect.content == null) return;
-        var content = _catalogScrollRect.content;
-        LayoutRebuilder.ForceRebuildLayoutImmediate(content);
+        if (_catalogContainer is not RectTransform rt) return;
+        LayoutRebuilder.ForceRebuildLayoutImmediate(rt);
         Canvas.ForceUpdateCanvases();
-        _catalogScrollRect.verticalNormalizedPosition = 1f;
-    }
-
-    private void CloseDebugFilterDropdown()
-    {
-        if (_debugFilterListRoot != null) _debugFilterListRoot.SetActive(false);
-        if (_debugDivinityFilterListRoot != null) _debugDivinityFilterListRoot.SetActive(false);
-        if (_debugFilterClickBlocker != null) _debugFilterClickBlocker.SetActive(false);
-        if (_filterDropdownModalBlocker != null) _filterDropdownModalBlocker.SetActive(false);
-    }
-
-    private void SetDebugFilterDropdownOpen(bool open)
-    {
-        if (_debugFilterListRoot != null) _debugFilterListRoot.SetActive(open);
-        if (_debugFilterClickBlocker != null) _debugFilterClickBlocker.SetActive(open);
-        if (_filterDropdownModalBlocker != null) _filterDropdownModalBlocker.SetActive(open);
-        if (open)
-        {
-            BringCatalogAndDropdownToFront();
-            if (_debugFilterListRoot != null)
-            {
-                var listRt = _debugFilterListRoot.GetComponent<RectTransform>();
-                if (listRt != null)
-                {
-                    LayoutRebuilder.ForceRebuildLayoutImmediate(listRt);
-                    Canvas.ForceUpdateCanvases();
-                }
-                _debugFilterListRoot.transform.SetAsLastSibling();
-            }
-        }
-    }
-
-    private void BringCatalogAndDropdownToFront()
-    {
-        if (_catalogPanelTransform != null)
-            _catalogPanelTransform.SetAsLastSibling();
-        if (_closeButton != null)
-            _closeButton.transform.SetAsLastSibling();
     }
 
     public void ShowSkillDetails(SkillDataSO skill)
@@ -455,178 +422,21 @@ public class ExplorationLoadoutUIView : MonoBehaviour, IExplorationLoadoutView
         AddPanelOutline(bookContainer, new Color(1f, 1f, 1f, 0.32f));
         BuildSlotRow(bookContainer.transform, _bookSlots, "Skills Livro", "L");
 
-        _filterDropdownModalBlocker = CreateUiObject("FilterDropdownModalBlocker", panel.transform);
-        StretchRect(_filterDropdownModalBlocker.GetComponent<RectTransform>(), Vector2.zero, Vector2.one);
-        var modalImg = _filterDropdownModalBlocker.AddComponent<Image>();
-        modalImg.color = new Color(0f, 0f, 0f, 0.25f);
-        modalImg.raycastTarget = true;
-        var modalBtn = _filterDropdownModalBlocker.AddComponent<Button>();
-        modalBtn.targetGraphic = modalImg;
-        modalBtn.onClick.AddListener(CloseDebugFilterDropdown);
-        _filterDropdownModalBlocker.SetActive(false);
-
         var catalogObj = CreateUiObject("Catalog", panel.transform);
-        _catalogPanelTransform = catalogObj.transform;
         StretchRect(catalogObj.GetComponent<RectTransform>(), new Vector2(0.03f, 0.38f), new Vector2(0.58f, 0.94f));
         InsetRect(catalogObj.GetComponent<RectTransform>(), 6f);
         catalogObj.AddComponent<Image>().color = new Color(1f, 1f, 1f, 0.07f);
         AddPanelOutline(catalogObj, new Color(1f, 1f, 1f, 0.32f));
         CreateText(catalogObj.transform, "CatalogTitle", "Catalogo de Habilidades", new Vector2(0.04f, 0.88f), new Vector2(0.96f, 0.97f), 22f);
-        _catalogContainer = BuildCatalogScrollArea(catalogObj.transform);
-        BuildDebugFilterBar(catalogObj.transform);
 
-        BringCatalogAndDropdownToFront();
-    }
-
-    private void BuildDebugFilterBar(Transform catalogParent)
-    {
-        _debugFilterClickBlocker = CreateUiObject("FilterClickBlocker", catalogParent);
-        StretchRect(_debugFilterClickBlocker.GetComponent<RectTransform>(), new Vector2(0.02f, 0.02f), new Vector2(0.98f, 0.748f));
-        var blk = _debugFilterClickBlocker.AddComponent<Image>();
-        blk.color = new Color(0f, 0f, 0f, 0.12f);
-        blk.raycastTarget = true;
-        var blkBtn = _debugFilterClickBlocker.AddComponent<Button>();
-        blkBtn.targetGraphic = blk;
-        blkBtn.onClick.AddListener(CloseDebugFilterDropdown);
-        _debugFilterClickBlocker.SetActive(false);
-
-        var row = CreateUiObject("FilterRow", catalogParent);
-        StretchRect(row.GetComponent<RectTransform>(), new Vector2(0.04f, 0.755f), new Vector2(0.96f, 0.855f));
-        row.AddComponent<Image>().color = new Color(0f, 0f, 0f, 0.22f);
-        AddPanelOutline(row, new Color(1f, 1f, 1f, 0.22f));
-        CreateText(row.transform, "Lbl", "Categoria", new Vector2(0.03f, 0.2f), new Vector2(0.22f, 0.8f), 15f);
-        var hdrGo = CreateUiObject("FilterHeaderBtn", row.transform);
-        StretchRect(hdrGo.GetComponent<RectTransform>(), new Vector2(0.24f, 0.12f), new Vector2(0.97f, 0.88f));
-        hdrGo.AddComponent<Image>().color = new Color(1f, 1f, 1f, 0.1f);
-        var hdrBtn = hdrGo.AddComponent<Button>();
-        _debugFilterHeaderText = CreateText(hdrGo.transform, "Txt", "Todas ▼", new Vector2(0.05f, 0.12f), new Vector2(0.95f, 0.88f), 17f);
-        _debugFilterHeaderText.alignment = TextAlignmentOptions.Left;
-
-        _debugFilterListRoot = CreateUiObject("FilterList", catalogParent);
-        var listRt = _debugFilterListRoot.GetComponent<RectTransform>();
-        listRt.anchorMin = new Vector2(0.06f, 0.755f);
-        listRt.anchorMax = new Vector2(0.94f, 0.755f);
-        listRt.pivot = new Vector2(0.5f, 1f);
-        listRt.anchoredPosition = Vector2.zero;
-        listRt.sizeDelta = Vector2.zero;
-        var listBg = _debugFilterListRoot.AddComponent<Image>();
-        listBg.color = new Color(0.08f, 0.08f, 0.1f, 0.98f);
-        listBg.raycastTarget = true;
-        AddPanelOutline(_debugFilterListRoot, new Color(0.9f, 0.9f, 1f, 0.4f));
-        var vlg = _debugFilterListRoot.AddComponent<VerticalLayoutGroup>();
-        vlg.padding = new RectOffset(12, 12, 10, 10);
-        vlg.spacing = 8f;
-        vlg.childAlignment = TextAnchor.UpperCenter;
-        vlg.childControlWidth = true;
-        vlg.childControlHeight = true;
-        vlg.childForceExpandWidth = true;
-        vlg.childForceExpandHeight = false;
-        var listCsf = _debugFilterListRoot.AddComponent<ContentSizeFitter>();
-        listCsf.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
-        listCsf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-        _debugFilterListRoot.SetActive(false);
-
-        for (int i = 0; i <= (int)ExplorationLoadoutSkillFilter.Buff; i++)
-        {
-            int idx = i;
-            var label = ExplorationLoadoutSkillFilterUtil.DisplayLabel((ExplorationLoadoutSkillFilter)idx);
-            var optGo = CreateUiObject("Opt" + i, _debugFilterListRoot.transform);
-            var optImg = optGo.AddComponent<Image>();
-            optImg.color = new Color(1f, 1f, 1f, 0.1f);
-            var le = optGo.AddComponent<LayoutElement>();
-            le.minHeight = 38f;
-            le.preferredHeight = 38f;
-            var optBtn = optGo.AddComponent<Button>();
-            var optTxt = CreateText(optGo.transform, "Txt", label, new Vector2(0.05f, 0.1f), new Vector2(0.95f, 0.9f), 16f);
-            optTxt.alignment = TextAlignmentOptions.Left;
-            optBtn.onClick.AddListener(() =>
-            {
-                if (_skillCategoryDropdown != null)
-                    _skillCategoryDropdown.SetValueWithoutNotify(idx);
-                _onCatalogFilterChanged?.Invoke((ExplorationLoadoutSkillFilter)idx);
-                _debugFilterHeaderText?.SetText(label + " ▼");
-                CloseDebugFilterDropdown();
-            });
-        }
-
-        hdrBtn.onClick.AddListener(() =>
-        {
-            bool open = _debugFilterListRoot == null || !_debugFilterListRoot.activeSelf;
-            SetDebugFilterDropdownOpen(open);
-        });
-
-        BuildDebugDivinityFilterRow(catalogParent);
-    }
-
-    private void BuildDebugDivinityFilterRow(Transform catalogParent)
-    {
-        var row = CreateUiObject("DivinityFilterRow", catalogParent);
-        StretchRect(row.GetComponent<RectTransform>(), new Vector2(0.04f, 0.655f), new Vector2(0.96f, 0.748f));
-        row.AddComponent<Image>().color = new Color(0f, 0f, 0f, 0.18f);
-        AddPanelOutline(row, new Color(1f, 1f, 1f, 0.2f));
-        CreateText(row.transform, "Lbl", "Divindade", new Vector2(0.03f, 0.2f), new Vector2(0.24f, 0.8f), 14f);
-        var hdrGo = CreateUiObject("DivinityFilterHeaderBtn", row.transform);
-        StretchRect(hdrGo.GetComponent<RectTransform>(), new Vector2(0.26f, 0.12f), new Vector2(0.97f, 0.88f));
-        hdrGo.AddComponent<Image>().color = new Color(1f, 1f, 1f, 0.1f);
-        var hdrBtn = hdrGo.AddComponent<Button>();
-        _debugDivinityFilterHeaderText = CreateText(hdrGo.transform, "Txt", "Todas ▼", new Vector2(0.05f, 0.12f), new Vector2(0.95f, 0.88f), 16f);
-        _debugDivinityFilterHeaderText.alignment = TextAlignmentOptions.Left;
-
-        _debugDivinityFilterListRoot = CreateUiObject("DivinityFilterList", catalogParent);
-        var listRt = _debugDivinityFilterListRoot.GetComponent<RectTransform>();
-        listRt.anchorMin = new Vector2(0.06f, 0.655f);
-        listRt.anchorMax = new Vector2(0.94f, 0.655f);
-        listRt.pivot = new Vector2(0.5f, 1f);
-        listRt.anchoredPosition = Vector2.zero;
-        listRt.sizeDelta = Vector2.zero;
-        var listBg = _debugDivinityFilterListRoot.AddComponent<Image>();
-        listBg.color = new Color(0.08f, 0.08f, 0.1f, 0.98f);
-        listBg.raycastTarget = true;
-        AddPanelOutline(_debugDivinityFilterListRoot, new Color(0.9f, 0.9f, 1f, 0.4f));
-        var vlg = _debugDivinityFilterListRoot.AddComponent<VerticalLayoutGroup>();
-        vlg.padding = new RectOffset(10, 10, 8, 8);
-        vlg.spacing = 6f;
-        vlg.childControlWidth = true;
-        vlg.childControlHeight = true;
-        vlg.childForceExpandWidth = true;
-        vlg.childForceExpandHeight = false;
-        _debugDivinityFilterListRoot.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-        _debugDivinityFilterListRoot.SetActive(false);
-
-        for (int i = 0; i <= (int)ExplorationLoadoutDivinityFilter.Iara; i++)
-        {
-            int idx = i;
-            var label = ExplorationLoadoutDivinityFilterUtil.DisplayLabel((ExplorationLoadoutDivinityFilter)idx);
-            var optGo = CreateUiObject("DivOpt" + i, _debugDivinityFilterListRoot.transform);
-            optGo.AddComponent<Image>().color = new Color(1f, 1f, 1f, 0.1f);
-            var le = optGo.AddComponent<LayoutElement>();
-            le.minHeight = 34f;
-            le.preferredHeight = 34f;
-            var optBtn = optGo.AddComponent<Button>();
-            var optTxt = CreateText(optGo.transform, "Txt", label, new Vector2(0.05f, 0.1f), new Vector2(0.95f, 0.9f), 15f);
-            optTxt.alignment = TextAlignmentOptions.Left;
-            optBtn.onClick.AddListener(() =>
-            {
-                if (_divinityCategoryDropdown != null)
-                    _divinityCategoryDropdown.SetValueWithoutNotify(idx);
-                _onDivinityFilterChanged?.Invoke((ExplorationLoadoutDivinityFilter)idx);
-                _debugDivinityFilterHeaderText?.SetText(label + " ▼");
-                _debugDivinityFilterListRoot.SetActive(false);
-                if (_debugFilterListRoot != null) _debugFilterListRoot.SetActive(false);
-                if (_debugFilterClickBlocker != null) _debugFilterClickBlocker.SetActive(false);
-                if (_filterDropdownModalBlocker != null) _filterDropdownModalBlocker.SetActive(false);
-            });
-        }
-
-        hdrBtn.onClick.AddListener(() =>
-        {
-            bool open = _debugDivinityFilterListRoot == null || !_debugDivinityFilterListRoot.activeSelf;
-            if (_debugDivinityFilterListRoot != null) _debugDivinityFilterListRoot.SetActive(open);
-            if (_debugFilterListRoot != null && open) _debugFilterListRoot.SetActive(false);
-            if (_debugFilterClickBlocker != null) _debugFilterClickBlocker.SetActive(open);
-            if (_filterDropdownModalBlocker != null) _filterDropdownModalBlocker.SetActive(open);
-            if (open) BringCatalogAndDropdownToFront();
-        });
+        var catalogGrid = CreateUiObject("CatalogContainer", catalogObj.transform);
+        StretchRect(catalogGrid.GetComponent<RectTransform>(), new Vector2(0.04f, 0.04f), new Vector2(0.96f, 0.86f));
+        var grid = catalogGrid.AddComponent<GridLayoutGroup>();
+        grid.cellSize = new Vector2(120f, 120f);
+        grid.spacing = new Vector2(8f, 8f);
+        grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+        grid.constraintCount = 5;
+        _catalogContainer = catalogGrid.transform;
     }
 
     private void BuildSlotRow(Transform parent, List<SkillSlotUiRef> targetSlots, string title, string prefix)
@@ -720,118 +530,6 @@ public class ExplorationLoadoutUIView : MonoBehaviour, IExplorationLoadoutView
         _detailIconImage = detailIconObj.AddComponent<Image>();
         StretchRect(detailIconObj.GetComponent<RectTransform>(), new Vector2(0.12f, 0.12f), new Vector2(0.88f, 0.88f));
         _detailIconImage.enabled = false;
-    }
-
-    private Transform BuildCatalogScrollArea(Transform parent)
-    {
-        const float scrollbarWidth = 18f;
-
-        var scrollRoot = CreateUiObject("CatalogScroll", parent);
-        StretchRect(scrollRoot.GetComponent<RectTransform>(), new Vector2(0.035f, 0.03f), new Vector2(0.965f, 0.74f));
-
-        var viewport = CreateUiObject("Viewport", scrollRoot.transform);
-        var vpRt = viewport.GetComponent<RectTransform>();
-        vpRt.anchorMin = Vector2.zero;
-        vpRt.anchorMax = Vector2.one;
-        vpRt.offsetMin = Vector2.zero;
-        vpRt.offsetMax = new Vector2(-scrollbarWidth, 0f);
-
-        var vpImg = viewport.AddComponent<Image>();
-        vpImg.color = new Color(0f, 0f, 0f, 0.18f);
-        AddPanelOutline(viewport, new Color(1f, 1f, 1f, 0.2f));
-        viewport.AddComponent<Mask>().showMaskGraphic = false;
-
-        var scrollbarGo = CreateUiObject("Scrollbar", scrollRoot.transform);
-        var sbRt = scrollbarGo.GetComponent<RectTransform>();
-        sbRt.anchorMin = new Vector2(1f, 0f);
-        sbRt.anchorMax = new Vector2(1f, 1f);
-        sbRt.pivot = new Vector2(1f, 0.5f);
-        sbRt.sizeDelta = new Vector2(scrollbarWidth, 0f);
-        sbRt.anchoredPosition = Vector2.zero;
-        scrollbarGo.AddComponent<Image>().color = new Color(0f, 0f, 0f, 0.4f);
-
-        var sliding = CreateUiObject("SlidingArea", scrollbarGo.transform);
-        StretchRect(sliding.GetComponent<RectTransform>(), new Vector2(0.15f, 0.03f), new Vector2(0.85f, 0.97f));
-        sliding.AddComponent<Image>().color = new Color(0f, 0f, 0f, 0.15f);
-
-        var handle = CreateUiObject("Handle", sliding.transform);
-        var hRt = handle.GetComponent<RectTransform>();
-        hRt.anchorMin = Vector2.zero;
-        hRt.anchorMax = Vector2.one;
-        hRt.sizeDelta = Vector2.zero;
-        var hImg = handle.AddComponent<Image>();
-        hImg.color = new Color(0.88f, 0.88f, 0.95f, 0.95f);
-
-        var scrollbar = scrollbarGo.AddComponent<Scrollbar>();
-        scrollbar.direction = Scrollbar.Direction.BottomToTop;
-        scrollbar.targetGraphic = hImg;
-        scrollbar.handleRect = hRt;
-
-        var content = CreateUiObject("Content", viewport.transform);
-        var contentRect = content.GetComponent<RectTransform>();
-        contentRect.anchorMin = new Vector2(0f, 1f);
-        contentRect.anchorMax = new Vector2(1f, 1f);
-        contentRect.pivot = new Vector2(0.5f, 1f);
-        contentRect.anchoredPosition = Vector2.zero;
-        contentRect.sizeDelta = new Vector2(0f, 0f);
-
-        var vlg = content.AddComponent<VerticalLayoutGroup>();
-        vlg.spacing = 6f;
-        vlg.padding = new RectOffset(4, 6, 2, 6);
-        vlg.childAlignment = TextAnchor.UpperCenter;
-        vlg.childControlWidth = true;
-        vlg.childControlHeight = true;
-        vlg.childForceExpandWidth = true;
-        vlg.childForceExpandHeight = false;
-
-        var csf = content.AddComponent<ContentSizeFitter>();
-        csf.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
-        csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-
-        var scrollRect = scrollRoot.AddComponent<ScrollRect>();
-        scrollRect.viewport = vpRt;
-        scrollRect.content = contentRect;
-        scrollRect.verticalScrollbar = scrollbar;
-        scrollRect.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.Permanent;
-        scrollRect.horizontal = false;
-        scrollRect.vertical = true;
-        scrollRect.movementType = ScrollRect.MovementType.Clamped;
-        scrollRect.scrollSensitivity = 38f;
-
-        _catalogScrollRect = scrollRect;
-
-        return content.transform;
-    }
-
-    private ExplorationSkillCatalogItemView CreateRuntimeCatalogItem(Transform parent)
-    {
-        const float rowH = 76f;
-        var row = CreateUiObject("CatalogItem", parent);
-        var le = row.AddComponent<LayoutElement>();
-        le.minHeight = rowH;
-        le.preferredHeight = rowH;
-        le.flexibleHeight = 0f;
-
-        var button = row.AddComponent<Button>();
-        var image = row.AddComponent<Image>();
-        image.color = new Color(1f, 1f, 1f, 0.11f);
-        AddPanelOutline(row, new Color(1f, 1f, 1f, 0.22f));
-
-        var name = CreateText(row.transform, "Name", "", new Vector2(0.22f, 0.18f), new Vector2(0.96f, 0.82f), 16f, ellipsis: true);
-        if (name != null) name.gameObject.SetActive(false);
-
-        var frameObj = CreateUiObject("Frame", row.transform);
-        var frame = frameObj.AddComponent<Image>();
-        StretchRect(frameObj.GetComponent<RectTransform>(), new Vector2(0.03f, 0.12f), new Vector2(0.20f, 0.88f));
-        frame.enabled = false;
-        var iconObj = CreateUiObject("Icon", frameObj.transform);
-        var icon = iconObj.AddComponent<Image>();
-        StretchRect(iconObj.GetComponent<RectTransform>(), new Vector2(0.12f, 0.12f), new Vector2(0.88f, 0.88f));
-        icon.enabled = false;
-
-        var view = row.AddComponent<ExplorationSkillCatalogItemView>();
-        view.ConfigureRuntimeReferences(button, frame, icon, name);
-        return view;
     }
 
     private static GameObject CreateUiObject(string name, Transform parent)

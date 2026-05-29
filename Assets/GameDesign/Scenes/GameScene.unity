@@ -240,16 +240,21 @@ MonoBehaviour:
   _gameplaySfxClips: {fileID: 11400000, guid: 4fb288e591186ec468383ef3b94e7009, type: 2}
   _universalUiSceneViews: {fileID: 921906174}
   _newSkillSystemSkillCatalog:
-  - {fileID: 11400000, guid: f47ac10b58cc4372a5670e02b2c3d479, type: 2}
-  - {fileID: 11400000, guid: f47ac10b58cc4372a5670e02b2c3d47a, type: 2}
   - {fileID: 11400000, guid: f47ac10b58cc4372a5670e02b2c3d47b, type: 2}
-  - {fileID: 11400000, guid: f47ac10b58cc4372a5670e02b2c3d47c, type: 2}
-  - {fileID: 11400000, guid: 64fea6c3aef129d48b549b5238f2d586, type: 2}
-  - {fileID: 11400000, guid: d548e03ba1372aa4b9c0c271ec06628d, type: 2}
-  - {fileID: 11400000, guid: 04366a99f7db49240b9d7bd26effd69a, type: 2}
+  - {fileID: 11400000, guid: f47ac10b58cc4372a5670e02b2c3d47a, type: 2}
   - {fileID: 11400000, guid: 2325b20b41e54ce4d9f1a13401122072, type: 2}
-  - {fileID: 11400000, guid: 2c210c926633a654faae7dd53f0b2d25, type: 2}
-  - {fileID: 11400000, guid: f08ba4d22e326294898f1a2c7d0e0ba6, type: 2}
+  - {fileID: 11400000, guid: 17c1b07d19f9c0043a0fc1421a80c5ef, type: 2}
+  - {fileID: 11400000, guid: f47ac10b58cc4372a5670e02b2c3d479, type: 2}
+  - {fileID: 11400000, guid: 18689ca3f7e23fc4090b1508be523653, type: 2}
+  - {fileID: 11400000, guid: f47ac10b58cc4372a5670e02b2c3d47c, type: 2}
+  - {fileID: 11400000, guid: 04366a99f7db49240b9d7bd26effd69a, type: 2}
+  - {fileID: 11400000, guid: ec2f8a9ac30b6ab4992673eb0eade811, type: 2}
+  - {fileID: 11400000, guid: 64fea6c3aef129d48b549b5238f2d586, type: 2}
+  - {fileID: 11400000, guid: 6124f387325556644b2e582026e4795b, type: 2}
+  - {fileID: 11400000, guid: d006a586356b89247bbb423c04fa6645, type: 2}
+  - {fileID: 11400000, guid: d548e03ba1372aa4b9c0c271ec06628d, type: 2}
+  - {fileID: 11400000, guid: 03657d19a43c5744fa836c6c2e33136e, type: 2}
+  - {fileID: 11400000, guid: 184a493930348454a9ef68b5df88fd57, type: 2}
   _skillVisualCatalog: {fileID: 11400000, guid: ca520d6c0d2ac3a44baa811fb9dd6de8, type: 2}
 --- !u!1001 &921906173
 PrefabInstance:

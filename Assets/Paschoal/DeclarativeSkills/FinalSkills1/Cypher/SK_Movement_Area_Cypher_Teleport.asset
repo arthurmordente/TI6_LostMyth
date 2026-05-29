@@ -10,8 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6a7b8c9d0e1f23456789abcdef0123ab, type: 3}
-  m_Name: SK_Movement_Area_Teleport
+  m_Name: SK_Movement_Area_Cypher_Teleport
   m_EditorClassIdentifier: 
+  _divinity: 3
   _skillType: 2
   _castType: 1
   _projectileRange: 12
@@ -35,10 +36,12 @@ MonoBehaviour:
   _selfCastPrefab: {fileID: 1607142820532151380, guid: 6190cf774033c09479d45e3c13b935d7, type: 3}
   Power: 0
   Cost: 2
-  Icon: {fileID: 21300000, guid: f1f774d82f1bae14a95b9197cb85239d, type: 3}
+  Icon: {fileID: 21300000, guid: 5fe6deaf353008c409d8f7e30a0ebeca, type: 3}
   SkillName: Teleporte
   Description: "Teleporta at\xE9 a \xE1rea alvo."
   _effects:
   - {fileID: 11400000, guid: 697ae35b4c5cfb0439a41ec694d04329, type: 2}
   _passiveModifiers: []
+  _passiveTurnBehavior: {fileID: 0}
+  _passiveCombatBehavior: {fileID: 0}
   _runtimeModifiers: []

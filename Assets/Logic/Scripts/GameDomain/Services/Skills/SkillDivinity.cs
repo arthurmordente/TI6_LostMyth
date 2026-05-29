@@ -26,5 +26,8 @@ namespace Logic.Scripts.GameDomain.Services.Skills {
                 _ => divinity.ToString()
             };
         }
+
+        /// <summary>Catalog sort order: Hocari → Laki → Ouroboros → Mafdet → Iara.</summary>
+        public static int CatalogSortOrder(SkillDivinity divinity) => (int)divinity;
     }
 }

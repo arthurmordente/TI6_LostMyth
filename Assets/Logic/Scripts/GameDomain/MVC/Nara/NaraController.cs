@@ -27,6 +27,7 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
         private readonly ICheatController _cheatController;
         private readonly INewSkillSystemSkillLoadoutService _newSkillSystemSkillLoadoutService;
         private readonly ErzahlerAnimatorControllersSO _erzahlerAnimatorControllers;
+        private readonly IDamageStackMovementPassiveService _damageStackMovementPassiveService;
         public GameObject NaraViewGO => _naraView.gameObject;
         public Transform NaraSkillSpotTransform => _naraView.transform;
         public NaraMovementController NaraMove => _naraMovementController;
@@ -55,7 +56,8 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
             NaraConfigurationSO naraConfiguration, ICheatController cheatController,
             AbilityData[] abilities,
             [InjectOptional] INewSkillSystemSkillLoadoutService newSkillSystemSkillLoadoutService = null,
-            [InjectOptional] ErzahlerAnimatorControllersSO erzahlerAnimatorControllers = null) {
+            [InjectOptional] ErzahlerAnimatorControllersSO erzahlerAnimatorControllers = null,
+            [InjectOptional] IDamageStackMovementPassiveService damageStackMovementPassiveService = null) {
             _naraData = new NaraData(naraConfiguration);
             _naraConfiguration = naraConfiguration;
             _updateSubscriptionService = updateSubscriptionService;
@@ -66,6 +68,7 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
             _abilities = abilities ?? System.Array.Empty<AbilityData>();
             _newSkillSystemSkillLoadoutService = newSkillSystemSkillLoadoutService;
             _erzahlerAnimatorControllers = erzahlerAnimatorControllers;
+            _damageStackMovementPassiveService = damageStackMovementPassiveService;
         }
 
         public void RegisterListeners() {
@@ -306,6 +309,7 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
                 _naraData.TakeDamage(damageAmound);
 
             if (damageApplied) {
+                _damageStackMovementPassiveService?.OnPlayerDamageTaken();
                 if (_naraView != null) {
                     var flash = _naraView.GetComponent<DamageFlashPresenter>();
                     if (flash == null) flash = _naraView.gameObject.AddComponent<DamageFlashPresenter>();
