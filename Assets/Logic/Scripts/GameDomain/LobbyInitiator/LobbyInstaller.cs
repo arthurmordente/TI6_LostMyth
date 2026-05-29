@@ -7,7 +7,12 @@ public class LobbyInstaller : MonoInstaller {
     public override void InstallBindings() {
         Container.Bind<ILobbyInitiator>().To<LobbyInitiator>().AsSingle().NonLazy();
         if (_lobbyMenuView != null)
+        {
             Container.Bind<ILobbyMenuView>().FromInstance(_lobbyMenuView).AsSingle();
+            if (_lobbyMenuView.GetComponent<LobbyMenuEscapeRelay>() == null)
+                _lobbyMenuView.gameObject.AddComponent<LobbyMenuEscapeRelay>();
+            Container.Bind<LobbyMenuEscapeRelay>().FromComponentOn(_lobbyMenuView.gameObject).AsSingle();
+        }
         else
             Container.Bind<ILobbyMenuView>().FromComponentInHierarchy().AsSingle();
         Container.Bind<ILobbyController>().To<LobbyUiController>().AsSingle().NonLazy();

@@ -17,7 +17,6 @@ public sealed class CreditsCanvasView : UguiCanvasViewBase, ICreditsView
     {
         EnsureRuntimeUiIfNeeded();
         base.Awake();
-        HideUntilOpened();
     }
 
     public void InitEntryPoint()

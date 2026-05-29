@@ -24,12 +24,17 @@ public sealed class OptionsCanvasView : UguiCanvasViewBase, IOptionsView
     {
         EnsureRuntimeUiIfNeeded();
         base.Awake();
-        HideUntilOpened();
     }
 
     public void InitEntryPoint()
     {
         HideUntilOpened();
+    }
+
+    public override void Show()
+    {
+        EnsureRuntimeUiIfNeeded();
+        base.Show();
         ShowSoundPanel();
     }
 
@@ -108,13 +113,17 @@ public sealed class OptionsCanvasView : UguiCanvasViewBase, IOptionsView
 
     private void ShowVideoPanel()
     {
-        if (_videoPanel != null) _videoPanel.SetActive(true);
-        if (_soundPanel != null) _soundPanel.SetActive(false);
+        if (_videoPanel == null) return;
+        _videoPanel.SetActive(true);
+        if (_soundPanel != null && _soundPanel != _videoPanel)
+            _soundPanel.SetActive(false);
     }
 
     private void ShowSoundPanel()
     {
-        if (_videoPanel != null) _videoPanel.SetActive(false);
-        if (_soundPanel != null) _soundPanel.SetActive(true);
+        if (_soundPanel == null) return;
+        _soundPanel.SetActive(true);
+        if (_videoPanel != null && _videoPanel != _soundPanel)
+            _videoPanel.SetActive(false);
     }
 }

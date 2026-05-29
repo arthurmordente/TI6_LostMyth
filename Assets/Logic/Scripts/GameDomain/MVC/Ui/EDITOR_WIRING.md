@@ -53,6 +53,18 @@ O menu **inicia oculto** (`Awake` + `Init`). Só abre quando o jogador interage 
 - Overlays Options/Credits/Load/Guide/Cheats são criados em runtime se não houver refs; **iniciam sempre ocultos** até `ShowOptionsScreen`, `ShowCreditsScreen`, etc.
 - Se usares canvases na cena, atribui em `UniversalUiSceneViews` e define **Root Panel** no Inspector de cada `*CanvasView` (filho `Panel`, não o root do canvas).
 
+### Hierarquia recomendada (`UniversalUIViews.prefab`)
+
+| Objeto | Estado inicial no prefab | Notas |
+|--------|--------------------------|--------|
+| `*CanvasView` (root do overlay) | **Ativo**, `localScale = (1,1,1)` | O script desliga o GO em `InitEntryPoint`; precisa de estar ativo para Awake/serialização. |
+| Filho `Panel` (conteúdo) | **Ativo** (o código oculta via `Hide`) | Atribuir em **Root Panel** no `*CanvasView`. |
+| Botões fora do `Panel` (ex. Close solto) | Evitar — meter tudo dentro de `Panel` | Se Close for irmão do Panel, ao esconder só o Panel o X fica visível. |
+
+**Options:** no prefab atual o GO `OptionsCanvasView` costuma começar **inativo** com scale 0 — no Editor, passa a **ativo + scale 1**; o `HideUntilOpened` no arranque trata da visibilidade.
+
+**Credits:** se **Root Panel** apontar para o próprio canvas, o código trata como overlay inteiro (equivalente a não ter filho Panel).
+
 - Remover GameObjects com `OptionsUIView`, `CreditsUIView`, `LoadUIView`, `GuideUIView`, `CheatsUIView`.
 
 ## 6. Canvas sorting

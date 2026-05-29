@@ -27,7 +27,6 @@ public sealed class GuideCanvasView : UguiCanvasViewBase, IGuideScreenView
     protected override void Awake()
     {
         base.Awake();
-        HideUntilOpened();
     }
 
     public async Awaitable InitEntryPoint()

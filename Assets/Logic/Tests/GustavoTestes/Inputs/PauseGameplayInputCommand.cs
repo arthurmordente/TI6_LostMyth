@@ -7,12 +7,18 @@ using UnityEngine;
 public class PauseGameplayInputCommand : BaseCommand, ICommandVoid {
     private IGamePlayUiController _gamePlayUiController;
     private IGameInputActionsController _gameInputActionsController;
+    private IUniversalUIController _universalUIController;
+
     public override void ResolveDependencies() {
         _gamePlayUiController = _diContainer.Resolve<IGamePlayUiController>();
         _gameInputActionsController = _diContainer.Resolve<IGameInputActionsController>();
+        _universalUIController = _diContainer.Resolve<IUniversalUIController>();
     }
 
     public void Execute() {
+        if (_universalUIController != null && _universalUIController.TryCloseTopOverlay())
+            return;
+
         LogService.Log("Pause pressed");
         Time.timeScale = 0f;
         _gamePlayUiController.ShowPauseScreen();

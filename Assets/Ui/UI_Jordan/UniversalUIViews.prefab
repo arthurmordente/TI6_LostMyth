@@ -2687,7 +2687,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &6973701732281775745
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2784,7 +2784,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2e7975d57d6aeda47807b0779fe60664, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CreditsCanvasView
-  _rootPanel: {fileID: 0}
+  _rootPanel: {fileID: 8377613314781934864}
   _canvasGroup: {fileID: 0}
   _closeButton: {fileID: 1187190218934432963}
   _bodyText: {fileID: 7208334593626899997}

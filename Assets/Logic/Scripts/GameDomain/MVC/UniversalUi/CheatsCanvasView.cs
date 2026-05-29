@@ -12,11 +12,7 @@ public sealed class CheatsCanvasView : UguiCanvasViewBase, ICheatsScreenView
     [SerializeField] private Toggle _actionPointsToggle;
     [SerializeField] private Toggle _movementToggle;
 
-    protected override void Awake()
-    {
-        base.Awake();
-        HideUntilOpened();
-    }
+    protected override void Awake() => base.Awake();
 
     public void InitEntryPoint() => HideUntilOpened();
 

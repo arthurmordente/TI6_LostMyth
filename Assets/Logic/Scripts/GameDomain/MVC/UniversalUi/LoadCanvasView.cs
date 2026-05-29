@@ -9,11 +9,7 @@ public sealed class LoadCanvasView : UguiCanvasViewBase, ILoadScreenView
 
     [SerializeField] private Button _closeButton;
 
-    protected override void Awake()
-    {
-        base.Awake();
-        HideUntilOpened();
-    }
+    protected override void Awake() => base.Awake();
 
     public void InitEntryPoint() => HideUntilOpened();
 
