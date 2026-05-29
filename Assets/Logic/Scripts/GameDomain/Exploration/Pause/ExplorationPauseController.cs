@@ -130,6 +130,6 @@ namespace Logic.Scripts.GameDomain.Exploration.Pause
         }
 
         private void PlayClick() =>
-            _audioService?.PlayAudio(AudioClipType.UIClick1SFX, AudioChannelType.Fx);
+            _audioService?.PlaySfx(SfxIds.UI_Clique, AudioChannelType.SfxUi);
     }
 }

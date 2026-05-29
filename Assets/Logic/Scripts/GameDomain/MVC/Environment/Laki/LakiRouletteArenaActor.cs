@@ -1,5 +1,7 @@
+using System;
 using System.Threading.Tasks;
 using UnityEngine;
+using Logic.Scripts.Services.AudioService;
 using Logic.Scripts.Turns;
 using Logic.Scripts.GameDomain.MVC.Nara;
 
@@ -13,11 +15,12 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 		private readonly IEffectable _caster;
 		private readonly IRouletteArenaVisual _visual;
 		private readonly IEffectable _bookEffectable;
+		private readonly IAudioService _audioService;
 		private Vector3 _centerWorld;
 
 		public bool RemoveAfterRun => false;
 
-		public LakiRouletteArenaActor(ITurnStateReader turnState, INaraController nara, RouletteArenaService arena, Vector3? centerWorld = null, IRouletteArenaVisual visual = null, IEffectable caster = null, IEffectable bookEffectable = null)
+		public LakiRouletteArenaActor(ITurnStateReader turnState, INaraController nara, RouletteArenaService arena, Vector3? centerWorld = null, IRouletteArenaVisual visual = null, IEffectable caster = null, IEffectable bookEffectable = null, IAudioService audioService = null)
 		{
 			_turnState = turnState;
 			_nara = nara;
@@ -25,6 +28,7 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 			_visual = visual;
 			_caster = caster;
 			_bookEffectable = bookEffectable;
+			_audioService = audioService;
 			_centerWorld = centerWorld ?? new Vector3(0f, 0.5f, -4f);
 		}
 
@@ -48,7 +52,7 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 			int bookTile = -1;
 			try
 			{
-				var bookView = Object.FindFirstObjectByType<Logic.Scripts.GameDomain.MVC.Book.BookView>();
+				var bookView = UnityEngine.Object.FindFirstObjectByType<Logic.Scripts.GameDomain.MVC.Book.BookView>();
 				if (bookView != null)
 				{
 					bookTile = _arena.ComputeTileIndex(bookView.transform.position, _centerWorld);
@@ -88,17 +92,15 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 			int turn = _turnState != null ? _turnState.TurnNumber : 0;
 			Vector3 playerPos = (_nara != null && _nara.NaraViewGO != null) ? _nara.NaraViewGO.transform.position : Vector3.zero;
 			int playerTile = _arena.ComputeTileIndex(playerPos, _centerWorld);
-
-			for (int i = 0; i < 3; i++)
-			{
-				_arena.RandomizeVisualMapping(new System.Random((turn + i + 1) * 104729 + playerTile));
-				_visual?.RefreshFrom(_arena);
-				await Task.Delay(150);
-			}
-
 			int nextTurn = turn + 1;
-			_arena.RerollTiles(nextTurn, new System.Random(nextTurn * 7919 + 17));
-			_visual?.RefreshFrom(_arena);
+			await LakiArenaRerollPresentation.RunShuffleWithTurnoSfxAsync(
+				_arena,
+				_visual,
+				_audioService,
+				turn,
+				playerTile,
+				nextTurn,
+				new System.Random(nextTurn * 7919 + 17));
 		}
 
 		public void SetCenter(Vector3 centerWorld)

@@ -1,4 +1,3 @@
-using Logic.Scripts.Core.Audio;
 using Logic.Scripts.Core.Mvc.LoadingScreen;
 using Logic.Scripts.Core.Mvc.UICamera;
 using Logic.Scripts.Core.Mvc.WorldCamera;
@@ -15,7 +14,6 @@ using Zenject;
 
 public class CoreInstaler : MonoInstaller
 {
-    [SerializeField] private CoreAudioClipsScriptableObject _coreAudioClipsScriptableObject;
     [SerializeField] private UpdateSubscriptionService _updateSubscriptionService;
     [SerializeField] private AudioService _audioService;
     [SerializeField] private LoadingScreenCanvasView _loadingScreenView;
@@ -35,7 +33,6 @@ public class CoreInstaler : MonoInstaller
         Container.BindInterfacesTo<LoadingScreenController>().AsSingle().WithArguments(_loadingScreenView).NonLazy();
         Container.BindInterfacesTo<UICameraController>().AsSingle().WithArguments(_uiCameraView).NonLazy();
         Container.BindInterfacesTo<WorldCameraController>().AsSingle().WithArguments(_worldCameraView).NonLazy();
-        Container.Bind<CoreAudioClipsScriptableObject>().FromScriptableObject(_coreAudioClipsScriptableObject).AsSingle().NonLazy();
         Container.Bind<GameInputActions>().AsSingle().NonLazy();
     }
 }

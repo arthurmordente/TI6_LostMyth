@@ -6,23 +6,21 @@ using Logic.Scripts.Services.SceneServices;
 using Logic.Scripts.Services.Logger.Base;
 using Logic.Scripts.Services.AudioService;
 using Logic.Scripts.Core.Mvc.LoadingScreen;
-using Logic.Scripts.Core.Audio;
+
 namespace Logic.Scripts.Core.CoreInitiator {
     public class CoreInitiator : MonoBehaviour {
         private GameInputActions _gameInputActions;
         private ISceneLoaderService _sceneLoaderService;
         private IAudioService _audioService;
         private ILoadingScreenController _loadingScreenController;
-        private CoreAudioClipsScriptableObject _coreAudioClipsScriptableObject;
 
         [Inject]
-        private void Setup(GameInputActions gameInputActions, ISceneLoaderService sceneLoaderService, IAudioService audioService, ILoadingScreenController loadingScreenController,
-            CoreAudioClipsScriptableObject coreAudioClipsScriptableObject) {
+        private void Setup(GameInputActions gameInputActions, ISceneLoaderService sceneLoaderService, IAudioService audioService,
+            ILoadingScreenController loadingScreenController) {
             _gameInputActions = gameInputActions;
             _sceneLoaderService = sceneLoaderService;
             _audioService = audioService;
             _loadingScreenController = loadingScreenController;
-            _coreAudioClipsScriptableObject = coreAudioClipsScriptableObject;
         }
 
         private void Start() {
@@ -35,7 +33,6 @@ namespace Logic.Scripts.Core.CoreInitiator {
                 _loadingScreenController.SetupLoadingView();
                 _loadingScreenController.Show();
                 InitializeServices();
-                _audioService.AddAudioClips(_coreAudioClipsScriptableObject);
                 await LoadGameScene(cancellationTokenSource);
                 await _loadingScreenController.SetLoadingSlider(1, cancellationTokenSource);
             }

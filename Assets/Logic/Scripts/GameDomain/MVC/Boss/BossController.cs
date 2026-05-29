@@ -116,6 +116,10 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
             if (_activeBehavior != null) {
                 _bossAbilityController.SetBehavior(_activeBehavior);
             }
+            if (_bossView != null) {
+                var bridge = _bossView.GetComponentInChildren<Laki.LakiBossAnimationBridge>(true);
+                BindLakiBridgeAudio(bridge);
+            }
         }
 
 		public void ManagedFixedUpdate() {
@@ -235,7 +239,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
             // 2) Definir movimento deste turno via padrão configurável
             ConfigureTurnMovement();
 
-            _audioService.PlayAudio(AudioClipType.BossMove1SFX, AudioChannelType.Fx, AudioPlayType.OneShot);
+            _audioService.PlaySfx(SfxIds.Hocari_Movimento_Mecanico, AudioChannelType.SfxBoss);
 
             // 3) Preparar ataque deste turno conforme padrão do behavior
             _ = QueuePreparedAttackFromBehaviorAsync();
@@ -269,7 +273,6 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
                 out Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackResult diceResult,
                 out Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.IResolver diceResolver))
             {
-                // Debug.Log($"[Laki] DiceAttack resolved at Boss turn. PlayerWon={diceResult.PlayerWon}");
                 int fightTurn = _turnStateService != null ? _turnStateService.TurnNumber : 0;
                 Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.NotifyPlayerWonDiceOpensShieldWindow(diceResult, fightTurn);
                 try { diceResolver?.DestroyDiceAttackRoot(); } catch { }
@@ -279,11 +282,21 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
                 out Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.MinigameResult mgResult,
                 out Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.IMinigameResolver mgResolver))
             {
-                // Debug.Log($"[Laki] Minigame resolved at Boss turn. PlayerWon={mgResult.PlayerWon} Chips: P+={mgResult.PlayerChipsDelta}, B+={mgResult.BossChipsDelta}");
+                PlayLakiMinigameResolutionSfx(mgResult.PlayerWon);
                 try { mgResolver?.DestroyMinigameRoot(); } catch { }
                 return true;
             }
             return false;
+        }
+
+        void PlayLakiMinigameResolutionSfx(bool playerWon) {
+            if (!BossViewUsesLakiAnimator(_bossView)) return;
+            PlayLakiBossSfx(playerWon ? SfxIds.Laki_Perdendo : SfxIds.Laki_Ganhando);
+        }
+
+        void PlayLakiBossSfx(string sfxId) {
+            if (!BossViewUsesLakiAnimator(_bossView) || string.IsNullOrEmpty(sfxId)) return;
+            _audioService?.PlaySfx(sfxId, AudioChannelType.SfxBoss);
         }
 
         async Task RunBossPrepareTurnCoreAsync(bool pauseThisTurn) {
@@ -300,12 +313,19 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
             if (_bossView == null) return;
             var bridge = _bossView.GetComponentInChildren<Laki.LakiBossAnimationBridge>(true);
             if (bridge == null) return;
+            BindLakiBridgeAudio(bridge);
             try { await bridge.OnBossPrepareTurnStartedAsync(); } catch { }
+        }
+
+        void BindLakiBridgeAudio(Laki.LakiBossAnimationBridge bridge) {
+            if (bridge == null) return;
+            bridge.SetAudio(_audioService);
         }
 
         static bool BossViewUsesLakiAnimator(BossView bossView) {
             if (bossView == null) return false;
-            return bossView.GetComponentInChildren<Laki.LakiBossAnimationBridge>(true) != null;
+            return bossView.GetComponentInChildren<Laki.LakiBossAnimationBridge>(true) != null
+                || bossView.GetComponentInChildren<Laki.LakiBossAnimatorBootstrap>(true) != null;
         }
 
         async Task RunBossResolveTurnCoreAsync(bool pauseThisTurn) {
@@ -359,8 +379,11 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
             var lakiBridge = _bossView != null
                 ? _bossView.GetComponentInChildren<Laki.LakiBossAnimationBridge>(true)
                 : null;
-            if (lakiBridge != null && HasNonDiceAttack(toExecute))
-                lakiBridge.BeginResolveAttackAnimation();
+            if (lakiBridge != null) {
+                BindLakiBridgeAudio(lakiBridge);
+                if (HasNonDiceAttack(toExecute))
+                    lakiBridge.BeginResolveAttackAnimation();
+            }
 
 			// Exclusividade de deslocamento (push/pull): escolher 1 vencedor por prioridade
 			BossAttack winner = null;
@@ -791,6 +814,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
                 LakiBossShieldRuntime.EngageShield();
 
             if (applied <= 0) return;
+            PlayLakiBossSfx(SfxIds.Laki_Atingida);
             if (_bossView != null) {
                 var flash = _bossView.GetComponent<DamageFlashPresenter>();
                 if (flash == null) flash = _bossView.gameObject.AddComponent<DamageFlashPresenter>();
@@ -804,8 +828,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
             _gamePlayUiController.OnPreviewBossHealthChange(pct);
             // Handle death immediately
             if (_bossData.ActualHealth <= 0) {
-                // Debug.Log("[Boss] Died");
-                // Ensure movement/animations are stopped and gates cleared to avoid being stuck in MoveLoop/idle
+                PlayLakiBossSfx(SfxIds.Laki_Morrer);
                 _turnMoveDistanceBudget = 0f;
                 _movementAllowed = false;
                 _movementGatePending = false;
@@ -930,6 +953,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
                 Debug.LogWarning($"[Boss] Phase '{newName}' has no Behavior assigned. Keeping current behavior.");
             }
 
+            PlayLakiBossSfx(SfxIds.Laki_Reclamando);
             PlayPhaseTransitionAnimation();
             _currentPhaseIndex = newIndex;
             LakiBossShieldRuntime.NotifyBossPhaseChanged(_bossPhases, newIndex, maxHp);

@@ -19,7 +19,7 @@ namespace Logic.Scripts.GameDomain.Services.Skills
 
         public static void ZeroPlanarVelocity(Rigidbody rb)
         {
-            if (rb == null) return;
+            if (rb == null || rb.isKinematic) return;
             Vector3 v = rb.linearVelocity;
             rb.linearVelocity = new Vector3(0f, v.y, 0f);
             rb.angularVelocity = Vector3.zero;

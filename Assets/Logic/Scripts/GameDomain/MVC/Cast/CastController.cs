@@ -137,7 +137,7 @@ public class CastController : ICastController {
         }
 
         caster?.TriggerExecute();
-        PlayUsedSfxByIndex(_currentAbilityIndex);
+        PlayCastSfx(caster);
 
         _deferredArenaSyncAfterProjectileCast = false;
         _lastCastWasMovementSkill = false;
@@ -172,20 +172,13 @@ public class CastController : ICastController {
         return true;
     }
 
-    private void PlayUsedSfxByIndex(int index) {
+    private void PlayCastSfx(IPlayableUnit caster) {
         if (_audio == null) return;
-        AudioClipType clip = MapUsedClip(index);
-        _audio.PlayAudio(clip, AudioChannelType.Fx, AudioPlayType.OneShot);
+        _audio.PlaySfx(MapCastClip(caster), AudioChannelType.SfxCombat);
     }
 
-    private static AudioClipType MapUsedClip(int index) {
-        switch (index) {
-            case 0: return AudioClipType.AbilityUsed1SFX;
-            case 1: return AudioClipType.AbilityUsed2SFX;
-            case 2: return AudioClipType.AbilityUsed3SFX;
-            case 3: return AudioClipType.AbilityUsed4SFX;
-            default: return AudioClipType.AbilityUsed5SFX;
-        }
+    private static string MapCastClip(IPlayableUnit caster) {
+        return caster is IBookController ? SfxIds.Livro_Cast : SfxIds.Erza_Cast;
     }
 
     private ISkillCastFlow SelectFlow(IPlayableUnit caster) {

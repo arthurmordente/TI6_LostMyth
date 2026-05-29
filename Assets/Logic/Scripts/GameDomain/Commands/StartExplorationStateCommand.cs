@@ -14,6 +14,7 @@ public class StartExplorationStateCommand : BaseCommand, ICommandAsync {
     private IGameInputActionsController _gameInputActionsController;
     private IExplorationLoadoutUIController _explorationLoadoutUIController;
     private IExplorationPauseController _explorationPauseController;
+    private IAudioService _audioService;
 
     private ExplorationInitiatorEnterData _enterData;
 
@@ -28,11 +29,13 @@ public class StartExplorationStateCommand : BaseCommand, ICommandAsync {
         _gameInputActionsController = _diContainer.Resolve<IGameInputActionsController>();
         _explorationLoadoutUIController = _diContainer.Resolve<IExplorationLoadoutUIController>();
         _explorationPauseController = _diContainer.Resolve<IExplorationPauseController>();
+        _audioService = _diContainer.Resolve<IAudioService>();
     }
 
     public async Awaitable Execute(CancellationTokenSource cancellationTokenSource) {
         _gameInputActionsController.RegisterExplorationInputListeners();
         await _commandFactory.CreateCommandAsync<StartLevelCommand>().Execute(cancellationTokenSource);
+        _audioService.PlayMusic(MusicIds.Menu);
         _naraController.InitEntryPointExploration();
         _explorationLoadoutUIController.InitEntryPoint();
         _explorationPauseController.InitEntryPoint();

@@ -1,9 +1,9 @@
-namespace Logic.Scripts.Services.AudioService
-{
-    public enum AudioChannelType
-    {
-        Master,
-        Fx,
-        Music
+namespace Logic.Scripts.Services.AudioService {
+    public enum AudioChannelType {
+        Music,
+        SfxUi,
+        SfxCombat,
+        SfxBoss,
+        SfxAmbience,
     }
 }

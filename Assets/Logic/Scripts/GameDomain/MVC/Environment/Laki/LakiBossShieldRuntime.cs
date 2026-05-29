@@ -170,6 +170,10 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
         public static bool IsLakiShieldBlockingCombatInteraction() =>
             _registered && _shieldActive;
 
+        /// <summary>Escudo Laki registado e desligado (janela de vulnerabilidade / escudo caído).</summary>
+        public static bool IsShieldDownForBossPresentation() =>
+            _registered && !_shieldActive;
+
         public static bool ShouldSuppressNewSkillSystemHighlightFor(IEffectable effectable)
         {
             if (!IsLakiShieldBlockingCombatInteraction()) return false;

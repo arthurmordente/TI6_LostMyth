@@ -47,9 +47,12 @@ namespace Logic.Scripts.GameDomain.MVC.Environment
         private static void SetKinematic(Rigidbody rb)
         {
             if (rb == null) return;
+            if (!rb.isKinematic)
+            {
+                rb.linearVelocity = Vector3.zero;
+                rb.angularVelocity = Vector3.zero;
+            }
             rb.isKinematic = true;
-            rb.linearVelocity = Vector3.zero;
-            rb.angularVelocity = Vector3.zero;
         }
     }
 }

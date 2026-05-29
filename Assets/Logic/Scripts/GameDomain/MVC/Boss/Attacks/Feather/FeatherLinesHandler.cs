@@ -379,7 +379,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Feather
 				FreezeSpecialAxis(parentTransform.position);
 			}
             EnsureAudio();
-            _audio?.PlayAudio(AudioClipType.BossPrepAttack1SFX, AudioChannelType.Fx, AudioPlayType.OneShot);
+            _audio?.PlaySfx(SfxIds.Hocari_Ataque_Cortes, AudioChannelType.SfxBoss);
             _updateSvc?.RegisterUpdatable(this);
 
             // Start hidden; boss controller will reveal at mid prep
@@ -607,7 +607,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Feather
             yield return new WaitForSeconds(0.5f);
 
             EnsureAudio();
-            _audio?.PlayAudio(AudioClipType.StrongWindTornado1SFX, AudioChannelType.Fx, AudioPlayType.OneShot);
+            _audio?.PlaySfx(SfxIds.Hocari_Orbe, AudioChannelType.SfxBoss);
 
             int lastIndex = effects.Count - 1;
             Vector3 playerWorld = arenaReference.RelativeArenaPositionToRealPosition(arenaReference.GetPlayerArenaPosition());

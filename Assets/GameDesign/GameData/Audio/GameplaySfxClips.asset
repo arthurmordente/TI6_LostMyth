@@ -1,0 +1,101 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e7f4a1b22c3d4456a8b9c0d1e2f3a4b6, type: 3}
+  m_Name: GameplaySfxClips
+  m_EditorClassIdentifier: 
+  _entries:
+  - Id: UI_Clique
+    Clip: {fileID: 8300000, guid: 77751de95f5f44e4c95278212ffdf48e, type: 3}
+  - Id: UI_Clique2
+    Clip: {fileID: 8300000, guid: 245c34477cda1eb47adb662d87e5a327, type: 3}
+  - Id: UI_Tela_Vitoria
+    Clip: {fileID: 8300000, guid: 8bac74f2e7ac642448975d4280a85700, type: 3}
+  - Id: UI_Tela_Derrota
+    Clip: {fileID: 8300000, guid: c48df5f7608ca7d4eae77bdbf2e4f8dd, type: 3}
+  - Id: Portal
+    Clip: {fileID: 8300000, guid: 8bf4d440179886b4aa73d5d581869504, type: 3}
+  - Id: Novo_Turno
+    Clip: {fileID: 8300000, guid: a8cd28077718dea45842367b2b029cc8, type: 3}
+  - Id: NPC_Falando
+    Clip: {fileID: 8300000, guid: 96506a559ebf6fc4db9548dc70f3b558, type: 3}
+  - Id: Dados
+    Clip: {fileID: 8300000, guid: c721650fd08b4a84e9b388a229d69c59, type: 3}
+  - Id: Erza_Atingida
+    Clip: {fileID: 8300000, guid: 02890015ff6693b48a950bdfc0c70996, type: 3}
+  - Id: Erza_Cast
+    Clip: {fileID: 8300000, guid: 9a46db098df6b8d47b9616ef700628af, type: 3}
+  - Id: Erza_Morte
+    Clip: {fileID: 8300000, guid: ba0112a69c2d66a4194de6274c8e869e, type: 3}
+  - Id: Erza_Passos
+    Clip: {fileID: 8300000, guid: 2db629a2e90a8ca48890befa178c3707, type: 3}
+  - Id: Ezra_Clone
+    Clip: {fileID: 8300000, guid: 59f20053d477bd1449fe4f1536803f64, type: 3}
+  - Id: Ezra_Trocar_personagem
+    Clip: {fileID: 8300000, guid: 7dd1eed0b261db742a13460ae8ae2750, type: 3}
+  - Id: Hocari_Ataque_Cortes
+    Clip: {fileID: 8300000, guid: a2b2cbc6b141f13428fffff123bcd865, type: 3}
+  - Id: Hocari_Ataque_Laminas
+    Clip: {fileID: 8300000, guid: 68ceb97a67c86e546a6067acee3c9e04, type: 3}
+  - Id: Hocari_Ataque_Mecanico
+    Clip: {fileID: 8300000, guid: 7e7f12cebad80d34f82b460b6c0090a5, type: 3}
+  - Id: Hocari_Atingida
+    Clip: {fileID: 8300000, guid: f341c5363bb581440b07ddc5937467db, type: 3}
+  - Id: Hocari_Crescer
+    Clip: {fileID: 8300000, guid: 208ed044aafa6c64784e1753eff32c49, type: 3}
+  - Id: Hocari_Explosao
+    Clip: {fileID: 8300000, guid: 0c62cc81f1c60af4a8ff6350f2ae994f, type: 3}
+  - Id: Hocari_Lamina
+    Clip: {fileID: 8300000, guid: 2275253ef4413ab4897212bccd4e36f6, type: 3}
+  - Id: Hocari_Morte
+    Clip: {fileID: 8300000, guid: ac5f4643e4ff20140a4c466ce0d47e9b, type: 3}
+  - Id: Hocari_Movimento_Cortes
+    Clip: {fileID: 8300000, guid: 29142a4bedb3e6f4fad8df228177a870, type: 3}
+  - Id: Hocari_Movimento_Laminas
+    Clip: {fileID: 8300000, guid: 0edd77332d3a5f248bf35faf242e381b, type: 3}
+  - Id: Hocari_Movimento_Mecanico
+    Clip: {fileID: 8300000, guid: 22d153855b60b9444a1e085bd9ef8b2f, type: 3}
+  - Id: Hocari_Orbe
+    Clip: {fileID: 8300000, guid: 7c93e702a7e55b6409c1ce2ade71a54a, type: 3}
+  - Id: Hocari_Spawnar
+    Clip: {fileID: 8300000, guid: 7f29d47bb45292c46b4bddb97eda358f, type: 3}
+  - Id: Laki_Atingida
+    Clip: {fileID: 8300000, guid: 434e6acff3cd0194cbebdc257719db91, type: 3}
+  - Id: Laki_Cantar_1
+    Clip: {fileID: 8300000, guid: 8a1ed89af99d67a4ebf14b79c84bf346, type: 3}
+  - Id: Laki_Cantar_2
+    Clip: {fileID: 8300000, guid: e1df33ef86fc8f94c8917581c559f232, type: 3}
+  - Id: Laki_Cantar_3
+    Clip: {fileID: 8300000, guid: 90f91aa15458f7748887adb3865aefc6, type: 3}
+  - Id: Laki_Ganhando
+    Clip: {fileID: 8300000, guid: 2d48d90ee4333314bb09521eb109a427, type: 3}
+  - Id: Laki_Morrer
+    Clip: {fileID: 8300000, guid: 2fdee061edd78754ca717fba3f25943e, type: 3}
+  - Id: Laki_Perdendo
+    Clip: {fileID: 8300000, guid: 2918f2d00e056864ea3b51945ccfb1f4, type: 3}
+  - Id: Laki_Reclamando
+    Clip: {fileID: 8300000, guid: a303e8ee74e1f624091c31f88bfb6a8e, type: 3}
+  - Id: Laki_Risada_1
+    Clip: {fileID: 8300000, guid: 487441e3aedbc814e86e9d167e46905a, type: 3}
+  - Id: Laki_Risada_2
+    Clip: {fileID: 8300000, guid: c9d863cfb2bceb146a0c064913ba0ce6, type: 3}
+  - Id: Laki_Turno
+    Clip: {fileID: 8300000, guid: 77e6bbc84c885894abd4e1292f8bb260, type: 3}
+  - Id: Livro_Atingido
+    Clip: {fileID: 8300000, guid: b05fd34ee4c680e4698f9dc5c165ee66, type: 3}
+  - Id: Livro_Cast
+    Clip: {fileID: 8300000, guid: 1e4416fafde16ec4e97253032b39b46c, type: 3}
+  - Id: Livro_Movimento
+    Clip: {fileID: 8300000, guid: 47d6f53c185bfc74a869c2af10f5c5d6, type: 3}
+  - Id: Livro_Pagina
+    Clip: {fileID: 8300000, guid: 40c93443b1ea41c458c7efe6012be3f3, type: 3}
+  - Id: Livro_Paginas
+    Clip: {fileID: 8300000, guid: c1b80a5f9fbab1846a0f553c67c3fe19, type: 3}

@@ -1,6 +1,7 @@
 using Logic.Scripts.GameDomain.MVC.Abilitys;
 using Logic.Scripts.GameDomain.MVC.Nara;
 using Logic.Scripts.GameDomain.Services.ActiveUnit;
+using Logic.Scripts.Services.AudioService;
 using Logic.Scripts.Services.CommandFactory;
 using Logic.Scripts.Services.UpdateService;
 using UnityEngine;
@@ -15,6 +16,7 @@ namespace Logic.Scripts.GameDomain.MVC.Book.Divide
         private readonly AbilityData _divideTargetingData;
         private readonly IUpdateSubscriptionService _updateSubscriptionService;
         private readonly ICommandFactory _commandFactory;
+        private readonly IAudioService _audioService;
 
         private const int COOLDOWN_TURNS = 1;
 
@@ -32,7 +34,8 @@ namespace Logic.Scripts.GameDomain.MVC.Book.Divide
             IActiveUnitService activeUnitService,
             IUpdateSubscriptionService updateSubscriptionService,
             ICommandFactory commandFactory,
-            AbilityData divideTargetingData)
+            AbilityData divideTargetingData,
+            IAudioService audioService)
         {
             _bookController = bookController;
             _naraController = naraController;
@@ -40,6 +43,7 @@ namespace Logic.Scripts.GameDomain.MVC.Book.Divide
             _updateSubscriptionService = updateSubscriptionService;
             _commandFactory = commandFactory;
             _divideTargetingData = divideTargetingData;
+            _audioService = audioService;
         }
 
         public void Activate()
@@ -131,6 +135,7 @@ namespace Logic.Scripts.GameDomain.MVC.Book.Divide
         {
             _bookController.CreateBook(position);
             _naraController.SetBookCloneDeployed(true);
+            _audioService?.PlaySfx(SfxIds.Ezra_Clone, AudioChannelType.SfxCombat);
             // Grant the Book its first turn's AP immediately so the player
             // can cast abilities on the same turn it is deployed.
             _bookController.GainTurnActionPoints();

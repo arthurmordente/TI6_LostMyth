@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Dice;
 using Logic.Scripts.GameDomain.MVC.Nara;
+using Logic.Scripts.Services.AudioService;
 using Logic.Scripts.Turns;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -30,6 +31,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack
             private readonly INaraController _player;
             private readonly Logic.Scripts.GameDomain.MVC.Boss.IBossController _boss;
             private readonly IEnvironmentActorsRegistry _envReg;
+            private readonly IAudioService _audioService;
 
             private bool _resolved;
             private bool _playerGateConsumed;
@@ -53,6 +55,8 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack
                 _boss = sceneContainer != null ? sceneContainer.Resolve<Logic.Scripts.GameDomain.MVC.Boss.IBossController>() : null;
                 try { _envReg = sceneContainer != null ? sceneContainer.Resolve<IEnvironmentActorsRegistry>() : null; }
                 catch { _envReg = null; }
+                try { _audioService = sceneContainer != null ? sceneContainer.Resolve<IAudioService>() : null; }
+                catch { _audioService = null; }
             }
 
             public void Begin()
@@ -203,12 +207,20 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack
                 int bossSum = Sum(_bossRolls);
                 bool playerWon = playerSum > bossSum;
                 _outcome = playerSum == bossSum ? Outcome.Tie : (playerWon ? Outcome.PlayerWin : Outcome.BossWin);
-                _final = new DiceAttackResult { Completed = true, PlayerWon = playerWon };
+                _final = new DiceAttackResult { Completed = true, PlayerWon = playerWon, IsTie = _outcome == Outcome.Tie };
                 _resolved = true;
+                PlayDiceResolutionVocalSfx();
                 DiceUiRuntime.ReportFinal(playerSum, bossSum);
                 string winner = _outcome == Outcome.Tie ? "Tie" : (playerWon ? "Player" : "Boss");
                 Debug.Log($"[Laki][DiceAttack] TURN_RESULT Winner={winner} P={playerSum} B={bossSum} outcome={_outcome}");
                 DestroyAllSpawnedDice();
+            }
+
+            void PlayDiceResolutionVocalSfx()
+            {
+                if (_audioService == null || _final.IsTie) return;
+                string sfxId = _final.PlayerWon ? SfxIds.Laki_Perdendo : SfxIds.Laki_Ganhando;
+                _audioService.PlaySfx(sfxId, AudioChannelType.SfxBoss);
             }
 
             private void ReportUiProgress(bool[] punchPlayerSlots = null, bool[] punchBossSlots = null,

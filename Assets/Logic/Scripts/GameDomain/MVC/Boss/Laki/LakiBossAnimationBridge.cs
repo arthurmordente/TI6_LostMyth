@@ -1,4 +1,6 @@
 using System.Threading.Tasks;
+using Logic.Scripts.GameDomain.MVC.Environment.Laki;
+using Logic.Scripts.Services.AudioService;
 using UnityEngine;
 using Logic.Scripts.GameDomain.MVC.Nara.Animation;
 
@@ -18,6 +20,9 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki
 
         private bool _performanceLoopActive;
         private Task _resolveAnimationTask = Task.CompletedTask;
+        private IAudioService _audioService;
+
+        public void SetAudio(IAudioService audioService) => _audioService = audioService;
 
         private void Awake()
         {
@@ -53,6 +58,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki
             }
 
             _view.PlayAbility();
+            PlayRandomLaughSfx();
             await _view.WaitUntilLeftStateTagAsync(LakiAnimatorParams.TagAbility, 4f);
             _performanceLoopActive = false;
         }
@@ -80,11 +86,13 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki
             int pick = PickPerformanceForTurn();
             if (pick < 2)
             {
+                TryPlayCantarSfxForPerformance(pick);
                 _performanceLoopActive = false;
                 _view.SetPerformanceLoop(false);
                 return;
             }
 
+            TryPlayCantarSfxForPerformance(pick);
             _view.BeginPerformanceTurn(pick);
             await _view.WaitUntilStateTagAsync(LakiAnimatorParams.TagPerformancePrep, 2f);
             _view.SetPerformanceLoop(true);
@@ -108,6 +116,35 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki
             }
 
             return 2;
+        }
+
+        static bool ShouldPlayCantarSfx() =>
+            !LakiBossShieldRuntime.IsShieldDownForBossPresentation();
+
+        void TryPlayCantarSfxForPerformance(int performanceId)
+        {
+            if (!ShouldPlayCantarSfx()) return;
+            string sfxId = CantarSfxIdForPerformance(performanceId);
+            if (string.IsNullOrEmpty(sfxId)) return;
+            _audioService?.PlaySfx(sfxId, AudioChannelType.SfxBoss);
+        }
+
+        static string CantarSfxIdForPerformance(int performanceId)
+        {
+            switch (performanceId)
+            {
+                case 1: return SfxIds.Laki_Cantar_1;
+                case 2: return SfxIds.Laki_Cantar_2;
+                case 3: return SfxIds.Laki_Cantar_3;
+                default: return null;
+            }
+        }
+
+        void PlayRandomLaughSfx()
+        {
+            if (_audioService == null) return;
+            string laugh = Random.value < 0.5f ? SfxIds.Laki_Risada_1 : SfxIds.Laki_Risada_2;
+            _audioService.PlaySfx(laugh, AudioChannelType.SfxBoss);
         }
     }
 }

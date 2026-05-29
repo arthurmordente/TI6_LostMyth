@@ -236,7 +236,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 5b91df082e7286a4db5caf468c7fcc40, type: 2}
   - {fileID: 11400000, guid: 5b91df082e7286a4db5caf468c7fcc40, type: 2}
   PointData: {fileID: 11400000, guid: 9e946bc4bff420943a724d914a258b15, type: 2}
-  _gameplayAudioClips: {fileID: 11400000, guid: de32ad9f37d71f748a607de1eb325792, type: 2}
+  _gameplayMusicClips: {fileID: 11400000, guid: 6dd0edd045a704d4eaf93a306adc0e25, type: 2}
+  _gameplaySfxClips: {fileID: 11400000, guid: 4fb288e591186ec468383ef3b94e7009, type: 2}
   _universalUiSceneViews: {fileID: 2143035982}
   _newSkillSystemSkillCatalog:
   - {fileID: 11400000, guid: f47ac10b58cc4372a5670e02b2c3d479, type: 2}

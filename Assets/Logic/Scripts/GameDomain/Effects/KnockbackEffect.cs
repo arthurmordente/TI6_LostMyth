@@ -74,7 +74,7 @@ namespace Logic.Scripts.GameDomain.Effects
             float scaledForce = Mathf.Max(0f, _force * stacksFactor * distanceFactor);
             if (scaledForce <= 0f) return;
 
-            Audio?.PlayAudio(AudioClipType.StrongWindTornado1SFX, AudioChannelType.Fx, AudioPlayType.OneShot);
+            Audio?.PlaySfx(SfxIds.Hocari_Orbe, AudioChannelType.SfxBoss);
 
             Vector3 start = rb.position;
             Vector3 end   = start + dir * scaledForce;
@@ -141,7 +141,7 @@ namespace Logic.Scripts.GameDomain.Effects
             distanceFactor = Mathf.Clamp(distanceFactor, 0.5f, 3.0f);
             float scaledForce = Mathf.Max(0f, _force * stacksFactor * distanceFactor);
 
-            Audio?.PlayAudio(AudioClipType.StrongWindTornado1SFX, AudioChannelType.Fx, AudioPlayType.OneShot);
+            Audio?.PlaySfx(SfxIds.Hocari_Orbe, AudioChannelType.SfxBoss);
 
             Vector3 start = rb.position;
             Vector3 end = start + dir * scaledForce;

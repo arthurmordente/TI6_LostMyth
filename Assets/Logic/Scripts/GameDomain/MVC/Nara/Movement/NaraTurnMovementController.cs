@@ -97,8 +97,7 @@ public class NaraTurnMovementController : NaraMovementController {
     public override void Move(Vector2 direction, float velocity, float rotation) {
         if (NaraRigidbody == null || NaraTransform == null) return;
         if (!IsPlayerActPhase() || !IsActivelyControlled) {
-            // hard lock: zero planar velocity when not in player phase or not the active unit
-            NaraRigidbody.linearVelocity = new Vector3(0f, NaraRigidbody.linearVelocity.y, 0f);
+            StopPlanarMotion();
             return;
         }
 
@@ -110,8 +109,7 @@ public class NaraTurnMovementController : NaraMovementController {
         Vector3 worldDir = camF * direction.y + camR * direction.x;
         if (worldDir.sqrMagnitude > 1e-6f) worldDir.Normalize();
 
-        Vector3 vel = worldDir * velocity;
-        NaraRigidbody.linearVelocity = new Vector3(vel.x, NaraRigidbody.linearVelocity.y, vel.z);
+        SetPlanarMotion(worldDir, velocity);
 
         Rotate(rotation);
         CheckRadiusLimit();
@@ -132,7 +130,7 @@ public class NaraTurnMovementController : NaraMovementController {
             direction.y = 0f;
             Vector3 n = direction.magnitude > 0.0001f ? direction.normalized : Vector3.zero;
             _movement = n * velocity;
-            NaraRigidbody.linearVelocity = new Vector3(_movement.x, 0f, _movement.z);
+            SetPlanarMotion(n, velocity);
             Rotate(rotation);
         }
     }

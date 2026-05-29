@@ -4,6 +4,7 @@ using Logic.Scripts.GameDomain.GameInputActions;
 using Logic.Scripts.GameDomain.MVC.Nara;
 using Logic.Scripts.GameDomain.MVC.Ui;
 using Logic.Scripts.GameDomain.Services.ActiveUnit;
+using Logic.Scripts.GameDomain.Audio;
 using Logic.Scripts.Services.AudioService;
 using Logic.Scripts.Services.CommandFactory;
 using Logic.Scripts.Turns;
@@ -20,6 +21,7 @@ namespace Logic.Scripts.GameDomain.Commands {
         private IGameInputActionsController _gameInputActionsController;
         private IActiveUnitService _activeUnitService;
         private IActionPointsService _actionPointsService;
+        private ILevelsDataService _levelsDataService;
 
         private GamePlayInitatorEnterData _enterData;
 
@@ -37,20 +39,20 @@ namespace Logic.Scripts.GameDomain.Commands {
             _gameInputActionsController = _diContainer.Resolve<IGameInputActionsController>();
             _activeUnitService = _diContainer.Resolve<IActiveUnitService>();
             _actionPointsService = _diContainer.Resolve<IActionPointsService>();
+            _levelsDataService = _diContainer.Resolve<ILevelsDataService>();
         }
 
         public async Awaitable Execute(CancellationTokenSource cancellationTokenSource) {
             _gameInputActionsController.RegisterGameplayInputListeners();
-            // Wire rigidbody/camera on the movement controller before EnterTurnMode: Laki's first BossAct
-            // can finish synchronously and reach PlayerAct before this method would otherwise continue,
-            // which left NaraTransform null inside ResetMovementArea (Hokari usually awaits long enough to mask it).
             _naraController.InitEntryPointGamePlay(_gamePlayUiController);
             _naraController.ApplyCombatLoadoutPassivesAndActionPoints(_actionPointsService);
             await _commandFactory.CreateCommandAsync<StartLevelCommand>().StartBoss().Execute(cancellationTokenSource);
-            _audioService.PlayAudio(AudioClipType.BossTheme, AudioChannelType.Music, AudioPlayType.Loop);
+
+            var levelData = _levelsDataService.GetLevelData(_enterData.LevelNumberToEnter) as LevelTurnData;
+            _audioService.PlayMusic(AudioMusicResolver.ResolveFightMusic(levelData));
+
             _gamePlayUiController.InitEntryPoint();
             _activeUnitService.RefreshHudAbilityCosts();
-            // Skills slidable may still be "open" from prefab / before UiSlidableAnchoredPanel applies pending state; force closed until TurnFlow allows it.
             _gamePlayUiController.SetSkillsSlidableExpanded(false, instant: true);
         }
     }

@@ -4,5 +4,6 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack
     {
         public bool Completed;
         public bool PlayerWon;
+        public bool IsTie;
     }
 }

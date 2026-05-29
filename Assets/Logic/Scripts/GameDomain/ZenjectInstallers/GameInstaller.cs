@@ -7,16 +7,14 @@ using Zenject;
 using Logic.Scripts.Services.AudioService;
 using UnityEngine;
 using UnityEngine.Serialization;
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
 
 namespace Logic.Scripts.GameDomain.ZenjectInstallers {
     public class GameInstaller : MonoInstaller {
         public List<AbilityData> Abilities;
         public AbilityPointData PointData;
 
-        [SerializeField] private AudioClipsScriptableObject _gameplayAudioClips;
+        [SerializeField] private MusicClipsScriptableObject _gameplayMusicClips;
+        [SerializeField] private SfxClipsScriptableObject _gameplaySfxClips;
         [SerializeField] private UniversalUiSceneViews _universalUiSceneViews;
 
         [Header("New Skill System — catálogo global")]
@@ -44,15 +42,10 @@ namespace Logic.Scripts.GameDomain.ZenjectInstallers {
                 .AsSingle()
                 .IfNotBound();
 
-            if (_gameplayAudioClips != null) {
-                Container.BindInstance(_gameplayAudioClips).IfNotBound();
-            }
-#if UNITY_EDITOR
-            else {
-                var pack = AssetDatabase.LoadAssetAtPath<AudioClipsScriptableObject>("Assets/Logic/Scripts/GameDomain/Audio/GameplayAudioClips.asset");
-                if (pack != null) Container.BindInstance(pack).IfNotBound();
-            }
-#endif
+            if (_gameplayMusicClips != null)
+                Container.BindInstance(_gameplayMusicClips).WhenInjectedInto<GameInitiator.GameInitiator>();
+            if (_gameplaySfxClips != null)
+                Container.BindInstance(_gameplaySfxClips).WhenInjectedInto<GameInitiator.GameInitiator>();
         }
 
         private void BindUniversalUi() {

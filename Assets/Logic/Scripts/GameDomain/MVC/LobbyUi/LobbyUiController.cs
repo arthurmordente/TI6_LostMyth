@@ -21,23 +21,23 @@ public class LobbyUiController : ILobbyController {
     public void InitEntryPoint() {
         _lobbyView.RegisterCallbacks(OnClickPlay, OnClickConfig, OnExitPlay);
         _lobbyView.Show();
-        _audioService.PlayAudio(AudioClipType.MenuTheme, AudioChannelType.Music, AudioPlayType.Loop);
+        _audioService.PlayMusic(MusicIds.Menu);
     }
 
     public void HideMenu() => _lobbyView.Hide();
 
     public void OnClickPlay() {
         _stateMachineService.SwitchState(_explorationStateFactory.Create(new ExplorationInitiatorEnterData(0)));
-        _audioService.PlayAudio(AudioClipType.UIClick1SFX, AudioChannelType.Fx);
+        _audioService.PlaySfx(SfxIds.UI_Clique, AudioChannelType.SfxUi);
     }
 
     public void OnClickConfig() {
         _universalUIController.ShowOptionsScreen();
-        _audioService.PlayAudio(AudioClipType.UIClick1SFX, AudioChannelType.Fx);
+        _audioService.PlaySfx(SfxIds.UI_Clique, AudioChannelType.SfxUi);
     }
 
     public void OnExitPlay() {
-        _audioService.PlayAudio(AudioClipType.UIClick2SFX, AudioChannelType.Fx);
+        _audioService.PlaySfx(SfxIds.UI_Clique2, AudioChannelType.SfxUi);
         QuitApplicationUtility.Quit();
     }
 }

@@ -5,6 +5,7 @@ using Logic.Scripts.GameDomain.MVC.Nara;
 using Logic.Scripts.GameDomain.MVC.Shared;
 using Logic.Scripts.GameDomain.MVC.Ui;
 using Logic.Scripts.GameDomain.Services.Skills;
+using Logic.Scripts.Services.AudioService;
 using UnityEngine;
 using Zenject;
 
@@ -18,17 +19,20 @@ namespace Logic.Scripts.GameDomain.Services.ActiveUnit
         private readonly IWorldCameraController _worldCamera;
         private readonly IGamePlayUiController _gamePlayUiController;
         private readonly INewSkillSystemSkillLoadoutService _newSkillSystemSkillLoadoutService;
+        private readonly IAudioService _audioService;
         private IPlayableUnit _bookUnit;
 
         public IPlayableUnit ActiveUnit { get; private set; }
         public bool IsBookDeployed => _bookUnit != null;
 
         public ActiveUnitService(INaraController naraController, IWorldCameraController worldCameraController,
-            IGamePlayUiController gamePlayUiController, [InjectOptional] INewSkillSystemSkillLoadoutService newSkillSystemSkillLoadoutService = null)
+            IGamePlayUiController gamePlayUiController, IAudioService audioService,
+            [InjectOptional] INewSkillSystemSkillLoadoutService newSkillSystemSkillLoadoutService = null)
         {
             _naraController = naraController;
             _worldCamera = worldCameraController;
             _gamePlayUiController = gamePlayUiController;
+            _audioService = audioService;
             _newSkillSystemSkillLoadoutService = newSkillSystemSkillLoadoutService;
             ActiveUnit = naraController as IPlayableUnit;
         }
@@ -173,6 +177,8 @@ namespace Logic.Scripts.GameDomain.Services.ActiveUnit
         public void ToggleActiveUnit()
         {
             if (!IsBookDeployed) return;
+
+            _audioService?.PlaySfx(SfxIds.Ezra_Trocar_personagem, AudioChannelType.SfxCombat);
 
             var naraAsPlayable = _naraController as IPlayableUnit;
             if (ActiveUnit == naraAsPlayable)

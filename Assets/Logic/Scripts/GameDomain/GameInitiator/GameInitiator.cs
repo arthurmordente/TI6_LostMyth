@@ -3,6 +3,7 @@ using Logic.Scripts.Core.CoreInitiator.Base;
 using Logic.Scripts.Core.Mvc.LoadingScreen;
 using Logic.Scripts.GameDomain.States;
 using Logic.Scripts.Services.InitiatorInvokerService;
+using Logic.Scripts.Services.Logger.Base;
 using Logic.Scripts.Services.StateMachineService;
 using Logic.Scripts.Utils;
 using System.Threading;
@@ -20,20 +21,24 @@ namespace Logic.Scripts.GameDomain.GameInitiator {
         private readonly IUniversalUIController _universalUIController;
 
         private readonly IAudioService _audio;
-        private readonly AudioClipsScriptableObject _gameplayAudioPack;
+        private readonly MusicClipsScriptableObject _gameplayMusicClips;
+        private readonly SfxClipsScriptableObject _gameplaySfxClips;
 
         public SceneType SceneType => SceneType.GameScene;
 
         public GameInitiator(IStateMachineService stateMachine, LobbyState.Factory LobbyStateFactory, ILoadingScreenController loadingScreenController,
             ILevelsDataService levelsDataService, ISceneInitiatorsService sceneInitiatorsService, IAudioService audio,
-            IUniversalUIController universalUIController, [InjectOptional] AudioClipsScriptableObject gameplayAudioPack = null) {
+            IUniversalUIController universalUIController,
+            [InjectOptional] MusicClipsScriptableObject gameplayMusicClips = null,
+            [InjectOptional] SfxClipsScriptableObject gameplaySfxClips = null) {
             _stateMachine = stateMachine;
             _lobbyStateFactory = LobbyStateFactory;
             _loadingScreenController = loadingScreenController;
             _levelsDataService = levelsDataService;
             _sceneInitiatorsService = sceneInitiatorsService;
             _audio = audio;
-            _gameplayAudioPack = gameplayAudioPack;
+            _gameplayMusicClips = gameplayMusicClips;
+            _gameplaySfxClips = gameplaySfxClips;
             _universalUIController = universalUIController;
 
             _sceneInitiatorsService.RegisterInitiator(this);
@@ -41,17 +46,16 @@ namespace Logic.Scripts.GameDomain.GameInitiator {
 
         public async Awaitable LoadEntryPoint(IInitiatorEnterData enterDataObject, CancellationTokenSource cancellationTokenSource) {
             await _universalUIController.InitEntryPoint();
-            // IMPORTANTE: não chamar _audio.InitEntryPoint() aqui para evitar duplicata de canais ("Master").
 
-            AudioClipsScriptableObject pack = _gameplayAudioPack;
-#if UNITY_EDITOR
-            if (pack == null) {
-                pack = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClipsScriptableObject>(
-                    "Assets/Logic/Scripts/GameDomain/Audio/GameplayAudioClips.asset");
-            }
-#endif
-            if (pack != null)
-                _audio.AddAudioClips(pack);
+            if (_gameplayMusicClips == null)
+                LogService.LogError("[Audio] GameplayMusicClips is not assigned on GameInstaller (GameScene).");
+            else
+                _audio.AddMusicClips(_gameplayMusicClips);
+
+            if (_gameplaySfxClips == null)
+                LogService.LogError("[Audio] GameplaySfxClips is not assigned on GameInstaller (GameScene).");
+            else
+                _audio.AddSfxClips(_gameplaySfxClips);
 
             _ = _loadingScreenController.SetLoadingSlider(0.5f, cancellationTokenSource);
             await _levelsDataService.LoadLevelsData(cancellationTokenSource);

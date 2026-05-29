@@ -1,93 +1,437 @@
 using System.Collections.Generic;
+
 using System.Threading;
+
 using Logic.Scripts.Services.Logger.Base;
+
 using UnityEngine;
 
-namespace Logic.Scripts.Services.AudioService {
-    public class AudioService : MonoBehaviour, IAudioService {
-        [SerializeField] private AudioSource _masterAudioSource;
-        [SerializeField] private AudioSource _FxAudioSource;
-        [SerializeField] private AudioSource _MusicAudioSource;
+using UnityEngine.Serialization;
 
-        private readonly List<AudioClipsScriptableObject> _audioClipsScriptableObjects = new();
+
+
+namespace Logic.Scripts.Services.AudioService {
+
+    public class AudioService : MonoBehaviour, IAudioService {
+
+        [FormerlySerializedAs("_MusicAudioSource")]
+
+        [SerializeField] private AudioSource _musicAudioSource;
+
+        [FormerlySerializedAs("_FxAudioSource")]
+
+        [SerializeField] private AudioSource _sfxCombatAudioSource;
+
+        [SerializeField] private AudioSource _sfxUiAudioSource;
+
+        [SerializeField] private AudioSource _sfxBossAudioSource;
+
+        [SerializeField] private AudioSource _sfxAmbienceAudioSource;
+
+
+
+        private readonly List<MusicClipsScriptableObject> _musicPacks = new();
+
+        private readonly List<SfxClipsScriptableObject> _sfxPacks = new();
+
         private readonly Dictionary<AudioChannelType, AudioSource> _audioSourceByChannel = new();
 
+
+
+        private AudioChannelType? _segmentLoopChannel;
+
+        private float _segmentLoopLengthSeconds;
+
+
+
         public void InitEntryPoint() {
-            _audioSourceByChannel.Add(AudioChannelType.Master, _masterAudioSource);
-            _audioSourceByChannel.Add(AudioChannelType.Fx, _FxAudioSource);
-            _audioSourceByChannel.Add(AudioChannelType.Music, _MusicAudioSource);
+
+            ResolveMissingSources();
+
+            _audioSourceByChannel.Clear();
+
+            RegisterChannel(AudioChannelType.Music, _musicAudioSource);
+
+            RegisterChannel(AudioChannelType.SfxUi, _sfxUiAudioSource);
+
+            RegisterChannel(AudioChannelType.SfxCombat, _sfxCombatAudioSource);
+
+            RegisterChannel(AudioChannelType.SfxBoss, _sfxBossAudioSource);
+
+            RegisterChannel(AudioChannelType.SfxAmbience, _sfxAmbienceAudioSource);
+
         }
 
-        public void AddAudioClips(AudioClipsScriptableObject audioClipsScriptableObject) {
-            _audioClipsScriptableObjects.Add(audioClipsScriptableObject);
+
+
+        private void Update() {
+
+            if (_segmentLoopChannel == null)
+
+                return;
+
+            if (!_audioSourceByChannel.TryGetValue(_segmentLoopChannel.Value, out var source)
+
+                || source == null
+
+                || !source.isPlaying
+
+                || source.clip == null)
+
+                return;
+
+
+
+            if (source.time >= _segmentLoopLengthSeconds)
+
+                source.time = 0f;
+
         }
 
-        public void RemoveAudioClips(AudioClipsScriptableObject audioClipsScriptableObject) {
-            _audioClipsScriptableObjects.Remove(audioClipsScriptableObject);
+
+
+        private void ResolveMissingSources() {
+
+            if (_sfxUiAudioSource == null)
+
+                _sfxUiAudioSource = _sfxCombatAudioSource;
+
+            if (_sfxBossAudioSource == null)
+
+                _sfxBossAudioSource = _sfxCombatAudioSource;
+
+            if (_sfxAmbienceAudioSource == null)
+
+                _sfxAmbienceAudioSource = _sfxCombatAudioSource;
+
         }
 
-        public void PlayAudio(AudioClipType audioClipType, AudioChannelType audioChannel, AudioPlayType audioPlayType = AudioPlayType.OneShot) {
-            TryPlayAudioClip(audioClipType, audioChannel, audioPlayType, out _);
+
+
+        private void RegisterChannel(AudioChannelType channel, AudioSource source) {
+
+            if (source == null) {
+
+                LogService.LogError($"[Audio] Missing AudioSource for channel {channel}");
+
+                return;
+
+            }
+
+            _audioSourceByChannel[channel] = source;
+
         }
 
-        private bool TryPlayAudioClip(AudioClipType audioClipType, AudioChannelType audioChannel, AudioPlayType audioPlayType, out AudioClip audioClip) {
-            audioClip = default;
 
-            if (!TryGetAudioClip(audioClipType, out var clip)) {
-                return false;
-            }
 
-            if (!_audioSourceByChannel.TryGetValue(audioChannel, out var audioSource)) {
-                LogService.LogError($"No audioChannel of name {audioChannel} found");
-                return false;
-            }
+        public void AddMusicClips(MusicClipsScriptableObject pack) {
 
-            var isAudioMuted = audioSource.mute || !audioSource.enabled;
+            if (pack != null && !_musicPacks.Contains(pack))
 
-            if (isAudioMuted) {
-                return false;
-            }
+                _musicPacks.Add(pack);
 
-            switch (audioPlayType) {
-                case AudioPlayType.OneShot:
-                    audioSource.loop = false;
-                    audioSource.PlayOneShot(clip);
-                    break;
-                case AudioPlayType.Loop:
-                    audioSource.clip = clip;
-                    audioSource.loop = true;
-                    audioSource.Play();
-                    break;
-            }
-
-            LogService.LogTopic($"Played Audio {audioClipType} for channel {audioChannel}", LogTopicType.Audio);
-            return true;
         }
 
-        private bool TryGetAudioClip(AudioClipType audioClipType, out AudioClip audioClip) {
-            foreach (var audioClipsScriptableObject in _audioClipsScriptableObjects) {
-                if (audioClipsScriptableObject.AudioClips.TryGetValue(audioClipType, out audioClip)) {
-                    return true;
-                }
+
+
+        public void AddSfxClips(SfxClipsScriptableObject pack) {
+
+            if (pack != null && !_sfxPacks.Contains(pack))
+
+                _sfxPacks.Add(pack);
+
+        }
+
+
+
+        public void PlayMusic(string musicId) {
+
+            if (!TryGetMusicClip(musicId, out var clip))
+
+                return;
+
+
+
+            if (!_audioSourceByChannel.TryGetValue(AudioChannelType.Music, out var source) || source == null) {
+
+                LogService.LogError("[Audio] Music channel not configured.");
+
+                return;
+
             }
 
-            LogService.LogError($"No clip of name {audioClipType} found");
-            audioClip = null;
+
+
+            if (source.mute || !source.enabled)
+
+                return;
+
+
+
+            source.Stop();
+
+            source.clip = clip;
+
+            source.loop = true;
+
+            source.Play();
+
+            LogService.LogTopic($"PlayMusic {musicId}", LogTopicType.Audio);
+
+        }
+
+
+
+        public void StopMusic() {
+
+            if (_audioSourceByChannel.TryGetValue(AudioChannelType.Music, out var source) && source != null)
+
+                source.Stop();
+
+        }
+
+
+
+        public void PlaySfx(string sfxId, AudioChannelType channel, AudioPlayType playType = AudioPlayType.OneShot) {
+
+            TryPlaySfxClip(sfxId, channel, playType, out _);
+
+        }
+
+
+
+        public bool TryGetSfxDuration(string sfxId, out float durationSeconds) {
+
+            if (TryGetSfxClip(sfxId, out var clip) && clip != null) {
+
+                durationSeconds = clip.length;
+
+                return true;
+
+            }
+
+            durationSeconds = 0f;
+
             return false;
+
         }
 
-        public async Awaitable PlayAudioAsync(AudioClipType audioClipType, AudioChannelType audioChannel, CancellationTokenSource cancellationTokenSource, AudioPlayType audioPlayType = AudioPlayType.OneShot) {
-            if (TryPlayAudioClip(audioClipType, audioChannel, audioPlayType, out var audioClip)) {
-                await Awaitable.WaitForSecondsAsync(audioClip.length, cancellationTokenSource.Token);
+
+
+        public void SetSegmentLoopingSfx(string sfxId, AudioChannelType channel, float segmentLengthSeconds, bool play) {
+
+            if (!play) {
+
+                StopLoopingSfx(channel);
+
+                return;
+
             }
+
+
+
+            if (!TryGetSfxClip(sfxId, out var clip))
+
+                return;
+
+
+
+            var audioSource = ResolveSfxSource(channel);
+
+            if (audioSource == null || audioSource.mute || !audioSource.enabled)
+
+                return;
+
+
+
+            float segment = Mathf.Clamp(segmentLengthSeconds, 0.05f, clip.length);
+
+
+
+            audioSource.Stop();
+
+            audioSource.clip = clip;
+
+            audioSource.loop = false;
+
+            audioSource.time = 0f;
+
+            audioSource.Play();
+
+
+
+            _segmentLoopChannel = channel;
+
+            _segmentLoopLengthSeconds = segment;
+
+            LogService.LogTopic($"PlaySfx {sfxId} segment-loop {segment:F2}s on {channel}", LogTopicType.Audio);
+
         }
+
+
+
+        public void StopLoopingSfx(AudioChannelType channel) {
+
+            if (_segmentLoopChannel == channel)
+
+                _segmentLoopChannel = null;
+
+
+
+            if (!_audioSourceByChannel.TryGetValue(channel, out var source) || source == null)
+
+                return;
+
+
+
+            source.Stop();
+
+            source.loop = false;
+
+            source.clip = null;
+
+        }
+
+
+
+        public async Awaitable PlaySfxAsync(string sfxId, AudioChannelType channel, CancellationTokenSource cancellationTokenSource,
+
+            AudioPlayType playType = AudioPlayType.OneShot) {
+
+            if (TryPlaySfxClip(sfxId, channel, playType, out var clip))
+
+                await Awaitable.WaitForSecondsAsync(clip.length, cancellationTokenSource.Token);
+
+        }
+
+
+
+        private bool TryPlaySfxClip(string sfxId, AudioChannelType channel, AudioPlayType playType, out AudioClip clip) {
+
+            clip = null;
+
+            if (!TryGetSfxClip(sfxId, out clip))
+
+                return false;
+
+
+
+            var audioSource = ResolveSfxSource(channel);
+
+            if (audioSource == null)
+
+                return false;
+
+
+
+            if (audioSource.mute || !audioSource.enabled)
+
+                return false;
+
+
+
+            switch (playType) {
+
+                case AudioPlayType.OneShot:
+
+                    audioSource.loop = false;
+
+                    audioSource.PlayOneShot(clip);
+
+                    break;
+
+                case AudioPlayType.Loop:
+
+                    audioSource.clip = clip;
+
+                    audioSource.loop = true;
+
+                    audioSource.Play();
+
+                    break;
+
+            }
+
+
+
+            LogService.LogTopic($"PlaySfx {sfxId} on {channel}", LogTopicType.Audio);
+
+            return true;
+
+        }
+
+
+
+        private bool TryGetMusicClip(string id, out AudioClip clip) {
+
+            foreach (var pack in _musicPacks) {
+
+                if (pack.TryGetClip(id, out clip))
+
+                    return true;
+
+            }
+
+            LogService.LogError($"[Audio] No music clip for '{id}'");
+
+            clip = null;
+
+            return false;
+
+        }
+
+
+
+        private AudioSource ResolveSfxSource(AudioChannelType channel) {
+
+            if (!_audioSourceByChannel.TryGetValue(channel, out var audioSource) || audioSource == null) {
+
+                LogService.LogError($"[Audio] No channel {channel} found.");
+
+                return null;
+
+            }
+
+            return audioSource;
+
+        }
+
+
+
+        private bool TryGetSfxClip(string id, out AudioClip clip) {
+
+            foreach (var pack in _sfxPacks) {
+
+                if (pack.TryGetClip(id, out clip))
+
+                    return true;
+
+            }
+
+            LogService.LogError($"[Audio] No sfx clip for '{id}'");
+
+            clip = null;
+
+            return false;
+
+        }
+
+
 
         public void StopAllAudio() {
+
             LogService.LogTopic("Stop all audio", LogTopicType.Audio);
 
-            foreach (var keyValuePair in _audioSourceByChannel) {
-                keyValuePair.Value.Stop();
-            }
+            _segmentLoopChannel = null;
+
+            foreach (var pair in _audioSourceByChannel)
+
+                pair.Value.Stop();
+
         }
+
     }
+
 }
+
+

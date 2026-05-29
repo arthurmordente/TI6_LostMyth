@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e7f4a1b22c3d4456a8b9c0d1e2f3a4b5, type: 3}
+  m_Name: GameplayMusicClips 1
+  m_EditorClassIdentifier: Assembly-CSharp::Logic.Scripts.Services.AudioService.MusicClipsScriptableObject
+  _entries:
+  - Id: Menu
+    Clip: {fileID: 8300000, guid: cae6305d298eb6e49ae814d5dee81afb, type: 3}
+  - Id: FightHokari
+    Clip: {fileID: 8300000, guid: cdc0fb3a141338e4f8d33910c83183ed, type: 3}
+  - Id: FightLaki
+    Clip: {fileID: 8300000, guid: 6a233299735205348b58d435f30382bc, type: 3}

@@ -10,8 +10,11 @@ public abstract class NaraMovementController : INaraMovementController, IFixedUp
     protected Rigidbody NaraRigidbody;
     protected Transform NaraTransform;
     protected GameInputActions GameInputActions;
+    protected Vector3 PlanarFacingDirection;
 
     protected Camera Cam;
+
+    protected bool IsKinematicRigidbody => NaraRigidbody != null && NaraRigidbody.isKinematic;
 
     public NaraMovementController(GameInputActions inputActions, IUpdateSubscriptionService updateSubscriptionService,
         NaraConfigurationSO naraConfiguration) {
@@ -30,8 +33,36 @@ public abstract class NaraMovementController : INaraMovementController, IFixedUp
 
     public abstract void Move(Vector2 direction, float velocity, float rotation);
     public abstract void MoveToPoint(Vector3 endPosition, float velocity, float rotation);
+    protected void StopPlanarMotion() {
+        if (NaraRigidbody == null) return;
+        PlanarFacingDirection = Vector3.zero;
+        if (!IsKinematicRigidbody)
+            NaraRigidbody.linearVelocity = new Vector3(0f, NaraRigidbody.linearVelocity.y, 0f);
+    }
+
+    protected void SetPlanarMotion(Vector3 worldDirectionNormalized, float speed) {
+        if (NaraRigidbody == null) return;
+        PlanarFacingDirection = worldDirectionNormalized;
+        if (IsKinematicRigidbody) {
+            if (worldDirectionNormalized.sqrMagnitude <= 1e-6f) return;
+            Vector3 delta = worldDirectionNormalized * (speed * Time.fixedDeltaTime);
+            Vector3 pos = NaraRigidbody.position;
+            pos.x += delta.x;
+            pos.z += delta.z;
+            NaraRigidbody.MovePosition(pos);
+            return;
+        }
+
+        NaraRigidbody.linearVelocity = new Vector3(
+            worldDirectionNormalized.x * speed,
+            NaraRigidbody.linearVelocity.y,
+            worldDirectionNormalized.z * speed);
+    }
+
     protected void Rotate(float rotationForce) {
-        Vector3 rotate = new Vector3(NaraRigidbody.linearVelocity.x, 0f, NaraRigidbody.linearVelocity.z);
+        Vector3 rotate = IsKinematicRigidbody
+            ? new Vector3(PlanarFacingDirection.x, 0f, PlanarFacingDirection.z)
+            : new Vector3(NaraRigidbody.linearVelocity.x, 0f, NaraRigidbody.linearVelocity.z);
         if (rotate.sqrMagnitude > 0.0001f) {
             Quaternion finalRotation = Quaternion.LookRotation(rotate.normalized, Vector3.up);
             NaraTransform.rotation = Quaternion.Slerp(NaraTransform.rotation, finalRotation, Time.fixedDeltaTime * rotationForce);

@@ -41,6 +41,8 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
 
         private GameObject _activeUnitCircleInstance;
         private bool _hasNextHitShield;
+        private bool _footstepsPlaying;
+        private const float FootstepLoopSegmentSeconds = 0.5f;
 
         public NaraController(IUpdateSubscriptionService updateSubscriptionService,
             IAudioService audioService, ICommandFactory commandFactory,
@@ -71,9 +73,11 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
 
         public void StopMovingAnim() {
             _naraView?.SetMoving(false);
+            StopFootstepSfx();
         }
         public void Freeeze() {
             _canMove = false;
+            StopFootstepSfx();
         }
 
         public void Unfreeeze() {
@@ -99,11 +103,16 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
             if (dir == Vector2.zero || _canMove == false) {
                 _naraMovementController.Move(Vector2.zero, 0f, 0f);
                 _naraView?.SetMoving(false);
+                StopFootstepSfx();
             }
             else {
                 _naraMovementController.Move(dir, _naraConfiguration.MoveSpeed, _naraConfiguration.RotationSpeed);
                 bool willMove = movementAllowed && dir.sqrMagnitude > 0.0001f && _naraConfiguration.MoveSpeed > 0f;
                 _naraView?.SetMoving(willMove);
+                if (willMove)
+                    StartFootstepSfx();
+                else
+                    StopFootstepSfx();
             }
         }
 
@@ -251,24 +260,46 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
         public bool HasNextHitShieldActive => _hasNextHitShield;
 
         public void TakeDamage(int damageAmound) {
-            if (_cheatController.Imortal == false && damageAmound > 0 && _hasNextHitShield) {
+            if (damageAmound <= 0) return;
+
+            if (_cheatController.Imortal == false && _hasNextHitShield) {
                 _hasNextHitShield = false;
                 _gamePlayUiController?.OnPlayerNextHitShieldChanged(false);
                 return;
             }
-            if (_cheatController.Imortal == false) _naraData.TakeDamage(damageAmound);
-            if (_naraView != null) {
-                var flash = _naraView.GetComponent<DamageFlashPresenter>();
-                if (flash == null) flash = _naraView.gameObject.AddComponent<DamageFlashPresenter>();
-                flash.TriggerFlash();
+
+            bool damageApplied = _cheatController.Imortal == false;
+            if (damageApplied)
+                _naraData.TakeDamage(damageAmound);
+
+            if (damageApplied) {
+                if (_naraView != null) {
+                    var flash = _naraView.GetComponent<DamageFlashPresenter>();
+                    if (flash == null) flash = _naraView.gameObject.AddComponent<DamageFlashPresenter>();
+                    flash.TriggerFlash();
+                }
+                _audioService?.PlaySfx(SfxIds.Erza_Atingida, AudioChannelType.SfxCombat);
             }
-            _audioService?.PlayAudio(AudioClipType.AbilityPrep2SFX, AudioChannelType.Fx, AudioPlayType.OneShot);
+
             _gamePlayUiController?.OnPlayerHealthUpdate(_naraData.ActualHealth, _naraConfiguration.MaxHealth);
             _gamePlayUiController?.OnPreviewPlayerHealthUpdate(_naraData.ActualHealth, _naraConfiguration.MaxHealth);
             if (_naraData.IsAlive()) {
+                _audioService?.PlaySfx(SfxIds.Erza_Morte, AudioChannelType.SfxCombat);
                 _naraView?.PlayDeath();
                 _commandFactory.CreateCommandVoid<GameOverCommand>().SetData(new GameOverCommandData(false)).Execute();
             }
+        }
+
+        private void StartFootstepSfx() {
+            if (_footstepsPlaying) return;
+            _footstepsPlaying = true;
+            _audioService?.SetSegmentLoopingSfx(SfxIds.Erza_Passos, AudioChannelType.SfxAmbience, FootstepLoopSegmentSeconds, true);
+        }
+
+        private void StopFootstepSfx() {
+            if (!_footstepsPlaying) return;
+            _footstepsPlaying = false;
+            _audioService?.StopLoopingSfx(AudioChannelType.SfxAmbience);
         }
 
         public void PlayAttackType(int type) {
@@ -287,7 +318,6 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
         }
 
         public void TriggerExecute() {
-            _audioService.PlayAudio(AudioClipType.AbilityUsed1SFX, AudioChannelType.Fx);
             _naraView?.TriggerExecute();
         }
 

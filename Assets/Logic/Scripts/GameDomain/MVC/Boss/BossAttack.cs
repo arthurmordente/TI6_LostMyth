@@ -262,7 +262,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
         public void Execute()
         {
             if (_attackType != AttackType.FeatherLines)
-                _audio?.PlayAudio(AudioClipType.MetalSlash1SFX, AudioChannelType.Fx);
+                _audio?.PlaySfx(SfxIds.Hocari_Ataque_Laminas, AudioChannelType.SfxBoss);
 
             if (_attackType == AttackType.Orb)
             {
@@ -284,7 +284,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
         public System.Threading.Tasks.Task ExecuteAsync()
         {
             if (_attackType != AttackType.FeatherLines)
-                _audio?.PlayAudio(AudioClipType.MetalSlash1SFX, AudioChannelType.Fx);
+                _audio?.PlaySfx(SfxIds.Hocari_Ataque_Laminas, AudioChannelType.SfxBoss);
 
             if (_attackType == AttackType.Orb)
             {

@@ -6,6 +6,8 @@ using Logic.Scripts.GameDomain.MVC.Nara;
 using Logic.Scripts.GameDomain.MVC.Boss.Visuals;
 using Logic.Scripts.GameDomain.MVC.Environment;
 using Logic.Scripts.GameDomain.MVC.Boss.Laki;
+using Logic.Scripts.Services.AudioService;
+using System;
 using System.Threading.Tasks;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -74,7 +76,7 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 		private void Start()
 		{
 			Zenject.DiContainer container = null;
-			var sceneCtxs = Object.FindObjectsByType<Zenject.SceneContext>(FindObjectsSortMode.None);
+			var sceneCtxs = UnityEngine.Object.FindObjectsByType<Zenject.SceneContext>(FindObjectsSortMode.None);
 			for (int i = 0; i < sceneCtxs.Length; i++)
 			{
 				var sc = sceneCtxs[i];
@@ -137,18 +139,22 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 			}
 			catch { Debug.LogWarning("[LakiArenaBossBootstrap] IBookController não encontrado no container – Livro não receberá efeitos de casa."); }
 
+			IAudioService audioService = null;
+			try { audioService = container.Resolve<IAudioService>(); }
+			catch { Debug.LogWarning("[LakiArenaBossBootstrap] IAudioService not bound — Laki_Turno arena shuffle will be silent."); }
+
 			if (_phaseTileDisposition != null)
 				LakiArenaTileDispositionRuntime.Register(arenaService, _phaseTileDisposition);
 			else
 				arenaService.SetTileDisposition(LakiArenaTileDisposition.Default);
 
-			var actor = new LakiRouletteArenaActor(_turnStateService, _naraController, arenaService, _centerWorld, view, caster, bookEffectable);
+			var actor = new LakiRouletteArenaActor(_turnStateService, _naraController, arenaService, _centerWorld, view, caster, bookEffectable, audioService);
 			LakiArenaTurnFlowBridge.Register(actor, _postApplyBeforeBossResolveSeconds, _postBossBeforeRerollSeconds);
 			var cmd = _commandFactory.CreateCommandVoid<Logic.Scripts.GameDomain.Commands.RegisterEnvironmentActorCommand>();
 			cmd.SetActor(actor);
 			cmd.Execute();
 
-			_ = RunFightBoardIntroThenReleaseTurnFlowAsync(arenaService, view);
+			_ = RunFightBoardIntroThenReleaseTurnFlowAsync(arenaService, view, audioService);
 
 			LakiBossShieldRuntime.RegisterShieldRoot(_lakiShieldVfxRoot);
 			EnsureLakiBossAnimatorBootstrap();
@@ -167,7 +173,7 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 				bossRoot.AddComponent<LakiBossAnimatorBootstrap>();
 		}
 
-		private async Task RunFightBoardIntroThenReleaseTurnFlowAsync(RouletteArenaService arenaService, LakiRouletteArenaView view)
+		private async Task RunFightBoardIntroThenReleaseTurnFlowAsync(RouletteArenaService arenaService, LakiRouletteArenaView view, IAudioService audioService)
 		{
 			try
 			{
@@ -177,14 +183,14 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 					: Vector3.zero;
 				int playerTile = arenaService.ComputeTileIndex(playerPos, _centerWorld);
 				const int turnForIntroSeed = 0;
-				for (int i = 0; i < 3; i++)
-				{
-					arenaService.RandomizeVisualMapping(new System.Random((turnForIntroSeed + i + 1) * 104729 + playerTile));
-					view.RefreshFrom(arenaService);
-					await Task.Delay(150);
-				}
-				arenaService.RerollTiles(0, new System.Random(17));
-				view.RefreshFrom(arenaService);
+				await LakiArenaRerollPresentation.RunShuffleWithTurnoSfxAsync(
+					arenaService,
+					view,
+					audioService,
+					turnForIntroSeed,
+					playerTile,
+					0,
+					new System.Random(17));
 			}
 			finally
 			{
