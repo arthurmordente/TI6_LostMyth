@@ -59,7 +59,7 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
             _gamePlayHud.RegisterOpenPauseMenuCallback(OnOpenPauseMenu);
             SyncBossHudNameFromCurrentLevel();
             _gameOverView.InitEntryPoint();
-            _gameOverView.RegisterCallbacks(OnClickPlayAgainWithSfx, OnClickPlayAgainWithSfx, OnBackToLobbyFromGameOver);
+            _gameOverView.RegisterCallbacks(OnClickPlayAgainWithSfx, OnBackToLobbyFromGameOver, OnQuitGameFromGameOver);
         }
 
         /// <summary>
@@ -145,7 +145,13 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
 
         private void OnBackToLobbyFromGameOver() {
             GeneralSfxFeedback.PlayMenuClick(_audioService, secondary: true);
+            _gameOverView.Hide();
             BackToLobby();
+        }
+
+        private void OnQuitGameFromGameOver() {
+            _gameOverView.Hide();
+            OnQuitGame();
         }
 
         private void OnBackToLobby() {

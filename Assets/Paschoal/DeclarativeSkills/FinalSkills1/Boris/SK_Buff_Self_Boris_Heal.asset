@@ -36,7 +36,7 @@ MonoBehaviour:
   _selfCastPrefab: {fileID: 1607142820532151380, guid: 6190cf774033c09479d45e3c13b935d7, type: 3}
   Power: 20
   Cost: 4
-  Icon: {fileID: 21300000, guid: f18e00465fefb7b4db6702a67ed18621, type: 3}
+  Icon: {fileID: 21300000, guid: 186772cbcc71e324eabaf923201504d0, type: 3}
   SkillName: Onda de cura
   Description: Invoca ventos rejuvenecedores que aliviam a dor, recuperando um pouco
     de vida.
@@ -45,4 +45,5 @@ MonoBehaviour:
   _passiveModifiers: []
   _passiveTurnBehavior: {fileID: 0}
   _passiveCombatBehavior: {fileID: 0}
+  _passiveOnDamageTakenBehavior: {fileID: 0}
   _runtimeModifiers: []

@@ -12,7 +12,7 @@ public class GrantOutgoingLifestealSkillEffectSO : SkillEffectSO
 
     public override void Execute(in SkillExecutionContext context)
     {
-        if (context.Caster is not IOutgoingDamageLifesteal lifesteal) return;
+        if (context.EffectRecipient is not IOutgoingDamageLifesteal lifesteal) return;
         lifesteal.SetOutgoingLifestealPercent(Mathf.Max(0f, _healPercentOfDamageDealt));
     }
 

@@ -15,10 +15,11 @@ public class DeclarativeSkillDataSO : SkillDataSO
     {
         if (!IsCastable) return;
 
-        OutgoingDamageLifestealRuntime.ClearForCaster(caster);
+        IEffectable beneficiary = SkillCastBeneficiaryResolver.TryResolve(this, caster);
+        OutgoingDamageLifestealRuntime.ClearForCaster(beneficiary);
 
         List<IEffectable> targets = new List<IEffectable>();
-        IReadOnlyList<IEffectable> resolved = ResolveTargets(caster, target);
+        IReadOnlyList<IEffectable> resolved = ResolveTargets(caster, target, beneficiary);
         if (resolved != null)
         {
             for (int i = 0; i < resolved.Count; i++)
@@ -40,6 +41,7 @@ public class DeclarativeSkillDataSO : SkillDataSO
             {
                 Skill = this,
                 Caster = caster,
+                Beneficiary = beneficiary,
                 TargetTransform = target,
                 TargetPoint = target != null ? target.position : Vector3.zero,
                 Targets = targets
@@ -51,6 +53,6 @@ public class DeclarativeSkillDataSO : SkillDataSO
             Debug.LogWarning($"[DeclarativeSkill] '{SkillName}' is Projectile but ProjectilePrefab is not assigned.");
         }
 
-        SkillEffectsRunner.Execute(this, caster, target, targets);
+        SkillEffectsRunner.Execute(this, caster, target, targets, beneficiary);
     }
 }

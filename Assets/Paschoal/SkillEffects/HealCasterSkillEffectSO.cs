@@ -10,8 +10,8 @@ public class HealCasterSkillEffectSO : SkillEffectSO
 
     public override void Execute(in SkillExecutionContext context)
     {
-        if (context.Caster == null) return;
+        if (context.EffectRecipient == null) return;
         int amount = ComputeTotalHealForSkillPower(context.Skill.Power);
-        context.Caster.Heal(amount);
+        context.EffectRecipient.Heal(amount);
     }
 }

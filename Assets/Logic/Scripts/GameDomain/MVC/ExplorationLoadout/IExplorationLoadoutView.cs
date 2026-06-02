@@ -13,10 +13,10 @@ public interface IExplorationLoadoutView
     void RegisterCallbacks(Action onClose, Action<int> onPlayerSlotClicked, Action<int> onBookSlotClicked,
         Action<ExplorationLoadoutSkillFilter> onCatalogFilterChanged = null,
         Action<ExplorationLoadoutDivinityFilter> onDivinityFilterChanged = null);
-    void SetSlotData(SkillLoadoutUnitType unitType, int slotIndex, SkillDataSO skill);
+    void RebuildLoadoutSlots(int slotCount, Func<SkillLoadoutUnitType, int, SkillDataSO> getSkillForSlot);
     void SetSelectedSlot(SkillLoadoutUnitType unitType, int slotIndex);
     void ClearSlotSelection();
-    void PlayInvalidAssignFeedback();
+    void PlayInvalidAssignFeedback(SkillLoadoutUnitType unitType, int slotIndex);
     void ClearCatalog();
     LoadoutSkillFrameView CreateCatalogItem();
     void FinalizeCatalogScroll();

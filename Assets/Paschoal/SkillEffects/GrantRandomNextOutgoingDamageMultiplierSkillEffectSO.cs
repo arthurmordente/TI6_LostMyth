@@ -12,7 +12,7 @@ public class GrantRandomNextOutgoingDamageMultiplierSkillEffectSO : SkillEffectS
 
     public override void Execute(in SkillExecutionContext context)
     {
-        if (context.Caster is not IOutgoingDamageModifier modifier) return;
+        if (context.EffectRecipient is not IOutgoingDamageModifier modifier) return;
 
         float min = Mathf.Min(_minMultiplier, _maxMultiplier);
         float max = Mathf.Max(_minMultiplier, _maxMultiplier);

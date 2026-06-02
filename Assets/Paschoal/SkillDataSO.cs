@@ -81,9 +81,11 @@ public abstract class SkillDataSO : ScriptableObject
     public SkillDivinity Divinity => _divinity;
     public SkillType SkillType => _skillType;
 
-    /// <summary>Passive skills always behave as <see cref="SkillCastType.Self"/> at runtime (serialized cast is forced in <see cref="OnValidate"/>).</summary>
+    /// <summary>Passive and SelfBuff skills always behave as <see cref="SkillCastType.Self"/> at runtime.</summary>
     private SkillCastType EffectiveCastType =>
-        _skillType == SkillType.Passive ? SkillCastType.Self : _castType;
+        _skillType == SkillType.Passive || _skillType == SkillType.SelfBuff
+            ? SkillCastType.Self
+            : _castType;
 
     public SkillCastType CastType => EffectiveCastType;
     public SkillEffectSO[] Effects => _effects;
@@ -129,12 +131,15 @@ public abstract class SkillDataSO : ScriptableObject
     public GameObject SelfAimPrefab => _selfAimPrefab;
     public GameObject SelfCastPrefab => _selfCastPrefab;
 
-    protected virtual IReadOnlyList<IEffectable> ResolveTargets(IEffectable caster, Transform target)
+    protected virtual IReadOnlyList<IEffectable> ResolveTargets(IEffectable caster, Transform target, IEffectable beneficiary = null)
     {
         if (EffectiveCastType == SkillCastType.Self)
         {
-            if (caster == null) return Array.Empty<IEffectable>();
-            return new[] { caster };
+            IEffectable selfTarget = SkillCastRules.IsRangelessSelfBuff(this)
+                ? beneficiary ?? SkillCastBeneficiaryResolver.TryResolve(this, caster)
+                : caster;
+            if (selfTarget == null) return Array.Empty<IEffectable>();
+            return new[] { selfTarget };
         }
 
         Vector3 center = target != null ? target.position : (caster != null && caster.GetReferenceTransform() != null ? caster.GetReferenceTransform().position : Vector3.zero);
@@ -230,9 +235,10 @@ public abstract class SkillDataSO : ScriptableObject
     public virtual void OnCast(IEffectable caster = null, Transform target = null)
     {
         if (!IsCastable) return;
-        OutgoingDamageLifestealRuntime.ClearForCaster(caster);
-        IReadOnlyList<IEffectable> targets = ResolveTargets(caster, target);
-        SkillEffectsRunner.Execute(this, caster, target, targets);
+        IEffectable beneficiary = SkillCastBeneficiaryResolver.TryResolve(this, caster);
+        OutgoingDamageLifestealRuntime.ClearForCaster(beneficiary);
+        IReadOnlyList<IEffectable> targets = ResolveTargets(caster, target, beneficiary);
+        SkillEffectsRunner.Execute(this, caster, target, targets, beneficiary);
     }
 
     private void OnValidate()
@@ -255,6 +261,11 @@ public abstract class SkillDataSO : ScriptableObject
             _moveCasterToProjectileHit = false;
         if (_skillType == SkillType.Passive) {
             Cost = 0;
+            _castType = SkillCastType.Self;
+        }
+        if (_skillType == SkillType.SelfBuff && _castType != SkillCastType.Self)
+        {
+            Debug.LogWarning($"[SkillDataSO] '{name}' is SelfBuff but Cast Type is {_castType}; forcing Self at runtime via EffectiveCastType is not applied — set Cast Type to Self in the asset.", this);
             _castType = SkillCastType.Self;
         }
     }

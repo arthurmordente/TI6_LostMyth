@@ -12,8 +12,8 @@ public class ApplyLegacyEffectSkillEffectSO : SkillEffectSO
         if (_effect == null) return;
         if (_applyOnCaster)
         {
-            if (context.Caster != null)
-                _effect.DoStuff(context.Caster);
+            if (context.EffectRecipient != null)
+                _effect.DoStuff(context.EffectRecipient);
             return;
         }
 

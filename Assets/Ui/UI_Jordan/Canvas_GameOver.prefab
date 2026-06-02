@@ -541,7 +541,6 @@ GameObject:
   - component: {fileID: 3364495667261342041}
   - component: {fileID: 3090724255457382853}
   - component: {fileID: 7428759979169016484}
-  - component: {fileID: 7433443043807084965}
   m_Layer: 5
   m_Name: Canvas_GameOver
   m_TagString: Untagged
@@ -636,23 +635,6 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
---- !u!114 &7433443043807084965
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8819421844577353434}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4dd9fc8efb1675f439f4176364295b4e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::LobbyMainMenuCanvasView
-  _rootPanel: {fileID: 8819421844577353434}
-  _canvasGroup: {fileID: 0}
-  _startButton: {fileID: 8337150728282627563}
-  _configButton: {fileID: 0}
-  _quitButton: {fileID: 7376169680774905905}
 --- !u!1001 &704366029638559592
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -763,17 +745,6 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 4768086727449144467, guid: 8ee978791e01c224cb20e8e8bc63a9d5, type: 3}
   m_PrefabInstance: {fileID: 704366029638559592}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &8337150728282627563 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 8824217731895769731, guid: 8ee978791e01c224cb20e8e8bc63a9d5, type: 3}
-  m_PrefabInstance: {fileID: 704366029638559592}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
 --- !u!1001 &2029012886017407666
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -892,17 +863,6 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 4768086727449144467, guid: 8ee978791e01c224cb20e8e8bc63a9d5, type: 3}
   m_PrefabInstance: {fileID: 2029012886017407666}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &7376169680774905905 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 8824217731895769731, guid: 8ee978791e01c224cb20e8e8bc63a9d5, type: 3}
-  m_PrefabInstance: {fileID: 2029012886017407666}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
 --- !u!1001 &5794375944393129237
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -918,6 +878,10 @@ PrefabInstance:
     - target: {fileID: 3118847420176011515, guid: 8ee978791e01c224cb20e8e8bc63a9d5, type: 3}
       propertyPath: m_Name
       value: btn_Retry
+      objectReference: {fileID: 0}
+    - target: {fileID: 3118847420176011515, guid: 8ee978791e01c224cb20e8e8bc63a9d5, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4205752566426213364, guid: 8ee978791e01c224cb20e8e8bc63a9d5, type: 3}
       propertyPath: m_Name
@@ -937,7 +901,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4768086727449144467, guid: 8ee978791e01c224cb20e8e8bc63a9d5, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4768086727449144467, guid: 8ee978791e01c224cb20e8e8bc63a9d5, type: 3}
       propertyPath: m_AnchorMin.x
@@ -945,7 +909,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4768086727449144467, guid: 8ee978791e01c224cb20e8e8bc63a9d5, type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4768086727449144467, guid: 8ee978791e01c224cb20e8e8bc63a9d5, type: 3}
       propertyPath: m_SizeDelta.x
@@ -985,11 +949,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4768086727449144467, guid: 8ee978791e01c224cb20e8e8bc63a9d5, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 0
+      value: 319.94507
       objectReference: {fileID: 0}
     - target: {fileID: 4768086727449144467, guid: 8ee978791e01c224cb20e8e8bc63a9d5, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: -100
       objectReference: {fileID: 0}
     - target: {fileID: 4768086727449144467, guid: 8ee978791e01c224cb20e8e8bc63a9d5, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x

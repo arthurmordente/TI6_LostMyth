@@ -154,6 +154,7 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
 
         private bool _castAimPreviewActive;
         private IPlayableUnit _aimPreviewCaster;
+        private IPlayableUnit _aimPreviewPresentationUnit;
         private bool _playerHpSelfDamageAimActive;
         private bool _apManaAimPreviewActive;
         private int _apAimBaseline;
@@ -460,9 +461,14 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
 
             _castAimPreviewActive = true;
             _aimPreviewCaster = caster;
+            _aimPreviewPresentationUnit = skill != null
+                ? SkillCastPresentationTarget.ResolvePlayable(caster, skill) ?? caster
+                : caster;
             _apManaAimPreviewActive = false;
 
-            if (caster is INaraController naraForPreview && skill != null && caster is IEffectable effNara)
+            if (_aimPreviewPresentationUnit is INaraController naraForPreview
+                && skill != null
+                && _aimPreviewPresentationUnit is IEffectable effNara)
             {
                 if (SkillCastSelfHealPreview.TryGetSelfHealPreviewAmount(skill, out int heal) && heal > 0)
                     effNara.PreviewHeal(heal);
@@ -490,10 +496,10 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
         {
             if (!_castAimPreviewActive) return;
 
-            if (caster is INaraController nara)
+            if (_aimPreviewPresentationUnit is INaraController nara)
                 nara.EndSelfDamageCastAimPreview(true);
 
-            if (caster is IEffectable eff)
+            if (_aimPreviewPresentationUnit is IEffectable eff)
                 eff.ResetPreview();
 
             if (_apManaAimPreviewActive)
@@ -507,16 +513,17 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
 
             _castAimPreviewActive = false;
             _aimPreviewCaster = null;
+            _aimPreviewPresentationUnit = null;
         }
 
         public void EndSkillCastAimPreviewCommit(IPlayableUnit caster)
         {
             if (!_castAimPreviewActive) return;
 
-            if (caster is INaraController nara)
+            if (_aimPreviewPresentationUnit is INaraController nara)
                 nara.EndSelfDamageCastAimPreview(false);
 
-            if (caster is IEffectable eff)
+            if (_aimPreviewPresentationUnit is IEffectable eff)
                 eff.ResetPreview();
 
             if (_apManaAimPreviewActive)
@@ -537,6 +544,7 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
 
             _castAimPreviewActive = false;
             _aimPreviewCaster = null;
+            _aimPreviewPresentationUnit = null;
         }
 
         private void EnsurePlayerManaMainFillAtCurrentWhileAiming(int apCurrent, int maxAp)

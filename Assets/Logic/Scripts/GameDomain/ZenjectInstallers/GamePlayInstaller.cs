@@ -15,6 +15,7 @@ using Logic.Scripts.GameDomain.MVC.Echo;
 using Logic.Scripts.GameDomain.MVC.Boss.Telegraph;
 using Logic.Scripts.GameDomain.MVC.Boss.Visuals;
 using Logic.Scripts.GameDomain.MVC.Nara.Animation;
+using Logic.Scripts.GameDomain.Services.Skills;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -66,6 +67,7 @@ public class GamePlayInstaller : MonoInstaller {
         Container.BindInterfacesTo<GamePlayDataService>().AsSingle().NonLazy();
         Container.Bind<INewSkillSystemSkillTargetingPreviewService>().To<NewSkillSystemSkillTargetingPreviewService>().AsSingle();
         Container.Bind<NewSkillSystemDefaultSkillCastFlow>().AsSingle();
+        Container.BindInterfacesTo<SkillCastBeneficiaryResolver>().AsSingle().NonLazy();
 
         // Book system
         Container.Bind<IActiveUnitService>().To<ActiveUnitService>().AsSingle();

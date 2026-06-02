@@ -1,85 +1,84 @@
 using System;
 using Logic.Scripts.GameDomain.MVC.Ui.Shared;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Coordinator for end-of-fight overlays. Assign defeat and victory prefab roots; only the matching screen is shown.
+/// Buttons are resolved by name under each screen: <c>btn_Retry</c>, <c>btn_Return</c>, <c>btn_QuitGame</c>.
+/// </summary>
 public sealed class GameOverCanvasView : UguiCanvasViewBase, IGameOverView
 {
-    [SerializeField] private TMP_Text _resultText;
-    [SerializeField] private Button _playButton;
-    [SerializeField] private Button _loadButton;
-    [SerializeField] private Button _exitButton;
+    [Header("Screens")]
+    [Tooltip("Root of Canvas_GameOver (derrota).")]
+    [SerializeField] private GameObject _defeatScreen;
+    [Tooltip("Root of Canvas_Victory (vitória).")]
+    [SerializeField] private GameObject _victoryScreen;
 
-    protected override void Awake()
+    Button _defeatRetryButton;
+    Button _defeatReturnButton;
+    Button _defeatQuitButton;
+    Button _victoryReturnButton;
+    Button _victoryQuitButton;
+
+    public void InitEntryPoint()
     {
-        EnsureRuntimeUiIfNeeded();
-        base.Awake();
+        ResolveButtons();
+        Hide();
     }
 
-    public void InitEntryPoint() => Hide();
-
-    private void EnsureRuntimeUiIfNeeded()
+    void ResolveButtons()
     {
-        if (_playButton != null) return;
+        if (_defeatScreen != null)
+        {
+            Transform root = _defeatScreen.transform;
+            _defeatRetryButton = ResolveButton(_defeatRetryButton, root, "btn_Retry");
+            _defeatReturnButton = ResolveButton(_defeatReturnButton, root, "btn_Return");
+            _defeatQuitButton = ResolveButton(_defeatQuitButton, root, "btn_QuitGame");
+        }
 
-        var panel = new GameObject("Panel", typeof(RectTransform), typeof(Image));
-        panel.transform.SetParent(transform, false);
-        var panelRt = panel.GetComponent<RectTransform>();
-        panelRt.anchorMin = Vector2.zero;
-        panelRt.anchorMax = Vector2.one;
-        panelRt.offsetMin = Vector2.zero;
-        panelRt.offsetMax = Vector2.zero;
-        panel.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.8f);
-
-        var titleGo = new GameObject("Title", typeof(RectTransform), typeof(TextMeshProUGUI));
-        titleGo.transform.SetParent(panel.transform, false);
-        _resultText = titleGo.GetComponent<TextMeshProUGUI>();
-        var titleRt = _resultText.rectTransform;
-        titleRt.anchorMin = new Vector2(0.2f, 0.55f);
-        titleRt.anchorMax = new Vector2(0.8f, 0.75f);
-        titleRt.offsetMin = Vector2.zero;
-        titleRt.offsetMax = Vector2.zero;
-        _resultText.fontSize = 48;
-        _resultText.alignment = TextAlignmentOptions.Center;
-
-        _playButton = CreateButton(panel.transform, "Jogar novamente", 0.42f);
-        _exitButton = CreateButton(panel.transform, "Sair", 0.32f);
+        if (_victoryScreen != null)
+        {
+            Transform root = _victoryScreen.transform;
+            _victoryReturnButton = ResolveButton(_victoryReturnButton, root, "btn_Return");
+            _victoryQuitButton = ResolveButton(_victoryQuitButton, root, "btn_QuitGame");
+        }
     }
 
-    private static Button CreateButton(Transform parent, string label, float anchorY)
+    public void RegisterCallbacks(Action onRetry, Action onReturnToLobby, Action onQuitGame)
     {
-        var go = new GameObject(label, typeof(RectTransform), typeof(Image), typeof(Button));
-        go.transform.SetParent(parent, false);
-        var rt = go.GetComponent<RectTransform>();
-        rt.anchorMin = new Vector2(0.35f, anchorY);
-        rt.anchorMax = new Vector2(0.65f, anchorY + 0.08f);
-        rt.offsetMin = Vector2.zero;
-        rt.offsetMax = Vector2.zero;
-        var textGo = new GameObject("Label", typeof(RectTransform), typeof(TextMeshProUGUI));
-        textGo.transform.SetParent(go.transform, false);
-        var tmp = textGo.GetComponent<TextMeshProUGUI>();
-        tmp.text = label;
-        tmp.alignment = TextAlignmentOptions.Center;
-        var textRt = tmp.rectTransform;
-        textRt.anchorMin = Vector2.zero;
-        textRt.anchorMax = Vector2.one;
-        textRt.offsetMin = Vector2.zero;
-        textRt.offsetMax = Vector2.zero;
-        return go.GetComponent<Button>();
-    }
-
-    public void RegisterCallbacks(Action onPlay, Action onLoad, Action onExit)
-    {
-        if (_playButton != null) _playButton.onClick.AddListener(() => onPlay?.Invoke());
-        if (_loadButton != null) _loadButton.onClick.AddListener(() => onLoad?.Invoke());
-        if (_exitButton != null) _exitButton.onClick.AddListener(() => onExit?.Invoke());
+        WireButton(_defeatRetryButton, onRetry);
+        WireButton(_defeatReturnButton, onReturnToLobby);
+        WireButton(_defeatQuitButton, onQuitGame);
+        WireButton(_victoryReturnButton, onReturnToLobby);
+        WireButton(_victoryQuitButton, onQuitGame);
     }
 
     public void Show(bool isWin)
     {
-        if (_resultText != null)
-            _resultText.text = isWin ? "Você Ganhou" : "Derrotado";
-        Show();
+        SetScreenActive(_defeatScreen, !isWin);
+        SetScreenActive(_victoryScreen, isWin);
+        transform.localScale = Vector3.one;
+        base.Show();
+    }
+
+    public override void Hide()
+    {
+        SetScreenActive(_defeatScreen, false);
+        SetScreenActive(_victoryScreen, false);
+        base.Hide();
+    }
+
+    static void SetScreenActive(GameObject screen, bool active)
+    {
+        if (screen != null)
+            screen.SetActive(active);
+    }
+
+    static void WireButton(Button button, Action callback)
+    {
+        if (button == null) return;
+        button.onClick.RemoveAllListeners();
+        button.onClick.AddListener(() => callback?.Invoke());
     }
 }

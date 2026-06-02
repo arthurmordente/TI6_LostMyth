@@ -8,16 +8,20 @@ namespace Logic.Scripts.GameDomain.Services.Skills
             SkillDataSO skill,
             IEffectable caster,
             UnityEngine.Transform target,
-            IReadOnlyList<IEffectable> targets)
+            IReadOnlyList<IEffectable> targets,
+            IEffectable beneficiary = null)
         {
             if (skill == null) return;
             SkillEffectSO[] effects = skill.Effects;
             if (effects == null || effects.Length == 0) return;
 
+            IEffectable resolvedBeneficiary = beneficiary ?? SkillCastBeneficiaryResolver.TryResolve(skill, caster);
+
             SkillExecutionContext context = new SkillExecutionContext
             {
                 Skill = skill,
                 Caster = caster,
+                Beneficiary = resolvedBeneficiary,
                 TargetTransform = target,
                 TargetPoint = target != null ? target.position : UnityEngine.Vector3.zero,
                 Targets = targets

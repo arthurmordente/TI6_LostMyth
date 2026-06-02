@@ -1,5 +1,7 @@
 using System;
+using DG.Tweening;
 using Logic.Scripts.GameDomain.Services.Skills;
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -7,7 +9,7 @@ using UnityEngine.UI;
 namespace Logic.Scripts.GameDomain.MVC.ExplorationLoadout
 {
     /// <summary>
-    /// Skill frame for the loadout catalog: visuals + button click/hover.
+    /// Skill frame for loadout catalog and equipped slots: visuals + button click/hover.
     /// Wire <c>img_Paint</c>, <c>img_Shape</c>, <c>img_Icon</c> and the frame <see cref="Button"/> in the Inspector.
     /// </summary>
     public class LoadoutSkillFrameView : MonoBehaviour
@@ -17,14 +19,17 @@ namespace Logic.Scripts.GameDomain.MVC.ExplorationLoadout
         [SerializeField] private Image _iconImage;
         [SerializeField] private Button _button;
         [SerializeField] private Image _catalogSelectionOutline;
+        [SerializeField] private TMP_Text _skillNameText;
 
         SkillDataSO _boundSkill;
         Action<SkillDataSO> _onSelected;
         Action<SkillDataSO> _onHovered;
+        Outline _selectionOutlineEffect;
 
         private void Awake()
         {
             ResolveReferences();
+            HideSkillNameLabel();
             PrepareForCatalogHost();
         }
 
@@ -42,10 +47,47 @@ namespace Logic.Scripts.GameDomain.MVC.ExplorationLoadout
             WireButton();
         }
 
-        public void SetCatalogSelected(bool selected)
+        public void SetCatalogSelected(bool selected) => SetSelectionOutline(selected);
+
+        public void SetSlotSelected(bool selected) => SetSelectionOutline(selected);
+
+        void SetSelectionOutline(bool selected)
         {
+            EnsureSelectionOutline();
             if (_catalogSelectionOutline != null)
                 _catalogSelectionOutline.enabled = selected;
+            if (_selectionOutlineEffect != null)
+                _selectionOutlineEffect.enabled = selected;
+        }
+
+        void EnsureSelectionOutline()
+        {
+            if (_catalogSelectionOutline == null)
+            {
+                _catalogSelectionOutline = FindChildImage("img_SelectionOutline")
+                    ?? FindChildImage("SelectionOutline")
+                    ?? FindChildImage("Selected");
+            }
+
+            if (_selectionOutlineEffect == null && _shapeImage != null)
+            {
+                _selectionOutlineEffect = _shapeImage.GetComponent<Outline>();
+                if (_selectionOutlineEffect == null)
+                    _selectionOutlineEffect = _shapeImage.gameObject.AddComponent<Outline>();
+                _selectionOutlineEffect.effectColor = new Color(1f, 0.85f, 0.2f, 0.95f);
+                _selectionOutlineEffect.effectDistance = new Vector2(3f, -3f);
+                _selectionOutlineEffect.enabled = false;
+            }
+
+            if (_catalogSelectionOutline != null)
+                _catalogSelectionOutline.enabled = false;
+        }
+
+        public void PlayInvalidAssignShake()
+        {
+            if (transform is not RectTransform rect) return;
+            DOTween.Kill(rect, true);
+            rect.DOShakeAnchorPos(0.35f, strength: 18f, vibrato: 16, randomness: 60f, fadeOut: true);
         }
 
         public void ApplySkillVisual(SkillDataSO skill, ISkillVisualCatalog catalog)
@@ -85,7 +127,29 @@ namespace Logic.Scripts.GameDomain.MVC.ExplorationLoadout
             if (_button == null) _button = GetComponentInChildren<Button>(true);
         }
 
-        /// <summary>SkillFrame.prefab root may ship at scale zero for layout authoring; restore visible scale when spawned in the catalog.</summary>
+        void HideSkillNameLabel()
+        {
+            if (_skillNameText != null)
+            {
+                _skillNameText.gameObject.SetActive(false);
+                return;
+            }
+
+            foreach (TMP_Text text in GetComponentsInChildren<TMP_Text>(true))
+            {
+                if (text == null) continue;
+                string objectName = text.gameObject.name;
+                if (objectName.Equals("Name", StringComparison.OrdinalIgnoreCase)
+                    || objectName.Equals("SkillName", StringComparison.OrdinalIgnoreCase)
+                    || objectName.Equals("txt_Name", StringComparison.OrdinalIgnoreCase)
+                    || objectName.Equals("txt_SkillName", StringComparison.OrdinalIgnoreCase))
+                {
+                    text.gameObject.SetActive(false);
+                }
+            }
+        }
+
+        /// <summary>SkillFrame.prefab root may ship at scale zero for layout authoring; restore visible scale when spawned.</summary>
         void PrepareForCatalogHost()
         {
             if (transform is RectTransform rt)

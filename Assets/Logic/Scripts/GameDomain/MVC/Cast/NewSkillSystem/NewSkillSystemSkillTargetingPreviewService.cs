@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Logic.Scripts.GameDomain.MVC.Environment.Laki;
 using Logic.Scripts.GameDomain.MVC.Shared;
+using Logic.Scripts.GameDomain.Services.Skills;
 using Logic.Scripts.Services.UpdateService;
 using UnityEngine;
 
@@ -59,6 +60,12 @@ namespace Logic.Scripts.GameDomain.MVC.Cast.NewSkillSystem {
                     break;
                 case NewSkillSystemAimHighlightKind.SelfFootAnchor:
                     SyncSelfFootAimRoot();
+                    if (_skill != null && SkillCastRules.IsRangelessSelfBuff(_skill))
+                    {
+                        IPlayableUnit presentation = SkillCastPresentationTarget.ResolvePlayable(_playable, _skill);
+                        if (presentation is IEffectable beneficiary)
+                            next.Add(beneficiary);
+                    }
                     break;
             }
             ApplyHighlightDiff(next);
@@ -90,10 +97,11 @@ namespace Logic.Scripts.GameDomain.MVC.Cast.NewSkillSystem {
 
         private void SyncSelfFootAimRoot() {
             if (_aimVisualRoot == null || _skill == null || _playable == null) return;
-            Vector3 foot = NewSkillSystemSkillAimWorld.GetSelfCastFootWorld(_playable);
+            Vector3 foot = SkillCastPresentationTarget.GetSelfCastFootWorld(_playable, _skill);
             _aimVisualRoot.position = foot;
-            if (_playable.UnitViewGO != null) {
-                Vector3 f = Vector3.ProjectOnPlane(_playable.UnitViewGO.transform.forward, Vector3.up);
+            Transform presentation = SkillCastPresentationTarget.GetSelfCastTransform(_playable, _skill);
+            if (presentation != null) {
+                Vector3 f = Vector3.ProjectOnPlane(presentation.forward, Vector3.up);
                 if (f.sqrMagnitude > 1e-6f)
                     _aimVisualRoot.rotation = Quaternion.LookRotation(f.normalized, Vector3.up);
             }

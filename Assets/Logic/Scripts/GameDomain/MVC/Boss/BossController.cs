@@ -92,6 +92,15 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
         }
 
         public void Initialize() {
+            TryUnregisterFromUpdate();
+            if (_bossView != null) {
+                try { DisableCallbacks(); } catch { }
+                Object.Destroy(_bossView.gameObject);
+                _bossView = null;
+                _bossRigidbody = null;
+                _bossTransform = null;
+            }
+
             _isCasting = false;
             _remainingCastTurns = 0;
             _pendingCasts = new System.Collections.Generic.List<PendingCast>();

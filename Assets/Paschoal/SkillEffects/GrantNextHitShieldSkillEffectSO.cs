@@ -7,7 +7,7 @@ public class GrantNextHitShieldSkillEffectSO : SkillEffectSO
 {
     public override void Execute(in SkillExecutionContext context)
     {
-        if (context.Caster is INextHitDamageShield shield)
+        if (context.EffectRecipient is INextHitDamageShield shield)
             shield.GrantNextHitShield();
     }
 }

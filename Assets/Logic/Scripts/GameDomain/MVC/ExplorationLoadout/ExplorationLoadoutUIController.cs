@@ -17,6 +17,7 @@ public class ExplorationLoadoutUIController : IExplorationLoadoutUIController
     private SkillLoadoutUnitType _selectedUnitType = SkillLoadoutUnitType.Player;
     private int _selectedSlotIndex;
     private SkillDataSO _selectedCatalogSkill;
+    private bool _slotArmedForAssign;
     private ExplorationLoadoutSkillFilter _catalogFilter = ExplorationLoadoutSkillFilter.All;
     private ExplorationLoadoutDivinityFilter _divinityFilter = ExplorationLoadoutDivinityFilter.All;
     private bool _modalGateActive;
@@ -43,7 +44,6 @@ public class ExplorationLoadoutUIController : IExplorationLoadoutUIController
             OnCatalogFilterChanged, OnDivinityFilterChanged);
         RebuildCatalog();
         RefreshSlots();
-        _view.SetSelectedSlot(_selectedUnitType, _selectedSlotIndex);
         if (_loadoutService != null)
             _loadoutService.OnLoadoutChanged += OnLoadoutChanged;
     }
@@ -71,6 +71,8 @@ public class ExplorationLoadoutUIController : IExplorationLoadoutUIController
     {
         if (_view == null || !_view.IsVisible) return;
         _view.SetVisible(false);
+        _slotArmedForAssign = false;
+        _selectedCatalogSkill = null;
         if (_modalGateActive)
         {
             ExplorationInteractInputGate.Pop();
@@ -119,14 +121,17 @@ public class ExplorationLoadoutUIController : IExplorationLoadoutUIController
     {
         if (_view == null || _loadoutService == null) return;
 
-        for (int i = 0; i < _loadoutService.SlotCount; i++)
-        {
-            _loadoutService.TryGetSelectedSkill(SkillLoadoutUnitType.Player, i, out SkillDataSO playerSkill);
-            _view.SetSlotData(SkillLoadoutUnitType.Player, i, playerSkill);
+        int slotCount = _loadoutService.SlotCount;
+        _view.RebuildLoadoutSlots(slotCount, GetSkillForLoadoutSlot);
+        if (_slotArmedForAssign)
+            _view.SetSelectedSlot(_selectedUnitType, _selectedSlotIndex);
+    }
 
-            _loadoutService.TryGetSelectedSkill(SkillLoadoutUnitType.Book, i, out SkillDataSO bookSkill);
-            _view.SetSlotData(SkillLoadoutUnitType.Book, i, bookSkill);
-        }
+    private SkillDataSO GetSkillForLoadoutSlot(SkillLoadoutUnitType unitType, int slotIndex)
+    {
+        if (_loadoutService == null) return null;
+        _loadoutService.TryGetSelectedSkill(unitType, slotIndex, out SkillDataSO skill);
+        return skill;
     }
 
     private void OnCatalogSkillSelected(SkillDataSO skill)
@@ -135,30 +140,43 @@ public class ExplorationLoadoutUIController : IExplorationLoadoutUIController
 
         _selectedCatalogSkill = skill;
         _view?.SetSelectedCatalogSkill(skill);
-        _view?.ShowSkillDetails(skill);
+
+        if (_slotArmedForAssign)
+        {
+            TryAssignSelectedCatalogSkillToSlot();
+            return;
+        }
+
+        _slotArmedForAssign = false;
+        _view?.ClearSlotSelection();
         GeneralSfxFeedback.PlayMenuClick(_audioService);
+        _view?.ShowSkillDetails(skill);
     }
 
-    private void TryAssignSelectedCatalogSkillToSlot()
+    private bool TryAssignSelectedCatalogSkillToSlot()
     {
-        if (_loadoutService == null || _selectedCatalogSkill == null) return;
+        if (_loadoutService == null || _selectedCatalogSkill == null) return false;
 
         if (!_loadoutService.CanAssignSkillToSlot(_selectedUnitType, _selectedSlotIndex, _selectedCatalogSkill))
         {
             PlayInvalidAssignFeedback();
-            return;
+            return false;
         }
 
         if (_loadoutService.SetSlotSkill(_selectedUnitType, _selectedSlotIndex, _selectedCatalogSkill))
         {
             GeneralSfxFeedback.PlayMenuClick(_audioService);
             _view?.ShowSkillDetails(_selectedCatalogSkill);
+            return true;
         }
+
+        return false;
     }
 
     private void PlayInvalidAssignFeedback()
     {
-        _view?.PlayInvalidAssignFeedback();
+        _slotArmedForAssign = false;
+        _view?.PlayInvalidAssignFeedback(_selectedUnitType, _selectedSlotIndex);
         _view?.ClearSlotSelection();
         if (EventSystem.current != null)
             EventSystem.current.SetSelectedGameObject(null);
@@ -168,6 +186,7 @@ public class ExplorationLoadoutUIController : IExplorationLoadoutUIController
     {
         _selectedUnitType = SkillLoadoutUnitType.Player;
         _selectedSlotIndex = slotIndex;
+        _slotArmedForAssign = true;
         _view?.SetSelectedSlot(_selectedUnitType, _selectedSlotIndex);
 
         if (_selectedCatalogSkill != null)
@@ -175,6 +194,9 @@ public class ExplorationLoadoutUIController : IExplorationLoadoutUIController
             TryAssignSelectedCatalogSkillToSlot();
             return;
         }
+
+        _selectedCatalogSkill = null;
+        _view?.SetSelectedCatalogSkill(null);
 
         if (_loadoutService != null && _loadoutService.TryGetSelectedSkill(_selectedUnitType, slotIndex, out SkillDataSO skill))
             _view?.ShowSkillDetails(skill);
@@ -184,6 +206,7 @@ public class ExplorationLoadoutUIController : IExplorationLoadoutUIController
     {
         _selectedUnitType = SkillLoadoutUnitType.Book;
         _selectedSlotIndex = slotIndex;
+        _slotArmedForAssign = true;
         _view?.SetSelectedSlot(_selectedUnitType, _selectedSlotIndex);
 
         if (_selectedCatalogSkill != null)
@@ -191,6 +214,9 @@ public class ExplorationLoadoutUIController : IExplorationLoadoutUIController
             TryAssignSelectedCatalogSkillToSlot();
             return;
         }
+
+        _selectedCatalogSkill = null;
+        _view?.SetSelectedCatalogSkill(null);
 
         if (_loadoutService != null && _loadoutService.TryGetSelectedSkill(_selectedUnitType, slotIndex, out SkillDataSO skill))
             _view?.ShowSkillDetails(skill);

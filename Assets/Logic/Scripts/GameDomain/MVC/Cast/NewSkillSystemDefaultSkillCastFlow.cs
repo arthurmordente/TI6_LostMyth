@@ -1,3 +1,4 @@
+using Logic.Scripts.GameDomain.MVC.Book;
 using Logic.Scripts.GameDomain.MVC.Cast.NewSkillSystem;
 using Logic.Scripts.GameDomain.MVC.Environment;
 using Logic.Scripts.GameDomain.MVC.Nara;
@@ -8,13 +9,18 @@ using UnityEngine;
 public class NewSkillSystemDefaultSkillCastFlow : ISkillCastFlow
 {
     private readonly INewSkillSystemSkillTargetingPreviewService _targetingPreview;
+    private readonly INaraController _nara;
 
     private SkillDataSO _currentSkill;
     private GameObject _currentPreview;
     private Transform _fallbackTarget;
 
-    public NewSkillSystemDefaultSkillCastFlow(INewSkillSystemSkillTargetingPreviewService targetingPreview) {
+    public NewSkillSystemDefaultSkillCastFlow(
+        INewSkillSystemSkillTargetingPreviewService targetingPreview,
+        INaraController nara)
+    {
         _targetingPreview = targetingPreview;
+        _nara = nara;
     }
 
     public bool CanHandleCaster(IPlayableUnit caster)
@@ -30,7 +36,7 @@ public class NewSkillSystemDefaultSkillCastFlow : ISkillCastFlow
 
     public void InitEntryPoint(INaraController naraController)
     {
-        // No setup required for ScriptableObject-driven casts.
+        SkillCastPresentationTarget.Bind(naraController ?? _nara);
     }
 
     public bool TryPrepareCast(int index, IPlayableUnit caster, out SkillCastPrepareResult prepareResult)
@@ -57,8 +63,10 @@ public class NewSkillSystemDefaultSkillCastFlow : ISkillCastFlow
         }
         else if (_currentSkill.CastType == SkillCastType.Self && _currentSkill.SelfAimPrefab != null)
         {
-            Vector3 foot = NewSkillSystemSkillAimWorld.GetSelfCastFootWorld(caster);
-            _currentPreview = Object.Instantiate(_currentSkill.SelfAimPrefab, foot, caster.UnitViewGO.transform.rotation);
+            Vector3 foot = SkillCastPresentationTarget.GetSelfCastFootWorld(caster, _currentSkill);
+            Transform presentation = SkillCastPresentationTarget.GetSelfCastTransform(caster, _currentSkill);
+            Quaternion rotation = presentation != null ? presentation.rotation : caster.UnitViewGO.transform.rotation;
+            _currentPreview = Object.Instantiate(_currentSkill.SelfAimPrefab, foot, rotation);
         }
 
         EnsureFallbackTarget(caster);
@@ -95,8 +103,10 @@ public class NewSkillSystemDefaultSkillCastFlow : ISkillCastFlow
         }
         else if (_currentSkill.CastType == SkillCastType.Self && _currentSkill.SelfCastPrefab != null)
         {
-            Vector3 p = NewSkillSystemSkillAimWorld.GetSelfCastFootWorld(caster);
-            var vfx = Object.Instantiate(_currentSkill.SelfCastPrefab, p, caster.UnitViewGO != null ? caster.UnitViewGO.transform.rotation : Quaternion.identity);
+            Vector3 p = SkillCastPresentationTarget.GetSelfCastFootWorld(caster, _currentSkill);
+            Transform presentation = SkillCastPresentationTarget.GetSelfCastTransform(caster, _currentSkill);
+            Quaternion rotation = presentation != null ? presentation.rotation : Quaternion.identity;
+            var vfx = Object.Instantiate(_currentSkill.SelfCastPrefab, p, rotation);
             SkillCastVfxUtility.ConfigureSpawnedInstance(vfx, persistInScene: false, destroyAfterSeconds: 0f);
         }
 
@@ -131,7 +141,7 @@ public class NewSkillSystemDefaultSkillCastFlow : ISkillCastFlow
         Vector3 point;
         if (_currentSkill != null && _currentSkill.CastType == SkillCastType.Self)
         {
-            point = NewSkillSystemSkillAimWorld.GetSelfCastFootWorld(caster);
+            point = SkillCastPresentationTarget.GetSelfCastFootWorld(caster, _currentSkill);
         }
         else if (_currentSkill != null && _currentSkill.CastType == SkillCastType.Area)
         {

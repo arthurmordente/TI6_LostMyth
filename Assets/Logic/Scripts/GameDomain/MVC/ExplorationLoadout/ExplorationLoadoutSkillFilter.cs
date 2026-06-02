@@ -58,5 +58,17 @@ namespace Logic.Scripts.GameDomain.MVC.ExplorationLoadout
                 default: return "Todas";
             }
         }
+
+        public static string DisplayLabel(SkillType skillType)
+        {
+            switch (skillType)
+            {
+                case SkillType.Damage: return "Dano";
+                case SkillType.SelfBuff: return "Buff";
+                case SkillType.Movement: return "Movimento";
+                case SkillType.Passive: return "Passiva";
+                default: return "-";
+            }
+        }
     }
 }
