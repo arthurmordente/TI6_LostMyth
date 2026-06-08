@@ -273,6 +273,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: AudioService
       objectReference: {fileID: 0}
+    - target: {fileID: 6063683956242518707, guid: 2b2a91279a677b24f9ee2d6b552eb06a, type: 3}
+      propertyPath: OutputAudioMixerGroup
+      value: 
+      objectReference: {fileID: -7011799180500644107, guid: 51e7ac47bcff1ab42b31375feb2b7b81, type: 2}
     - target: {fileID: 6365749893733696452, guid: 2b2a91279a677b24f9ee2d6b552eb06a, type: 3}
       propertyPath: m_LocalPosition.x
       value: 312
@@ -317,6 +321,10 @@ PrefabInstance:
       propertyPath: m_Volume
       value: 0.33
       objectReference: {fileID: 0}
+    - target: {fileID: 7408033819164889468, guid: 2b2a91279a677b24f9ee2d6b552eb06a, type: 3}
+      propertyPath: OutputAudioMixerGroup
+      value: 
+      objectReference: {fileID: -4319005328212555198, guid: 51e7ac47bcff1ab42b31375feb2b7b81, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
