@@ -8,11 +8,21 @@ Este documento descreve o inventario atual de animacoes e como as maquinas de es
 - `Erza/Erzahler` e o nome atual de gameplay/art.
 - Neste documento, `NaraController/NaraView` representam a entidade `Erza`.
 
+## Controllers FINAL (3 personagens)
+
+| Personagem | Controller(s) gerados pelo pipeline |
+|------------|-------------------------------------|
+| **Erzahler** | `ERZ_ErzahlerBook_FINAL`, `ERZ_Erzahler_FINAL`, `ERZ_Book_FINAL` |
+| **Laki** | `LKI_Animator_FINAL` |
+| **Hocari** | `HOC_Hocari_FINAL` |
+
+Fonte de caminhos: `AnimationControllerPaths.cs`. Controllers sem sufixo `_FINAL` são legado.
+
 ## Assets e Controllers
 
 ### Player Erza (sem clone ativo)
 
-- Controller: `Assets/Art/Animations/erz+book/ERZ_ErzahlerBook.controller`
+- Controller: `Assets/Art/Animations/erz+book/ERZ_ErzahlerBook_FINAL.controller`
 - Clips (pasta `erz+book`):
   - `ErzahlerArmature_Erzahler+Book_Walk_1.anim`
   - `ErzahlerArmature_Erzahler+Book_Walk_2.anim`
@@ -23,7 +33,7 @@ Este documento descreve o inventario atual de animacoes e como as maquinas de es
 
 ### Player Erza (com clone ativo)
 
-- Controller: `Assets/Art/Animations/Erzahler/ERZ_Erzahler.controller`
+- Controller: `Assets/Art/Animations/Erzahler/ERZ_Erzahler_FINAL.controller`
 - Clips (pasta `Erzahler`):
   - `ErzahlerArmature_Erzahler_Idle_1.anim`
   - `ErzahlerArmature_Erzahler_Idle_2.anim`
@@ -36,7 +46,7 @@ Este documento descreve o inventario atual de animacoes e como as maquinas de es
 
 ### Clone Book (Book of Cagliostro)
 
-- Controller: `Assets/Art/Animations/Book/ERZ_Book.controller`
+- Controller: `Assets/Art/Animations/Book/ERZ_Book_FINAL.controller`
 - Clips (pasta `Book`):
   - `ErzahlerArmature_Book_Idle_1.anim`
   - `ErzahlerArmature_Book_Idle_2.anim`
@@ -47,7 +57,7 @@ Este documento descreve o inventario atual de animacoes e como as maquinas de es
 
 ### Laki
 
-- Controller: `Assets/Art/Animations/MadamLaki/LKI_Animator.controller`
+- Controller: `Assets/Art/Animations/MadamLaki/LKI_Animator_FINAL.controller`
 - Clips:
   - `Laki_Idle_1.anim`
   - `Laki_Idle_2_Prep.anim`, `Laki_Idle_2_Loop.anim`, `Laki_Idle_2_Finish.anim`
@@ -105,7 +115,7 @@ Fonte: `Assets/Logic/Scripts/GameDomain/MVC/Nara/Animation/ErzahlerAnimatorParam
 
 Fonte: `Assets/Logic/Scripts/GameDomain/MVC/Nara/Editor/ErzahlerAnimatorControllerBuilder.cs`
 
-### ERZ_ErzahlerBook (player default, sem clone)
+### ERZ_ErzahlerBook_FINAL (player default, sem clone)
 
 - Estados principais:
   - `Idle` (usa `Walk_1` com `speed = 0`)
@@ -123,7 +133,7 @@ Fonte: `Assets/Logic/Scripts/GameDomain/MVC/Nara/Editor/ErzahlerAnimatorControll
   - `FastConjuring -> Idle` por exit time
   - `SlowConjuring`: `Prep -> Loop` por `ConjuringLoop = true`, `Loop -> Finish` por `ConjuringFinish`, `Finish` sai por exit transition
 
-### ERZ_Erzahler (player com clone ativo)
+### ERZ_Erzahler_FINAL (player com clone ativo)
 
 - Estados principais:
   - `Idle_1`, `Idle_2`
@@ -141,7 +151,7 @@ Fonte: `Assets/Logic/Scripts/GameDomain/MVC/Nara/Editor/ErzahlerAnimatorControll
   - `FastConjuring -> Idle_1` por exit time
   - `SlowConjuring`: `Prep -> Loop` por `ConjuringLoop = true`, `Loop -> Finish` por `ConjuringFinish`, `Finish` sai por exit transition
 
-### ERZ_Book (clone deployado)
+### ERZ_Book_FINAL (clone deployado)
 
 - Estados principais:
   - `Idle_1`, `Idle_2`, `Idle_3`
@@ -158,7 +168,7 @@ Fonte: `Assets/Logic/Scripts/GameDomain/MVC/Nara/Editor/ErzahlerAnimatorControll
   - `AnyState -> Ability` por trigger `Ability`
   - `Ability -> Idle_1` por exit time
 
-### LKI_Animator (Laki)
+### LKI_Animator_FINAL (Laki)
 
 - Estados principais:
   - `Idle_1`
@@ -222,8 +232,8 @@ Implementacao do swap:
 - `ErzahlerPlayerIdleController` (auto no `NaraView` junto do driver)
 - A cada `_intervalSeconds` (default 8s), se **parado**, **sem cast** e com controllers Erza:
   - `IdleVariant` alterna `1 <-> 2` via `ErzahlerPlayerAnimatorDriver.SetIdleVariant`
-- **So tem efeito** no controller solo `ERZ_Erzahler` (`Idle_1` / `Idle_2`)
-- Com livro (`ERZ_ErzahlerBook`) ha um unico estado Idle (sem segunda variante no builder)
+- **So tem efeito** no controller solo `ERZ_Erzahler_FINAL` (`Idle_1` / `Idle_2`)
+- Com livro (`ERZ_ErzahlerBook_FINAL`) ha um unico estado Idle (sem segunda variante no builder)
 
 ## 4) Clone Book
 
@@ -236,7 +246,7 @@ Implementacao do swap:
 
 ## 5) Laki (dados + ataques comuns apenas)
 
-Controller: `LKI_Animator` (`Idle_1`, performance `Idle_2`/`Idle_3`, `Ability`).
+Controller: `LKI_Animator_FINAL` (`Idle_1`, performance `Idle_2`/`Idle_3`, `Ability`).
 
 **Nao usar** `MinigameRuntimeService` / Suit / Naipe para animacao da Laki.
 
@@ -262,40 +272,42 @@ Controller: `LKI_Animator` (`Idle_1`, performance `Idle_2`/`Idle_3`, `Ability`).
 
 ### Rebuild Laki (menu Unity)
 
-- `TI6 > Animation > Build > LKI_Animator (Laki boss)` — so este controller + slot `LakiBoss` no SO
-- Outros controllers têm entradas separadas em `TI6 > Animation > Build/...`
+- Export: `TI6 > Animation > 1 Export FBX Clips > Laki`
+- Build: `TI6 > Animation > 2 Build State Machines > Laki`
+
+Params extra Laki: `HitReaction`, `BetWon`, `BetLost`, `Death`, `ThrowDiePrep/Loop/Finish`.  
+Dice: `LakiBossAnimationBridge` escuta `DiceAttackRuntimeService.OnDiceAttackBegan/Ended`.  
+Clips sem hook: ver `AnimationInventory_UnwiredClips.md`.
 
 Fonte: `LakiBossAnimatorView.cs`, `LakiBossAnimationBridge.cs`
 
-## 6) Hocari (boss legado — `1HOC_Hocari.controller`)
+## 6) Hocari (`HOC_Hocari_FINAL.controller`)
 
-Controller em `Assets/Art/Animations/Hocari/1HOC_Hocari.controller` (nao gerado pelo builder Erza/Laki).
+Export: `TI6 > Animation > 1 Export FBX Clips > Hocari`  
+Build: `TI6 > Animation > 2 Build State Machines > Hocari`  
+Clips: `HocariAnimations2.fbx` (fase 1), `HocariAnimations1.fbx` (fase 2) → `Art/Animations/Hocari/Exported/`  
+Runtime: `HocariBossAnimationBridge`, `HocariBossAnimatorBootstrap` no prefab `HokariBoss`.
 
 ### Parametros (Animator)
 
-| Parametro | Tipo | Uso no codigo (`BossView` / `BossController`) |
-|-----------|------|--------------------------------------------------|
-| `AttackId` | int | Escolhe sub-ataque (0 Protean, 1 Circle, 2 FeatherLines, 3/4 Wing L/R) |
-| `AttackPrep` | trigger | Inicio do telegraph de ataque |
-| `AttackLoop` | bool | Mantem loop do telegraph ate resolver |
-| `AttackFinish` | trigger | Fecha ataque no turno de resolucao |
-| `Moving` | bool | Locomotion |
-| `MovePrep` / `MoveFinish` | trigger | Deslocamento por turno |
-| `Idle` | trigger | Volta ao idle (`BossResetStateBehaviour` no fim dos ataques) |
+| Parametro | Tipo | Uso no codigo |
+|-----------|------|---------------|
+| `AttackId` | int | 0 Protean, 1 Circle, 2 SwordLines, 3/4 Wing L/R (mesmo mapeamento de `BossController.ResolveAnimationIdFor`) |
+| `BossPhase` | int | 0 fase 1, 1 fase 2 (apos `PhaseTransition`) |
+| `PhaseTransition` | trigger | `BossController.ApplyBossPhaseChangeSync` |
+| `Hit` / `Death` | trigger | Dano / morte do boss |
+| (+ params legados `AttackPrep`, `AttackLoop`, `Moving`, `Idle`, etc.) | | `BossView` |
 
-### Estrutura da maquina (alto nivel)
+### Estrutura
 
-- **Idle de combate**: `HOC_CombatIdle` (+ variantes Phase2 / defesa L/R com Prep-Loop-Finish)
-- **Movimento**: sub-FSM `HOC_Movement` (Prep / Loop / Finish)
-- **Ataques**: sub-FSM `HOC_Attacks` → `HOC_AttackChooser` → por `AttackId`:
-  - `HOC_Protean`, `HOC_Circle`, `HOC_Swords` (FeatherLines), `HOC_WingsLeft`, `HOC_WingsRight`
-  - Cada ataque: Prep → Loop (`AttackLoop`) → Finish (`AttackFinish`) → reset
-- **Reset**: estado com `BossResetStateBehaviour` limpa flags e dispara `Idle`
-- Clips extras: `HOC_IdleDefaultRest`, `HOC_PhaseTransition*`, `HOC_Phase2*` (fase 2 no asset, wiring no controller)
+- `P1_CombatIdle` / `P2_CombatIdle` por `BossPhase`
+- `HOC_Movement`, `HOC_PhaseTransition` (Finish_2 + `HocariPhaseTransitionBehaviour`)
+- `HOC_Attacks` com chooser dual-phase (P1/P2 por ataque)
+- Legado (nao usar): `1HOC_Hocari.controller`, `HOC_AnimatorController.controller`, `HOC_Hocari_Unified.controller` (sem sufixo `_FINAL`)
 
 ### Diferenca vs Laki
 
-| | Hocari | Laki (`LKI_Animator`) |
+| | Hocari (`HOC_Hocari_FINAL`) | Laki (`LKI_Animator_FINAL`) |
 |---|--------|----------------------|
 | Telegraph ataque | `AttackId` + Prep/Loop/Finish | `Ability` one-shot |
 | Idle de turno | `CombatIdle` fixo no controller | Sorteio `Idle_2` / `Idle_3` por turno |
@@ -304,8 +316,11 @@ Controller em `Assets/Art/Animations/Hocari/1HOC_Hocari.controller` (nao gerado 
 ## Bootstrap e carregamento automatico
 
 - Builder/editor:
-  - `TI6/Animation/Build Erzahler & Laki Animator Controllers`
-  - Auto-build em load se `ERZ_ErzahlerBook.controller` nao existir
+  - Export: `TI6/Animation/1 Export FBX Clips/...`
+  - Build: `TI6/Animation/2 Build State Machines/...`
+  - Clips sem gameplay: `AnimationInventory_UnwiredClips.md`
+  - Auto-build em load se `ERZ_ErzahlerBook_FINAL.controller` nao existir (so controllers Erza+Laki, sem export)
+  - Nomes canonicos: `AnimationControllerPaths.cs`
 - SO de controllers:
   - `ErzahlerAnimatorControllers.asset`
   - copia em `Assets/Resources/ErzahlerAnimatorControllers.asset`

@@ -116,7 +116,8 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
             else {
                 _naraMovementController.Move(dir, _naraConfiguration.MoveSpeed, _naraConfiguration.RotationSpeed);
                 bool willMove = movementAllowed && dir.sqrMagnitude > 0.0001f && _naraConfiguration.MoveSpeed > 0f;
-                _naraView?.SetMoving(willMove);
+                bool running = willMove && _naraConfiguration.MoveSpeed >= _naraConfiguration.JogSpeedThreshold;
+                _naraView?.SetMoving(willMove, running);
                 if (willMove)
                     StartFootstepSfx();
                 else
@@ -316,6 +317,7 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
                     flash.TriggerFlash();
                 }
                 _audioService?.PlaySfx(SfxIds.Erza_Atingida, AudioChannelType.SfxCombat);
+                _naraView?.PlayHitReaction();
             }
 
             _gamePlayUiController?.OnPlayerHealthUpdate(_naraData.ActualHealth, _naraConfiguration.MaxHealth);
@@ -339,8 +341,8 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
             _audioService?.StopLoopingSfx(AudioChannelType.SfxAmbience);
         }
 
-        public void PlayAttackType(int type) {
-            _naraView?.SetAttackType(type);
+        public void PlayAttackType(int type, SkillCastAnimationStyle style = SkillCastAnimationStyle.Slow) {
+            _naraView?.SetAttackType(type, style);
         }
 
         public void PlayAttackType1() {
@@ -539,6 +541,10 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
         }
 
         public void SetBookCloneDeployed(bool cloneDeployed) {
+            if (cloneDeployed)
+                _naraView?.PlayDivideDeployAnimation();
+            else
+                _naraView?.PlayDivideRecallAnimation();
             _naraView?.SetBookCloneDeployed(cloneDeployed);
         }
 

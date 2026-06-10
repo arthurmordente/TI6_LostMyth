@@ -299,8 +299,14 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
         }
 
         void PlayLakiMinigameResolutionSfx(bool playerWon) {
-            if (!BossViewUsesLakiAnimator(_bossView)) return;
-            PlayLakiBossSfx(playerWon ? SfxIds.Laki_Perdendo : SfxIds.Laki_Ganhando);
+            Laki.LakiArenaPresentationEvents.NotifyBetResolved(playerWon);
+            if (BossViewUsesLakiAnimator(_bossView)) {
+                PlayLakiBossSfx(playerWon ? SfxIds.Laki_Perdendo : SfxIds.Laki_Ganhando);
+                ResolveLakiAnimatorView(_bossView)?.PlayBetReaction(!playerWon);
+                return;
+            }
+
+            ResolveHocariAnimationBridge(_bossView)?.PlayHit();
         }
 
         void PlayLakiBossSfx(string sfxId) {
@@ -335,6 +341,16 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
             if (bossView == null) return false;
             return bossView.GetComponentInChildren<Laki.LakiBossAnimationBridge>(true) != null
                 || bossView.GetComponentInChildren<Laki.LakiBossAnimatorBootstrap>(true) != null;
+        }
+
+        static Laki.LakiBossAnimatorView ResolveLakiAnimatorView(BossView bossView) {
+            if (bossView == null) return null;
+            return bossView.GetComponentInChildren<Laki.LakiBossAnimatorView>(true);
+        }
+
+        static Hocari.HocariBossAnimationBridge ResolveHocariAnimationBridge(BossView bossView) {
+            if (bossView == null) return null;
+            return bossView.GetComponentInChildren<Hocari.HocariBossAnimationBridge>(true);
         }
 
         async Task RunBossResolveTurnCoreAsync(bool pauseThisTurn) {
@@ -824,6 +840,10 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
 
             if (applied <= 0) return;
             PlayLakiBossSfx(SfxIds.Laki_Atingida);
+            if (BossViewUsesLakiAnimator(_bossView))
+                ResolveLakiAnimatorView(_bossView)?.PlayHitReaction();
+            else
+                ResolveHocariAnimationBridge(_bossView)?.PlayHit();
             if (_bossView != null) {
                 var flash = _bossView.GetComponent<DamageFlashPresenter>();
                 if (flash == null) flash = _bossView.gameObject.AddComponent<DamageFlashPresenter>();
@@ -838,6 +858,10 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
             // Handle death immediately
             if (_bossData.ActualHealth <= 0) {
                 PlayLakiBossSfx(SfxIds.Laki_Morrer);
+                if (BossViewUsesLakiAnimator(_bossView))
+                    ResolveLakiAnimatorView(_bossView)?.PlayDeath();
+                else
+                    ResolveHocariAnimationBridge(_bossView)?.PlayDeath();
                 _turnMoveDistanceBudget = 0f;
                 _movementAllowed = false;
                 _movementGatePending = false;
@@ -964,6 +988,9 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
 
             PlayLakiBossSfx(SfxIds.Laki_Reclamando);
             PlayPhaseTransitionAnimation();
+            var hocariBridge = ResolveHocariAnimationBridge(_bossView);
+            if (hocariBridge != null && hocariBridge.IsActive)
+                hocariBridge.SetBossPhase(Mathf.Clamp(newIndex, 0, 1));
             _currentPhaseIndex = newIndex;
             LakiBossShieldRuntime.NotifyBossPhaseChanged(_bossPhases, newIndex, maxHp);
             LakiArenaTileDispositionRuntime.NotifyBossPhaseChanged(newIndex);

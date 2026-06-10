@@ -29,6 +29,7 @@ public class CastController : ICastController {
     private int _currentAbilityIndex = -1;
     private int _currentAbilityCost = 0;
     private int _currentAnimatorAttackType = 1;
+    private SkillCastAnimationStyle _currentCastAnimationStyle = SkillCastAnimationStyle.Slow;
 
     public Transform PlayerTransform;
 
@@ -95,6 +96,7 @@ public class CastController : ICastController {
         _currentAbilityIndex = prepareResult.AbilityIndex;
         _currentAbilityCost = isBook ? 0 : prepareResult.Cost;
         _currentAnimatorAttackType = prepareResult.AnimatorAttackType;
+        _currentCastAnimationStyle = prepareResult.CastAnimationStyle;
 
         var loadout = caster.UnitViewGO != null ? caster.UnitViewGO.GetComponent<NewSkillSystemSkillLoadout>() : null;
         SkillDataSO skillForPreview = null;
@@ -104,8 +106,7 @@ public class CastController : ICastController {
         bool showManaPreview = !isBook && !_cheatController.InfinityCast;
         _gamePlayUiController?.BeginSkillCastAimPreview(caster, skillForPreview, prepareResult.Cost, showManaPreview && ap != null, ap?.Current ?? 0, ap?.Max ?? 0);
 
-        int attackType = prepareResult.AnimatorAttackType;
-        caster.PlayAttackType(attackType);
+        caster.PlayAttackType(prepareResult.AnimatorAttackType, prepareResult.CastAnimationStyle);
         return true;
     }
 
@@ -120,6 +121,7 @@ public class CastController : ICastController {
         _currentAbilityIndex = -1;
         _currentAbilityCost = 0;
         _currentAnimatorAttackType = 1;
+        _currentCastAnimationStyle = SkillCastAnimationStyle.Slow;
     }
 
     public void UseAbility(IPlayableUnit caster) {

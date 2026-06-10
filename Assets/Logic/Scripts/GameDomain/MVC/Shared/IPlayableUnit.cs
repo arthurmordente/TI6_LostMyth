@@ -1,5 +1,6 @@
 using System;
 using Logic.Scripts.GameDomain.MVC.Abilitys;
+using Logic.Scripts.GameDomain.Services.Skills;
 using Logic.Scripts.Turns;
 using UnityEngine;
 
@@ -21,7 +22,7 @@ namespace Logic.Scripts.GameDomain.MVC.Shared
         void UnfreezeInputs();
         void StopMovingAnim();
 
-        void PlayAttackType(int type);
+        void PlayAttackType(int type, SkillCastAnimationStyle style = SkillCastAnimationStyle.Slow);
         void TriggerExecute();
         void ResetExecuteTrigger();
         void TriggerCancel();

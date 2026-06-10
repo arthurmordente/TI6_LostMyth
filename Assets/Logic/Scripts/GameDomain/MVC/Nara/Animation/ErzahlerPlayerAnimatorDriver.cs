@@ -116,6 +116,61 @@ namespace Logic.Scripts.GameDomain.MVC.Nara.Animation
             _animator.SetTrigger(ErzahlerAnimatorParams.ConjuringCancel);
         }
 
+        public void PlayConjuringFail()
+        {
+            if (_animator == null || !UsesErzahlerControllers) return;
+            if (!HasAnimatorParameter(ErzahlerAnimatorParams.ConjuringFail)) return;
+            _animator.SetTrigger(ErzahlerAnimatorParams.ConjuringFail);
+        }
+
+        public void PlayDeath()
+        {
+            if (_animator == null || !UsesErzahlerControllers) return;
+            if (!HasAnimatorParameter(ErzahlerAnimatorParams.Dead)) return;
+            _animator.SetTrigger(ErzahlerAnimatorParams.Dead);
+        }
+
+        public void PlayHit()
+        {
+            if (_animator == null || !UsesErzahlerControllers) return;
+            if (!HasAnimatorParameter(ErzahlerAnimatorParams.Hit)) return;
+            _animator.SetTrigger(ErzahlerAnimatorParams.Hit);
+        }
+
+        public void PlayBetReaction(bool playerWon)
+        {
+            if (_animator == null || !UsesErzahlerControllers) return;
+            string param = playerWon ? ErzahlerAnimatorParams.BetWon : ErzahlerAnimatorParams.BetLost;
+            if (!HasAnimatorParameter(param)) return;
+            _animator.SetTrigger(param);
+        }
+
+        public void PlayDivideDeploy()
+        {
+            if (_animator == null || !UsesErzahlerControllers) return;
+            if (!HasAnimatorParameter(ErzahlerAnimatorParams.DivideDeploy)) return;
+            _animator.SetTrigger(ErzahlerAnimatorParams.DivideDeploy);
+        }
+
+        public void PlayDivideRecall()
+        {
+            if (_animator == null || !UsesErzahlerControllers) return;
+            if (!HasAnimatorParameter(ErzahlerAnimatorParams.DivideRecall)) return;
+            _animator.SetTrigger(ErzahlerAnimatorParams.DivideRecall);
+        }
+
+        public bool HasAnimatorParameter(string name)
+        {
+            if (_animator == null || string.IsNullOrEmpty(name)) return false;
+            var parameters = _animator.parameters;
+            for (int i = 0; i < parameters.Length; i++)
+            {
+                if (parameters[i].name == name) return true;
+            }
+
+            return false;
+        }
+
         private void InitializeDefaultController()
         {
             _controllers ??= ErzahlerAnimatorControllersSO.LoadDefault();

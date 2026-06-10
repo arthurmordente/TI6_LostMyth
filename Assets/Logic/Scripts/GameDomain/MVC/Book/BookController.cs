@@ -192,7 +192,8 @@ namespace Logic.Scripts.GameDomain.MVC.Book
             _bookView?.SetMoving(false);
             StopMovementSfx();
         }
-        public void PlayAttackType(int type) => _bookView?.SetAttackType(type);
+        public void PlayAttackType(int type, SkillCastAnimationStyle style = SkillCastAnimationStyle.Slow) =>
+            _bookView?.SetAttackType(type);
 
         public void TriggerExecute() => _bookView?.TriggerExecute();
         public void ResetExecuteTrigger() => _bookView?.ResetExecuteTrigger();

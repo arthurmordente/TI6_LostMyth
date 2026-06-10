@@ -17,6 +17,9 @@ public abstract class SkillDataSO : ScriptableObject
     [SerializeField, FormerlySerializedAs("_castModeOverride")]
     private SkillCastType _castType = SkillCastType.Projectile;
 
+    [Header("Cast Animation")]
+    [SerializeField] private SkillCastAnimationStyle _castAnimationStyle = SkillCastAnimationStyle.Slow;
+
     [Header("Projectile (when Cast Type is Projectile)")]
     [SerializeField] private float _projectileRange = 8f;
     [SerializeField] private int _projectileNumberOfTargets = 1;
@@ -88,6 +91,11 @@ public abstract class SkillDataSO : ScriptableObject
             : _castType;
 
     public SkillCastType CastType => EffectiveCastType;
+
+    public SkillCastAnimationStyle CastAnimationStyle =>
+        EffectiveCastType == SkillCastType.Self && SkillType == SkillType.SelfBuff
+            ? SkillCastAnimationStyle.Fast
+            : _castAnimationStyle;
     public SkillEffectSO[] Effects => _effects;
 
     /// <summary>Entries for <see cref="SkillType.Passive"/>; ignored for other skill types at runtime.</summary>

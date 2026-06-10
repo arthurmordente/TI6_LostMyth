@@ -1,4 +1,5 @@
 using Logic.Scripts.GameDomain.MVC.Nara.Animation;
+using Logic.Scripts.GameDomain.Services.Skills;
 using UnityEngine;
 
 namespace Logic.Scripts.GameDomain.MVC.Nara
@@ -32,6 +33,8 @@ namespace Logic.Scripts.GameDomain.MVC.Nara
             if (_erzahlerAnimatorDriver == null)
                 _erzahlerAnimatorDriver = GetComponent<ErzahlerPlayerAnimatorDriver>();
             EnsureErzahlerIdleController();
+            if (GetComponent<ErzaMinigameAnimationListener>() == null)
+                gameObject.AddComponent<ErzaMinigameAnimationListener>();
         }
 
         public void ConfigureErzahlerAnimation(ErzahlerAnimatorControllersSO controllers)
@@ -71,16 +74,48 @@ namespace Logic.Scripts.GameDomain.MVC.Nara
 
         public void PlayDeath()
         {
+            if (_erzahlerAnimatorDriver != null && _erzahlerAnimatorDriver.UsesErzahlerControllers)
+            {
+                _erzahlerAnimatorDriver.PlayDeath();
+                return;
+            }
+
             if (_animator != null)
                 _animator.SetTrigger("Dead");
         }
 
-        public void SetAttackType(int type)
+        public void PlayHitReaction()
+        {
+            _erzahlerAnimatorDriver?.PlayHit();
+        }
+
+        public void PlayBetReaction(bool playerWon)
+        {
+            _erzahlerAnimatorDriver?.PlayBetReaction(playerWon);
+        }
+
+        public void PlayDivideDeployAnimation()
+        {
+            _erzahlerAnimatorDriver?.PlayDivideDeploy();
+        }
+
+        public void PlayDivideRecallAnimation()
+        {
+            _erzahlerAnimatorDriver?.PlayDivideRecall();
+        }
+
+        public void SetAttackType(int type, SkillCastAnimationStyle style = SkillCastAnimationStyle.Slow)
         {
             if (_erzahlerAnimatorDriver != null && _erzahlerAnimatorDriver.UsesErzahlerControllers)
             {
                 if (type > 0)
-                    _erzahlerAnimatorDriver.PlayConjuringSlowPrep();
+                {
+                    if (style == SkillCastAnimationStyle.Fast)
+                        _erzahlerAnimatorDriver.PlayConjuringFast();
+                    else
+                        _erzahlerAnimatorDriver.PlayConjuringSlowPrep();
+                }
+
                 return;
             }
 
@@ -127,6 +162,7 @@ namespace Logic.Scripts.GameDomain.MVC.Nara
             if (_erzahlerAnimatorDriver != null && _erzahlerAnimatorDriver.UsesErzahlerControllers)
             {
                 _erzahlerAnimatorDriver.CancelConjuring();
+                _erzahlerAnimatorDriver.PlayConjuringFail();
                 ResetAttackType();
                 return;
             }

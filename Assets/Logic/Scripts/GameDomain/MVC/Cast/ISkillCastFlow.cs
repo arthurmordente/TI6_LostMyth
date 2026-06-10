@@ -1,5 +1,6 @@
 using Logic.Scripts.GameDomain.MVC.Nara;
 using Logic.Scripts.GameDomain.MVC.Shared;
+using Logic.Scripts.GameDomain.Services.Skills;
 
 public interface ISkillCastFlow
 {
@@ -16,4 +17,5 @@ public struct SkillCastPrepareResult
     public int AbilityIndex;
     public int Cost;
     public int AnimatorAttackType;
+    public SkillCastAnimationStyle CastAnimationStyle;
 }

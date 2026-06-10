@@ -3,6 +3,7 @@ using UnityEngine;
 using System.Threading.Tasks;
 using Logic.Scripts.GameDomain.VisualFeedback;
 using Logic.Scripts.GameDomain.MVC.Environment.Laki;
+using Logic.Scripts.GameDomain.MVC.Boss.Hocari;
 using Logic.Scripts.GameDomain.MVC.Boss.Laki;
 using Logic.Scripts.GameDomain.MVC.Nara.Animation;
 
@@ -12,7 +13,8 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
         [SerializeField] private Collider _collider;
         [SerializeField] private Animator _animator;
         [SerializeField] private LakiBossAnimatorView _lakiAnimatorView;
-        [SerializeField] private float _phaseTransitionDuration = 1.0f;
+        [SerializeField] private HocariBossAnimationBridge _hocariAnimationBridge;
+        [SerializeField] private float _phaseTransitionDuration = 4.5f;
 
         private Action<int> _onPreviewHeal;
         private Action<int> _onPreviewDamage;
@@ -76,6 +78,12 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
 
         public void PlayPhaseTransition() {
             if (UsesLakiAnimator()) return;
+            var hocari = ResolveHocariAnimationBridge();
+            if (hocari != null && hocari.IsActive) {
+                hocari.PlayPhaseTransition();
+                return;
+            }
+
             if (_animator == null) return;
             _animator.SetTrigger("PhaseTransition");
         }
@@ -97,6 +105,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
             if (UsesLakiAnimator()) return;
             if (_animator == null) return;
             _animator.SetTrigger("AttackFinish");
+            _animator.SetInteger("AttackId", -1);
         }
 
         public void PlayMovePrep() {
@@ -217,6 +226,15 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
             if (_lakiAnimatorView == null)
                 _lakiAnimatorView = GetComponentInChildren<LakiBossAnimatorView>(true);
             return _lakiAnimatorView;
+        }
+
+        private HocariBossAnimationBridge ResolveHocariAnimationBridge()
+        {
+            if (_hocariAnimationBridge != null) return _hocariAnimationBridge;
+            _hocariAnimationBridge = GetComponent<HocariBossAnimationBridge>();
+            if (_hocariAnimationBridge == null)
+                _hocariAnimationBridge = GetComponentInChildren<HocariBossAnimationBridge>(true);
+            return _hocariAnimationBridge;
         }
 
         private bool AnimatorHasParameter(string name)

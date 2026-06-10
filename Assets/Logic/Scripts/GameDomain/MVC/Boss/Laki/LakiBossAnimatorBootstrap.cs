@@ -7,7 +7,7 @@ using UnityEditor;
 namespace Logic.Scripts.GameDomain.MVC.Boss.Laki
 {
     /// <summary>
-    /// Ensures the Laki boss Animator uses LKI_Animator and runtime animation drivers.
+    /// Ensures the Laki boss Animator uses LKI_Animator_FINAL and runtime animation drivers.
     /// </summary>
     public class LakiBossAnimatorBootstrap : MonoBehaviour
     {
@@ -41,7 +41,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki
 
 #if UNITY_EDITOR
             return AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>(
-                "Assets/Art/Animations/MadamLaki/LKI_Animator.controller");
+                AnimationControllerPaths.LakiBoss);
 #else
             return null;
 #endif

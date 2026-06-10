@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack;
 using Logic.Scripts.GameDomain.MVC.Environment.Laki;
 using Logic.Scripts.Services.AudioService;
 using UnityEngine;
@@ -30,6 +31,33 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki
                 _view = GetComponent<LakiBossAnimatorView>();
             if (_view == null)
                 _view = GetComponentInChildren<LakiBossAnimatorView>(true);
+        }
+
+        private void OnEnable()
+        {
+            DiceAttackRuntimeService.OnDiceAttackBegan += OnDiceAttackBegan;
+            DiceAttackRuntimeService.OnDiceAttackEnded += OnDiceAttackEnded;
+        }
+
+        private void OnDisable()
+        {
+            DiceAttackRuntimeService.OnDiceAttackBegan -= OnDiceAttackBegan;
+            DiceAttackRuntimeService.OnDiceAttackEnded -= OnDiceAttackEnded;
+        }
+
+        private void OnDiceAttackBegan()
+        {
+            if (_view == null) return;
+            _view.BeginThrowDie();
+            _view.SetThrowDieLoop(true);
+        }
+
+        private async void OnDiceAttackEnded()
+        {
+            if (_view == null) return;
+            _view.SetThrowDieLoop(false);
+            _view.FinishThrowDie();
+            await _view.WaitUntilStateTagAsync(LakiAnimatorParams.TagIdle, 2f);
         }
 
         public async Task OnBossPrepareTurnStartedAsync()

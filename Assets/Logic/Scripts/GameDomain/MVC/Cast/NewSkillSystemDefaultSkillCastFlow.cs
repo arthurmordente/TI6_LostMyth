@@ -78,7 +78,8 @@ public class NewSkillSystemDefaultSkillCastFlow : ISkillCastFlow
         {
             AbilityIndex = index,
             Cost = Mathf.Max(0, _currentSkill.Cost),
-            AnimatorAttackType = index + 1
+            AnimatorAttackType = index + 1,
+            CastAnimationStyle = _currentSkill.CastAnimationStyle
         };
         return true;
     }

@@ -24,58 +24,55 @@ namespace Logic.Scripts.GameDomain.MVC.Nara.Editor
 
     public static class ErzahlerAnimatorControllerBuilder
     {
-        public const string ErzahlerBookControllerPath = "Assets/Art/Animations/erz+book/ERZ_ErzahlerBook.controller";
-        public const string ErzahlerSoloControllerPath = "Assets/Art/Animations/Erzahler/ERZ_Erzahler.controller";
-        public const string BookCloneControllerPath = "Assets/Art/Animations/Book/ERZ_Book.controller";
-        public const string LakiBossControllerPath = "Assets/Art/Animations/MadamLaki/LKI_Animator.controller";
+        public const string ErzahlerBookControllerPath = AnimationControllerPaths.ErzahlerBook;
+        public const string ErzahlerSoloControllerPath = AnimationControllerPaths.ErzahlerSolo;
+        public const string BookCloneControllerPath = AnimationControllerPaths.BookClone;
+        public const string LakiBossControllerPath = AnimationControllerPaths.LakiBoss;
         private const string ControllersSoPath = "Assets/Logic/Scripts/GameDomain/MVC/Nara/Animation/ErzahlerAnimatorControllers.asset";
         private const string ControllersResourcesPath = "Assets/Resources/ErzahlerAnimatorControllers.asset";
 
-        [MenuItem("TI6/Animation/Build All (Erzahler + Laki)", priority = 0)]
         public static void BuildAll()
+        {
+            BuildErzahlerStateMachines();
+            BuildLakiBossOnly();
+        }
+
+        public static void BuildErzahlerStateMachines()
         {
             BuildErzahlerWithBookOnly();
             BuildErzahlerSoloOnly();
             BuildBookCloneOnly();
-            BuildLakiBossOnly();
-            Debug.Log("[ErzahlerAnimatorControllerBuilder] Built all animator controllers and updated ErzahlerAnimatorControllers.asset");
+            Debug.Log("[ErzahlerAnimatorControllerBuilder] Built Erzahler controllers (core + optional states when exported clips exist).");
         }
 
-        [MenuItem("TI6/Animation/Build/ERZ_ErzahlerBook (player + book)", priority = 10)]
         public static void BuildErzahlerWithBookOnly()
         {
             var controller = BuildErzahlerWithBookController();
             AssignControllerToSo(so => so.ErzahlerWithBook = controller);
-            FinishBuild($"ERZ_ErzahlerBook → {ErzahlerBookControllerPath}");
+            FinishBuild($"ERZ_ErzahlerBook_FINAL → {ErzahlerBookControllerPath}");
         }
 
-        [MenuItem("TI6/Animation/Build/ERZ_Erzahler (player solo)", priority = 11)]
         public static void BuildErzahlerSoloOnly()
         {
             var controller = BuildErzahlerSoloController();
             AssignControllerToSo(so => so.ErzahlerSolo = controller);
-            FinishBuild($"ERZ_Erzahler → {ErzahlerSoloControllerPath}");
+            FinishBuild($"ERZ_Erzahler_FINAL → {ErzahlerSoloControllerPath}");
         }
 
-        [MenuItem("TI6/Animation/Build/ERZ_Book (clone)", priority = 12)]
         public static void BuildBookCloneOnly()
         {
             var controller = BuildBookCloneController();
             AssignControllerToSo(so => so.BookClone = controller);
-            FinishBuild($"ERZ_Book → {BookCloneControllerPath}");
+            FinishBuild($"ERZ_Book_FINAL → {BookCloneControllerPath}");
         }
 
-        [MenuItem("TI6/Animation/Build/LKI_Animator (Laki boss)", priority = 13)]
         public static void BuildLakiBossOnly()
         {
             FixLakiAbilityClipLoop();
             var controller = BuildLakiController();
             AssignControllerToSo(so => so.LakiBoss = controller);
-            FinishBuild($"LKI_Animator → {LakiBossControllerPath}");
+            FinishBuild($"LKI_Animator_FINAL → {LakiBossControllerPath}");
         }
-
-        [MenuItem("TI6/Animation/Build Erzahler & Laki Animator Controllers", priority = 100)]
-        public static void BuildAllLegacyMenu() => BuildAll();
 
         static void AssignControllerToSo(System.Action<ErzahlerAnimatorControllersSO> assign)
         {
@@ -143,6 +140,7 @@ namespace Logic.Scripts.GameDomain.MVC.Nara.Editor
             AddAnyStateTrigger(root, fastState, ErzahlerAnimatorParams.ConjuringFast);
             AddExitTransition(fastState, idle, 0.95f);
             AddAnyStateTrigger(root, slowSm, ErzahlerAnimatorParams.ConjuringPrep);
+            AddPlayerReactionStates(c, root, idle, includeDivideClips: true);
 
             return c;
         }
@@ -189,6 +187,7 @@ namespace Logic.Scripts.GameDomain.MVC.Nara.Editor
             AddAnyStateTrigger(root, fastState, ErzahlerAnimatorParams.ConjuringFast);
             AddExitTransition(fastState, idle1State, 0.95f);
             AddAnyStateTrigger(root, slowSm, ErzahlerAnimatorParams.ConjuringPrep);
+            AddPlayerReactionStates(c, root, idle1State, includeDivideClips: false);
 
             return c;
         }
@@ -275,7 +274,147 @@ namespace Logic.Scripts.GameDomain.MVC.Nara.Editor
             // After Ability, return to base idle; runtime re-rolls performance via PerformancePrep.
             AddExitTransition(abilityState, idle1State, 0.92f);
 
+            AddLakiReactionStates(c, root, idle1State);
+            AddLakiThrowDieSubMachine(c, root, new Vector3(550, 400, 0));
+
             return c;
+        }
+
+        private static void AddPlayerReactionStates(AnimatorController controller, AnimatorStateMachine root, AnimatorState idleFallback, bool includeDivideClips)
+        {
+            var death = LoadClipOrExported("Assets/Art/Animations/Erzahler/Exported/Erzahler_Death.anim", "Erzahler_Death");
+            var hit = LoadClipOrExported("Assets/Art/Animations/Erzahler/Exported/Erzahler_Hit.anim", "Erzahler_Hit");
+            var betWon = LoadClipOrExported("Assets/Art/Animations/Erzahler/Exported/Erzahler_BetWon.anim", "Erzahler_BetWon");
+            var betLost = LoadClipOrExported("Assets/Art/Animations/Erzahler/Exported/Erzahler_BetLost.anim", "Erzahler_BetLost");
+            var conjuringFail = LoadClipOrExported("Assets/Art/Animations/Erzahler/Exported/Erzahler_Conjuring_Fail.anim", "Erzahler_Conjuring_Fail");
+
+            if (death != null)
+            {
+                AddParam(controller, ErzahlerAnimatorParams.Dead, AnimatorControllerParameterType.Trigger);
+                var deathState = AddMotionState(root, "Death", death, new Vector3(850, 0, 0), ErzahlerAnimatorParams.TagDeath);
+                AddAnyStateTrigger(root, deathState, ErzahlerAnimatorParams.Dead);
+            }
+
+            if (hit != null)
+            {
+                AddParam(controller, ErzahlerAnimatorParams.Hit, AnimatorControllerParameterType.Trigger);
+                var hitState = AddMotionState(root, "Hit", hit, new Vector3(850, 90, 0), "");
+                AddAnyStateTrigger(root, hitState, ErzahlerAnimatorParams.Hit);
+                AddExitTransition(hitState, idleFallback, 0.92f);
+            }
+
+            if (betWon != null)
+            {
+                AddParam(controller, ErzahlerAnimatorParams.BetWon, AnimatorControllerParameterType.Trigger);
+                var wonState = AddMotionState(root, "BetWon", betWon, new Vector3(850, 180, 0), "");
+                AddAnyStateTrigger(root, wonState, ErzahlerAnimatorParams.BetWon);
+                AddExitTransition(wonState, idleFallback, 0.92f);
+            }
+
+            if (betLost != null)
+            {
+                AddParam(controller, ErzahlerAnimatorParams.BetLost, AnimatorControllerParameterType.Trigger);
+                var lostState = AddMotionState(root, "BetLost", betLost, new Vector3(850, 270, 0), "");
+                AddAnyStateTrigger(root, lostState, ErzahlerAnimatorParams.BetLost);
+                AddExitTransition(lostState, idleFallback, 0.92f);
+            }
+
+            if (conjuringFail != null)
+            {
+                AddParam(controller, ErzahlerAnimatorParams.ConjuringFail, AnimatorControllerParameterType.Trigger);
+                var failState = AddMotionState(root, "ConjuringFail", conjuringFail, new Vector3(850, 360, 0), "");
+                AddAnyStateTrigger(root, failState, ErzahlerAnimatorParams.ConjuringFail);
+                AddExitTransition(failState, idleFallback, 0.92f);
+            }
+
+            if (!includeDivideClips) return;
+
+            var deploy = LoadClipOrExported("Assets/Art/Animations/Erzahler/Exported/Book_CreateClone.anim", "Book_CreateClone");
+            var recall = LoadClipOrExported("Assets/Art/Animations/Erzahler/Exported/Book_ReturnClone.anim", "Book_ReturnClone");
+            if (deploy != null)
+            {
+                AddParam(controller, ErzahlerAnimatorParams.DivideDeploy, AnimatorControllerParameterType.Trigger);
+                var deployState = AddMotionState(root, "DivideDeploy", deploy, new Vector3(850, 450, 0), "");
+                AddAnyStateTrigger(root, deployState, ErzahlerAnimatorParams.DivideDeploy);
+                AddExitTransition(deployState, idleFallback, 0.92f);
+            }
+
+            if (recall != null)
+            {
+                AddParam(controller, ErzahlerAnimatorParams.DivideRecall, AnimatorControllerParameterType.Trigger);
+                var recallState = AddMotionState(root, "DivideRecall", recall, new Vector3(850, 540, 0), "");
+                AddAnyStateTrigger(root, recallState, ErzahlerAnimatorParams.DivideRecall);
+                AddExitTransition(recallState, idleFallback, 0.92f);
+            }
+        }
+
+        private static void AddLakiReactionStates(AnimatorController controller, AnimatorStateMachine root, AnimatorState idleFallback)
+        {
+            var hit = LakiAnimationClipExporter.LoadExported("Laki_Hit_LoseBet");
+            var betWon = LakiAnimationClipExporter.LoadExported("Laki_BetWon");
+            var death = LakiAnimationClipExporter.LoadExported("Laki_Death");
+
+            if (hit != null)
+            {
+                AddParam(controller, LakiAnimatorParams.HitReaction, AnimatorControllerParameterType.Trigger);
+                var hitState = AddMotionState(root, "Hit_LoseBet", hit, new Vector3(850, 0, 0), "");
+                AddAnyStateTrigger(root, hitState, LakiAnimatorParams.HitReaction);
+                AddExitTransition(hitState, idleFallback, 0.92f);
+            }
+
+            if (betWon != null)
+            {
+                AddParam(controller, LakiAnimatorParams.BetWon, AnimatorControllerParameterType.Trigger);
+                var wonState = AddMotionState(root, "BetWon", betWon, new Vector3(850, 90, 0), "");
+                AddAnyStateTrigger(root, wonState, LakiAnimatorParams.BetWon);
+                AddExitTransition(wonState, idleFallback, 0.92f);
+            }
+
+            if (hit != null)
+            {
+                AddParam(controller, LakiAnimatorParams.BetLost, AnimatorControllerParameterType.Trigger);
+                var lostState = AddMotionState(root, "BetLost", hit, new Vector3(850, 135, 0), "");
+                AddAnyStateTrigger(root, lostState, LakiAnimatorParams.BetLost);
+                AddExitTransition(lostState, idleFallback, 0.92f);
+            }
+
+            if (death != null)
+            {
+                AddParam(controller, LakiAnimatorParams.Death, AnimatorControllerParameterType.Trigger);
+                var deathState = AddMotionState(root, "Death", death, new Vector3(850, 180, 0), LakiAnimatorParams.TagDeath);
+                AddAnyStateTrigger(root, deathState, LakiAnimatorParams.Death);
+            }
+        }
+
+        private static void AddLakiThrowDieSubMachine(AnimatorController controller, AnimatorStateMachine root, Vector3 position)
+        {
+            var prep = LakiAnimationClipExporter.LoadExported("Laki_ThrowDie_Prep");
+            var loop = LakiAnimationClipExporter.LoadExported("Laki_ThrowDie_Loop");
+            var finish = LakiAnimationClipExporter.LoadExported("Laki_ThrowDie_Finish");
+            if (prep == null || loop == null || finish == null) return;
+
+            AddParam(controller, LakiAnimatorParams.ThrowDiePrep, AnimatorControllerParameterType.Trigger);
+            AddParam(controller, LakiAnimatorParams.ThrowDieLoop, AnimatorControllerParameterType.Bool);
+            AddParam(controller, LakiAnimatorParams.ThrowDieFinish, AnimatorControllerParameterType.Trigger);
+
+            var sm = root.AddStateMachine("ThrowDie", position);
+            var prepState = AddMotionState(sm, "Prep", prep, new Vector3(0, 0, 0), "");
+            var loopState = AddMotionState(sm, "Loop", loop, new Vector3(250, 0, 0), LakiAnimatorParams.TagThrowDieLoop);
+            var finishState = AddMotionState(sm, "Finish", finish, new Vector3(500, 0, 0), "");
+            sm.defaultState = prepState;
+
+            AddTransition(prepState, loopState, AnimatorConditionMode.If, LakiAnimatorParams.ThrowDieLoop);
+            AddTransition(loopState, finishState, AnimatorConditionMode.If, LakiAnimatorParams.ThrowDieFinish);
+            AddExitTransition(finishState, null, 0.95f);
+
+            AddAnyStateTrigger(root, sm, LakiAnimatorParams.ThrowDiePrep);
+        }
+
+        private static AnimationClip LoadClipOrExported(string path, string exportName)
+        {
+            var clip = LoadClip(path);
+            if (clip != null) return clip;
+            return ErzahlerErzaClipExporter.LoadExported(exportName);
         }
 
         private static AnimatorStateMachine AddPerformanceSubMachine(

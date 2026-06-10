@@ -49,6 +49,58 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki
             _animator.SetTrigger(LakiAnimatorParams.Spotlight);
         }
 
+        public void PlayHitReaction()
+        {
+            if (_animator == null || !HasParameter(LakiAnimatorParams.HitReaction)) return;
+            _animator.SetTrigger(LakiAnimatorParams.HitReaction);
+        }
+
+        public void PlayBetReaction(bool bossWonBet)
+        {
+            if (_animator == null) return;
+            string param = bossWonBet ? LakiAnimatorParams.BetWon : LakiAnimatorParams.BetLost;
+            if (!HasParameter(param)) return;
+            _animator.SetTrigger(param);
+        }
+
+        public void PlayDeath()
+        {
+            if (_animator == null || !HasParameter(LakiAnimatorParams.Death)) return;
+            _animator.SetTrigger(LakiAnimatorParams.Death);
+        }
+
+        public void BeginThrowDie()
+        {
+            if (_animator == null || !HasParameter(LakiAnimatorParams.ThrowDiePrep)) return;
+            _animator.SetBool(LakiAnimatorParams.ThrowDieLoop, false);
+            _animator.SetTrigger(LakiAnimatorParams.ThrowDiePrep);
+        }
+
+        public void SetThrowDieLoop(bool looping)
+        {
+            if (_animator == null || !HasParameter(LakiAnimatorParams.ThrowDieLoop)) return;
+            _animator.SetBool(LakiAnimatorParams.ThrowDieLoop, looping);
+        }
+
+        public void FinishThrowDie()
+        {
+            if (_animator == null || !HasParameter(LakiAnimatorParams.ThrowDieFinish)) return;
+            _animator.SetBool(LakiAnimatorParams.ThrowDieLoop, false);
+            _animator.SetTrigger(LakiAnimatorParams.ThrowDieFinish);
+        }
+
+        bool HasParameter(string name)
+        {
+            if (_animator == null || string.IsNullOrEmpty(name)) return false;
+            var parameters = _animator.parameters;
+            for (int i = 0; i < parameters.Length; i++)
+            {
+                if (parameters[i].name == name) return true;
+            }
+
+            return false;
+        }
+
         public void ResetCombatTriggers()
         {
             if (_animator == null) return;
