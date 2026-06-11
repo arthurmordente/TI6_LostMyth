@@ -6,8 +6,8 @@ Scripts criados.
 
 | Passo | Menu |
 |-------|------|
-| Export FBX | `TI6 → Animation → 1 Export FBX Clips → Hocari` |
-| Build controller | `TI6 → Animation → 2 Build State Machines → Hocari` |
+| Export + rebuild | `TI6 → Animation → 1 Export FBX Clips → Hocari` (ou **All Final**) |
+| Build controller (só FSM) | `TI6 → Animation → 2 Build State Machines → Hocari` |
 | Assign prefab | `TI6 → Animation → 2 Build State Machines → Hocari — Assign HOC_Hocari_FINAL to HokariBoss prefab` |
 
 Clips sem hook de gameplay (Donut, idle rest, legacy `HOC_*`): `AnimationInventory_UnwiredClips.md`
@@ -15,11 +15,11 @@ Clips sem hook de gameplay (Donut, idle rest, legacy `HOC_*`): `AnimationInvento
 ## Passos no Unity (tu)
 
 1. Deixa o Unity recompilar os scripts.
-2. **`TI6 → Animation → 1 Export FBX Clips → Hocari`**  
-   - Fontes: `HocariAnimations1.fbx`, `HocariAnimations2.fbx`  
-   - Dump completo: `Exported/FromAnim1`, `FromAnim2`, `Legacy`  
-   - Pastas para o builder: `Phase1`, `Phase2`, `Shared`
-3. **`TI6 → Animation → 2 Build State Machines → Hocari`**  
+2. **`TI6 → Animation → 1 Export FBX Clips → Hocari`** (ou **All Final**)  
+   - FBX: `Art/FBX/Characters/FinalFBXs/HocariAllAnimsPart1.fbx`, `HocariAllAnimsPart2.fbx`  
+   - Clips: `Assets/ArquivosArthur/Animacoes/Hocari/{Phase1,Phase2,Shared}`  
+   - Apaga exports legados em `Art/Animations/Hocari/Exported`
+3. **`TI6 → Animation → 2 Build State Machines → Hocari`** (incluído no export Hocari)  
    - Gera `Assets/Art/Animations/Hocari/HOC_Hocari_FINAL.controller`  
    - **Obrigatório após alterações ao FSM no builder** (`HocariAnimatorControllerBuilder.cs`): volta a correr este menu para regenerar o `.controller` (não editar o `.controller` à mão).
 4. **`TI6 → Animation → 2 Build State Machines → Hocari — Assign HOC_Hocari_FINAL to HokariBoss prefab`**
@@ -40,19 +40,19 @@ Clips sem hook de gameplay (Donut, idle rest, legacy `HOC_*`): `AnimationInvento
 
 ## Mapa de clips exportados
 
-### Phase1 (`HocariAnimations2.fbx` + 1 clip de Anim1)
+### Phase1 (`HocariAllAnimsPart2.fbx`)
 
 - Idle: `Hocari_CombatIdle_2`
 - Ataques: Protean_2, Circle, Donut, SwordLines (+ Prep de Anim1), Wing L/R
 - Hit: `Hocari_Hit`
 
-### Phase2 (`HocariAnimations1.fbx` + Wing R Prep de Anim2)
+### Phase2 (`HocariAllAnimsPart1.fbx`)
 
 - Idle: `Hocari_Phase2_CombatIdle`
 - Ataques: Protean, Circle, Donut, SwordLines, Wing L/R (+ Right Prep de Anim2)
 - Hit/Death: `Hocari_Phase2_Hit`, `Hocari_Phase2_Death`
 
-### Shared (`HocariAnimations1.fbx`)
+### Shared (Part1 = phase transition; Part2 = movement)
 
 - `Hocari_PhaseTransition_Prep/Loop/Finish/Finish_2`
 - `Hocari_Movement_Prep/Loop/Loop_2/Loop_3/Finish`

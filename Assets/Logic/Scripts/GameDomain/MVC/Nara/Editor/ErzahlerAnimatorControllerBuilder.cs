@@ -97,7 +97,7 @@ namespace Logic.Scripts.GameDomain.MVC.Nara.Editor
 
         private static void FixLakiAbilityClipLoop()
         {
-            var clip = AssetDatabase.LoadAssetAtPath<AnimationClip>("Assets/Art/Animations/MadamLaki/Laki_Ability.anim");
+            var clip = LakiAnimationClipExporter.LoadExported("Laki_Ability");
             if (clip == null) return;
 
             var settings = AnimationUtility.GetAnimationClipSettings(clip);
@@ -112,12 +112,12 @@ namespace Logic.Scripts.GameDomain.MVC.Nara.Editor
             AddPlayerParameters(c);
 
             var root = c.layers[0].stateMachine;
-            var walk1 = LoadClip("Assets/Art/Animations/erz+book/ErzahlerArmature_Erzahler+Book_Walk_1.anim");
-            var walk2 = LoadClip("Assets/Art/Animations/erz+book/ErzahlerArmature_Erzahler+Book_Walk_2.anim");
-            var fast = LoadClip("Assets/Art/Animations/erz+book/ErzahlerArmature_Erzahler+Book_FastConjuringWithTwoHands.anim");
-            var slowPrep = LoadClip("Assets/Art/Animations/erz+book/ErzahlerArmature_Erzahler+Book_SlowConjuring_Prep.anim");
-            var slowLoop = LoadClip("Assets/Art/Animations/erz+book/ErzahlerArmature_Erzahler+Book_SlowConjuring_Loop.anim");
-            var slowFinish = LoadClip("Assets/Art/Animations/erz+book/ErzahlerArmature_Erzahler+Book_SlowConjuring_Finish.anim");
+            var walk1 = ErzahlerErzaClipExporter.LoadExported("Erzahler+Book_Walk_1");
+            var walk2 = ErzahlerErzaClipExporter.LoadExported("Erzahler+Book_Walk_2");
+            var fast = ErzahlerErzaClipExporter.LoadExported("Erzahler+Book_FastConjuringWithTwoHands");
+            var slowPrep = ErzahlerErzaClipExporter.LoadExported("Erzahler+Book_SlowConjuring_Prep");
+            var slowLoop = ErzahlerErzaClipExporter.LoadExported("Erzahler+Book_SlowConjuring_Loop");
+            var slowFinish = ErzahlerErzaClipExporter.LoadExported("Erzahler+Book_SlowConjuring_Finish");
 
             var idle = AddMotionState(root, "Idle", walk1, new Vector3(300, 0, 0), ErzahlerAnimatorParams.TagIdle);
             idle.speed = 0f;
@@ -151,14 +151,14 @@ namespace Logic.Scripts.GameDomain.MVC.Nara.Editor
             AddPlayerParameters(c);
 
             var root = c.layers[0].stateMachine;
-            var idle1 = LoadClip("Assets/Art/Animations/Erzahler/ErzahlerArmature_Erzahler_Idle_1.anim");
-            var idle2 = LoadClip("Assets/Art/Animations/Erzahler/ErzahlerArmature_Erzahler_Idle_2.anim");
-            var walk = LoadClip("Assets/Art/Animations/Erzahler/ErzahlerArmature_Erzahler_Walk.anim");
-            var jog = LoadClip("Assets/Art/Animations/Erzahler/ErzahlerArmature_Erzahler_Jog.anim");
-            var fast = LoadClip("Assets/Art/Animations/Erzahler/ErzahlerArmature_Erzahler_FastConjuring.anim");
-            var slowPrep = LoadClip("Assets/Art/Animations/Erzahler/ErzahlerArmature_Erzahler_SlowConjuring_Prep.anim");
-            var slowLoop = LoadClip("Assets/Art/Animations/Erzahler/ErzahlerArmature_Erzahler_SlowConjuring_Loop.anim");
-            var slowFinish = LoadClip("Assets/Art/Animations/Erzahler/ErzahlerArmature_Erzahler_SlowConjuring_Finish.anim");
+            var idle1 = ErzahlerErzaClipExporter.LoadExported("Erzahler_Idle_1");
+            var idle2 = ErzahlerErzaClipExporter.LoadExported("Erzahler_Idle_2");
+            var walk = ErzahlerErzaClipExporter.LoadExported("Erzahler_Walk");
+            var jog = ErzahlerErzaClipExporter.LoadExported("Erzahler_Jog");
+            var fast = ErzahlerErzaClipExporter.LoadExported("Erzahler_FastConjuring");
+            var slowPrep = ErzahlerErzaClipExporter.LoadExported("Erzahler_SlowConjuring_Prep");
+            var slowLoop = ErzahlerErzaClipExporter.LoadExported("Erzahler_SlowConjuring_Loop");
+            var slowFinish = ErzahlerErzaClipExporter.LoadExported("Erzahler_SlowConjuring_Finish");
 
             var idle1State = AddMotionState(root, "Idle_1", idle1, new Vector3(300, 0, 0), ErzahlerAnimatorParams.TagIdle);
             var idle2State = AddMotionState(root, "Idle_2", idle2, new Vector3(300, 100, 0), ErzahlerAnimatorParams.TagIdle);
@@ -201,12 +201,12 @@ namespace Logic.Scripts.GameDomain.MVC.Nara.Editor
             AddParam(c, BookAnimatorParams.Ability, AnimatorControllerParameterType.Trigger);
 
             var root = c.layers[0].stateMachine;
-            var idle1 = LoadClip("Assets/Art/Animations/Book/ErzahlerArmature_Book_Idle_1.anim");
-            var idle2 = LoadClip("Assets/Art/Animations/Book/ErzahlerArmature_Book_Idle_2.anim");
-            var idle3 = LoadClip("Assets/Art/Animations/Book/ErzahlerArmature_Book_Idle_3.anim");
-            var walk1 = LoadClip("Assets/Art/Animations/Book/ErzahlerArmature_Book_Walk_1.anim");
-            var walk2 = LoadClip("Assets/Art/Animations/Book/ErzahlerArmature_Book_Walk_2.anim");
-            var ability = LoadClip("Assets/Art/Animations/Book/ErzahlerArmature_Book_Ability.anim");
+            var idle1 = ErzahlerErzaClipExporter.LoadExported("Book_Idle_1");
+            var idle2 = ErzahlerErzaClipExporter.LoadExported("Book_Idle_2");
+            var idle3 = ErzahlerErzaClipExporter.LoadExported("Book_Idle_3");
+            var walk1 = ErzahlerErzaClipExporter.LoadExported("Book_Walk_1");
+            var walk2 = ErzahlerErzaClipExporter.LoadExported("Book_Walk_2");
+            var ability = ErzahlerErzaClipExporter.LoadExported("Book_Ability");
 
             var idle1State = AddMotionState(root, "Idle_1", idle1, new Vector3(300, 0, 0), BookAnimatorParams.TagIdle);
             var idle2State = AddMotionState(root, "Idle_2", idle2, new Vector3(300, 90, 0), BookAnimatorParams.TagIdle);
@@ -249,14 +249,14 @@ namespace Logic.Scripts.GameDomain.MVC.Nara.Editor
             AddParam(c, LakiAnimatorParams.Spotlight, AnimatorControllerParameterType.Trigger);
 
             var root = c.layers[0].stateMachine;
-            var idle1 = LoadClip("Assets/Art/Animations/MadamLaki/Laki_Idle_1.anim");
-            var p2Prep = LoadClip("Assets/Art/Animations/MadamLaki/Laki_Idle_2_Prep.anim");
-            var p2Loop = LoadClip("Assets/Art/Animations/MadamLaki/Laki_Idle_2_Loop.anim");
-            var p2Finish = LoadClip("Assets/Art/Animations/MadamLaki/Laki_Idle_2_Finish.anim");
-            var p3Prep = LoadClip("Assets/Art/Animations/MadamLaki/Laki_Idle_3_Prep.anim");
-            var p3Loop = LoadClip("Assets/Art/Animations/MadamLaki/Laki_Idle_3_Loop.anim");
-            var p3Finish = LoadClip("Assets/Art/Animations/MadamLaki/Laki_Idle_3_Finish.anim");
-            var ability = LoadClip("Assets/Art/Animations/MadamLaki/Laki_Ability.anim");
+            var idle1 = LakiAnimationClipExporter.LoadExported("Laki_Idle_1");
+            var p2Prep = LakiAnimationClipExporter.LoadExported("Laki_Idle_2_Prep");
+            var p2Loop = LakiAnimationClipExporter.LoadExported("Laki_Idle_2_Loop");
+            var p2Finish = LakiAnimationClipExporter.LoadExported("Laki_Idle_2_Finish");
+            var p3Prep = LakiAnimationClipExporter.LoadExported("Laki_Idle_3_Prep");
+            var p3Loop = LakiAnimationClipExporter.LoadExported("Laki_Idle_3_Loop");
+            var p3Finish = LakiAnimationClipExporter.LoadExported("Laki_Idle_3_Finish");
+            var ability = LakiAnimationClipExporter.LoadExported("Laki_Ability");
 
             var idle1State = AddMotionState(root, "Idle_1", idle1, new Vector3(300, 0, 0), LakiAnimatorParams.TagIdle);
             root.defaultState = idle1State;
@@ -282,11 +282,11 @@ namespace Logic.Scripts.GameDomain.MVC.Nara.Editor
 
         private static void AddPlayerReactionStates(AnimatorController controller, AnimatorStateMachine root, AnimatorState idleFallback, bool includeDivideClips)
         {
-            var death = LoadClipOrExported("Assets/Art/Animations/Erzahler/Exported/Erzahler_Death.anim", "Erzahler_Death");
-            var hit = LoadClipOrExported("Assets/Art/Animations/Erzahler/Exported/Erzahler_Hit.anim", "Erzahler_Hit");
-            var betWon = LoadClipOrExported("Assets/Art/Animations/Erzahler/Exported/Erzahler_BetWon.anim", "Erzahler_BetWon");
-            var betLost = LoadClipOrExported("Assets/Art/Animations/Erzahler/Exported/Erzahler_BetLost.anim", "Erzahler_BetLost");
-            var conjuringFail = LoadClipOrExported("Assets/Art/Animations/Erzahler/Exported/Erzahler_Conjuring_Fail.anim", "Erzahler_Conjuring_Fail");
+            var death = ErzahlerErzaClipExporter.LoadExported("Erzahler_Death");
+            var hit = ErzahlerErzaClipExporter.LoadExported("Erzahler_Hit");
+            var betWon = ErzahlerErzaClipExporter.LoadExported("Erzahler_BetWon");
+            var betLost = ErzahlerErzaClipExporter.LoadExported("Erzahler_BetLost");
+            var conjuringFail = ErzahlerErzaClipExporter.LoadExported("Erzahler_Conjuring_Fail");
 
             if (death != null)
             {
@@ -329,8 +329,8 @@ namespace Logic.Scripts.GameDomain.MVC.Nara.Editor
 
             if (!includeDivideClips) return;
 
-            var deploy = LoadClipOrExported("Assets/Art/Animations/Erzahler/Exported/Book_CreateClone.anim", "Book_CreateClone");
-            var recall = LoadClipOrExported("Assets/Art/Animations/Erzahler/Exported/Book_ReturnClone.anim", "Book_ReturnClone");
+            var deploy = ErzahlerErzaClipExporter.LoadExported("Book_CreateClone");
+            var recall = ErzahlerErzaClipExporter.LoadExported("Book_ReturnClone");
             if (deploy != null)
             {
                 AddParam(controller, ErzahlerAnimatorParams.DivideDeploy, AnimatorControllerParameterType.Trigger);
@@ -408,13 +408,6 @@ namespace Logic.Scripts.GameDomain.MVC.Nara.Editor
             AddExitTransition(finishState, null, 0.95f);
 
             AddAnyStateTrigger(root, sm, LakiAnimatorParams.ThrowDiePrep);
-        }
-
-        private static AnimationClip LoadClipOrExported(string path, string exportName)
-        {
-            var clip = LoadClip(path);
-            if (clip != null) return clip;
-            return ErzahlerErzaClipExporter.LoadExported(exportName);
         }
 
         private static AnimatorStateMachine AddPerformanceSubMachine(
@@ -516,9 +509,6 @@ namespace Logic.Scripts.GameDomain.MVC.Nara.Editor
             existing.LakiBoss = source.LakiBoss;
             EditorUtility.SetDirty(existing);
         }
-
-        private static AnimationClip LoadClip(string path) =>
-            AssetDatabase.LoadAssetAtPath<AnimationClip>(path);
 
         private static void AddParam(AnimatorController c, string name, AnimatorControllerParameterType type)
         {

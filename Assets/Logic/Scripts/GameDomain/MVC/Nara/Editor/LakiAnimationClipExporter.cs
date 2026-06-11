@@ -1,6 +1,5 @@
 #if UNITY_EDITOR
-using System.Collections.Generic;
-using System.IO;
+using Logic.Scripts.GameDomain.MVC.Nara.Animation;
 using UnityEditor;
 using UnityEngine;
 
@@ -8,100 +7,26 @@ namespace Logic.Scripts.GameDomain.MVC.Nara.Editor
 {
     public static class LakiAnimationClipExporter
     {
-        public const string ExportPath = "Assets/Art/Animations/MadamLaki/Exported";
-        private const string LakiAnimationsFbx = "Assets/Art/FBX/Characters/MadameLakiAnimations.fbx";
-
-        private static readonly string[] ClipNames =
-        {
-            "Laki_Death",
-            "Laki_Hit_LoseBet",
-            "Laki_BetWon",
-            "Laki_ThrowDie_Prep",
-            "Laki_ThrowDie_Loop",
-            "Laki_ThrowDie_Finish",
-        };
+        public const string ExportPath = AnimationFinalExportPaths.LakiExport;
 
         public static int ExportAllFbxClips()
         {
-            EnsureFolder(ExportPath);
-            var index = BuildFbxClipIndex(LakiAnimationsFbx);
-            int exported = 0;
+            AnimationClipExportEditorUtility.DeleteLegacyExportFolders();
+            AnimationClipExportEditorUtility.RecreateExportFolder(ExportPath);
 
-            foreach (var pair in index)
-            {
-                WriteClipCopy(pair.Value, $"{ExportPath}/{pair.Key}.anim");
-                exported++;
-            }
+            int exported = AnimationClipExportEditorUtility.ExportAllClipsFromFbx(
+                AnimationFinalExportPaths.LakiFbx, ExportPath);
+
+            int fixedNames = AnimationClipExportEditorUtility.FixClipObjectNamesUnder(ExportPath);
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
+            Debug.Log($"[LakiAnimationClipExporter] Exported {exported} clips from {AnimationFinalExportPaths.LakiFbx} → {ExportPath}. Fixed names: {fixedNames}.");
             return exported;
         }
 
-        public static void ExportGameplayClips()
-        {
-            EnsureFolder(ExportPath);
-            var index = BuildFbxClipIndex(LakiAnimationsFbx);
-            int exported = 0;
-            int missing = 0;
-
-            foreach (var name in ClipNames)
-            {
-                if (!index.TryGetValue(name, out var source) || source == null)
-                {
-                    Debug.LogWarning($"[LakiAnimationClipExporter] Missing clip '{name}' in {LakiAnimationsFbx}.");
-                    missing++;
-                    continue;
-                }
-
-                WriteClipCopy(source, $"{ExportPath}/{name}.anim");
-                exported++;
-            }
-
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
-            Debug.Log($"[LakiAnimationClipExporter] Exported {exported} gameplay clips to {ExportPath}. Missing: {missing}.");
-        }
-
         public static AnimationClip LoadExported(string clipName) =>
-            AssetDatabase.LoadAssetAtPath<AnimationClip>($"{ExportPath}/{clipName}.anim");
-
-        private static void WriteClipCopy(AnimationClip source, string destPath)
-        {
-            var existing = AssetDatabase.LoadAssetAtPath<AnimationClip>(destPath);
-            if (existing != null)
-            {
-                EditorUtility.CopySerialized(source, existing);
-                EditorUtility.SetDirty(existing);
-                return;
-            }
-
-            var copy = Object.Instantiate(source);
-            copy.name = source.name;
-            AssetDatabase.CreateAsset(copy, destPath);
-        }
-
-        private static Dictionary<string, AnimationClip> BuildFbxClipIndex(string fbxPath)
-        {
-            var index = new Dictionary<string, AnimationClip>();
-            foreach (var asset in AssetDatabase.LoadAllAssetsAtPath(fbxPath))
-            {
-                if (asset is not AnimationClip clip) continue;
-                if (clip.name.StartsWith("__")) continue;
-                index[clip.name] = clip;
-            }
-
-            return index;
-        }
-
-        private static void EnsureFolder(string path)
-        {
-            if (AssetDatabase.IsValidFolder(path)) return;
-            var parent = Path.GetDirectoryName(path)?.Replace('\\', '/');
-            var leaf = Path.GetFileName(path);
-            if (!string.IsNullOrEmpty(parent) && !string.IsNullOrEmpty(leaf))
-                AssetDatabase.CreateFolder(parent, leaf);
-        }
+            AnimationClipExportEditorUtility.LoadExportedClip(ExportPath, clipName);
     }
 }
 #endif

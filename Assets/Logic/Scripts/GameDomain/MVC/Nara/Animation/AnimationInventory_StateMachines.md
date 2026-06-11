@@ -285,7 +285,7 @@ Fonte: `LakiBossAnimatorView.cs`, `LakiBossAnimationBridge.cs`
 
 Export: `TI6 > Animation > 1 Export FBX Clips > Hocari`  
 Build: `TI6 > Animation > 2 Build State Machines > Hocari`  
-Clips: `HocariAnimations2.fbx` (fase 1), `HocariAnimations1.fbx` (fase 2) → `Art/Animations/Hocari/Exported/`  
+Clips: `FinalFBXs/HocariAllAnimsPart2.fbx` (fase 1), `Part1.fbx` (fase 2) → `ArquivosArthur/Animacoes/Hocari/`  
 Runtime: `HocariBossAnimationBridge`, `HocariBossAnimatorBootstrap` no prefab `HokariBoss`.
 
 ### Parametros (Animator)

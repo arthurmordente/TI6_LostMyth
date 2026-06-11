@@ -1,44 +1,67 @@
 #if UNITY_EDITOR
 using Logic.Scripts.GameDomain.MVC.Boss.Hocari.Editor;
+using Logic.Scripts.GameDomain.MVC.Nara.Animation;
 using UnityEditor;
 using UnityEngine;
 
 namespace Logic.Scripts.GameDomain.MVC.Nara.Editor
 {
     /// <summary>
-    /// Entrada única para export de FBX e rebuild de animator controllers.
-    /// Ver AnimationInventory_UnwiredClips.md para clips sem hook de gameplay.
+    /// Entrada única para export de FBX finais e rebuild de animator controllers.
+    /// Clips finais: Assets/ArquivosArthur/Animacoes/{Erzahler,Laki,Hocari}
     /// </summary>
     public static class AnimationEditorMenus
     {
         private const string ExportMenu = "TI6/Animation/1 Export FBX Clips/";
         private const string BuildMenu = "TI6/Animation/2 Build State Machines/";
 
+        [MenuItem(ExportMenu + "All Final (Erzahler + Laki + Hocari)", false, 0)]
+        public static void ExportAllFinalFbx()
+        {
+            int erz = ErzahlerErzaClipExporter.ExportAllFbxClips();
+            int laki = LakiAnimationClipExporter.ExportAllFbxClips();
+            HocariAnimationClipExporter.ExportAllFbxClips();
+
+            ErzahlerAnimatorControllerBuilder.BuildErzahlerStateMachines();
+            ErzahlerAnimatorControllerBuilder.BuildLakiBossOnly();
+            HocariAnimatorControllerBuilder.BuildUnifiedOnly();
+
+            Debug.Log($"[Animation] All final: Erzahler={erz}, Laki={laki} clips → {AnimationFinalExportPaths.ExportRoot}. Controllers rebuilt.");
+        }
+
         [MenuItem(ExportMenu + "Erzahler", false, 1)]
         public static void ExportErzahlerFbx()
         {
             int count = ErzahlerErzaClipExporter.ExportAllFbxClips();
-            Debug.Log($"[Animation] Erzahler: exported {count} clips from ErzahlerFinal.fbx → {ErzahlerErzaClipExporter.ExportPath}");
+            ErzahlerAnimatorControllerBuilder.BuildErzahlerStateMachines();
+            Debug.Log($"[Animation] Erzahler: {count} clips → {ErzahlerErzaClipExporter.ExportPath}. Controllers rebuilt.");
         }
 
         [MenuItem(ExportMenu + "Laki", false, 2)]
         public static void ExportLakiFbx()
         {
             int count = LakiAnimationClipExporter.ExportAllFbxClips();
-            Debug.Log($"[Animation] Laki: exported {count} clips from MadameLakiAnimations.fbx → {LakiAnimationClipExporter.ExportPath}");
+            ErzahlerAnimatorControllerBuilder.BuildLakiBossOnly();
+            Debug.Log($"[Animation] Laki: {count} clips → {LakiAnimationClipExporter.ExportPath}. Controller rebuilt.");
         }
 
         [MenuItem(ExportMenu + "Hocari", false, 3)]
         public static void ExportHocariFbx()
         {
             HocariAnimationClipExporter.ExportAllFbxClips();
+            HocariAnimatorControllerBuilder.BuildUnifiedOnly();
+            Debug.Log($"[Animation] Hocari: clips → {HocariAnimationClipExporter.RootPath}. Controller rebuilt.");
         }
 
-        [MenuItem(ExportMenu + "Hocari — Fix clip names (Armature|...)", false, 4)]
-        public static void FixHocariExportedClipNames()
+        [MenuItem(ExportMenu + "Fix all clip names (Armature|...)", false, 20)]
+        public static void FixAllExportedClipNames()
         {
-            int count = HocariAnimationClipExporter.FixExportedClipObjectNames();
-            Debug.Log($"[Animation] Hocari: fixed {count} exported clip name(s) under {HocariAnimationClipExporter.RootPath}.");
+            int erz = AnimationClipExportEditorUtility.FixClipObjectNamesUnder(AnimationFinalExportPaths.ErzahlerExport);
+            int laki = AnimationClipExportEditorUtility.FixClipObjectNamesUnder(AnimationFinalExportPaths.LakiExport);
+            int hoc = HocariAnimationClipExporter.FixExportedClipObjectNames();
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            Debug.Log($"[Animation] Fixed clip names: Erzahler={erz}, Laki={laki}, Hocari={hoc}.");
         }
 
         [MenuItem(BuildMenu + "All (Erzahler + Laki + Hocari)", false, 10)]
@@ -47,7 +70,7 @@ namespace Logic.Scripts.GameDomain.MVC.Nara.Editor
             ErzahlerAnimatorControllerBuilder.BuildErzahlerStateMachines();
             ErzahlerAnimatorControllerBuilder.BuildLakiBossOnly();
             HocariAnimatorControllerBuilder.BuildUnifiedOnly();
-            Debug.Log("[Animation] Built all state machines (Erzahler, Laki, Hocari). Optional states depend on exported clips.");
+            Debug.Log("[Animation] Built all state machines from ArquivosArthur/Animacoes exports.");
         }
 
         [MenuItem(BuildMenu + "Erzahler", false, 11)]

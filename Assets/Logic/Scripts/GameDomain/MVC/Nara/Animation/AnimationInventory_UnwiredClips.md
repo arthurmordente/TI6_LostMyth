@@ -10,21 +10,21 @@ Para inventário completo do que **está ligado**, ver `AnimationInventory_State
 
 | Passo | Menu |
 |-------|------|
-| 1 — Exportar FBX | `TI6 → Animation → 1 Export FBX Clips → Erzahler / Laki / Hocari` |
-| 2 — Rebuild controllers | `TI6 → Animation → 2 Build State Machines → All` (ou Erzahler / Laki / Hocari individual) |
+| 1 — Exportar FBX finais | `TI6 → Animation → 1 Export FBX Clips → All Final` (ou por personagem) |
+| 2 — Rebuild controllers | Incluído no export; ou `2 Build State Machines → All` |
 | 3 — Hocari prefab (opcional) | `TI6 → Animation → 2 Build State Machines → Hocari — Assign to HokariBoss prefab` |
 
-O build usa clips já exportados em `Exported/` (e pastas core de Erza/Laki). Estados opcionais (Death, Hit, Bet, ThrowDie, etc.) só aparecem no controller **se** o `.anim` existir após o export.
+Clips finais em `Assets/ArquivosArthur/Animacoes/{Erzahler,Laki,Hocari}`. Export apaga pastas legadas `Art/Animations/*/Exported`.
 
 ---
 
-## Erzahler (`ErzahlerFinal.fbx`)
+## Erzahler (`FinalFBXs/ErzahlerFinal.fbx` → `ArquivosArthur/Animacoes/Erzahler`)
 
 **Todos os clips do FBX têm destino** em pelo menos um dos controllers FINAL (`ERZ_ErzahlerBook_FINAL`, `ERZ_Erzahler_FINAL`, `ERZ_Book_FINAL`) ou em estados opcionais (Death, Hit, Bet, Conjuring Fail, Divide).
 
 | Clip FBX | Situação |
 |----------|----------|
-| Locomoção / conjuring / book core | Pastas `erz+book`, `Erzahler`, `Book` (controllers core) |
+| Locomoção / conjuring / book core | Todos exportados para `ArquivosArthur/Animacoes/Erzahler` |
 | `Erzahler_Death`, `Hit`, `BetWon`, `BetLost`, `Conjuring_Fail` | Estados opcionais no player (se exportados) |
 | `Book_CreateClone`, `Book_ReturnClone` | Divide ability (se exportados) |
 
@@ -32,7 +32,7 @@ O build usa clips já exportados em `Exported/` (e pastas core de Erza/Laki). Es
 
 ---
 
-## Laki (`MadameLakiAnimations.fbx`)
+## Laki (`FinalFBXs/MadameLakiAnimations.fbx` → `ArquivosArthur/Animacoes/Laki`)
 
 | Clip | Motivo |
 |------|--------|
@@ -42,7 +42,7 @@ O build usa clips já exportados em `Exported/` (e pastas core de Erza/Laki). Es
 
 ---
 
-## Hocari (`HocariAnimations1.fbx`, `HocariAnimations2.fbx`, `HOC_Hocari.fbx`)
+## Hocari (`FinalFBXs/HocariAllAnimsPart1.fbx`, `HocariAllAnimsPart2.fbx` → `ArquivosArthur/Animacoes/Hocari`)
 
 ### Sem `AttackId` / ataque no código
 

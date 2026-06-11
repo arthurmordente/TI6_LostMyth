@@ -104,6 +104,7 @@ MonoBehaviour:
   _collider: {fileID: 6820227577075520871}
   _animator: {fileID: 5729420308865477600}
   _lakiAnimatorView: {fileID: 172926066645270346}
+  _hocariAnimationBridge: {fileID: 0}
   _phaseTransitionDuration: 1
 --- !u!114 &3114752621752471854
 MonoBehaviour:
@@ -447,7 +448,7 @@ Animator:
   m_GameObject: {fileID: 6444789507857401608}
   m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: 429a6fcf0dfeaf04cb5d484ba30d94e8, type: 3}
-  m_Controller: {fileID: 9100000, guid: 8a9b98068b47f6f489f43f952cd7a40d, type: 2}
+  m_Controller: {fileID: 9100000, guid: b2d130fa47a359a43887126703aa0b91, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
