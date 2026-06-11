@@ -26,10 +26,10 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8688181529004620475}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 1
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -51,7 +51,7 @@ VisualEffect:
   m_PropertySheet:
     m_Float:
       m_Array:
-      - m_Value: 0.6
+      - m_Value: 0.2
         m_Name: BGAlpha
         m_Overridden: 1
       - m_Value: 0
@@ -87,7 +87,7 @@ VisualEffect:
       m_Array: []
     m_Vector4f:
       m_Array:
-      - m_Value: {x: 0, y: 3.8643916, z: 21.112125, w: 1}
+      - m_Value: {x: 0, y: 5.317667, z: 28.213194, w: 1}
         m_Name: BorderColor
         m_Overridden: 1
       - m_Value: {x: 3.206431, y: 0.13787666, z: 0.13787666, w: 1}
@@ -96,7 +96,7 @@ VisualEffect:
       - m_Value: {x: 0.7490195, y: 0, z: 0, w: 0}
         m_Name: HoverColor
         m_Overridden: 1
-      - m_Value: {x: 0, y: 0.0042738914, z: 1, w: 1}
+      - m_Value: {x: 0, y: 0.0015926275, z: 0.4061262, w: 1}
         m_Name: BackGroundColor
         m_Overridden: 1
     m_Uint:

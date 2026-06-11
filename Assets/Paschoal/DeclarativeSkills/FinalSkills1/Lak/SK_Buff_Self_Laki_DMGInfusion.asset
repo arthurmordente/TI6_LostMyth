@@ -33,16 +33,18 @@ MonoBehaviour:
   _areaAimPrefab: {fileID: 0}
   _areaImpactPrefab: {fileID: 0}
   _selfAimPrefab: {fileID: 1607142820532151380, guid: 869e8460ad50e054b9b351e10c296c31, type: 3}
-  _selfCastPrefab: {fileID: 1607142820532151380, guid: 6190cf774033c09479d45e3c13b935d7, type: 3}
+  _selfCastPrefab: {fileID: 3505108464399497771, guid: 5f0611deb795ac6498d79e53952101b7, type: 3}
   Power: 0
   Cost: 0
   Icon: {fileID: 21300000, guid: 636254e507f1d2346a16a9436cf1aade, type: 3}
-  SkillName: Ataque infusionado
-  Description: "Garante um multiplicador de dano aleat\xF3rio para o pr\xF3ximo ataque.
-    Viva a sorte!"
+  SkillName: Dama da Sorte
+  Description: "Demonstra sua devo\xE7\xE3o a Laki, gastando X PA. No in\xEDcio dos
+    pr\xF3ximos 2 turnos Laki demonstra seu apre\xE7o, concedendo um b\xF4nus de
+    X+1 PA."
   _effects:
   - {fileID: 11400000, guid: a7b7f6e2e38a90e4d9f1d814975fc12c, type: 2}
   _passiveModifiers: []
   _passiveTurnBehavior: {fileID: 0}
   _passiveCombatBehavior: {fileID: 0}
+  _passiveOnDamageTakenBehavior: {fileID: 0}
   _runtimeModifiers: []

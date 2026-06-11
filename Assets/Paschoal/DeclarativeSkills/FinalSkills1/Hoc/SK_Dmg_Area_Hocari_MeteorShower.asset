@@ -31,15 +31,19 @@ MonoBehaviour:
   _areaMaxRange: 8
   _areaRadius: 4
   _areaAimPrefab: {fileID: 1607142820532151380, guid: 6feee9629db8db94f83b1e6771d787d1, type: 3}
-  _areaImpactPrefab: {fileID: 2224025274982176450, guid: caa4a69375bd38348901ddadba2f8953, type: 3}
+  _areaImpactPrefab: {fileID: 6108087016125792725, guid: 2ca6cdfe2d6cd5a4db4bb465cee7f47a, type: 3}
   _selfAimPrefab: {fileID: 0}
   _selfCastPrefab: {fileID: 0}
   Power: 30
   Cost: 2
   Icon: {fileID: 21300000, guid: a3059404bf2223c43b52b7b86d37bb18, type: 3}
-  SkillName: Chuva de raios
-  Description: "Invoca raio dos c\xE9us, causando muito dano em tudo na \xE1rea selecionada."
+  SkillName: "Chuva Mec\xE2nica"
+  Description: "Marca uma pequena \xE1rea alvo que \xE9 atingida por in\xFAmeras
+    l\xE2minas de Hocari. Todo alvo dentro da \xE1rea sofre X dano duas vezes"
   _effects:
   - {fileID: 11400000, guid: a47ac10b58cc4372a5670e02b2c3d472, type: 2}
   _passiveModifiers: []
+  _passiveTurnBehavior: {fileID: 0}
+  _passiveCombatBehavior: {fileID: 0}
+  _passiveOnDamageTakenBehavior: {fileID: 0}
   _runtimeModifiers: []

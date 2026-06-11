@@ -37,10 +37,13 @@ MonoBehaviour:
   Power: 0
   Cost: 0
   Icon: {fileID: 21300000, guid: 04385632ecaf79f479ed377125261b7f, type: 3}
-  SkillName: "Maldi\xE7\xE3o de Boris"
-  Description: Potencializa seu dano quanto mais ferido estiver
+  SkillName: "F\xFAria da Serpente"
+  Description: "Imbu\xEDdo com a magia de Boris, o usu\xE1rio fica mais forte quando
+    est\xE1 ferido. Ao ter sua vida reduzida a, pelo menos, 50% do valor total ele
+    recebe um b\xF4nus de 25% para todo seu dano causado."
   _effects: []
   _passiveModifiers: []
   _passiveTurnBehavior: {fileID: 0}
   _passiveCombatBehavior: {fileID: 11400000, guid: a2816f323a5a3ea4395ce60eba203824, type: 2}
+  _passiveOnDamageTakenBehavior: {fileID: 0}
   _runtimeModifiers: []
