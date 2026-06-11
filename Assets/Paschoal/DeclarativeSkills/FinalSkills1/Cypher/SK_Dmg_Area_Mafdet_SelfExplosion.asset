@@ -30,8 +30,8 @@ MonoBehaviour:
   _areaMinRange: 0
   _areaMaxRange: 0
   _areaRadius: 5
-  _areaAimPrefab: {fileID: 1607142820532151380, guid: 6feee9629db8db94f83b1e6771d787d1, type: 3}
-  _areaImpactPrefab: {fileID: 2224025274982176450, guid: caa4a69375bd38348901ddadba2f8953, type: 3}
+  _areaAimPrefab: {fileID: 5397782417188293735, guid: 806bc1f9fc4930940a8f9e8415524439, type: 3}
+  _areaImpactPrefab: {fileID: 8585913976967579655, guid: e13673e55656e5e44b1fecd8f916f987, type: 3}
   _selfAimPrefab: {fileID: 0}
   _selfCastPrefab: {fileID: 0}
   Power: 50
@@ -46,4 +46,5 @@ MonoBehaviour:
   _passiveModifiers: []
   _passiveTurnBehavior: {fileID: 0}
   _passiveCombatBehavior: {fileID: 0}
+  _passiveOnDamageTakenBehavior: {fileID: 0}
   _runtimeModifiers: []

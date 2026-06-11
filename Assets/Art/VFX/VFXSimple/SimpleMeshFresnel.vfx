@@ -110,7 +110,7 @@ MonoBehaviour:
     x: 410
     y: -492
     width: 744
-    height: 1647
+    height: 1616
 --- !u!114 &114350483966674976
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -920,7 +920,7 @@ MonoBehaviour:
   enableRayTracing: 0
   decimationFactor: 1
   raytracedScaleMode: 0
-  needsOwnSort: 0
+  needsOwnSort: 1
   needsOwnAabbBuffer: 0
   m_Topology:
     rid: 1000
