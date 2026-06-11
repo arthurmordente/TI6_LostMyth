@@ -35,7 +35,7 @@ public class DeclarativeSkillDataSO : SkillDataSO
                 _runtimeModifiers[i]?.Apply(this, caster, target, targets);
         }
 
-        if (CastType == SkillCastType.Projectile && ProjectilePrefab != null && caster != null)
+        if (CastType == SkillCastType.Projectile && ProjectileEffectPrefab != null && caster != null)
         {
             var projectileCtx = new SkillExecutionContext
             {
@@ -48,9 +48,9 @@ public class DeclarativeSkillDataSO : SkillDataSO
             };
             SkillProjectileSpawn.ExecuteSpawn(in projectileCtx);
         }
-        else if (CastType == SkillCastType.Projectile && ProjectilePrefab == null)
+        else if (CastType == SkillCastType.Projectile && ProjectileEffectPrefab == null)
         {
-            Debug.LogWarning($"[DeclarativeSkill] '{SkillName}' is Projectile but ProjectilePrefab is not assigned.");
+            Debug.LogWarning($"[DeclarativeSkill] '{SkillName}' is Projectile but Effect Prefab is not assigned.");
         }
 
         SkillEffectsRunner.Execute(this, caster, target, targets, beneficiary);

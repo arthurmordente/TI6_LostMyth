@@ -20,6 +20,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki
         [SerializeField] private bool _includeIdle1InPool;
 
         private bool _performanceLoopActive;
+        private bool _throwDieSequenceFinished;
         private Task _resolveAnimationTask = Task.CompletedTask;
         private IAudioService _audioService;
 
@@ -48,16 +49,24 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki
         private void OnDiceAttackBegan()
         {
             if (_view == null) return;
+            _throwDieSequenceFinished = false;
             _view.BeginThrowDie();
             _view.SetThrowDieLoop(true);
         }
 
         private async void OnDiceAttackEnded()
         {
-            if (_view == null) return;
+            if (_throwDieSequenceFinished) return;
+            await FinishDiceThrowSequenceAsync();
+        }
+
+        public async Task FinishDiceThrowSequenceAsync()
+        {
+            if (_view == null || _throwDieSequenceFinished) return;
             _view.SetThrowDieLoop(false);
             _view.FinishThrowDie();
             await _view.WaitUntilStateTagAsync(LakiAnimatorParams.TagIdle, 2f);
+            _throwDieSequenceFinished = true;
         }
 
         public async Task OnBossPrepareTurnStartedAsync()

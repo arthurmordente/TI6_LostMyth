@@ -144,7 +144,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Logic.Scripts.GameDomain.VisualFeedback.DamageFlashPresenter
   _flashSeconds: 0.2
   _flashColor: {r: 1, g: 0, b: 0, a: 1}
-  _modelRoot: {fileID: 0}
+  _modelRoot: {fileID: 5892792181930543306}
 --- !u!114 &5606840884547437125
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -158,7 +158,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Logic.Scripts.GameDomain.VisualFeedback.SkillTargetingHighlightPresenter
   _highlightMaterialTemplate: {fileID: 2100000, guid: 8bc147100e393b64bafc3b19463acc6a, type: 2}
-  _modelRoot: {fileID: 0}
+  _modelRoot: {fileID: 5892792181930543306}
   _overrideMainColor: 0
   _mainColor: {r: 8, g: 0, b: 0, a: 1}
 --- !u!114 &1036894158454948369

@@ -16,7 +16,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack
         public interface IResolver
         {
             bool TryResolveAtBossTurn(out DiceAttackResult result);
-            void DestroyDiceAttackRoot();
+            void DestroyDiceAttackRoot(bool deferUiDismiss = false);
         }
         public interface IPlayerTurnGate
         {
@@ -26,6 +26,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack
         private static int _activeCount;
         private static bool _skipOnceOnBossTurn;
         private static bool _pauseBossOnce;
+        private static bool _scoreboardDismissDeferred;
         private static readonly System.Collections.Generic.List<IResolver> _resolvers = new System.Collections.Generic.List<IResolver>(2);
         private static readonly System.Collections.Generic.List<IPlayerTurnGate> _playerTurnGates = new System.Collections.Generic.List<IPlayerTurnGate>(2);
 
@@ -38,10 +39,16 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack
         public static event System.Action OnDiceAttackEnded;
         public static bool IsActive => _activeCount > 0;
 
+        /// <summary>Fired when a deferred scoreboard should hide (start of next Laki turn).</summary>
+        public static event System.Action OnDeferredScoreboardDismiss;
+
+        public static bool IsScoreboardDismissDeferred => _scoreboardDismissDeferred;
+
         public static void Begin()
         {
             bool wasInactive = _activeCount <= 0;
             _activeCount++;
+            _scoreboardDismissDeferred = false;
             if (wasInactive) try { OnDiceAttackBegan?.Invoke(); } catch { }
         }
 
@@ -51,17 +58,28 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack
             try { OnNameChanged?.Invoke(ActiveName); } catch { }
         }
 
-        public static void EndAndScheduleBossResolutionSkip()
+        public static void EndAndScheduleBossResolutionSkip(bool dismissScoreboard = true)
         {
             if (_activeCount > 0) _activeCount--;
             _skipOnceOnBossTurn = true;
             _pauseBossOnce = true;
+            if (!dismissScoreboard)
+                _scoreboardDismissDeferred = true;
             if (_activeCount <= 0)
             {
                 StatusProvider = null;
-                try { OnDiceAttackEnded?.Invoke(); } catch { }
+                if (dismissScoreboard)
+                    try { OnDiceAttackEnded?.Invoke(); } catch { }
             }
             SetActiveName(null);
+        }
+
+        public static bool TryDismissDeferredScoreboard()
+        {
+            if (!_scoreboardDismissDeferred) return false;
+            _scoreboardDismissDeferred = false;
+            try { OnDeferredScoreboardDismiss?.Invoke(); } catch { }
+            return true;
         }
 
         public static bool ConsumeSkipOnBossTurn()
@@ -137,6 +155,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack
             _activeCount = 0;
             _skipOnceOnBossTurn = false;
             _pauseBossOnce = false;
+            _scoreboardDismissDeferred = false;
             _resolvers.Clear();
             _playerTurnGates.Clear();
             StatusProvider = null;

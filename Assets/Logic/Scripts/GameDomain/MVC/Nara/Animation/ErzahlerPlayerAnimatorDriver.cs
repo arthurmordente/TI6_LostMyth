@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Logic.Scripts.GameDomain.MVC.Nara.Animation
@@ -169,6 +170,34 @@ namespace Logic.Scripts.GameDomain.MVC.Nara.Animation
             }
 
             return false;
+        }
+
+        public async Task WaitUntilBetReactionCompleteAsync(float timeoutSeconds = 5f, int layer = 0)
+        {
+            if (_animator == null || !UsesErzahlerControllers) return;
+            if (!HasAnimatorParameter(ErzahlerAnimatorParams.BetWon)
+                && !HasAnimatorParameter(ErzahlerAnimatorParams.BetLost))
+                return;
+
+            float elapsed = 0f;
+            bool enteredBet = false;
+            while (elapsed < Mathf.Max(0.01f, timeoutSeconds))
+            {
+                if (!_animator.IsInTransition(layer))
+                {
+                    var st = _animator.GetCurrentAnimatorStateInfo(layer);
+                    if (st.IsTag(ErzahlerAnimatorParams.TagBetReaction))
+                    {
+                        enteredBet = true;
+                        if (st.normalizedTime >= 0.92f) return;
+                    }
+                    else if (enteredBet)
+                        return;
+                }
+
+                elapsed += Time.deltaTime;
+                await Task.Yield();
+            }
         }
 
         private void InitializeDefaultController()

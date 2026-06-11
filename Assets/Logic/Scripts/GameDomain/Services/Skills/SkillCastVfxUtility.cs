@@ -8,6 +8,13 @@ namespace Logic.Scripts.GameDomain.Services.Skills
     /// </summary>
     public static class SkillCastVfxUtility
     {
+        public static void TrySpawnTransiient(GameObject prefab, Vector3 position, Quaternion rotation)
+        {
+            if (prefab == null) return;
+            var instance = Object.Instantiate(prefab, position, rotation);
+            ConfigureSpawnedInstance(instance, persistInScene: false, destroyAfterSeconds: 0f);
+        }
+
         public static void ConfigureSpawnedInstance(GameObject instance, bool persistInScene, float destroyAfterSeconds)
         {
             if (instance == null || persistInScene) return;

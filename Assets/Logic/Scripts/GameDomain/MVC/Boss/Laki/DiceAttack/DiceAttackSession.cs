@@ -86,14 +86,15 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack
                 return false;
             }
 
-            public void DestroyDiceAttackRoot()
+            public void DestroyDiceAttackRoot(bool deferUiDismiss = false)
             {
                 HidePlayerPrompt();
                 DestroyAllSpawnedDice();
                 DiceAttackRuntimeService.UnregisterPlayerTurnGate(this);
                 DiceAttackRuntimeService.UnregisterResolver(this);
-                DiceAttackRuntimeService.EndAndScheduleBossResolutionSkip();
-                try { DiceUiRuntime.Reset(); } catch { }
+                DiceAttackRuntimeService.EndAndScheduleBossResolutionSkip(dismissScoreboard: !deferUiDismiss);
+                if (!deferUiDismiss)
+                    try { DiceUiRuntime.Reset(); } catch { }
             }
 
             public async Task OnPlayerTurnStartAsync()
@@ -207,20 +208,19 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack
                 int bossSum = Sum(_bossRolls);
                 bool playerWon = playerSum > bossSum;
                 _outcome = playerSum == bossSum ? Outcome.Tie : (playerWon ? Outcome.PlayerWin : Outcome.BossWin);
-                _final = new DiceAttackResult { Completed = true, PlayerWon = playerWon, IsTie = _outcome == Outcome.Tie };
+                _final = new DiceAttackResult
+                {
+                    Completed = true,
+                    PlayerWon = playerWon,
+                    IsTie = _outcome == Outcome.Tie,
+                    PlayerSum = playerSum,
+                    BossSum = bossSum
+                };
                 _resolved = true;
-                PlayDiceResolutionVocalSfx();
                 DiceUiRuntime.ReportFinal(playerSum, bossSum);
                 string winner = _outcome == Outcome.Tie ? "Tie" : (playerWon ? "Player" : "Boss");
                 Debug.Log($"[Laki][DiceAttack] TURN_RESULT Winner={winner} P={playerSum} B={bossSum} outcome={_outcome}");
                 DestroyAllSpawnedDice();
-            }
-
-            void PlayDiceResolutionVocalSfx()
-            {
-                if (_audioService == null || _final.IsTie) return;
-                string sfxId = _final.PlayerWon ? SfxIds.Laki_Perdendo : SfxIds.Laki_Ganhando;
-                _audioService.PlaySfx(sfxId, AudioChannelType.SfxBoss);
             }
 
             private void ReportUiProgress(bool[] punchPlayerSlots = null, bool[] punchBossSlots = null,

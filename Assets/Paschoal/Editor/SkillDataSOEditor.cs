@@ -59,8 +59,12 @@ public class SkillDataSOEditor : Editor
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("_projectileRange"), new GUIContent("Range"));
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("_projectileNumberOfTargets"), new GUIContent("Number Of Targets"));
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("_projectileTravelSpeed"), new GUIContent("Travel Speed"));
-                    EditorGUILayout.PropertyField(serializedObject.FindProperty("_projectileAimPrefab"), new GUIContent("Aim Prefab"));
-                    EditorGUILayout.PropertyField(serializedObject.FindProperty("_projectilePrefab"), new GUIContent("Projectile Prefab"));
+                    EditorGUILayout.Space(4f);
+                    EditorGUILayout.LabelField("VFX", EditorStyles.miniBoldLabel);
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("_projectileAimPrefab"), new GUIContent("Mira Prefab", "Indica onde a habilidade vai atingir durante o aim."));
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("_projectileCastPrefab"), new GUIContent("Cast Prefab", "Efeito no player ao confirmar a habilidade."));
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("_projectileEffectPrefab"), new GUIContent("Effect Prefab", "Projétil ou VFX de entrega da habilidade."));
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("_projectileImpactPrefab"), new GUIContent("Impact Prefab", "Efeito ao atingir um IEffectable (não spawna no boss Laki com escudo)."));
 
                     if (showMovementProjectileOptions)
                     {
@@ -96,13 +100,19 @@ public class SkillDataSOEditor : Editor
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("_areaMinRange"), new GUIContent("Min Range"));
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("_areaMaxRange"), new GUIContent("Max Range"));
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("_areaRadius"), new GUIContent("Radius"));
-                    EditorGUILayout.PropertyField(serializedObject.FindProperty("_areaAimPrefab"), new GUIContent("Aim Prefab"));
-                    EditorGUILayout.PropertyField(serializedObject.FindProperty("_areaImpactPrefab"), new GUIContent("Area Impact Prefab"));
+                    EditorGUILayout.Space(4f);
+                    EditorGUILayout.LabelField("VFX", EditorStyles.miniBoldLabel);
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("_areaAimPrefab"), new GUIContent("Mira Prefab", "Indica onde a habilidade vai atingir durante o aim."));
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("_areaCastPrefab"), new GUIContent("Cast Prefab", "Efeito no player ao confirmar a habilidade."));
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("_areaEffectPrefab"), new GUIContent("Effect Prefab", "Burst AoE no ponto confirmado."));
                     break;
                 case SkillCastType.Self:
                     EditorGUILayout.LabelField("Self", EditorStyles.boldLabel);
-                    EditorGUILayout.PropertyField(serializedObject.FindProperty("_selfAimPrefab"), new GUIContent("Aim Prefab"));
-                    EditorGUILayout.PropertyField(serializedObject.FindProperty("_selfCastPrefab"), new GUIContent("Cast Prefab"));
+                    EditorGUILayout.Space(4f);
+                    EditorGUILayout.LabelField("VFX", EditorStyles.miniBoldLabel);
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("_selfAimPrefab"), new GUIContent("Mira Prefab", "Indica onde a habilidade vai atingir durante o aim."));
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("_selfCastPrefab"), new GUIContent("Cast Prefab", "Efeito no player ao confirmar a habilidade."));
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("_selfEffectPrefab"), new GUIContent("Effect Prefab", "VFX de buff/cura no anchor de apresentação (tipicamente nos pés)."));
                     break;
             }
         }

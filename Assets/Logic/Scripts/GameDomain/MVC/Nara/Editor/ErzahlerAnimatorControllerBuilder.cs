@@ -286,7 +286,8 @@ namespace Logic.Scripts.GameDomain.MVC.Nara.Editor
         {
             var death = ErzahlerErzaClipExporter.LoadExported("Erzahler_Death");
             var hit = ErzahlerErzaClipExporter.LoadExported("Erzahler_Hit");
-            var betWon = ErzahlerErzaClipExporter.LoadExported("Erzahler_BetWon");
+            var betWon = ErzahlerErzaClipExporter.LoadExported("Erzahler_BetWon")
+                ?? ErzahlerErzaClipExporter.LoadExported("Erzahler_Idle_1");
             var betLost = ErzahlerErzaClipExporter.LoadExported("Erzahler_BetLost");
             var conjuringFail = ErzahlerErzaClipExporter.LoadExported("Erzahler_Conjuring_Fail");
 
@@ -308,7 +309,7 @@ namespace Logic.Scripts.GameDomain.MVC.Nara.Editor
             if (betWon != null)
             {
                 AddParam(controller, ErzahlerAnimatorParams.BetWon, AnimatorControllerParameterType.Trigger);
-                var wonState = AddMotionState(root, "BetWon", betWon, new Vector3(850, 180, 0), "");
+                var wonState = AddMotionState(root, "BetWon", betWon, new Vector3(850, 180, 0), ErzahlerAnimatorParams.TagBetReaction);
                 AddAnyStateTrigger(root, wonState, ErzahlerAnimatorParams.BetWon);
                 AddExitTransition(wonState, idleFallback, 0.92f);
             }
@@ -316,7 +317,7 @@ namespace Logic.Scripts.GameDomain.MVC.Nara.Editor
             if (betLost != null)
             {
                 AddParam(controller, ErzahlerAnimatorParams.BetLost, AnimatorControllerParameterType.Trigger);
-                var lostState = AddMotionState(root, "BetLost", betLost, new Vector3(850, 270, 0), "");
+                var lostState = AddMotionState(root, "BetLost", betLost, new Vector3(850, 270, 0), ErzahlerAnimatorParams.TagBetReaction);
                 AddAnyStateTrigger(root, lostState, ErzahlerAnimatorParams.BetLost);
                 AddExitTransition(lostState, idleFallback, 0.92f);
             }
@@ -367,7 +368,7 @@ namespace Logic.Scripts.GameDomain.MVC.Nara.Editor
             if (betWon != null)
             {
                 AddParam(controller, LakiAnimatorParams.BetWon, AnimatorControllerParameterType.Trigger);
-                var wonState = AddMotionState(root, "BetWon", betWon, new Vector3(850, 90, 0), "");
+                var wonState = AddMotionState(root, "BetWon", betWon, new Vector3(850, 90, 0), LakiAnimatorParams.TagBetReaction);
                 AddAnyStateTrigger(root, wonState, LakiAnimatorParams.BetWon);
                 AddExitTransition(wonState, idleFallback, 0.92f);
             }
@@ -375,7 +376,7 @@ namespace Logic.Scripts.GameDomain.MVC.Nara.Editor
             if (hit != null)
             {
                 AddParam(controller, LakiAnimatorParams.BetLost, AnimatorControllerParameterType.Trigger);
-                var lostState = AddMotionState(root, "BetLost", hit, new Vector3(850, 135, 0), "");
+                var lostState = AddMotionState(root, "BetLost", hit, new Vector3(850, 135, 0), LakiAnimatorParams.TagBetReaction);
                 AddAnyStateTrigger(root, lostState, LakiAnimatorParams.BetLost);
                 AddExitTransition(lostState, idleFallback, 0.92f);
             }
