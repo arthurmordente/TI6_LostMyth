@@ -19,7 +19,7 @@ MonoBehaviour:
   _projectileNumberOfTargets: 5
   _projectileTravelSpeed: 12
   _projectileAimPrefab: {fileID: 5171449077471736857, guid: 5a96a15201f481c488a06861525f72e4, type: 3}
-  _projectilePrefab: {fileID: 4470363709726842422, guid: 05ecf4c11bd35014797b40e47735e1c1, type: 3}
+  _projectilePrefab: {fileID: 6161943782864635518, guid: 35553b0efdb2f28489184681866edfcf, type: 3}
   _moveCasterToProjectileHit: 0
   _projectilePullStandoffFromTargetMeters: 1.2
   _projectileDealsDamage: 1
@@ -37,10 +37,14 @@ MonoBehaviour:
   Power: 15
   Cost: 1
   Icon: {fileID: 21300000, guid: 84fd325531c382e49a6e5ca447e45938, type: 3}
-  SkillName: Flecha penetrante
-  Description: Dispara uma flecha que perfura os dois primeiros alvos, causando dano
-    em tudo ao seu caminho.
+  SkillName: Pena Afiada
+  Description: "Invoca uma l\xE2mina das asas de Hocari e arremessa para frente \xE0
+    uma dist\xE2ncia mediana. A l\xE2mina \xE9 capaz de perfurar seus alvos, causando
+    X dano \xE0 todos em sua trajet\xF3ria."
   _effects:
   - {fileID: 0}
   _passiveModifiers: []
+  _passiveTurnBehavior: {fileID: 0}
+  _passiveCombatBehavior: {fileID: 0}
+  _passiveOnDamageTakenBehavior: {fileID: 0}
   _runtimeModifiers: []

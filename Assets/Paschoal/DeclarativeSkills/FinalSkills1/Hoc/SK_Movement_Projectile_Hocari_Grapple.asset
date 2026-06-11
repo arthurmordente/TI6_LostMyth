@@ -19,7 +19,7 @@ MonoBehaviour:
   _projectileNumberOfTargets: 1
   _projectileTravelSpeed: 12
   _projectileAimPrefab: {fileID: 5171449077471736857, guid: 5a96a15201f481c488a06861525f72e4, type: 3}
-  _projectilePrefab: {fileID: 4470363709726842422, guid: 05ecf4c11bd35014797b40e47735e1c1, type: 3}
+  _projectilePrefab: {fileID: 4387164337442403446, guid: ff7fc04b0ff3f974484921871be3a56c, type: 3}
   _moveCasterToProjectileHit: 1
   _projectilePullStandoffFromTargetMeters: 2
   _projectileDealsDamage: 1
@@ -37,8 +37,12 @@ MonoBehaviour:
   Power: 0
   Cost: 2
   Icon: {fileID: 21300000, guid: d40a558aa94823b49841218f31b64373, type: 3}
-  SkillName: "Pluma da aproxima\xE7\xE3o"
-  Description: "Utiliza o poder de suc\xE7\xE3o para ir at\xE9 o alvo atingido."
+  SkillName: "Impulso Magn\xE9tico"
+  Description: "Dispara energia magn\xE9tica para frente \xE0 uma grande dist\xE2ncia
+    e, caso colida com algo, a energia puxa o usu\xE1rio at\xE9 o ponto de colis\xE3o."
   _effects: []
   _passiveModifiers: []
+  _passiveTurnBehavior: {fileID: 0}
+  _passiveCombatBehavior: {fileID: 0}
+  _passiveOnDamageTakenBehavior: {fileID: 0}
   _runtimeModifiers: []

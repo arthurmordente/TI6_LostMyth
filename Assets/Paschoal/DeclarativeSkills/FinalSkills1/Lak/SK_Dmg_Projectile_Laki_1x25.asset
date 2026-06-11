@@ -19,7 +19,7 @@ MonoBehaviour:
   _projectileNumberOfTargets: 1
   _projectileTravelSpeed: 12
   _projectileAimPrefab: {fileID: 5171449077471736857, guid: 5a96a15201f481c488a06861525f72e4, type: 3}
-  _projectilePrefab: {fileID: 4470363709726842422, guid: 05ecf4c11bd35014797b40e47735e1c1, type: 3}
+  _projectilePrefab: {fileID: 6645431304558841046, guid: e869d7c59e9e0d24d87251a5c9af9845, type: 3}
   _moveCasterToProjectileHit: 0
   _projectilePullStandoffFromTargetMeters: 1.2
   _projectileDealsDamage: 1
@@ -37,11 +37,13 @@ MonoBehaviour:
   Power: 25
   Cost: 1
   Icon: {fileID: 21300000, guid: 432210c08292a1942935ebc8fcad4608, type: 3}
-  SkillName: Orbe de energia
-  Description: Dispara um dado que explode ao colidir.
+  SkillName: Dado Viciado
+  Description: Arremessa o dado da sorte de Laki, que explode ao contato com um alvo,
+    causando X dano.
   _effects:
   - {fileID: 0}
   _passiveModifiers: []
   _passiveTurnBehavior: {fileID: 0}
   _passiveCombatBehavior: {fileID: 0}
+  _passiveOnDamageTakenBehavior: {fileID: 0}
   _runtimeModifiers: []
