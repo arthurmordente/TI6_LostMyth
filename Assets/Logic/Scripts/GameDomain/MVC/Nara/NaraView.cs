@@ -22,6 +22,13 @@ namespace Logic.Scripts.GameDomain.MVC.Nara
 
         public Rigidbody GetRigidbody() => _rigidbody;
 
+        public Animator GetAnimator()
+        {
+            if (_animator == null)
+                _animator = GetComponentInChildren<Animator>(true);
+            return _animator;
+        }
+
         public Camera GetCamera() => Camera.main;
 
         public ErzahlerPlayerAnimatorDriver ErzahlerAnimatorDriver => _erzahlerAnimatorDriver;

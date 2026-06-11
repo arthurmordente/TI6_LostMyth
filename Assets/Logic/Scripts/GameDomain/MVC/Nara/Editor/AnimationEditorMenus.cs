@@ -37,7 +37,17 @@ namespace Logic.Scripts.GameDomain.MVC.Nara.Editor
             Debug.Log($"[Animation] Erzahler: {count} clips → {ErzahlerErzaClipExporter.ExportPath}. Controllers rebuilt.");
         }
 
-        [MenuItem(ExportMenu + "Laki", false, 2)]
+        [MenuItem(ExportMenu + "Erzahler — Book Idle (ErzahlerBookIdle.fbx)", false, 2)]
+        public static void ExportErzahlerBookIdleFbx()
+        {
+            if (!ErzahlerErzaClipExporter.ExportBookIdleClip())
+                return;
+
+            ErzahlerAnimatorControllerBuilder.BuildErzahlerWithBookOnly();
+            Debug.Log($"[Animation] Erzahler book idle → {ErzahlerErzaClipExporter.ExportPath}/{AnimationFinalExportPaths.ErzahlerBookIdleClipName}.anim. With-book controller rebuilt.");
+        }
+
+        [MenuItem(ExportMenu + "Laki", false, 3)]
         public static void ExportLakiFbx()
         {
             int count = LakiAnimationClipExporter.ExportAllFbxClips();
@@ -45,7 +55,7 @@ namespace Logic.Scripts.GameDomain.MVC.Nara.Editor
             Debug.Log($"[Animation] Laki: {count} clips → {LakiAnimationClipExporter.ExportPath}. Controller rebuilt.");
         }
 
-        [MenuItem(ExportMenu + "Hocari", false, 3)]
+        [MenuItem(ExportMenu + "Hocari", false, 4)]
         public static void ExportHocariFbx()
         {
             HocariAnimationClipExporter.ExportAllFbxClips();

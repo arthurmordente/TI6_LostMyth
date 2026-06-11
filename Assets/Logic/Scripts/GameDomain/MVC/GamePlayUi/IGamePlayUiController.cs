@@ -7,6 +7,7 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
         void ShowPauseScreen();
         void HidePauseScreen();
         void ShowGameOver(bool IsWin);
+        Awaitable ShowGameOverWithFadeAsync(bool isWin, float fadeDurationSeconds = 1f);
         /// <summary>Root transform of the main fight HUD (uGUI).</summary>
         Transform GameplayHudRoot();
         /// <summary>Initial HUD sync (no tween).</summary>

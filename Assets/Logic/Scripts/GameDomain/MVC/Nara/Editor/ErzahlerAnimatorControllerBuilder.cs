@@ -114,13 +114,15 @@ namespace Logic.Scripts.GameDomain.MVC.Nara.Editor
             var root = c.layers[0].stateMachine;
             var walk1 = ErzahlerErzaClipExporter.LoadExported("Erzahler+Book_Walk_1");
             var walk2 = ErzahlerErzaClipExporter.LoadExported("Erzahler+Book_Walk_2");
+            var bookIdle = ErzahlerErzaClipExporter.LoadExported("Erzahler+Book_Idle");
             var fast = ErzahlerErzaClipExporter.LoadExported("Erzahler+Book_FastConjuringWithTwoHands");
             var slowPrep = ErzahlerErzaClipExporter.LoadExported("Erzahler+Book_SlowConjuring_Prep");
             var slowLoop = ErzahlerErzaClipExporter.LoadExported("Erzahler+Book_SlowConjuring_Loop");
             var slowFinish = ErzahlerErzaClipExporter.LoadExported("Erzahler+Book_SlowConjuring_Finish");
 
-            var idle = AddMotionState(root, "Idle", walk1, new Vector3(300, 0, 0), ErzahlerAnimatorParams.TagIdle);
-            idle.speed = 0f;
+            var idle = AddMotionState(root, "Idle", bookIdle ?? walk1, new Vector3(300, 0, 0), ErzahlerAnimatorParams.TagIdle);
+            if (bookIdle == null)
+                idle.speed = 0f;
 
             var walk1State = AddMotionState(root, "Walk_1", walk1, new Vector3(300, 120, 0), ErzahlerAnimatorParams.TagLocomotion);
             var walk2State = AddMotionState(root, "Walk_2", walk2, new Vector3(300, 220, 0), ErzahlerAnimatorParams.TagLocomotion);

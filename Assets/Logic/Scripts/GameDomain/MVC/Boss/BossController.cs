@@ -875,7 +875,9 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
                 }
                 // Vitória com o Book/clone ativo deixa a câmara a seguir um alvo que pode ser destruído ou inválido; voltar à Nara antes do Game Over.
                 _activeUnitService?.SetNaraAsActiveUnit();
-                _commandFactory.CreateCommandVoid<GameOverCommand>().SetData(new GameOverCommandData(true)).Execute();
+                _commandFactory.CreateCommandVoid<GameOverCommand>()
+                    .SetData(new GameOverCommandData(true, _bossView?.GetAnimator()))
+                    .Execute();
                 return;
             }
         }

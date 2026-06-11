@@ -130,6 +130,32 @@ namespace Logic.Scripts.GameDomain.MVC.Nara.Editor
             return count;
         }
 
+        /// <summary>Exports one clip from an FBX into destFolder/{clipName}.anim without recreating the folder.</summary>
+        public static bool ExportSingleClipFromFbx(string fbxPath, string destFolder, string clipName)
+        {
+            if (string.IsNullOrEmpty(fbxPath) || string.IsNullOrEmpty(destFolder) || string.IsNullOrEmpty(clipName))
+                return false;
+
+            if (AssetDatabase.LoadAssetAtPath<Object>(fbxPath) == null)
+            {
+                Debug.LogError($"[AnimationExport] FBX not found: {fbxPath}");
+                return false;
+            }
+
+            EnsureFolder(destFolder);
+            var index = BuildFbxClipIndex(fbxPath);
+            var key = SanitizeClipAssetName(clipName);
+
+            if (!index.TryGetValue(key, out var source) || source == null)
+            {
+                Debug.LogError($"[AnimationExport] Clip '{clipName}' not found in {fbxPath}. Available: {string.Join(", ", index.Keys)}");
+                return false;
+            }
+
+            WriteClipCopy(source, $"{destFolder}/{key}.anim");
+            return true;
+        }
+
         public static int FixClipObjectNamesUnder(string rootPath)
         {
             if (!AssetDatabase.IsValidFolder(rootPath)) return 0;

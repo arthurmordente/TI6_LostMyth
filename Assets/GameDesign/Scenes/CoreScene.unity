@@ -648,8 +648,8 @@ MonoBehaviour:
       Radius: 2
       Height: 5
     Center:
-      Radius: 9.5
-      Height: 12
+      Radius: 10
+      Height: 12.5
     Bottom:
       Radius: 2.5
       Height: 0.1

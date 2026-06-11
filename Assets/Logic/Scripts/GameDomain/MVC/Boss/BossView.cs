@@ -36,6 +36,12 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
             return _rigidbody;
         }
 
+        public Animator GetAnimator() {
+            if (_animator == null)
+                _animator = GetComponentInChildren<Animator>(true);
+            return _animator;
+        }
+
         public Transform GetReferenceTransform() {
             return transform;
         }
