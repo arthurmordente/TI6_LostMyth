@@ -99,6 +99,9 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
         [SerializeField] private List<Image> _erzaSkillIconImages = new List<Image>(4);
         [SerializeField] private List<Image> _bookSkillIconImages = new List<Image>(4);
 
+        readonly List<SkillSlotVisualView> _erzaSkillVisuals = new List<SkillSlotVisualView>(4);
+        readonly List<SkillSlotVisualView> _bookSkillVisuals = new List<SkillSlotVisualView>(4);
+
         [Header("Buttons")]
         [SerializeField] private Button _nextTurnButton;
         [Tooltip("Abre o menu de pausa (mesmo que ESC / PauseGameplayInputCommand).")]
@@ -261,6 +264,34 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
         public void InitStartPoint()
         {
             if (_hudRoot == null) _hudRoot = GetComponent<RectTransform>();
+            EnsureCombatSkillVisuals();
+        }
+
+        void EnsureCombatSkillVisuals()
+        {
+            if (_erzaSkillVisuals.Count == 0)
+                PopulateSkillVisuals(_erzaSkillButtons, _erzaSkillVisuals);
+            if (_bookSkillVisuals.Count == 0)
+                PopulateSkillVisuals(_bookSkillButtons, _bookSkillVisuals);
+        }
+
+        static void PopulateSkillVisuals(List<Button> buttons, List<SkillSlotVisualView> target)
+        {
+            target.Clear();
+            if (buttons == null) return;
+            for (int i = 0; i < buttons.Count; i++)
+            {
+                Button button = buttons[i];
+                if (button == null)
+                {
+                    target.Add(null);
+                    continue;
+                }
+
+                SkillSlotVisualView visual = button.GetComponent<SkillSlotVisualView>()
+                    ?? button.gameObject.AddComponent<SkillSlotVisualView>();
+                target.Add(visual);
+            }
         }
 
         /// <summary>Abre ou fecha o painel de controles quando o slidable estiver atribuído no inspector.</summary>
@@ -671,6 +702,41 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
         {
             ApplySkillIconsToList(_erzaSkillIconImages, erza0, erza1, erza2, erza3);
             ApplySkillIconsToList(_bookSkillIconImages, book0, book1, book2, book3);
+        }
+
+        public void SetSkillHudVisuals(
+            SkillDataSO erza0, SkillDataSO erza1, SkillDataSO erza2, SkillDataSO erza3,
+            SkillDataSO book0, SkillDataSO book1, SkillDataSO book2, SkillDataSO book3,
+            ISkillVisualCatalog visualCatalog)
+        {
+            EnsureCombatSkillVisuals();
+            ApplySkillVisualToList(_erzaSkillVisuals, _erzaSkillIconImages, visualCatalog, erza0, erza1, erza2, erza3);
+            ApplySkillVisualToList(_bookSkillVisuals, _bookSkillIconImages, visualCatalog, book0, book1, book2, book3);
+        }
+
+        static void ApplySkillVisualToList(
+            List<SkillSlotVisualView> visuals,
+            List<Image> iconFallbacks,
+            ISkillVisualCatalog visualCatalog,
+            SkillDataSO s0, SkillDataSO s1, SkillDataSO s2, SkillDataSO s3)
+        {
+            ApplySkillVisualAt(visuals, iconFallbacks, visualCatalog, 0, s0);
+            ApplySkillVisualAt(visuals, iconFallbacks, visualCatalog, 1, s1);
+            ApplySkillVisualAt(visuals, iconFallbacks, visualCatalog, 2, s2);
+            ApplySkillVisualAt(visuals, iconFallbacks, visualCatalog, 3, s3);
+        }
+
+        static void ApplySkillVisualAt(
+            List<SkillSlotVisualView> visuals,
+            List<Image> iconFallbacks,
+            ISkillVisualCatalog visualCatalog,
+            int index,
+            SkillDataSO skill)
+        {
+            SkillSlotVisualView visual = At(visuals, index);
+            if (visual != null)
+                visual.Apply(skill, visualCatalog, SkillFrameVisualMode.FullLayers);
+            SetIconAt(iconFallbacks, index, skill != null ? skill.Icon : null);
         }
 
         private static void ApplySkillIconsToList(List<Image> icons, Sprite s0, Sprite s1, Sprite s2, Sprite s3)

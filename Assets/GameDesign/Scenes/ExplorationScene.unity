@@ -1138,6 +1138,26 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 9184394322346455155, guid: 020cb265607bb4c4e908e3b515e625d5, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9184394322346455155, guid: 020cb265607bb4c4e908e3b515e625d5, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9184394322346455155, guid: 020cb265607bb4c4e908e3b515e625d5, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9184394322346455155, guid: 020cb265607bb4c4e908e3b515e625d5, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9184394322346455155, guid: 020cb265607bb4c4e908e3b515e625d5, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
     - {fileID: 6432088257842754735, guid: 020cb265607bb4c4e908e3b515e625d5, type: 3}
@@ -1512,6 +1532,9 @@ MonoBehaviour:
   _bookSlotsContainer: {fileID: 1913603579}
   _catalogContainer: {fileID: 796192437}
   _skillFramePrefab: {fileID: 3812432834316311808, guid: f9eaf7863191ac24dafb370e85eec310, type: 3}
+  _catalogScrollRect: {fileID: 0}
+  _invalidSlotAlpha: 0.35
+  _dragGhostAlpha: 0.55
   _skillCategoryDropdown: {fileID: 0}
   _divinityCategoryDropdown: {fileID: 0}
   _detailNameText: {fileID: 796192443}

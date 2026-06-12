@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using DG.Tweening;
+using Logic.Scripts.GameDomain.MVC.Shared;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -26,6 +27,10 @@ public class ExplorationLoadoutUIView : MonoBehaviour, IExplorationLoadoutView
     [SerializeField] private Transform _catalogContainer;
     [Tooltip("SkillFrame.prefab — must include LoadoutSkillFrameView.")]
     [SerializeField] private LoadoutSkillFrameView _skillFramePrefab;
+    [Tooltip("Opcional. ScrollRect pai do catálogo — desactivado durante drag.")]
+    [SerializeField] private ScrollRect _catalogScrollRect;
+    [SerializeField] private float _invalidSlotAlpha = 0.35f;
+    [SerializeField] private float _dragGhostAlpha = 0.55f;
     [Tooltip("Opcional. Dropdown TMP no prefab da cena (mesma ordem que ExplorationLoadoutSkillFilter).")]
     [SerializeField] private TMP_Dropdown _skillCategoryDropdown;
     [Tooltip("Opcional. Dropdown TMP para filtrar por divindade.")]
@@ -46,11 +51,20 @@ public class ExplorationLoadoutUIView : MonoBehaviour, IExplorationLoadoutView
     private ISkillVisualCatalog _visualCatalog;
     private Action<ExplorationLoadoutSkillFilter> _onCatalogFilterChanged;
     private Action<ExplorationLoadoutDivinityFilter> _onDivinityFilterChanged;
-    private Action<int> _onPlayerSlotClicked;
-    private Action<int> _onBookSlotClicked;
+    private Action<SkillDataSO> _onCatalogPreview;
+    private Action<SkillDataSO> _onDragBegin;
+    private Action<Vector2> _onDragMove;
+    private Action _onDragEnd;
+    private Action<SkillLoadoutUnitType, int, SkillDataSO> _onSkillDropped;
+    private Action<SkillLoadoutUnitType, int> _onEquippedSlotClicked;
     private readonly List<LoadoutSkillFrameView> _catalogItems = new List<LoadoutSkillFrameView>(16);
     private readonly List<LoadoutSkillFrameView> _playerSlotFrames = new List<LoadoutSkillFrameView>(4);
     private readonly List<LoadoutSkillFrameView> _bookSlotFrames = new List<LoadoutSkillFrameView>(4);
+    private readonly List<CanvasGroup> _playerSlotCanvasGroups = new List<CanvasGroup>(4);
+    private readonly List<CanvasGroup> _bookSlotCanvasGroups = new List<CanvasGroup>(4);
+    private LoadoutSkillFrameView _dragGhostFrame;
+    private Canvas _rootCanvas;
+    private RectTransform _dragGhostParent;
 
     private void Awake()
     {
@@ -69,10 +83,11 @@ public class ExplorationLoadoutUIView : MonoBehaviour, IExplorationLoadoutView
     public void Init(ISkillVisualCatalog visualCatalog = null)
     {
         _visualCatalog = visualCatalog;
+        ResolveCanvasReferences();
         SetVisible(false);
     }
 
-    public void RegisterCallbacks(Action onClose, Action<int> onPlayerSlotClicked, Action<int> onBookSlotClicked,
+    public void RegisterCallbacks(Action onClose,
         Action<ExplorationLoadoutSkillFilter> onCatalogFilterChanged = null,
         Action<ExplorationLoadoutDivinityFilter> onDivinityFilterChanged = null)
     {
@@ -82,13 +97,41 @@ public class ExplorationLoadoutUIView : MonoBehaviour, IExplorationLoadoutView
             _closeButton.onClick.AddListener(() => onClose?.Invoke());
         }
 
-        _onPlayerSlotClicked = onPlayerSlotClicked;
-        _onBookSlotClicked = onBookSlotClicked;
-
         _onCatalogFilterChanged = onCatalogFilterChanged;
         _onDivinityFilterChanged = onDivinityFilterChanged;
         WireSkillCategoryDropdown();
         WireDivinityCategoryDropdown();
+    }
+
+    public void RegisterDragCallbacks(
+        Action<SkillDataSO> onCatalogPreview,
+        Action<SkillDataSO> onDragBegin,
+        Action<Vector2> onDragMove,
+        Action onDragEnd,
+        Action<SkillLoadoutUnitType, int, SkillDataSO> onSkillDropped,
+        Action<SkillLoadoutUnitType, int> onEquippedSlotClicked)
+    {
+        _onCatalogPreview = onCatalogPreview;
+        _onDragBegin = onDragBegin;
+        _onDragMove = onDragMove;
+        _onDragEnd = onDragEnd;
+        _onSkillDropped = onSkillDropped;
+        _onEquippedSlotClicked = onEquippedSlotClicked;
+    }
+
+    void ResolveCanvasReferences()
+    {
+        if (_rootCanvas == null)
+            _rootCanvas = GetComponentInParent<Canvas>();
+        if (_dragGhostParent == null)
+        {
+            if (_rootCanvas != null)
+                _dragGhostParent = _rootCanvas.transform as RectTransform;
+            else if (_rootPanel != null)
+                _dragGhostParent = _rootPanel.transform as RectTransform;
+        }
+        if (_catalogScrollRect == null && _catalogContainer != null)
+            _catalogScrollRect = _catalogContainer.GetComponentInParent<ScrollRect>();
     }
 
     private void WireSkillCategoryDropdown()
@@ -137,9 +180,9 @@ public class ExplorationLoadoutUIView : MonoBehaviour, IExplorationLoadoutView
     public void RebuildLoadoutSlots(int slotCount, Func<SkillLoadoutUnitType, int, SkillDataSO> getSkillForSlot)
     {
         RebuildUnitLoadoutSlots(SkillLoadoutUnitType.Player, _playerSlotsContainer, _playerSlotFrames,
-            slotCount, getSkillForSlot, _onPlayerSlotClicked);
+            _playerSlotCanvasGroups, slotCount, getSkillForSlot);
         RebuildUnitLoadoutSlots(SkillLoadoutUnitType.Book, _bookSlotsContainer, _bookSlotFrames,
-            slotCount, getSkillForSlot, _onBookSlotClicked);
+            _bookSlotCanvasGroups, slotCount, getSkillForSlot);
         FinalizeLoadoutSlotLayout(_playerSlotsContainer);
         FinalizeLoadoutSlotLayout(_bookSlotsContainer);
     }
@@ -148,11 +191,12 @@ public class ExplorationLoadoutUIView : MonoBehaviour, IExplorationLoadoutView
         SkillLoadoutUnitType unitType,
         Transform container,
         List<LoadoutSkillFrameView> frameList,
+        List<CanvasGroup> canvasGroups,
         int slotCount,
-        Func<SkillLoadoutUnitType, int, SkillDataSO> getSkillForSlot,
-        Action<int> onSlotClicked)
+        Func<SkillLoadoutUnitType, int, SkillDataSO> getSkillForSlot)
     {
         frameList.Clear();
+        canvasGroups.Clear();
         if (container == null || _skillFramePrefab == null || slotCount <= 0) return;
 
         for (int i = container.childCount - 1; i >= 0; i--)
@@ -164,40 +208,57 @@ public class ExplorationLoadoutUIView : MonoBehaviour, IExplorationLoadoutView
             SkillDataSO skill = getSkillForSlot?.Invoke(unitType, slotIndex);
             LoadoutSkillFrameView frame = Instantiate(_skillFramePrefab, container);
             frameList.Add(frame);
-            frame.Bind(skill, _visualCatalog, _ => onSlotClicked?.Invoke(slotIndex));
-            frame.SetSlotSelected(false);
+            frame.Bind(skill, _visualCatalog, null, null, SkillFrameVisualMode.FullLayers);
+            frame.ConfigureAsSlotDropSurface();
+            WireSlotDropTarget(frame, unitType, slotIndex);
+            canvasGroups.Add(frame.GetOrAddCanvasGroup());
         }
+    }
+
+    void WireSlotDropTarget(LoadoutSkillFrameView frame, SkillLoadoutUnitType unitType, int slotIndex)
+    {
+        if (frame == null) return;
+
+        // IDropHandler requires a Graphic on the same GameObject (img_Paint covers the slot hit area).
+        Transform dropSurface = FindDropSurfaceTransform(frame.transform);
+        if (dropSurface == null) return;
+
+        var existing = dropSurface.GetComponent<LoadoutSlotDropTarget>();
+        if (existing != null) Destroy(existing);
+
+        var dropTarget = dropSurface.gameObject.AddComponent<LoadoutSlotDropTarget>();
+        dropTarget.Configure(unitType, slotIndex, _onSkillDropped, _onEquippedSlotClicked);
+    }
+
+    static Transform FindDropSurfaceTransform(Transform frameRoot)
+    {
+        Transform shape = FindNamedChild(frameRoot, "img_Shape");
+        if (shape != null) return shape;
+
+        Transform paint = FindNamedChild(frameRoot, "img_Paint");
+        if (paint != null) return paint;
+
+        Image anyGraphic = frameRoot.GetComponentInChildren<Image>(true);
+        return anyGraphic != null ? anyGraphic.transform : frameRoot;
+    }
+
+    static Transform FindNamedChild(Transform root, string childName)
+    {
+        Transform direct = root.Find(childName);
+        if (direct != null) return direct;
+
+        foreach (Transform child in root.GetComponentsInChildren<Transform>(true))
+        {
+            if (child.name == childName) return child;
+        }
+
+        return null;
     }
 
     static void FinalizeLoadoutSlotLayout(Transform container)
     {
         if (container is not RectTransform rt) return;
         LayoutRebuilder.ForceRebuildLayoutImmediate(rt);
-    }
-
-    public void SetSelectedSlot(SkillLoadoutUnitType unitType, int slotIndex)
-    {
-        ClearSlotSelection();
-        List<LoadoutSkillFrameView> frames = unitType == SkillLoadoutUnitType.Book ? _bookSlotFrames : _playerSlotFrames;
-        if (slotIndex < 0 || slotIndex >= frames.Count) return;
-        LoadoutSkillFrameView selected = frames[slotIndex];
-        if (selected != null) selected.SetSlotSelected(true);
-    }
-
-    public void ClearSlotSelection()
-    {
-        SetSlotSelectionState(_playerSlotFrames, false);
-        SetSlotSelectionState(_bookSlotFrames, false);
-    }
-
-    static void SetSlotSelectionState(List<LoadoutSkillFrameView> frames, bool selected)
-    {
-        if (frames == null) return;
-        for (int i = 0; i < frames.Count; i++)
-        {
-            LoadoutSkillFrameView frame = frames[i];
-            if (frame != null) frame.SetSlotSelected(selected);
-        }
     }
 
     public void PlayInvalidAssignFeedback(SkillLoadoutUnitType unitType, int slotIndex)
@@ -233,11 +294,28 @@ public class ExplorationLoadoutUIView : MonoBehaviour, IExplorationLoadoutView
             Destroy(_catalogContainer.GetChild(i).gameObject);
     }
 
-    public LoadoutSkillFrameView CreateCatalogItem()
+    public LoadoutSkillFrameView CreateCatalogItem(SkillDataSO skill, Action<SkillDataSO> onCatalogClicked)
     {
         if (_catalogContainer == null || _skillFramePrefab == null) return null;
+        ResolveCanvasReferences();
+
         LoadoutSkillFrameView frame = Instantiate(_skillFramePrefab, _catalogContainer);
         _catalogItems.Add(frame);
+        frame.Bind(skill, _visualCatalog, onCatalogClicked, null, SkillFrameVisualMode.FrameAndIconOnly);
+
+        GameObject dragHost = frame.GetComponentInChildren<Button>(true) != null
+            ? frame.GetComponentInChildren<Button>(true).gameObject
+            : frame.gameObject;
+        var dragSource = dragHost.GetComponent<LoadoutCatalogSkillDragSource>()
+            ?? dragHost.AddComponent<LoadoutCatalogSkillDragSource>();
+        dragSource.Configure(
+            frame,
+            _onCatalogPreview,
+            _onDragBegin,
+            _onDragMove,
+            _onDragEnd,
+            _catalogScrollRect);
+
         return frame;
     }
 
@@ -256,6 +334,108 @@ public class ExplorationLoadoutUIView : MonoBehaviour, IExplorationLoadoutView
         if (_catalogContainer is not RectTransform rt) return;
         LayoutRebuilder.ForceRebuildLayoutImmediate(rt);
         Canvas.ForceUpdateCanvases();
+    }
+
+    public void ShowDragGhost(SkillDataSO skill)
+    {
+        if (skill == null || _skillFramePrefab == null) return;
+        ResolveCanvasReferences();
+        HideDragGhost();
+
+        Transform parent = _dragGhostParent != null ? _dragGhostParent : transform;
+        _dragGhostFrame = Instantiate(_skillFramePrefab, parent);
+        _dragGhostFrame.transform.SetAsLastSibling();
+        PrepareGhostForDrag(_dragGhostFrame);
+        _dragGhostFrame.Bind(skill, _visualCatalog, null, null, SkillFrameVisualMode.FrameAndIconOnly);
+        _dragGhostFrame.DisableRaycastTargetsForGhost();
+        _dragGhostFrame.SetBlocksRaycasts(false);
+
+        var ghostGroup = _dragGhostFrame.GetOrAddCanvasGroup();
+        ghostGroup.alpha = _dragGhostAlpha;
+        ghostGroup.blocksRaycasts = false;
+
+        UpdateDragGhostScreenPosition(Input.mousePosition);
+    }
+
+    static void PrepareGhostForDrag(LoadoutSkillFrameView ghost)
+    {
+        if (ghost == null) return;
+
+        // SkillFrame.prefab ships with a nested Canvas — breaks cursor positioning when reparented.
+        // Remove dependents before Canvas (Unity blocks Canvas removal while Scaler/Raycaster exist).
+        var raycaster = ghost.GetComponent<GraphicRaycaster>();
+        if (raycaster != null) Destroy(raycaster);
+        var scaler = ghost.GetComponent<CanvasScaler>();
+        if (scaler != null) Destroy(scaler);
+        var nestedCanvas = ghost.GetComponent<Canvas>();
+        if (nestedCanvas != null) Destroy(nestedCanvas);
+
+        if (ghost.transform is not RectTransform rt) return;
+
+        rt.localScale = Vector3.one;
+        rt.anchorMin = new Vector2(0.5f, 0.5f);
+        rt.anchorMax = new Vector2(0.5f, 0.5f);
+        rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.sizeDelta = new Vector2(120f, 120f);
+        rt.anchoredPosition = Vector2.zero;
+    }
+
+    public void UpdateDragGhostScreenPosition(Vector2 screenPosition)
+    {
+        if (_dragGhostFrame == null) return;
+
+        ResolveCanvasReferences();
+        RectTransform parentRect = _dragGhostParent;
+        if (parentRect == null && _rootCanvas != null)
+            parentRect = _rootCanvas.transform as RectTransform;
+        if (parentRect == null || _dragGhostFrame.transform is not RectTransform ghostRect) return;
+
+        Camera eventCamera = _rootCanvas != null && _rootCanvas.renderMode != RenderMode.ScreenSpaceOverlay
+            ? _rootCanvas.worldCamera
+            : null;
+
+        if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                parentRect, screenPosition, eventCamera, out Vector2 localPoint))
+        {
+            ghostRect.anchoredPosition = localPoint;
+        }
+    }
+
+    public void HideDragGhost()
+    {
+        if (_dragGhostFrame == null) return;
+        Destroy(_dragGhostFrame.gameObject);
+        _dragGhostFrame = null;
+    }
+
+    public void SetSlotDropHighlight(SkillLoadoutUnitType unitType, int slotIndex, bool canDrop)
+    {
+        CanvasGroup group = GetSlotCanvasGroup(unitType, slotIndex);
+        if (group == null) return;
+        group.alpha = canDrop ? 1f : _invalidSlotAlpha;
+    }
+
+    public void ClearAllSlotDropHighlights()
+    {
+        ResetSlotGroupAlphas(_playerSlotCanvasGroups);
+        ResetSlotGroupAlphas(_bookSlotCanvasGroups);
+    }
+
+    static void ResetSlotGroupAlphas(List<CanvasGroup> groups)
+    {
+        if (groups == null) return;
+        for (int i = 0; i < groups.Count; i++)
+        {
+            if (groups[i] != null)
+                groups[i].alpha = 1f;
+        }
+    }
+
+    CanvasGroup GetSlotCanvasGroup(SkillLoadoutUnitType unitType, int slotIndex)
+    {
+        List<CanvasGroup> groups = unitType == SkillLoadoutUnitType.Book ? _bookSlotCanvasGroups : _playerSlotCanvasGroups;
+        if (slotIndex < 0 || slotIndex >= groups.Count) return null;
+        return groups[slotIndex];
     }
 
     public void ShowSkillDetails(SkillDataSO skill)
@@ -284,50 +464,15 @@ public class ExplorationLoadoutUIView : MonoBehaviour, IExplorationLoadoutView
 
     private void ApplyDetailVisualLayers(SkillDataSO skill)
     {
-        if (skill == null) {
-            if (_detailBackgroundImage != null) {
-                _detailBackgroundImage.sprite = null;
-                _detailBackgroundImage.enabled = false;
-            }
-            if (_detailFrameImage != null) {
-                _detailFrameImage.sprite = null;
-                _detailFrameImage.enabled = false;
-            }
-            if (_detailIconImage != null) {
-                _detailIconImage.sprite = null;
-                _detailIconImage.enabled = false;
-            }
-            return;
-        }
-
-        if (_visualCatalog != null && _visualCatalog.TryGetLayerSprites(skill.Divinity, skill.SkillType,
-                out var bg, out var frame)) {
-            if (_detailBackgroundImage != null) {
-                _detailBackgroundImage.sprite = bg;
-                _detailBackgroundImage.enabled = bg != null;
-                if (bg != null) _detailBackgroundImage.color = Color.white;
-            }
-            if (_detailFrameImage != null) {
-                _detailFrameImage.sprite = frame;
-                _detailFrameImage.enabled = frame != null;
-                if (frame != null) _detailFrameImage.color = Color.white;
-            }
-        } else {
-            if (_detailBackgroundImage != null) {
-                _detailBackgroundImage.sprite = null;
-                _detailBackgroundImage.enabled = false;
-            }
-            if (_detailFrameImage != null) {
-                _detailFrameImage.sprite = null;
-                _detailFrameImage.enabled = false;
-            }
-        }
-
-        if (_detailIconImage != null) {
-            _detailIconImage.sprite = skill.Icon;
-            _detailIconImage.enabled = skill.Icon != null;
-            if (skill.Icon != null) _detailIconImage.color = Color.white;
-        }
+        var layout = new SkillSlotVisualApplicator.IconLayoutOptions { PreserveAspect = true };
+        SkillSlotVisualApplicator.Apply(
+            skill,
+            _visualCatalog,
+            SkillFrameVisualMode.FullLayers,
+            _detailBackgroundImage,
+            _detailFrameImage,
+            _detailIconImage,
+            layout);
     }
 
     private static void AddPanelOutline(GameObject go, Color outlineColor)

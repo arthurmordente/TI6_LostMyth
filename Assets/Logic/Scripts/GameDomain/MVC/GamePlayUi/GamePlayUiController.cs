@@ -5,6 +5,7 @@ using Logic.Scripts.GameDomain.MVC.Shared;
 using Logic.Scripts.GameDomain.States;
 using Logic.Scripts.GameDomain.Utilities;
 using Logic.Scripts.Services.AudioService;
+using Logic.Scripts.GameDomain.Services.Skills;
 using Logic.Scripts.Services.CommandFactory;
 using Logic.Scripts.Services.StateMachineService;
 using System.Threading;
@@ -25,13 +26,15 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
         private readonly ILevelsDataService _levelsDataService;
         private readonly IGamePlayDataService _gamePlayDataService;
         private readonly ICloneUseLimiter _cloneUseLimiter;
+        private readonly ISkillVisualCatalog _skillVisualCatalog;
 
         public GamePlayUiController(IStateMachineService stateMachineService, ExplorationState.Factory explorationStateFactory,
             IUICameraController uiCameraController, IGamePlayHudView gamePlayHud, IAudioService audioService, IPauseMenuView pauseMenuView,
             IUniversalUIController universalUIController, ICommandFactory commandFactory, IGameOverView gameOverView,
             [InjectOptional] ILevelsDataService levelsDataService = null,
             [InjectOptional] IGamePlayDataService gamePlayDataService = null,
-            [InjectOptional] ICloneUseLimiter cloneUseLimiter = null) {
+            [InjectOptional] ICloneUseLimiter cloneUseLimiter = null,
+            [InjectOptional] ISkillVisualCatalog skillVisualCatalog = null) {
             _stateMachineService = stateMachineService;
             _explorationStateFactory = explorationStateFactory;
             _uiCameraController = uiCameraController;
@@ -44,6 +47,7 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
             _levelsDataService = levelsDataService;
             _gamePlayDataService = gamePlayDataService;
             _cloneUseLimiter = cloneUseLimiter;
+            _skillVisualCatalog = skillVisualCatalog;
         }
 
         public void InitEntryPoint() {
@@ -183,6 +187,11 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
 
         public void SetSkillHudIcons(Sprite erza0, Sprite erza1, Sprite erza2, Sprite erza3, Sprite book0, Sprite book1, Sprite book2, Sprite book3) =>
             _gamePlayHud.SetSkillHudIcons(erza0, erza1, erza2, erza3, book0, book1, book2, book3);
+
+        public void SetSkillHudVisuals(
+            SkillDataSO erza0, SkillDataSO erza1, SkillDataSO erza2, SkillDataSO erza3,
+            SkillDataSO book0, SkillDataSO book1, SkillDataSO book2, SkillDataSO book3) =>
+            _gamePlayHud.SetSkillHudVisuals(erza0, erza1, erza2, erza3, book0, book1, book2, book3, _skillVisualCatalog);
 
         public void OnBossDisplayNameChange(string displayName) => _gamePlayHud.OnBossDisplayNameChange(displayName);
 
