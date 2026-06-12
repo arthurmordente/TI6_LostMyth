@@ -795,6 +795,81 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!1 &1984203799555544449
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5378218087531679723}
+  - component: {fileID: 6216663170882584675}
+  - component: {fileID: 2657360943464317842}
+  m_Layer: 5
+  m_Name: Empty
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &5378218087531679723
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1984203799555544449}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2462884679922509897}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 40}
+  m_Pivot: {x: 0.5, y: 1}
+--- !u!222 &6216663170882584675
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1984203799555544449}
+  m_CullTransparentMesh: 1
+--- !u!114 &2657360943464317842
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1984203799555544449}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 0}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
+  m_Type: 1
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
 --- !u!1 &2711140801929392425
 GameObject:
   m_ObjectHideFlags: 0
@@ -882,7 +957,7 @@ GameObject:
   - component: {fileID: 807834852893314222}
   - component: {fileID: 1771481839812187822}
   m_Layer: 5
-  m_Name: Description (1)
+  m_Name: Story
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1540,7 +1615,7 @@ GameObject:
   - component: {fileID: 1541613420170986896}
   - component: {fileID: 8882192233104195678}
   m_Layer: 5
-  m_Name: text_SkillDescription
+  m_Name: text_Story
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1593,7 +1668,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Mini Hist\xF3ria"
+  m_text: "\u201DLaki nunca almejou uma vit\xF3ria f\xE1cil, ela sempre espera que
+    cada visitante passe o maior tempo poss\xEDvel em sua companhia, fazendo-os gastar
+    tempo enquanto absorve suas vitalidade\u201D"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: d580464378edd044581dd2d85f8a2838, type: 2}
   m_sharedMaterial: {fileID: -8906674652059005393, guid: d580464378edd044581dd2d85f8a2838, type: 2}
@@ -1620,12 +1697,12 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 26
+  m_fontSize: 21.15
   m_fontSizeBase: 32
   m_fontWeight: 400
   m_enableAutoSizing: 1
   m_fontSizeMin: 18
-  m_fontSizeMax: 26
+  m_fontSizeMax: 22
   m_fontStyle: 0
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
@@ -1659,7 +1736,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_margin: {x: 4.7488403, y: 0, z: 4.7487793, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -2650,13 +2727,14 @@ RectTransform:
   - {fileID: 9184394322346455155}
   - {fileID: 1845306316931076695}
   - {fileID: 2964412300240012846}
+  - {fileID: 5378218087531679723}
   - {fileID: 4657691659674229262}
   m_Father: {fileID: 6612144559013306311}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: -1.6482, y: -405.11957}
-  m_SizeDelta: {x: 517.1459, y: 716.688}
+  m_AnchoredPosition: {x: -1.6482, y: -396.41275}
+  m_SizeDelta: {x: 517.1459, y: 792.8255}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3746292377251817824
 CanvasRenderer:
@@ -2822,7 +2900,7 @@ MonoBehaviour:
   m_ChildAlignment: 4
   m_Spacing: 0
   m_ChildForceExpandWidth: 0
-  m_ChildForceExpandHeight: 1
+  m_ChildForceExpandHeight: 0
   m_ChildControlWidth: 0
   m_ChildControlHeight: 0
   m_ChildScaleWidth: 0
