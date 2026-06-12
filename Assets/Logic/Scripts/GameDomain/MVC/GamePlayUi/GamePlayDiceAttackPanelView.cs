@@ -59,6 +59,11 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
         [SerializeField] private int _valuePunchVibrato = 10;
         [SerializeField] private float _valuePunchElasticity = 0.4f;
 
+        [Header("Resolution celebration")]
+        [SerializeField] private float _celebrationBoardPunchStrength = 0.12f;
+        [SerializeField] private float _celebrationBoardPunchDuration = 0.45f;
+        [SerializeField] private int _celebrationBoardPunchVibrato = 8;
+
         [Header("Ranking")]
         [Tooltip("Se false, a Laki fica em cima no início da ronda (0–0).")]
         [SerializeField] private bool _diceRoundStartsWithPlayerOnTop;
@@ -112,6 +117,38 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
             ApplyDiceSumRowOrder(_diceRoundStartsWithPlayerOnTop);
             RebuildRowsLayout();
             RebuildDiceSumRowsLayout();
+        }
+
+        public void PlayResolutionCelebration(bool playerWon, bool isTie)
+        {
+            EnsureLayoutInitialized();
+            EnsureDiceSumRowsInitialized();
+
+            if (_diceSumSlidable != null && HasAnyDiceSumTextAssigned())
+            {
+                int last = Mathf.Max(0, _diceSumSlidable.StateCount - 1);
+                _diceSumSlidable.SetStateIndex(last, instant: false);
+            }
+
+            var shakeRoot = _diceScoreRowsParent != null ? _diceScoreRowsParent : transform as RectTransform;
+            if (shakeRoot != null)
+            {
+                DOTween.Kill(shakeRoot, false);
+                shakeRoot.localScale = Vector3.one;
+                shakeRoot.DOPunchScale(
+                    Vector3.one * _celebrationBoardPunchStrength,
+                    _celebrationBoardPunchDuration,
+                    _celebrationBoardPunchVibrato,
+                    _valuePunchElasticity).SetEase(Ease.OutQuad);
+            }
+
+            if (!isTie)
+            {
+                if (playerWon && _playerSumText != null)
+                    PunchValue(_playerSumText.rectTransform);
+                else if (!playerWon && _lakiSumText != null)
+                    PunchValue(_lakiSumText.rectTransform);
+            }
         }
 
         public void ApplyProgress(DiceUiProgressPayload payload)

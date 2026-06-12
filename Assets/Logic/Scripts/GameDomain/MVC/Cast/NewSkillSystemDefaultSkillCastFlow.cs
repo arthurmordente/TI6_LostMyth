@@ -97,24 +97,47 @@ public class NewSkillSystemDefaultSkillCastFlow : ISkillCastFlow
         UpdateFallbackTarget(caster);
         _targetingPreview?.End();
 
-        if (_currentSkill.CastType == SkillCastType.Area && _currentSkill.AreaImpactPrefab != null && _fallbackTarget != null)
-        {
-            var vfx = Object.Instantiate(_currentSkill.AreaImpactPrefab, _fallbackTarget.position, Quaternion.identity);
-            SkillCastVfxUtility.ConfigureSpawnedInstance(vfx, persistInScene: false, destroyAfterSeconds: 0f);
-        }
-        else if (_currentSkill.CastType == SkillCastType.Self && _currentSkill.SelfCastPrefab != null)
+        SpawnCastVfx(caster);
+
+        if (_currentSkill.CastType == SkillCastType.Area && _fallbackTarget != null)
+            SkillCastVfxUtility.TrySpawnTransiient(_currentSkill.AreaEffectPrefab, _fallbackTarget.position, Quaternion.identity);
+        else if (_currentSkill.CastType == SkillCastType.Self)
         {
             Vector3 p = SkillCastPresentationTarget.GetSelfCastFootWorld(caster, _currentSkill);
             Transform presentation = SkillCastPresentationTarget.GetSelfCastTransform(caster, _currentSkill);
             Quaternion rotation = presentation != null ? presentation.rotation : Quaternion.identity;
-            var vfx = Object.Instantiate(_currentSkill.SelfCastPrefab, p, rotation);
-            SkillCastVfxUtility.ConfigureSpawnedInstance(vfx, persistInScene: false, destroyAfterSeconds: 0f);
+            SkillCastVfxUtility.TrySpawnTransiient(_currentSkill.SelfEffectPrefab, p, rotation);
         }
 
         Transform castTarget = _fallbackTarget != null ? _fallbackTarget : _currentPreview != null ? _currentPreview.transform : caster.UnitViewGO.transform;
         _currentSkill.OnCast(caster, castTarget);
         CleanupPreviewAndTarget();
         _currentSkill = null;
+    }
+
+    private void SpawnCastVfx(IPlayableUnit caster)
+    {
+        GameObject castPrefab = _currentSkill.GetCastPrefabForCurrentCastType();
+        if (castPrefab == null) return;
+
+        Vector3 position;
+        Quaternion rotation;
+        if (_currentSkill.CastType == SkillCastType.Self)
+        {
+            Transform skillSpot = caster.UnitSkillSpotTransform != null
+                ? caster.UnitSkillSpotTransform
+                : caster.UnitViewGO.transform;
+            position = skillSpot.position;
+            Transform presentation = SkillCastPresentationTarget.GetSelfCastTransform(caster, _currentSkill);
+            rotation = presentation != null ? presentation.rotation : skillSpot.rotation;
+        }
+        else
+        {
+            position = NewSkillSystemSkillAimWorld.GetSkillOrigin(caster, caster);
+            rotation = caster.UnitViewGO.transform.rotation;
+        }
+
+        SkillCastVfxUtility.TrySpawnTransiient(castPrefab, position, rotation);
     }
 
     public void CancelPreparedCast(IPlayableUnit caster)

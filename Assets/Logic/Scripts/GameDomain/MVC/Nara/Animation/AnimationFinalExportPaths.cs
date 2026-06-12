@@ -10,6 +10,8 @@ namespace Logic.Scripts.GameDomain.MVC.Nara.Animation
         public const string ExportRoot = "Assets/ArquivosArthur/Animacoes";
 
         public const string ErzahlerFbx = FbxRoot + "/ErzahlerFinal.fbx";
+        public const string ErzahlerBookIdleFbx = FbxRoot + "/ErzahlerBookIdle.fbx";
+        public const string ErzahlerBookIdleClipName = "Erzahler+Book_Idle";
         public const string LakiFbx = FbxRoot + "/MadameLakiAnimations.fbx";
         public const string HocariPart1Fbx = FbxRoot + "/HocariAllAnimsPart1.fbx";
         public const string HocariPart2Fbx = FbxRoot + "/HocariAllAnimsPart2.fbx";

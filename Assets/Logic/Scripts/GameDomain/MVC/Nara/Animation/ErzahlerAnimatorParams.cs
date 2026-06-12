@@ -24,6 +24,7 @@ namespace Logic.Scripts.GameDomain.MVC.Nara.Animation
         public const string TagLocomotion = "Locomotion";
         public const string TagConjuringLoop = "ConjuringLoop";
         public const string TagDeath = "Death";
+        public const string TagBetReaction = "BetReaction";
     }
 
     /// <summary>Animator parameters for the deployed Book clone unit.</summary>
@@ -62,5 +63,6 @@ namespace Logic.Scripts.GameDomain.MVC.Nara.Animation
         public const string TagPerformanceLoop = "PerformanceLoop";
         public const string TagPerformancePrep = "PerformancePrep";
         public const string TagAbility = "Ability";
+        public const string TagBetReaction = "BetReaction";
     }
 }

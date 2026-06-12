@@ -150,5 +150,32 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki
             if (_animator.IsInTransition(layer)) return false;
             return _animator.GetCurrentAnimatorStateInfo(layer).IsTag(LakiAnimatorParams.TagPerformanceLoop);
         }
+
+        public async Task WaitUntilBetReactionCompleteAsync(float timeoutSeconds = 5f, int layer = 0)
+        {
+            if (_animator == null) return;
+            if (!HasParameter(LakiAnimatorParams.BetWon) && !HasParameter(LakiAnimatorParams.BetLost))
+                return;
+
+            float elapsed = 0f;
+            bool enteredBet = false;
+            while (elapsed < Mathf.Max(0.01f, timeoutSeconds))
+            {
+                if (!_animator.IsInTransition(layer))
+                {
+                    var st = _animator.GetCurrentAnimatorStateInfo(layer);
+                    if (st.IsTag(LakiAnimatorParams.TagBetReaction))
+                    {
+                        enteredBet = true;
+                        if (st.normalizedTime >= 0.92f) return;
+                    }
+                    else if (enteredBet)
+                        return;
+                }
+
+                elapsed += Time.deltaTime;
+                await Task.Yield();
+            }
+        }
     }
 }

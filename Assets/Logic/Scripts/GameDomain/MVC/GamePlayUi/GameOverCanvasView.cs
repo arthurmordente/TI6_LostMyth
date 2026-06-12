@@ -56,10 +56,21 @@ public sealed class GameOverCanvasView : UguiCanvasViewBase, IGameOverView
 
     public void Show(bool isWin)
     {
+        PrepareScreen(isWin);
+        base.Show();
+    }
+
+    public async Awaitable ShowWithFadeAsync(bool isWin, float fadeDurationSeconds = 1f)
+    {
+        PrepareScreen(isWin);
+        await FadeInCanvasAsync(fadeDurationSeconds);
+    }
+
+    void PrepareScreen(bool isWin)
+    {
         SetScreenActive(_defeatScreen, !isWin);
         SetScreenActive(_victoryScreen, isWin);
         transform.localScale = Vector3.one;
-        base.Show();
     }
 
     public override void Hide()

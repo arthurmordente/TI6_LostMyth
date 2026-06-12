@@ -40,6 +40,8 @@ public class LoadLevelCommand : BaseCommand, ICommandAsync {
     }
 
     public async Awaitable Execute(CancellationTokenSource cancellationTokenSource) {
+        GameOverCommand.ResetSequenceGuard();
+        Time.timeScale = 1f;
         _levelCancellationTokenService.InitCancellationToken();
         //To-Do pregame da Ui
         int levelNumber = _commandData.LevelNumber;

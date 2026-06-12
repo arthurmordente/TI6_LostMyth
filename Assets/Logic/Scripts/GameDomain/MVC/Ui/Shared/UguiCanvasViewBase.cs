@@ -8,6 +8,14 @@ namespace Logic.Scripts.GameDomain.MVC.Ui.Shared
         [SerializeField] private GameObject _rootPanel;
         [SerializeField] private CanvasGroup _canvasGroup;
 
+        void EnsureCanvasGroup()
+        {
+            if (_canvasGroup != null) return;
+            _canvasGroup = GetComponent<CanvasGroup>();
+            if (_canvasGroup == null)
+                _canvasGroup = gameObject.AddComponent<CanvasGroup>();
+        }
+
         /// <summary>Subclasses may override for runtime UI setup. Do not auto-hide here — use <c>InitEntryPoint</c> or <see cref="HideUntilOpened"/>.</summary>
         protected virtual void Awake() { }
 
@@ -49,6 +57,35 @@ namespace Logic.Scripts.GameDomain.MVC.Ui.Shared
         }
 
         protected void HideImmediate() => Hide();
+
+        protected async Awaitable FadeInCanvasAsync(float durationSeconds)
+        {
+            NormalizeRootPanelReference();
+            gameObject.SetActive(true);
+            transform.localScale = Vector3.one;
+
+            if (UsesSeparateRootPanel())
+                _rootPanel.SetActive(true);
+
+            EnsureCanvasGroup();
+
+            durationSeconds = Mathf.Max(0.01f, durationSeconds);
+            _canvasGroup.alpha = 0f;
+            _canvasGroup.blocksRaycasts = false;
+            _canvasGroup.interactable = false;
+
+            float elapsed = 0f;
+            while (elapsed < durationSeconds)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                _canvasGroup.alpha = Mathf.Clamp01(elapsed / durationSeconds);
+                await Awaitable.NextFrameAsync();
+            }
+
+            _canvasGroup.alpha = 1f;
+            _canvasGroup.blocksRaycasts = true;
+            _canvasGroup.interactable = true;
+        }
 
         public virtual bool IsVisible
         {

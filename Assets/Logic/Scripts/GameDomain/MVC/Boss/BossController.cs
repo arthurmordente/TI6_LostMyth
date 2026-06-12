@@ -277,36 +277,41 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
             return pauseDice || pauseLegacy;
         }
 
-        bool TryResolveLakiMinigamesAtBossTurn() {
+        async Task<bool> TryResolveLakiMinigamesAtBossTurnAsync() {
             if (Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.TryResolveAnyAtBossTurn(
                 out Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackResult diceResult,
                 out Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.IResolver diceResolver))
             {
                 int fightTurn = _turnStateService != null ? _turnStateService.TurnNumber : 0;
                 Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.NotifyPlayerWonDiceOpensShieldWindow(diceResult, fightTurn);
-                try { diceResolver?.DestroyDiceAttackRoot(); } catch { }
+                try
+                {
+                    await Laki.LakiBetResolutionPresentation.PlayDiceAttackAsync(diceResult, _bossView, _audioService);
+                    diceResolver?.DestroyDiceAttackRoot(deferUiDismiss: true);
+                }
+                catch { }
                 return true;
             }
             if (Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.MinigameRuntimeService.TryResolveAnyAtBossTurn(
                 out Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.MinigameResult mgResult,
                 out Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.IMinigameResolver mgResolver))
             {
-                PlayLakiMinigameResolutionSfx(mgResult.PlayerWon);
-                try { mgResolver?.DestroyMinigameRoot(); } catch { }
+                try
+                {
+                    await Laki.LakiBetResolutionPresentation.PlayAsync(
+                        mgResult.PlayerWon,
+                        isTie: false,
+                        Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Dice.DiceUiRuntime.LastPlayerSum,
+                        Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Dice.DiceUiRuntime.LastBossSum,
+                        _bossView,
+                        _audioService,
+                        finishThrowDieFirst: false);
+                    mgResolver?.DestroyMinigameRoot();
+                }
+                catch { }
                 return true;
             }
             return false;
-        }
-
-        void PlayLakiMinigameResolutionSfx(bool playerWon) {
-            Laki.LakiArenaPresentationEvents.NotifyBetResolved(playerWon);
-            if (BossViewUsesLakiAnimator(_bossView)) {
-                PlayLakiBossSfx(playerWon ? SfxIds.Laki_Perdendo : SfxIds.Laki_Ganhando);
-                ResolveLakiAnimatorView(_bossView)?.PlayBetReaction(!playerWon);
-                return;
-            }
-
-            ResolveHocariAnimationBridge(_bossView)?.PlayHit();
         }
 
         void PlayLakiBossSfx(string sfxId) {
@@ -362,15 +367,12 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
                 await ExecutePreparedActionAsync();
             }
 
-            if (TryResolveLakiMinigamesAtBossTurn()) {
+            if (await TryResolveLakiMinigamesAtBossTurnAsync()) {
                 // Debug.Log("[Laki] Dice/minigame resolved after prepared attacks this boss resolve.");
             }
 
             await EvaluateAndMaybeSwitchPhaseAsync();
             await MoveTurnAsync();
-            if (_bossView != null) {
-                await _bossView.WaitUntilIdleAsync(1.5f);
-            }
             AdvanceBossTurnPatternIndex();
         }
 
@@ -875,7 +877,9 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
                 }
                 // Vitória com o Book/clone ativo deixa a câmara a seguir um alvo que pode ser destruído ou inválido; voltar à Nara antes do Game Over.
                 _activeUnitService?.SetNaraAsActiveUnit();
-                _commandFactory.CreateCommandVoid<GameOverCommand>().SetData(new GameOverCommandData(true)).Execute();
+                _commandFactory.CreateCommandVoid<GameOverCommand>()
+                    .SetData(new GameOverCommandData(true, _bossView?.GetAnimator()))
+                    .Execute();
                 return;
             }
         }

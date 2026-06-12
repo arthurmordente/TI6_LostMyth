@@ -37,7 +37,12 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 		[Header("Tile Info Canvas")]
 		[SerializeField] private float _canvasScale       = 0.004f;
 		[SerializeField] private float _canvasHeightOffset = 0.12f;
-		[SerializeField] private float _slotSpacing = 80f;
+		[Tooltip("Icon size in canvas layout units (before TileCanvasLayoutScale × TileCanvasSizeBoost).")]
+		[SerializeField] private float _stackedIconSize = 420f;
+		[Tooltip("Vertical gap between stacked effect icons.")]
+		[SerializeField] private float _stackSpacing = 36f;
+		[Tooltip("Extra scale for icons on the outer radial band (band 1).")]
+		[SerializeField] private float _iconSizeOuterScale = 1f;
 
 		/// <summary>Base layout factor (post −33%); multiplied by <see cref="TileCanvasSizeBoost"/> for effective UI size.</summary>
 		private const float TileCanvasLayoutScale = 0.67f;
@@ -321,7 +326,7 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 					CacheTileBaseColor(tileIndex, mr, fromCatalog, startType);
 					if (!fromCatalog)
 						ApplyProceduralTileTint(mr, startType);
-					_tileCanvases[tileIndex] = BuildTileCanvas(go.transform, b);
+					_tileCanvases[tileIndex] = BuildTileCanvas(go.transform);
 					tileIndex++;
 				}
 			}
@@ -333,7 +338,7 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 		/// band 0 = inner ring, band 1 = outer ring (affects VLG spacing).
 		/// Child of <paramref name="tileTr"/>; after layout, <see cref="RectTransform.localEulerAngles"/> is forced to (90, 0, −80).
 		/// </summary>
-		private TileInfoCanvas BuildTileCanvas(Transform tileTr, int band)
+		private TileInfoCanvas BuildTileCanvas(Transform tileTr)
 		{
 			float k = TileCanvasLayoutScale * TileCanvasSizeBoost;
 			var canvasGO = new GameObject("TileInfoCanvas");
@@ -346,14 +351,14 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 			canvasRt.sizeDelta = new Vector2(1400f * k, 900f * k);
 			float s = (_canvasScale > 0f ? _canvasScale : 0.004f) * k;
 
-			// Container anchored to canvas centre, shifted right (+X) to sit over the tile
+			// Container anchored to canvas centre (over the tile)
 			var containerGO = new GameObject("SlotsContainer");
 			containerGO.transform.SetParent(canvasGO.transform, false);
 			var containerRt = containerGO.AddComponent<RectTransform>();
 			containerRt.anchorMin = new Vector2(0.5f, 0.5f);
 			containerRt.anchorMax = new Vector2(0.5f, 0.5f);
 			containerRt.pivot     = new Vector2(0.5f, 0.5f);
-			containerRt.anchoredPosition = new Vector2(250f * k, 0f);
+			containerRt.anchoredPosition = Vector2.zero;
 			containerRt.sizeDelta = new Vector2(1380f * k, 0f); // height driven by ContentSizeFitter
 
 			var vlg = containerGO.AddComponent<VerticalLayoutGroup>();
@@ -362,8 +367,7 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 			vlg.childControlHeight    = false;
 			vlg.childForceExpandWidth = false;
 			vlg.childForceExpandHeight= false;
-			// Inner tiles (band 0) are narrower radially → more vertical spacing needed
-			vlg.spacing = band == 0 ? 300f * k : 200f * k;
+			vlg.spacing = _stackSpacing * k;
 
 			var csf = containerGO.AddComponent<ContentSizeFitter>();
 			csf.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
@@ -376,57 +380,25 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 		}
 
 		/// <summary>
-		/// Appends a single image+text row into the slots container.
-		/// Icon is hidden (transparent) when <paramref name="icon"/> is null.
+		/// Appends a single centered icon into the slots container (stacked vertically by VLG).
 		/// </summary>
-		private static void AppendSlotRow(Transform container, string label, Sprite icon)
+		private void AppendStackedIcon(Transform container, Sprite icon, int band)
 		{
+			if (icon == null) return;
+
 			float k = TileCanvasLayoutScale * TileCanvasSizeBoost;
-			float rowW   = 1380f * k;
-			float rowH   = 320f * k;
-			float iconSz = 320f * k;
-			float gap    = 180f * k;
-			float pad    = 12f * k;
+			float iconSz = _stackedIconSize * k;
+			if (band == 1 && _iconSizeOuterScale > 0f)
+				iconSz *= _iconSizeOuterScale;
 
-			var rowGO = new GameObject("Slot");
-			rowGO.transform.SetParent(container, false);
-			var rowRt = rowGO.AddComponent<RectTransform>();
-			rowRt.sizeDelta = new Vector2(rowW, rowH);
-
-			var hlg = rowGO.AddComponent<HorizontalLayoutGroup>();
-			hlg.childAlignment        = TextAnchor.MiddleLeft;
-			hlg.childControlWidth     = false;
-			hlg.childControlHeight    = false;
-			hlg.childForceExpandWidth = false;
-			hlg.childForceExpandHeight= false;
-			hlg.spacing               = gap;
-			int padI = Mathf.Max(0, Mathf.RoundToInt(pad));
-			hlg.padding               = new RectOffset(padI, padI, 0, 0);
-
-			// Icon (hidden when no sprite)
 			var imgGO = new GameObject("Icon");
-			imgGO.transform.SetParent(rowGO.transform, false);
+			imgGO.transform.SetParent(container, false);
 			var imgRt = imgGO.AddComponent<RectTransform>();
 			imgRt.sizeDelta = new Vector2(iconSz, iconSz);
 			var img = imgGO.AddComponent<Image>();
-			img.sprite        = icon;
-			img.preserveAspect= true;
-			img.color         = icon != null ? Color.white : Color.clear;
-
-			// Label — single line, fills remaining row width
-			float textWidth = rowW - iconSz - gap - pad * 2f;
-			var txtGO = new GameObject("Label");
-			txtGO.transform.SetParent(rowGO.transform, false);
-			var txtRt = txtGO.AddComponent<RectTransform>();
-			txtRt.sizeDelta = new Vector2(textWidth, rowH);
-			var tmp = txtGO.AddComponent<TextMeshProUGUI>();
-			tmp.text               = label ?? "";
-			tmp.fontSize           = 120f * k;
-			tmp.color              = Color.black;
-			tmp.alignment          = TextAlignmentOptions.MidlineLeft;
-			tmp.enableAutoSizing   = false;
-			tmp.enableWordWrapping = false;
-			tmp.overflowMode       = TextOverflowModes.Ellipsis;
+			img.sprite = icon;
+			img.preserveAspect = true;
+			img.color = Color.white;
 		}
 
 		public void RefreshFrom(RouletteArenaService service)
@@ -499,22 +471,32 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 		}
 
 		/// <summary>
-		/// Clears the tile's slot container and rebuilds one row per pre-assigned effect.
-		/// The VLG+ContentSizeFitter centres them vertically regardless of count.
+		/// Clears the tile's slot container and rebuilds one icon per assigned effect (stacked).
 		/// </summary>
-		private void RefreshTileCanvas(int i, Logic.Scripts.GameDomain.MVC.Abilitys.AbilityEffect[] effects)
+		private void RefreshTileCanvas(int tileIndex, Logic.Scripts.GameDomain.MVC.Abilitys.AbilityEffect[] effects)
 		{
-			var container = _tileCanvases[i].SlotsContainer;
+			if (_tileCanvases == null || tileIndex < 0 || tileIndex >= _tileCanvases.Length) return;
+			var container = _tileCanvases[tileIndex].SlotsContainer;
 			if (container == null) return;
 
-			// Remove previous slots
+			int band = tileIndex % Mathf.Max(1, _radialBands);
+
 			for (int c = container.childCount - 1; c >= 0; c--)
 				Destroy(container.GetChild(c).gameObject);
 
-			if (effects != null)
-				foreach (var e in effects)
-					if (e != null)
-						AppendSlotRow(container, string.IsNullOrEmpty(e.Name) ? "" : e.Name, e.TileIcon);
+			if (effects == null) return;
+
+			foreach (var e in effects)
+			{
+				if (e == null) continue;
+				if (e.TileIcon == null)
+				{
+					Debug.LogWarning($"[LakiRouletteArena] Tile {tileIndex}: effect '{e.Name}' has no TileIcon — assign in LKI_LakiPrefabBoss effect pools.");
+					continue;
+				}
+
+				AppendStackedIcon(container, e.TileIcon, band);
+			}
 
 			UnityEngine.UI.LayoutRebuilder.ForceRebuildLayoutImmediate(
 				container.GetComponent<RectTransform>());

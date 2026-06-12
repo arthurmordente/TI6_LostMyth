@@ -109,7 +109,13 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
         public void ShowGameOver(bool IsWin) {
             _gameOverView.Show(IsWin);
         }
+
+        public async Awaitable ShowGameOverWithFadeAsync(bool isWin, float fadeDurationSeconds = 1f) {
+            await _gameOverView.ShowWithFadeAsync(isWin, fadeDurationSeconds);
+        }
+
         public async void OnClickPlayAgain() {
+            GameOverCommand.ResetSequenceGuard();
             _commandFactory.CreateCommandVoid<ResumeGameplayInputCommand>().Execute();
             await _commandFactory.CreateCommandAsync<ReloadLevelCommand>().Execute(CancellationTokenSource.CreateLinkedTokenSource(Application.exitCancellationToken));
             _gameOverView.Hide();
@@ -160,6 +166,7 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
         }
 
         private void BackToLobby() {
+            GameOverCommand.ResetSequenceGuard();
             _universalUIController.CloseAllOverlays();
             _commandFactory.CreateCommandVoid<ResumeGameplayInputCommand>().Execute();
             _stateMachineService.SwitchState(_explorationStateFactory.Create(new ExplorationInitiatorEnterData(0)));

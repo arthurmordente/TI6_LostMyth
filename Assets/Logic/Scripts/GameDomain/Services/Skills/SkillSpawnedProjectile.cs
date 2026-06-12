@@ -19,6 +19,7 @@ namespace Logic.Scripts.GameDomain.Services.Skills
         public float PullStandoffFromTarget;
         public float MinTravelBeforeHitMeters;
         public float HitDisplacementDurationSeconds;
+        public GameObject ImpactPrefab;
     }
 
     /// <summary>
@@ -42,6 +43,7 @@ namespace Logic.Scripts.GameDomain.Services.Skills
         float _minTravelSq;
         float _hitDisplacementDuration;
         bool _canResolveHits;
+        GameObject _impactPrefab;
 
         public void Initialize(in SkillProjectileSpawnArgs args)
         {
@@ -55,6 +57,7 @@ namespace Logic.Scripts.GameDomain.Services.Skills
             float minMeters = Mathf.Max(0f, args.MinTravelBeforeHitMeters);
             _minTravelSq = minMeters * minMeters;
             _hitDisplacementDuration = Mathf.Max(0.05f, args.HitDisplacementDurationSeconds);
+            _impactPrefab = args.ImpactPrefab;
             _spawnPos = transform.position;
             _hitCount = 0;
             _canResolveHits = true;
@@ -101,6 +104,8 @@ namespace Logic.Scripts.GameDomain.Services.Skills
 
             if (_damage > 0)
                 OutgoingDamageApplier.Apply(_caster, hit, _damage);
+
+            TrySpawnImpactVfx(hit);
 
             if (_caster is IPlayableUnit playable)
             {
@@ -152,7 +157,18 @@ namespace Logic.Scripts.GameDomain.Services.Skills
         {
             if (_damage > 0)
                 OutgoingDamageApplier.Apply(_caster, hit, _damage);
+            TrySpawnImpactVfx(hit);
             RegisterHitDestroy();
+        }
+
+        void TrySpawnImpactVfx(IEffectable hit)
+        {
+            if (_impactPrefab == null || !SkillImpactVfxRules.ShouldSpawnImpactOn(hit)) return;
+
+            Transform reference = hit.GetReferenceTransform();
+            Vector3 position = reference != null ? reference.position : transform.position;
+            Quaternion rotation = reference != null ? reference.rotation : Quaternion.identity;
+            SkillCastVfxUtility.TrySpawnTransiient(_impactPrefab, position, rotation);
         }
 
         void RegisterHitDestroy()

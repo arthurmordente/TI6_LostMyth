@@ -187,14 +187,18 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
         {
             DiceAttackRuntimeService.OnDiceAttackBegan += OnDiceAttackBegan;
             DiceAttackRuntimeService.OnDiceAttackEnded += OnDiceAttackEnded;
+            DiceAttackRuntimeService.OnDeferredScoreboardDismiss += OnDeferredScoreboardDismiss;
             DiceUiRuntime.OnProgress += OnDiceUiProgress;
+            DiceUiRuntime.OnScoreboardCelebration += OnDiceScoreboardCelebration;
         }
 
         private void OnDisable()
         {
             DiceAttackRuntimeService.OnDiceAttackBegan -= OnDiceAttackBegan;
             DiceAttackRuntimeService.OnDiceAttackEnded -= OnDiceAttackEnded;
+            DiceAttackRuntimeService.OnDeferredScoreboardDismiss -= OnDeferredScoreboardDismiss;
             DiceUiRuntime.OnProgress -= OnDiceUiProgress;
+            DiceUiRuntime.OnScoreboardCelebration -= OnDiceScoreboardCelebration;
         }
 
         private void OnDiceAttackBegan()
@@ -203,7 +207,27 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
             ResolveDicePanel()?.PrepareRoundStart();
         }
 
-        private void OnDiceAttackEnded() => SetDiceScoreAreaActive(false);
+        private void OnDiceAttackEnded()
+        {
+            if (DiceAttackRuntimeService.IsScoreboardDismissDeferred) return;
+            DismissDiceScoreboard();
+        }
+
+        private void OnDeferredScoreboardDismiss() => DismissDiceScoreboard();
+
+        private void OnDiceScoreboardCelebration(int playerSum, int bossSum, bool playerWon, bool isTie)
+        {
+            SetDiceScoreAreaActive(true);
+            ResolveDicePanel()?.PlayResolutionCelebration(playerWon, isTie);
+        }
+
+        public void DismissDiceScoreboard()
+        {
+            if (_diceSlidablePanel != null)
+                _diceSlidablePanel.SetExpanded(false);
+            else
+                SetDiceScoreAreaActive(false);
+        }
 
         private void OnDiceUiProgress(DiceUiProgressPayload payload)
         {

@@ -24,11 +24,16 @@ public abstract class SkillDataSO : ScriptableObject
     [SerializeField] private float _projectileRange = 8f;
     [SerializeField] private int _projectileNumberOfTargets = 1;
     [SerializeField] private float _projectileTravelSpeed = 12f;
-    [Tooltip("Ground aim VFX at ability cast point: artist length along local +Y at scale 1; runtime lays flat and yaws to mouse, scale.y = projectile range.")]
+    [Tooltip("Mira: ground aim VFX at ability cast point; artist length along local +Y at scale 1; runtime lays flat and yaws to mouse, scale.y = projectile range.")]
     [SerializeField, FormerlySerializedAs("ProjectileAimPreviewPrefab")]
     private GameObject _projectileAimPrefab;
-    [SerializeField, FormerlySerializedAs("AttackPrefab")]
-    private GameObject _projectilePrefab;
+    [Tooltip("Cast: one-shot VFX on the caster when the skill is confirmed.")]
+    [SerializeField] private GameObject _projectileCastPrefab;
+    [Tooltip("Effect: traveling projectile (actual skill delivery).")]
+    [SerializeField, FormerlySerializedAs("AttackPrefab"), FormerlySerializedAs("_projectilePrefab")]
+    private GameObject _projectileEffectPrefab;
+    [Tooltip("Impact: one-shot VFX spawned on an IEffectable when the projectile hits.")]
+    [SerializeField] private GameObject _projectileImpactPrefab;
 
     [Header("Projectile movement / pull to target (Projectile only)")]
     [Tooltip("When enabled, hitting another IEffectable pulls the caster next to that target (miss = no movement). Uses the same hit rules as projectile damage.")]
@@ -50,13 +55,23 @@ public abstract class SkillDataSO : ScriptableObject
     [SerializeField] private float _areaMinRange;
     [SerializeField] private float _areaMaxRange = 8f;
     [SerializeField] private float _areaRadius = 2f;
+    [Tooltip("Mira: AoE aim ring/sphere at cast point.")]
     [SerializeField, FormerlySerializedAs("AoEPrefab")]
     private GameObject _areaAimPrefab;
-    [SerializeField] private GameObject _areaImpactPrefab;
+    [Tooltip("Cast: one-shot VFX on the caster when the skill is confirmed.")]
+    [SerializeField] private GameObject _areaCastPrefab;
+    [Tooltip("Effect: AoE burst at the committed target point.")]
+    [SerializeField, FormerlySerializedAs("_areaImpactPrefab")]
+    private GameObject _areaEffectPrefab;
 
     [Header("Self (when Cast Type is Self)")]
+    [Tooltip("Mira: self-buff aim anchor at feet during prepare.")]
     [SerializeField] private GameObject _selfAimPrefab;
+    [Tooltip("Cast: one-shot VFX on the caster when the skill is confirmed.")]
     [SerializeField] private GameObject _selfCastPrefab;
+    [Tooltip("Effect: buff/heal VFX at the presentation anchor (typically feet).")]
+    [SerializeField, FormerlySerializedAs("_selfCastPrefab")]
+    private GameObject _selfEffectPrefab;
 
     [Header("Skill")]
     public int Power, Cost;
@@ -133,11 +148,43 @@ public abstract class SkillDataSO : ScriptableObject
     public float CoolDown => 0f;
 
     public GameObject ProjectileAimPrefab => _projectileAimPrefab;
-    public GameObject ProjectilePrefab => _projectilePrefab;
+    public GameObject ProjectileCastPrefab => _projectileCastPrefab;
+    public GameObject ProjectileEffectPrefab => _projectileEffectPrefab;
+    public GameObject ProjectileImpactPrefab => _projectileImpactPrefab;
+    /// <summary>Backward-compatible alias for <see cref="ProjectileEffectPrefab"/>.</summary>
+    public GameObject ProjectilePrefab => ProjectileEffectPrefab;
+
     public GameObject AreaAimPrefab => _areaAimPrefab;
-    public GameObject AreaImpactPrefab => _areaImpactPrefab;
+    public GameObject AreaCastPrefab => _areaCastPrefab;
+    public GameObject AreaEffectPrefab => _areaEffectPrefab;
+    /// <summary>Backward-compatible alias for <see cref="AreaEffectPrefab"/>.</summary>
+    public GameObject AreaImpactPrefab => AreaEffectPrefab;
+
     public GameObject SelfAimPrefab => _selfAimPrefab;
     public GameObject SelfCastPrefab => _selfCastPrefab;
+    public GameObject SelfEffectPrefab => _selfEffectPrefab;
+
+    public GameObject GetCastPrefabForCurrentCastType()
+    {
+        switch (EffectiveCastType)
+        {
+            case SkillCastType.Projectile: return _projectileCastPrefab;
+            case SkillCastType.Area: return _areaCastPrefab;
+            case SkillCastType.Self: return _selfCastPrefab;
+            default: return null;
+        }
+    }
+
+    public GameObject GetEffectPrefabForCurrentCastType()
+    {
+        switch (EffectiveCastType)
+        {
+            case SkillCastType.Projectile: return _projectileEffectPrefab;
+            case SkillCastType.Area: return _areaEffectPrefab;
+            case SkillCastType.Self: return _selfEffectPrefab;
+            default: return null;
+        }
+    }
 
     protected virtual IReadOnlyList<IEffectable> ResolveTargets(IEffectable caster, Transform target, IEffectable beneficiary = null)
     {

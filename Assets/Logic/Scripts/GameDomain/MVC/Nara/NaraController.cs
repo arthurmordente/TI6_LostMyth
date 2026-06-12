@@ -325,7 +325,9 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
             if (_naraData.IsAlive()) {
                 _audioService?.PlaySfx(SfxIds.Erza_Morte, AudioChannelType.SfxCombat);
                 _naraView?.PlayDeath();
-                _commandFactory.CreateCommandVoid<GameOverCommand>().SetData(new GameOverCommandData(false)).Execute();
+                _commandFactory.CreateCommandVoid<GameOverCommand>()
+                    .SetData(new GameOverCommandData(false, _naraView?.GetAnimator()))
+                    .Execute();
             }
         }
 

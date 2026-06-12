@@ -151,23 +151,7 @@ MonoBehaviour:
       Slots:
       - Pool: 1
   _neutralTileConfig:
-    Layouts:
-    - Weight: 30
-      Slots:
-      - Pool: 0
-      - Pool: 2
-    - Weight: 30
-      Slots:
-      - Pool: 1
-      - Pool: 3
-    - Weight: 20
-      Slots:
-      - Pool: 0
-      - Pool: 3
-    - Weight: 20
-      Slots:
-      - Pool: 2
-      - Pool: 1
+    Layouts: []
   _negativeTileConfig:
     Layouts:
     - Weight: 30
@@ -194,7 +178,7 @@ MonoBehaviour:
         Name: +20HP
         Description: 
         IsAutoCast: 0
-        TileIcon: {fileID: 21300000, guid: f18e00465fefb7b4db6702a67ed18621, type: 3}
+        TileIcon: {fileID: 21300000, guid: df4c1c5d1175d124a83915cb4dd98632, type: 3}
         amount: 20
     - rid: 5387295318499655772
       type: {class: AddActionPointsAbilityEffect, ns: Logic.Scripts.GameDomain.Effects, asm: Assembly-CSharp}
@@ -202,7 +186,7 @@ MonoBehaviour:
         Name: +3AP
         Description: 
         IsAutoCast: 0
-        TileIcon: {fileID: 21300000, guid: 856d3e726be9055409ababe2a81d8ed2, type: 3}
+        TileIcon: {fileID: 21300000, guid: 0feb04ab30c1c364d9e9c8fd32fc8213, type: 3}
         amount: 3
     - rid: 5387295318499655773
       type: {class: HealAbilityEffect, ns: Logic.Scripts.GameDomain.Effects, asm: Assembly-CSharp}
@@ -210,7 +194,7 @@ MonoBehaviour:
         Name: +10HP
         Description: 
         IsAutoCast: 0
-        TileIcon: {fileID: 21300000, guid: f18e00465fefb7b4db6702a67ed18621, type: 3}
+        TileIcon: {fileID: 21300000, guid: df4c1c5d1175d124a83915cb4dd98632, type: 3}
         amount: 10
     - rid: 5387295318499655774
       type: {class: DamageEffect, ns: Assets.Logic.Scripts.GameDomain.Effects, asm: Assembly-CSharp}
@@ -218,7 +202,7 @@ MonoBehaviour:
         Name: -20HP
         Description: 
         IsAutoCast: 0
-        TileIcon: {fileID: 21300000, guid: 995624d19f0faec47ae51b40b76485de, type: 3}
+        TileIcon: {fileID: 21300000, guid: d96a097dec7fb114580b6dc75faf8518, type: 3}
         amount: 20
     - rid: 5387295318499655776
       type: {class: RemoveActionPointsAbilityEffect, ns: Logic.Scripts.GameDomain.Effects, asm: Assembly-CSharp}
@@ -226,7 +210,7 @@ MonoBehaviour:
         Name: -3AP
         Description: 
         IsAutoCast: 0
-        TileIcon: {fileID: 21300000, guid: 856d3e726be9055409ababe2a81d8ed2, type: 3}
+        TileIcon: {fileID: 21300000, guid: 0feb04ab30c1c364d9e9c8fd32fc8213, type: 3}
         amount: 3
     - rid: 5387295318499655777
       type: {class: DamageEffect, ns: Assets.Logic.Scripts.GameDomain.Effects, asm: Assembly-CSharp}
@@ -234,7 +218,7 @@ MonoBehaviour:
         Name: -10HP
         Description: 
         IsAutoCast: 0
-        TileIcon: {fileID: 21300000, guid: 995624d19f0faec47ae51b40b76485de, type: 3}
+        TileIcon: {fileID: 21300000, guid: d96a097dec7fb114580b6dc75faf8518, type: 3}
         amount: 10
     - rid: 8051478750538236118
       type: {class: RemoveActionPointsAbilityEffect, ns: Logic.Scripts.GameDomain.Effects, asm: Assembly-CSharp}
@@ -242,7 +226,7 @@ MonoBehaviour:
         Name: -1AP
         Description: 
         IsAutoCast: 0
-        TileIcon: {fileID: 21300000, guid: 856d3e726be9055409ababe2a81d8ed2, type: 3}
+        TileIcon: {fileID: 21300000, guid: 0feb04ab30c1c364d9e9c8fd32fc8213, type: 3}
         amount: 1
     - rid: 8051478750538236120
       type: {class: AddActionPointsAbilityEffect, ns: Logic.Scripts.GameDomain.Effects, asm: Assembly-CSharp}
@@ -250,7 +234,7 @@ MonoBehaviour:
         Name: +1AP
         Description: 
         IsAutoCast: 0
-        TileIcon: {fileID: 21300000, guid: 856d3e726be9055409ababe2a81d8ed2, type: 3}
+        TileIcon: {fileID: 21300000, guid: 0feb04ab30c1c364d9e9c8fd32fc8213, type: 3}
         amount: 1
 --- !u!114 &8695215367175580558
 MonoBehaviour:

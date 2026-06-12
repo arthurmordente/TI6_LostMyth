@@ -142,6 +142,9 @@ namespace Logic.Scripts.Turns {
 
             if (UsesLakiArenaTurnFlowOrder)
             {
+                if (Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.TryDismissDeferredScoreboard())
+                    try { Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Dice.DiceUiRuntime.Reset(); } catch { }
+
                 // LogService.Log($"Turno {_turnNumber} - Fase: BossAct (Laki prepare)");
                 _waitingBoss = true;
                 await _bossActionService.ExecuteBossPrepareTurnAsync();

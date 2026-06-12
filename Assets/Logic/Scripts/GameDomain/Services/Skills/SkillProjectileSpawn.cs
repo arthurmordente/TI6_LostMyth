@@ -57,7 +57,8 @@ namespace Logic.Scripts.GameDomain.Services.Skills
                 MoveCasterToHit = skill.MoveCasterToProjectileHit,
                 PullStandoffFromTarget = skill.ProjectilePullStandoffFromTargetMeters,
                 MinTravelBeforeHitMeters = skill.ProjectileMinTravelBeforeHitMeters,
-                HitDisplacementDurationSeconds = skill.ProjectileHitDisplacementDurationSeconds
+                HitDisplacementDurationSeconds = skill.ProjectileHitDisplacementDurationSeconds,
+                ImpactPrefab = skill.ProjectileImpactPrefab
             };
             motor.Initialize(args);
         }
