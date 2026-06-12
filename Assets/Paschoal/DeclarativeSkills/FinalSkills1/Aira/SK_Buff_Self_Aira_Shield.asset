@@ -15,11 +15,14 @@ MonoBehaviour:
   _divinity: 4
   _skillType: 1
   _castType: 2
+  _castAnimationStyle: 0
   _projectileRange: 8
   _projectileNumberOfTargets: 1
   _projectileTravelSpeed: 12
   _projectileAimPrefab: {fileID: 8272950397043843596, guid: 8058bca71956f704e915ec3e0b22aabd, type: 3}
-  _projectilePrefab: {fileID: 4470363709726842422, guid: 05ecf4c11bd35014797b40e47735e1c1, type: 3}
+  _projectileCastPrefab: {fileID: 0}
+  _projectileEffectPrefab: {fileID: 4470363709726842422, guid: 05ecf4c11bd35014797b40e47735e1c1, type: 3}
+  _projectileImpactPrefab: {fileID: 0}
   _moveCasterToProjectileHit: 0
   _projectilePullStandoffFromTargetMeters: 1.2
   _projectileDealsDamage: 1
@@ -31,14 +34,17 @@ MonoBehaviour:
   _areaMaxRange: 8
   _areaRadius: 2
   _areaAimPrefab: {fileID: 0}
-  _areaImpactPrefab: {fileID: 0}
+  _areaCastPrefab: {fileID: 0}
+  _areaEffectPrefab: {fileID: 0}
   _selfAimPrefab: {fileID: 1607142820532151380, guid: 869e8460ad50e054b9b351e10c296c31, type: 3}
   _selfCastPrefab: {fileID: 1607142820532151380, guid: 6190cf774033c09479d45e3c13b935d7, type: 3}
+  _selfEffectPrefab: {fileID: 1607142820532151380, guid: 6190cf774033c09479d45e3c13b935d7, type: 3}
   Power: 0
   Cost: 3
   Icon: {fileID: 21300000, guid: 5dfeb5cffa3878f4c8ad37049ac10bd8, type: 3}
-  SkillName: Escudo de fogo
-  Description: "Se protege nas chamas, bloqueando a pr\xF3xima inst\xE2ncia de dano."
+  SkillName: "Prote\xE7\xE3o Mel\xF3dica"
+  Description: "Aira aben\xE7oa o usu\xE1rio com sua m\xFAsica, garantindo ao mesmo
+    um escudo de Lava que impede a pr\xF3xima inst\xE2ncia de dano."
   _effects:
   - {fileID: 11400000, guid: e86755636f8c10b4daca1d5bb208919c, type: 2}
   _passiveModifiers: []

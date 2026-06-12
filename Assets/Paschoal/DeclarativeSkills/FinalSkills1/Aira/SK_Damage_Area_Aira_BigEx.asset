@@ -15,11 +15,14 @@ MonoBehaviour:
   _divinity: 4
   _skillType: 0
   _castType: 1
+  _castAnimationStyle: 0
   _projectileRange: 8
   _projectileNumberOfTargets: 1
   _projectileTravelSpeed: 12
   _projectileAimPrefab: {fileID: 0}
-  _projectilePrefab: {fileID: 0}
+  _projectileCastPrefab: {fileID: 0}
+  _projectileEffectPrefab: {fileID: 0}
+  _projectileImpactPrefab: {fileID: 0}
   _moveCasterToProjectileHit: 0
   _projectilePullStandoffFromTargetMeters: 1.2
   _projectileDealsDamage: 1
@@ -31,14 +34,17 @@ MonoBehaviour:
   _areaMaxRange: 12
   _areaRadius: 15
   _areaAimPrefab: {fileID: 1607142820532151380, guid: 6feee9629db8db94f83b1e6771d787d1, type: 3}
-  _areaImpactPrefab: {fileID: 2224025274982176450, guid: caa4a69375bd38348901ddadba2f8953, type: 3}
+  _areaCastPrefab: {fileID: 0}
+  _areaEffectPrefab: {fileID: 2224025274982176450, guid: caa4a69375bd38348901ddadba2f8953, type: 3}
   _selfAimPrefab: {fileID: 0}
   _selfCastPrefab: {fileID: 0}
+  _selfEffectPrefab: {fileID: 0}
   Power: 15
   Cost: 3
   Icon: {fileID: 21300000, guid: a98445229091fdf4db8d470929aaaec4, type: 3}
-  SkillName: "Explos\xE3o S\xEDsmica"
-  Description: Causa dano em tudo em uma area.
+  SkillName: "C\xE2ntico de Lava"
+  Description: " A voz de Aira ressoa ao seu redor em uma \xE1rea mediana, causando
+    X dano a todos os inimigos."
   _effects:
   - {fileID: 11400000, guid: a47ac10b58cc4372a5670e02b2c3d472, type: 2}
   _passiveModifiers: []
