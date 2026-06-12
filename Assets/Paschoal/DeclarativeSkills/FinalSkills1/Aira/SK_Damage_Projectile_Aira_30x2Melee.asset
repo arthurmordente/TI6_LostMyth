@@ -15,11 +15,14 @@ MonoBehaviour:
   _divinity: 4
   _skillType: 0
   _castType: 0
+  _castAnimationStyle: 0
   _projectileRange: 5
   _projectileNumberOfTargets: 2
   _projectileTravelSpeed: 12
   _projectileAimPrefab: {fileID: 5171449077471736857, guid: 5a96a15201f481c488a06861525f72e4, type: 3}
-  _projectilePrefab: {fileID: 4470363709726842422, guid: 05ecf4c11bd35014797b40e47735e1c1, type: 3}
+  _projectileCastPrefab: {fileID: 0}
+  _projectileEffectPrefab: {fileID: 4470363709726842422, guid: 05ecf4c11bd35014797b40e47735e1c1, type: 3}
+  _projectileImpactPrefab: {fileID: 0}
   _moveCasterToProjectileHit: 0
   _projectilePullStandoffFromTargetMeters: 1.2
   _projectileDealsDamage: 1
@@ -31,14 +34,17 @@ MonoBehaviour:
   _areaMaxRange: 8
   _areaRadius: 2
   _areaAimPrefab: {fileID: 0}
-  _areaImpactPrefab: {fileID: 0}
+  _areaCastPrefab: {fileID: 0}
+  _areaEffectPrefab: {fileID: 0}
   _selfAimPrefab: {fileID: 0}
   _selfCastPrefab: {fileID: 0}
+  _selfEffectPrefab: {fileID: 0}
   Power: 30
   Cost: 2
   Icon: {fileID: 21300000, guid: e32f9a864995dac4aa70678723ced89f, type: 3}
-  SkillName: Choque de lava
-  Description: Causa grande dano a quem ousar se aproximar.
+  SkillName: Corte Sonoro
+  Description: "Canaliza a f\xFAria de Aira em um \xFAnico ponto \xE0 uma curta dist\xE2ncia,
+    causando X dano ao primeiro inimigo atingido. "
   _effects: []
   _passiveModifiers: []
   _passiveTurnBehavior: {fileID: 0}
