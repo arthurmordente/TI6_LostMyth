@@ -106,9 +106,9 @@ MonoBehaviour:
   - title: Minimal
     position:
       serializedVersion: 2
-      x: -58
+      x: 87
       y: -643
-      width: 1882
+      width: 1737
       height: 1901
     contents:
     - model: {fileID: 8926484042661614689}
@@ -3328,7 +3328,7 @@ MonoBehaviour:
   m_UIIgnoredErrors: []
   m_Parent: {fileID: 114350483966674976}
   m_Children: []
-  m_UIPosition: {x: -33, y: 894}
+  m_UIPosition: {x: 112, y: 940}
   m_UICollapsed: 0
   m_UISuperCollapsed: 0
   m_InputSlots: []
@@ -3384,7 +3384,7 @@ MonoBehaviour:
   m_UIIgnoredErrors: []
   m_Parent: {fileID: 114350483966674976}
   m_Children: []
-  m_UIPosition: {x: 178, y: 894}
+  m_UIPosition: {x: 323, y: 940}
   m_UICollapsed: 0
   m_UISuperCollapsed: 0
   m_InputSlots:
