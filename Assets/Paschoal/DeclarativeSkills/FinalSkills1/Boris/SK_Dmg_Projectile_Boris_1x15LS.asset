@@ -19,7 +19,7 @@ MonoBehaviour:
   _projectileNumberOfTargets: 1
   _projectileTravelSpeed: 12
   _projectileAimPrefab: {fileID: 5171449077471736857, guid: 5a96a15201f481c488a06861525f72e4, type: 3}
-  _projectilePrefab: {fileID: 4470363709726842422, guid: 05ecf4c11bd35014797b40e47735e1c1, type: 3}
+  _projectilePrefab: {fileID: 4030026229297006641, guid: 91d1e965a2e14c14e93a209bb61f6d3c, type: 3}
   _moveCasterToProjectileHit: 0
   _projectilePullStandoffFromTargetMeters: 1.2
   _projectileDealsDamage: 1
@@ -37,11 +37,14 @@ MonoBehaviour:
   Power: 20
   Cost: 3
   Icon: {fileID: 21300000, guid: 8f9e4fb2e31ce5c41a5f5aec2d3b6838, type: 3}
-  SkillName: Sugada vital
-  Description: Rouba parte da energia vital do primeiro alvo atingido.
+  SkillName: Ciclo de Morte e Vida
+  Description: "Conjura a pe\xE7onha de Boris, que aprisiona parte da vitalidade
+    do alvo, causando X dano, e ent\xE3o retorna para o usu\xE1rio, curando-o em
+    Y de vida."
   _effects:
   - {fileID: 11400000, guid: b1ce42d1f87ea114f93d58402bb3939f, type: 2}
   _passiveModifiers: []
   _passiveTurnBehavior: {fileID: 0}
   _passiveCombatBehavior: {fileID: 0}
+  _passiveOnDamageTakenBehavior: {fileID: 0}
   _runtimeModifiers: []

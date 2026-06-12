@@ -33,13 +33,12 @@ MonoBehaviour:
   _areaAimPrefab: {fileID: 0}
   _areaImpactPrefab: {fileID: 0}
   _selfAimPrefab: {fileID: 1607142820532151380, guid: 869e8460ad50e054b9b351e10c296c31, type: 3}
-  _selfCastPrefab: {fileID: 1607142820532151380, guid: 6190cf774033c09479d45e3c13b935d7, type: 3}
+  _selfCastPrefab: {fileID: 3093461679282373187, guid: ef5829a30b1484d4b9769f9b06107e97, type: 3}
   Power: 20
   Cost: 4
   Icon: {fileID: 21300000, guid: 186772cbcc71e324eabaf923201504d0, type: 3}
-  SkillName: Onda de cura
-  Description: Invoca ventos rejuvenecedores que aliviam a dor, recuperando um pouco
-    de vida.
+  SkillName: Cura Serpentina
+  Description: Canaliza a magia de Boris para recuperar instantaneamente X de vida.
   _effects:
   - {fileID: 11400000, guid: e43e4868cc75aaf48b433861cd68c8c5, type: 2}
   _passiveModifiers: []

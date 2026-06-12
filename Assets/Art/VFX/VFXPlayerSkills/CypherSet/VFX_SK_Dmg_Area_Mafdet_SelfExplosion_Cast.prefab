@@ -128,7 +128,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2407501092842972851}
   m_Layer: 0
-  m_Name: VFX_SK_Dmg_Area_Mafdet_SelfExplosion_Cast
+  m_Name: VFX_SK_Dmg_Area_Mafdet_SelfExplosion_CAST
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
