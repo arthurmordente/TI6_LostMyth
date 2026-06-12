@@ -34,6 +34,8 @@ No GameObject do **SceneContext** (com `ExplorationInstaller`):
 
 O menu **inicia oculto** (`Awake` + `Init`). Só abre quando o jogador interage com o NPC (`OganjdanInteractable` → `OnSkillLoadoutInteractionCommand` → `Show()`).
 
+**Drag-and-drop (equipar skills):** implementado em código — não é preciso prefab extra. Opcionalmente arrasta o **ScrollRect** do catálogo para `_catalogScrollRect` no `ExplorationLoadoutUIView` (desactiva scroll durante drag). Interacção: pointer down/click mostra detalhes; arrastar para slot Erza/Livro equipa; slots inválidos escurecem durante o arrasto.
+
 ### Canvas de pause
 
 - Instanciar `Canvas_PauseMenu.prefab`, `PauseMenuCanvasView` no root, ligar em **Pause Menu View**.
@@ -46,6 +48,20 @@ O menu **inicia oculto** (`Awake` + `Init`). Só abre quando o jogador interage 
 - `GamePlayInstaller` → `Pause Menu View`, `Game Over View` (com `GameOverCanvasView`).
 
 - Remover `PauseUi` e `GameOver` com `UIDocument`.
+
+### HUD de combate — tinta + frame por skill
+
+O runtime adiciona `SkillSlotVisualView` em cada `btn_Skill` e resolve ícone/frame/tinta via `SkillVisualCatalog` (GameInstaller). Para a **tinta** aparecer, cada botão de skill precisa de um filho `img_Paint`:
+
+```
+btn_Skill (Button — Image = frame)
+├── img_Paint          ← Image, primeiro filho, stretch full rect
+├── icon_Skill
+├── icon_Mana
+└── icon_Keybind
+```
+
+Repetir nos **8** botões (4 Erza + 4 Livro) em `Assets/Ui/UI_Jordan/Canvas_Gameplay.prefab`. Duplica a estrutura de `SkillFrame.prefab` (`img_Paint` atrás do frame) ou copia sprites do `SkillVisualCatalog`. Sem `img_Paint`, o HUD actualiza ícone + frame (Image do botão); a tinta fica omitida até existir a camada.
 
 ## 5. GameScene
 

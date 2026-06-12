@@ -107,15 +107,15 @@ namespace Logic.Scripts.GameDomain.Services.ActiveUnit
             if (_gamePlayUiController == null || _newSkillSystemSkillLoadoutService == null) return;
             SkillDataSO[] p = _newSkillSystemSkillLoadoutService.BuildRuntimeSlotsArray(SkillLoadoutUnitType.Player);
             SkillDataSO[] b = _newSkillSystemSkillLoadoutService.BuildRuntimeSlotsArray(SkillLoadoutUnitType.Book);
-            _gamePlayUiController.SetSkillHudIcons(
-                IconFrom(p, 0), IconFrom(p, 1), IconFrom(p, 2), IconFrom(p, 3),
-                IconFrom(b, 0), IconFrom(b, 1), IconFrom(b, 2), IconFrom(b, 3));
+            _gamePlayUiController.SetSkillHudVisuals(
+                SkillAt(p, 0), SkillAt(p, 1), SkillAt(p, 2), SkillAt(p, 3),
+                SkillAt(b, 0), SkillAt(b, 1), SkillAt(b, 2), SkillAt(b, 3));
         }
 
-        private static Sprite IconFrom(SkillDataSO[] slots, int index)
+        private static SkillDataSO SkillAt(SkillDataSO[] slots, int index)
         {
             if (slots == null || index < 0 || index >= slots.Length) return null;
-            return slots[index] != null ? slots[index].Icon : null;
+            return slots[index];
         }
 
         public void RegisterBook(IPlayableUnit book)

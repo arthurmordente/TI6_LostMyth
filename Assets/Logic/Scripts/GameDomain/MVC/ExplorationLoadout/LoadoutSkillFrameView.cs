@@ -1,5 +1,6 @@
 using System;
 using DG.Tweening;
+using Logic.Scripts.GameDomain.MVC.Shared;
 using Logic.Scripts.GameDomain.Services.Skills;
 using TMPro;
 using UnityEngine;
@@ -20,11 +21,20 @@ namespace Logic.Scripts.GameDomain.MVC.ExplorationLoadout
         [SerializeField] private Button _button;
         [SerializeField] private Image _catalogSelectionOutline;
         [SerializeField] private TMP_Text _skillNameText;
+        [Header("Icon layout")]
+        [SerializeField] private bool _iconPreserveAspect = true;
+        [SerializeField] private bool _overrideIconAnchoredPosition;
+        [SerializeField] private Vector2 _iconAnchoredPosition;
+        [SerializeField] private bool _overrideIconSizeDelta;
+        [SerializeField] private Vector2 _iconSizeDelta = new Vector2(85f, 63f);
 
         SkillDataSO _boundSkill;
+        ISkillVisualCatalog _visualCatalog;
+        SkillFrameVisualMode _visualMode = SkillFrameVisualMode.FullLayers;
         Action<SkillDataSO> _onSelected;
         Action<SkillDataSO> _onHovered;
         Outline _selectionOutlineEffect;
+        CanvasGroup _canvasGroup;
 
         private void Awake()
         {
@@ -34,11 +44,15 @@ namespace Logic.Scripts.GameDomain.MVC.ExplorationLoadout
         }
 
         public SkillDataSO BoundSkill => _boundSkill;
+        public SkillFrameVisualMode VisualMode => _visualMode;
 
         public void Bind(SkillDataSO skill, ISkillVisualCatalog catalog,
-            Action<SkillDataSO> onSelected, Action<SkillDataSO> onHovered = null)
+            Action<SkillDataSO> onSelected, Action<SkillDataSO> onHovered = null,
+            SkillFrameVisualMode visualMode = SkillFrameVisualMode.FullLayers)
         {
             _boundSkill = skill;
+            _visualCatalog = catalog;
+            _visualMode = visualMode;
             _onSelected = onSelected;
             _onHovered = onHovered;
 
@@ -50,6 +64,18 @@ namespace Logic.Scripts.GameDomain.MVC.ExplorationLoadout
         public void SetCatalogSelected(bool selected) => SetSelectionOutline(selected);
 
         public void SetSlotSelected(bool selected) => SetSelectionOutline(selected);
+
+        public CanvasGroup GetOrAddCanvasGroup()
+        {
+            if (_canvasGroup == null)
+                _canvasGroup = GetComponent<CanvasGroup>() ?? gameObject.AddComponent<CanvasGroup>();
+            return _canvasGroup;
+        }
+
+        public void SetBlocksRaycasts(bool blocksRaycasts)
+        {
+            GetOrAddCanvasGroup().blocksRaycasts = blocksRaycasts;
+        }
 
         void SetSelectionOutline(bool selected)
         {
@@ -92,31 +118,48 @@ namespace Logic.Scripts.GameDomain.MVC.ExplorationLoadout
 
         public void ApplySkillVisual(SkillDataSO skill, ISkillVisualCatalog catalog)
         {
-            if (skill == null)
-            {
-                ClearVisual();
-                return;
-            }
-
-            if (catalog != null && catalog.TryGetLayerSprites(skill.Divinity, skill.SkillType, out Sprite bg, out Sprite frame))
-            {
-                SetImage(_backgroundPaint, bg);
-                SetImage(_shapeImage, frame);
-            }
-            else
-            {
-                SetImage(_backgroundPaint, null);
-                SetImage(_shapeImage, null);
-            }
-
-            SetImage(_iconImage, skill.Icon);
+            ResolveReferences();
+            var layout = BuildIconLayoutOptions();
+            SkillSlotVisualApplicator.Apply(
+                skill,
+                catalog,
+                _visualMode,
+                _backgroundPaint,
+                _shapeImage,
+                _iconImage,
+                layout);
         }
 
-        public void ClearVisual()
+        SkillSlotVisualApplicator.IconLayoutOptions BuildIconLayoutOptions()
         {
-            SetImage(_backgroundPaint, null);
-            SetImage(_shapeImage, null);
-            SetImage(_iconImage, null);
+            return new SkillSlotVisualApplicator.IconLayoutOptions
+            {
+                PreserveAspect = _iconPreserveAspect,
+                OverrideAnchoredPosition = _overrideIconAnchoredPosition,
+                AnchoredPosition = _iconAnchoredPosition,
+                OverrideSizeDelta = _overrideIconSizeDelta,
+                SizeDelta = _iconSizeDelta
+            };
+        }
+
+        public void ClearVisual() => SkillSlotVisualApplicator.Clear(_backgroundPaint, _shapeImage, _iconImage);
+
+        public void DisableRaycastTargetsForGhost()
+        {
+            SetRaycastTargets(false);
+        }
+
+        /// <summary>Let drops hit the frame shape instead of the icon overlay.</summary>
+        public void ConfigureAsSlotDropSurface()
+        {
+            if (_iconImage != null) _iconImage.raycastTarget = false;
+        }
+
+        void SetRaycastTargets(bool enabled)
+        {
+            if (_backgroundPaint != null) _backgroundPaint.raycastTarget = enabled;
+            if (_shapeImage != null) _shapeImage.raycastTarget = enabled;
+            if (_iconImage != null) _iconImage.raycastTarget = enabled;
         }
 
         void ResolveReferences()
@@ -149,7 +192,6 @@ namespace Logic.Scripts.GameDomain.MVC.ExplorationLoadout
             }
         }
 
-        /// <summary>SkillFrame.prefab root may ship at scale zero for layout authoring; restore visible scale when spawned.</summary>
         void PrepareForCatalogHost()
         {
             if (transform is RectTransform rt)
@@ -192,14 +234,6 @@ namespace Logic.Scripts.GameDomain.MVC.ExplorationLoadout
             }
 
             return child != null ? child.GetComponent<Image>() : null;
-        }
-
-        static void SetImage(Image image, Sprite sprite)
-        {
-            if (image == null) return;
-            image.sprite = sprite;
-            image.enabled = sprite != null;
-            if (sprite != null) image.color = Color.white;
         }
     }
 }

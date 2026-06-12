@@ -1,4 +1,5 @@
 using Logic.Scripts.GameDomain.MVC.Shared;
+using Logic.Scripts.GameDomain.Services.Skills;
 using UnityEngine;
 
 namespace Logic.Scripts.GameDomain.MVC.Ui {
@@ -17,6 +18,11 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
 
         /// <inheritdoc cref="IGamePlayHudView.SetSkillHudIcons"/>
         void SetSkillHudIcons(Sprite erza0, Sprite erza1, Sprite erza2, Sprite erza3, Sprite book0, Sprite book1, Sprite book2, Sprite book3);
+
+        /// <inheritdoc cref="IGamePlayHudView.SetSkillHudVisuals"/>
+        void SetSkillHudVisuals(
+            SkillDataSO erza0, SkillDataSO erza1, SkillDataSO erza2, SkillDataSO erza3,
+            SkillDataSO book0, SkillDataSO book1, SkillDataSO book2, SkillDataSO book3);
 
         void OnBossDisplayNameChange(string displayName);
 

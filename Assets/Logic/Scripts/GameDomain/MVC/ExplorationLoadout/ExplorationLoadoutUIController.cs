@@ -4,6 +4,7 @@ using Logic.Scripts.GameDomain.Exploration;
 using Logic.Scripts.GameDomain.MVC.ExplorationLoadout;
 using Logic.Scripts.GameDomain.Services.Skills;
 using Logic.Scripts.Services.AudioService;
+using UnityEngine;
 using UnityEngine.EventSystems;
 using Zenject;
 
@@ -14,10 +15,8 @@ public class ExplorationLoadoutUIController : IExplorationLoadoutUIController
     private readonly ISkillVisualCatalog _visualCatalog;
     private readonly IAudioService _audioService;
 
-    private SkillLoadoutUnitType _selectedUnitType = SkillLoadoutUnitType.Player;
-    private int _selectedSlotIndex;
     private SkillDataSO _selectedCatalogSkill;
-    private bool _slotArmedForAssign;
+    private SkillDataSO _draggingSkill;
     private ExplorationLoadoutSkillFilter _catalogFilter = ExplorationLoadoutSkillFilter.All;
     private ExplorationLoadoutDivinityFilter _divinityFilter = ExplorationLoadoutDivinityFilter.All;
     private bool _modalGateActive;
@@ -40,8 +39,14 @@ public class ExplorationLoadoutUIController : IExplorationLoadoutUIController
     {
         if (_view == null) return;
         _view.Init(_visualCatalog);
-        _view.RegisterCallbacks(Hide, OnPlayerSlotClicked, OnBookSlotClicked,
-            OnCatalogFilterChanged, OnDivinityFilterChanged);
+        _view.RegisterCallbacks(Hide, OnCatalogFilterChanged, OnDivinityFilterChanged);
+        _view.RegisterDragCallbacks(
+            OnCatalogSkillPreview,
+            OnCatalogDragBegin,
+            OnCatalogDragMove,
+            OnCatalogDragEnd,
+            OnSkillDroppedOnSlot,
+            OnEquippedSlotClicked);
         RebuildCatalog();
         RefreshSlots();
         if (_loadoutService != null)
@@ -70,8 +75,11 @@ public class ExplorationLoadoutUIController : IExplorationLoadoutUIController
     public void Hide()
     {
         if (_view == null || !_view.IsVisible) return;
+        _view.HideDragGhost();
+        _view.ClearAllSlotDropHighlights();
+        LoadoutDragContext.Clear();
         _view.SetVisible(false);
-        _slotArmedForAssign = false;
+        _draggingSkill = null;
         _selectedCatalogSkill = null;
         if (_modalGateActive)
         {
@@ -99,9 +107,7 @@ public class ExplorationLoadoutUIController : IExplorationLoadoutUIController
         _view.ClearCatalog();
         foreach (SkillDataSO skill in EnumerateFilteredCatalogSkills())
         {
-            LoadoutSkillFrameView frame = _view.CreateCatalogItem();
-            if (frame == null) continue;
-            frame.Bind(skill, _visualCatalog, OnCatalogSkillSelected);
+            _view.CreateCatalogItem(skill, OnCatalogSkillClicked);
         }
         _view.FinalizeCatalogScroll();
         _view.SetSelectedCatalogSkill(_selectedCatalogSkill);
@@ -120,11 +126,8 @@ public class ExplorationLoadoutUIController : IExplorationLoadoutUIController
     private void RefreshSlots()
     {
         if (_view == null || _loadoutService == null) return;
-
         int slotCount = _loadoutService.SlotCount;
         _view.RebuildLoadoutSlots(slotCount, GetSkillForLoadoutSlot);
-        if (_slotArmedForAssign)
-            _view.SetSelectedSlot(_selectedUnitType, _selectedSlotIndex);
     }
 
     private SkillDataSO GetSkillForLoadoutSlot(SkillLoadoutUnitType unitType, int slotIndex)
@@ -134,92 +137,105 @@ public class ExplorationLoadoutUIController : IExplorationLoadoutUIController
         return skill;
     }
 
-    private void OnCatalogSkillSelected(SkillDataSO skill)
+    private void OnCatalogSkillPreview(SkillDataSO skill)
+    {
+        if (skill == null) return;
+        _selectedCatalogSkill = skill;
+        _view?.SetSelectedCatalogSkill(skill);
+        _view?.ShowSkillDetails(skill);
+    }
+
+    private void OnCatalogSkillClicked(SkillDataSO skill)
+    {
+        if (skill == null) return;
+        _selectedCatalogSkill = skill;
+        _view?.SetSelectedCatalogSkill(skill);
+        GeneralSfxFeedback.PlayMenuClick(_audioService);
+        _view?.ShowSkillDetails(skill);
+    }
+
+    private void OnCatalogDragBegin(SkillDataSO skill)
+    {
+        if (skill == null) return;
+        _draggingSkill = skill;
+        _selectedCatalogSkill = skill;
+        _view?.SetSelectedCatalogSkill(skill);
+        _view?.ShowSkillDetails(skill);
+        _view?.ShowDragGhost(skill);
+        UpdateSlotDropHighlights(skill);
+    }
+
+    private void OnCatalogDragMove(Vector2 screenPosition)
+    {
+        _view?.UpdateDragGhostScreenPosition(screenPosition);
+    }
+
+    private void OnCatalogDragEnd()
+    {
+        _draggingSkill = null;
+        _view?.HideDragGhost();
+        _view?.ClearAllSlotDropHighlights();
+    }
+
+    private void UpdateSlotDropHighlights(SkillDataSO skill)
+    {
+        if (_view == null || _loadoutService == null || skill == null) return;
+
+        int slotCount = _loadoutService.SlotCount;
+        for (int i = 0; i < slotCount; i++)
+        {
+            bool canDropPlayer = _loadoutService.CanAssignSkillToSlot(SkillLoadoutUnitType.Player, i, skill);
+            bool canDropBook = _loadoutService.CanAssignSkillToSlot(SkillLoadoutUnitType.Book, i, skill);
+            _view.SetSlotDropHighlight(SkillLoadoutUnitType.Player, i, canDropPlayer);
+            _view.SetSlotDropHighlight(SkillLoadoutUnitType.Book, i, canDropBook);
+        }
+    }
+
+    private void OnSkillDroppedOnSlot(SkillLoadoutUnitType unitType, int slotIndex, SkillDataSO skill)
     {
         if (skill == null) return;
 
         _selectedCatalogSkill = skill;
         _view?.SetSelectedCatalogSkill(skill);
 
-        if (_slotArmedForAssign)
+        if (_loadoutService == null)
         {
-            TryAssignSelectedCatalogSkillToSlot();
+            OnCatalogDragEnd();
             return;
         }
 
-        _slotArmedForAssign = false;
-        _view?.ClearSlotSelection();
-        GeneralSfxFeedback.PlayMenuClick(_audioService);
-        _view?.ShowSkillDetails(skill);
-    }
-
-    private bool TryAssignSelectedCatalogSkillToSlot()
-    {
-        if (_loadoutService == null || _selectedCatalogSkill == null) return false;
-
-        if (!_loadoutService.CanAssignSkillToSlot(_selectedUnitType, _selectedSlotIndex, _selectedCatalogSkill))
+        if (!_loadoutService.CanAssignSkillToSlot(unitType, slotIndex, skill))
         {
-            PlayInvalidAssignFeedback();
-            return false;
+            PlayInvalidAssignFeedback(unitType, slotIndex);
+            OnCatalogDragEnd();
+            return;
         }
 
-        if (_loadoutService.SetSlotSkill(_selectedUnitType, _selectedSlotIndex, _selectedCatalogSkill))
+        if (_loadoutService.SetSlotSkill(unitType, slotIndex, skill))
         {
             GeneralSfxFeedback.PlayMenuClick(_audioService);
-            _view?.ShowSkillDetails(_selectedCatalogSkill);
-            return true;
+            _view?.ShowSkillDetails(skill);
         }
 
-        return false;
+        OnCatalogDragEnd();
     }
 
-    private void PlayInvalidAssignFeedback()
+    private void OnEquippedSlotClicked(SkillLoadoutUnitType unitType, int slotIndex)
     {
-        _slotArmedForAssign = false;
-        _view?.PlayInvalidAssignFeedback(_selectedUnitType, _selectedSlotIndex);
-        _view?.ClearSlotSelection();
+        if (_loadoutService == null) return;
+
+        _selectedCatalogSkill = null;
+        _view?.SetSelectedCatalogSkill(null);
+
+        if (_loadoutService.TryGetSelectedSkill(unitType, slotIndex, out SkillDataSO skill))
+            _view?.ShowSkillDetails(skill);
+    }
+
+    private void PlayInvalidAssignFeedback(SkillLoadoutUnitType unitType, int slotIndex)
+    {
+        _view?.PlayInvalidAssignFeedback(unitType, slotIndex);
         if (EventSystem.current != null)
             EventSystem.current.SetSelectedGameObject(null);
-    }
-
-    private void OnPlayerSlotClicked(int slotIndex)
-    {
-        _selectedUnitType = SkillLoadoutUnitType.Player;
-        _selectedSlotIndex = slotIndex;
-        _slotArmedForAssign = true;
-        _view?.SetSelectedSlot(_selectedUnitType, _selectedSlotIndex);
-
-        if (_selectedCatalogSkill != null)
-        {
-            TryAssignSelectedCatalogSkillToSlot();
-            return;
-        }
-
-        _selectedCatalogSkill = null;
-        _view?.SetSelectedCatalogSkill(null);
-
-        if (_loadoutService != null && _loadoutService.TryGetSelectedSkill(_selectedUnitType, slotIndex, out SkillDataSO skill))
-            _view?.ShowSkillDetails(skill);
-    }
-
-    private void OnBookSlotClicked(int slotIndex)
-    {
-        _selectedUnitType = SkillLoadoutUnitType.Book;
-        _selectedSlotIndex = slotIndex;
-        _slotArmedForAssign = true;
-        _view?.SetSelectedSlot(_selectedUnitType, _selectedSlotIndex);
-
-        if (_selectedCatalogSkill != null)
-        {
-            TryAssignSelectedCatalogSkillToSlot();
-            return;
-        }
-
-        _selectedCatalogSkill = null;
-        _view?.SetSelectedCatalogSkill(null);
-
-        if (_loadoutService != null && _loadoutService.TryGetSelectedSkill(_selectedUnitType, slotIndex, out SkillDataSO skill))
-            _view?.ShowSkillDetails(skill);
     }
 
     private void OnLoadoutChanged(SkillLoadoutUnitType unitType)
