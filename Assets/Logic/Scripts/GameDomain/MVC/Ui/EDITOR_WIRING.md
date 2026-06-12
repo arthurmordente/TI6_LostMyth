@@ -36,6 +36,16 @@ O menu **inicia oculto** (`Awake` + `Init`). Só abre quando o jogador interage 
 
 **Drag-and-drop (equipar skills):** implementado em código — não é preciso prefab extra. Opcionalmente arrasta o **ScrollRect** do catálogo para `_catalogScrollRect` no `ExplorationLoadoutUIView` (desactiva scroll durante drag). Interacção: pointer down/click mostra detalhes; arrastar para slot Erza/Livro equipa; slots inválidos escurecem durante o arrasto.
 
+**Painel de detalhes — custo:** no `ExplorationLoadoutUIView` / `ExplorationLoadoutCanvasView`, secção **Details — custo**:
+
+| Campo | O que arrastar |
+|-------|----------------|
+| **Detail Cost Label Text** | TMP ao lado (`Custo:` / `Sem Custo`) |
+| **Detail Cost Badge Image** | `Image` do ícone de mana (o sprite já traz o número desenhado) |
+| **Detail Cost Badge Sprites** | Array de 4 sprites: `[0]` = custo 0, `[1]` = 1, `[2]` = 2, `[3]` = 3 |
+
+Custo **0** (passivas incluídas — no `SkillDataSO` passivas têm sempre custo 0): rótulo **Sem Custo** + sprite `[0]`. Custo **1–3**: rótulo **Custo:** + sprite correspondente. Sem skill seleccionada: badge oculto.
+
 ### Canvas de pause
 
 - Instanciar `Canvas_PauseMenu.prefab`, `PauseMenuCanvasView` no root, ligar em **Pause Menu View**.
