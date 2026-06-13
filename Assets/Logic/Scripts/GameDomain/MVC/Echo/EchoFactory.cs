@@ -1,24 +1,18 @@
-using Logic.Scripts.Turns;
 using UnityEngine;
 
 namespace Logic.Scripts.GameDomain.MVC.Echo {
     public class EchoFactory {
         private readonly EchoView _echoViewPrefab;
-        private readonly IEchoService _echoService;
 
-        public EchoFactory(EchoView echoViewPrefab, IEchoService echoService) {
+        public EchoFactory(EchoView echoViewPrefab) {
             _echoViewPrefab = echoViewPrefab;
-            _echoService = echoService;
         }
 
         public EchoView CreateEcho(int castTime, Transform referenceTransform) {
             Debug.LogWarning("Is null refTransform: " + (referenceTransform == null));
             Debug.LogWarning("Is null echoprefab: " + (_echoViewPrefab == null));
             EchoView echo = Object.Instantiate(_echoViewPrefab, referenceTransform.position, referenceTransform.rotation);
-			// Retarget all current orbs to follow this newly created echo clone.
 			Logic.Scripts.GameDomain.MVC.Environment.Orb.OrbController.RetargetAllTo(echo.transform);
-			// Schedule destruction after castTime+1 Echoes phases so it lasts full 'castTime' turns.
-			_echoService.EnqueueEcho(new DestroyEchoAfterDelayAction(echo.gameObject), castTime + 1);
             return echo;
         }
     }

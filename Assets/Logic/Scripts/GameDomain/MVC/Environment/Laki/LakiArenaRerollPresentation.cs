@@ -9,7 +9,8 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
     /// </summary>
     public static class LakiArenaRerollPresentation
     {
-        const int ShuffleSteps = 16;
+        const int FullShuffleSteps = 16;
+        const int ShortShuffleSteps = 6;
         const float FallbackShuffleDurationSeconds = 0.45f;
         const float ShortShuffleDurationSeconds = 1f;
         const int FullDurationRerollCount = 2;
@@ -43,9 +44,10 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 
             audio?.PlaySfx(SfxIds.Laki_Turno, AudioChannelType.SfxBoss);
 
-            float stepDelaySeconds = duration / ShuffleSteps;
+            int shuffleSteps = useFullDuration ? FullShuffleSteps : ShortShuffleSteps;
+            float stepDelaySeconds = duration / shuffleSteps;
             float elapsed = 0f;
-            for (int i = 0; i < ShuffleSteps; i++)
+            for (int i = 0; i < shuffleSteps; i++)
             {
                 arena.RandomizeVisualMapping(new System.Random((shuffleTurnSeed + i + 1) * 104729 + playerTileIndex));
                 visual?.RefreshFrom(arena);

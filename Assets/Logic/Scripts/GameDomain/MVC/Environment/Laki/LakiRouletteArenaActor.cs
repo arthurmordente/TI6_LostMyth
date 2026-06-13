@@ -4,12 +4,14 @@ using UnityEngine;
 using Logic.Scripts.Services.AudioService;
 using Logic.Scripts.Turns;
 using Logic.Scripts.GameDomain.MVC.Nara;
+using Logic.Scripts.Core.Mvc.WorldCamera;
 
 namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 {
 	public sealed class LakiRouletteArenaActor : IEnvironmentTurnActor, ILakiRouletteArenaTurnPhases
 	{
 		const int PostEffectsPauseMs = 500;
+		const float TileApplyCameraBlendSec = 0.45f;
 
 		private readonly ITurnStateReader _turnState;
 		private readonly INaraController _nara;
@@ -18,7 +20,9 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 		private readonly IRouletteArenaVisual _visual;
 		private readonly IEffectable _bookEffectable;
 		private readonly IAudioService _audioService;
+		private readonly ICameraFocusService _cameraFocus;
 		private Vector3 _centerWorld;
+		private CameraFocusHandle _cameraFocusHandle;
 
 		public bool RemoveAfterRun => false;
 
@@ -30,7 +34,8 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 			IRouletteArenaVisual visual = null,
 			IEffectable caster = null,
 			IEffectable bookEffectable = null,
-			IAudioService audioService = null)
+			IAudioService audioService = null,
+			ICameraFocusService cameraFocus = null)
 		{
 			_turnState = turnState;
 			_nara = nara;
@@ -39,6 +44,7 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 			_caster = caster;
 			_bookEffectable = bookEffectable;
 			_audioService = audioService;
+			_cameraFocus = cameraFocus;
 			_centerWorld = centerWorld ?? new Vector3(0f, 0.5f, -4f);
 		}
 
@@ -73,25 +79,20 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 
 			if (_visual != null && tilesToEmphasize.Count > 0)
 			{
-				const int steps = 20;
-				for (int i = 0; i <= steps; i++)
+				const int emphasisDurationMs = 500;
+				const int emphasisSteps = 10;
+				int stepDelayMs = emphasisDurationMs / emphasisSteps;
+				for (int i = 0; i <= emphasisSteps; i++)
 				{
-					float t = (float)i / steps;
+					float t = (float)i / emphasisSteps;
 					_visual.SetEmphasis(tilesToEmphasize, t, 0.85f);
-					await Task.Delay(100);
+					if (i < emphasisSteps)
+						await Task.Delay(stepDelayMs);
 				}
 			}
 
-			if (playerTile >= 0)
-			{
-				LakiTileEffectApplyDebug.LogUnitOnTile(
-					"Player", turn, playerTile, _arena.GetTileEffect(playerTile), playerPos);
-				await _arena.ApplyEffectToPlayerAsync(_caster, _nara, playerTile, turn);
-			}
-			else
-			{
-				LakiTileEffectApplyDebug.LogUnitOnTile("Player", turn, playerTile, default, playerPos);
-			}
+			bool cloneApplied = false;
+			bool playerWillApply = playerTile >= 0;
 
 			if (bookTile >= 0 && _bookEffectable != null)
 			{
@@ -100,7 +101,9 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 					: Vector3.zero;
 				LakiTileEffectApplyDebug.LogUnitOnTile(
 					"Clone", turn, bookTile, _arena.GetTileEffect(bookTile), bookPos);
+				await FocusCameraOnAndWaitBlendAsync(_bookEffectable.GetReferenceTransform());
 				await _arena.ApplyEffectToEffectableAsync(_caster, _bookEffectable, bookTile, turn);
+				cloneApplied = true;
 			}
 			else if (_bookEffectable != null)
 			{
@@ -110,6 +113,23 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 				LakiTileEffectApplyDebug.LogUnitOnTile("Clone", turn, bookTile, default, bookPos);
 			}
 
+			if (cloneApplied && playerWillApply)
+				await Task.Delay(RouletteArenaService.TileEffectStaggerMs);
+
+			if (playerWillApply)
+			{
+				LakiTileEffectApplyDebug.LogUnitOnTile(
+					"Player", turn, playerTile, _arena.GetTileEffect(playerTile), playerPos);
+				Transform playerTransform = _nara != null ? _nara.NaraViewGO?.transform : null;
+				await FocusCameraOnAndWaitBlendAsync(playerTransform);
+				await _arena.ApplyEffectToPlayerAsync(_caster, _nara, playerTile, turn);
+			}
+			else
+			{
+				LakiTileEffectApplyDebug.LogUnitOnTile("Player", turn, playerTile, default, playerPos);
+			}
+
+			RestoreCameraAfterTileApply();
 			await Task.Delay(PostEffectsPauseMs);
 		}
 
@@ -132,6 +152,29 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 		public void SetCenter(Vector3 centerWorld)
 		{
 			_centerWorld = centerWorld;
+		}
+
+		async Task FocusCameraOnAndWaitBlendAsync(Transform target)
+		{
+			ReleaseCameraHandle();
+			if (_cameraFocus == null || target == null) return;
+			_cameraFocusHandle = _cameraFocus.Follow(target, CameraFocusOptions.Cinematic(TileApplyCameraBlendSec));
+			int blendMs = Mathf.RoundToInt(TileApplyCameraBlendSec * 1000f);
+			if (blendMs > 0)
+				await Task.Delay(blendMs);
+		}
+
+		void RestoreCameraAfterTileApply()
+		{
+			ReleaseCameraHandle();
+			_cameraFocus?.RestoreDefaultFollow();
+		}
+
+		void ReleaseCameraHandle()
+		{
+			if (!_cameraFocusHandle.IsValid) return;
+			_cameraFocus?.Release(_cameraFocusHandle);
+			_cameraFocusHandle = CameraFocusHandle.Invalid;
 		}
 	}
 }

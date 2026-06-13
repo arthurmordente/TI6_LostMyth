@@ -13,7 +13,6 @@ namespace Logic.Scripts.Turns
         None = 0,
         BossAct = 1,
         PlayerAct = 2,
-        EchoesAct = 3,
         EnviromentAct = 4
     }
 }

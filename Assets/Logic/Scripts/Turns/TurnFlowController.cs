@@ -13,7 +13,6 @@ using Logic.Scripts.GameDomain.Services.Skills;
 namespace Logic.Scripts.Turns {
     public class TurnFlowController : System.IDisposable {
         private readonly IActionPointsService _actionPointsService;
-        private readonly IEchoService _echoService;
         private readonly TurnStateService _turnStateService;
         private readonly ICommandFactory _commandFactory;
 		private readonly Logic.Scripts.GameDomain.MVC.Echo.ICloneUseLimiter _cloneUseLimiter;
@@ -40,7 +39,6 @@ namespace Logic.Scripts.Turns {
 
 		public TurnFlowController(
             IActionPointsService actionPointsService,
-            IEchoService echoService,
                         TurnStateService turnStateService,
             ICommandFactory commandFactory,
 			INaraController naraController,
@@ -50,7 +48,6 @@ namespace Logic.Scripts.Turns {
             [InjectOptional] IRandomTurnPassiveService randomTurnPassiveService,
             [InjectOptional] IDamageStackMovementPassiveService damageStackMovementPassiveService) {
             _actionPointsService = actionPointsService;
-            _echoService = echoService;
             _turnStateService = turnStateService;
             _commandFactory = commandFactory;
             _naraController = naraController;
@@ -200,7 +197,7 @@ namespace Logic.Scripts.Turns {
             if (UsesHokariArenaHazardTurnOrder)
                 StartHokariPostPlayerResolveAsync();
             else
-                StartEchoPhaseAsync();
+                ContinueAfterPlayerTurn();
         }
 
         public void CompletePlayerAction() {
@@ -213,7 +210,7 @@ namespace Logic.Scripts.Turns {
             if (UsesHokariArenaHazardTurnOrder)
                 StartHokariPostPlayerResolveAsync();
             else
-                StartEchoPhaseAsync();
+                ContinueAfterPlayerTurn();
         }
 
         async void StartHokariPostPlayerResolveAsync()
@@ -225,23 +222,15 @@ namespace Logic.Scripts.Turns {
 
             // LogService.Log($"Turno {_turnNumber} - Fase: Arena hazard resolve (Hokari)");
             await HokariArenaHazardTurnBridge.ExecuteScheduledForTurnAsync(_turnNumber);
-            StartEchoPhaseAsync();
+            ContinueAfterPlayerTurn();
         }
 
-        private async void StartEchoPhaseAsync() {
+        private void ContinueAfterPlayerTurn() {
             _gamePlayUiController?.SetSkillsSlidableExpanded(false);
-            _phase = TurnPhase.EchoesAct;
-            _turnStateService.AdvanceTurn(_turnNumber, _phase);
-            // Lock during Echoes
             _naraController?.FreezeInputs();
             _naraController?.Freeeze();
             _naraController?.StopMovingAnim();
-            // LogService.Log($"Turno {_turnNumber} - Fase: EchoesAct");
-            await _echoService.ResolveDueEchoesAsync();
-            OnEchoesCompleted();
-        }
 
-        private void OnEchoesCompleted() {
             if (UsesHokariArenaHazardTurnOrder)
                 StartHokariEndOfTurnAsync();
             else if (UsesLakiArenaTurnFlowOrder)

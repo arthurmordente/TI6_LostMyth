@@ -11,8 +11,8 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
     public static class LakiArenaTurnFlowBridge
     {
         static ILakiRouletteArenaTurnPhases _arenaPhases;
-        static float _postApplyBeforeBossResolveSeconds = 2f;
-        static float _postBossBeforeRerollSeconds = 2f;
+        static float _postApplyBeforeBossResolveSeconds = 1f;
+        static float _postBossBeforeRerollSeconds = 1f;
 
         public static bool IsRegistered => _arenaPhases != null;
 

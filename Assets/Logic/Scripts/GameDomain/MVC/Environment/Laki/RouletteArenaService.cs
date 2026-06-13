@@ -10,7 +10,7 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 {
 	public sealed class RouletteArenaService
 	{
-		const int TileEffectStaggerMs = 500;
+		public const int TileEffectStaggerMs = 500;
 		// ─── Effect pools ─────────────────────────────────────────────────────────
 		private readonly List<AbilityEffect> _largePositivePool = new List<AbilityEffect>(8);
 		private readonly List<AbilityEffect> _smallPositivePool = new List<AbilityEffect>(8);

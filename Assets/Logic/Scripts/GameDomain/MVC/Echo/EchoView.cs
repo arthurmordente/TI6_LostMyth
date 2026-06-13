@@ -1,8 +1,7 @@
-using Logic.Scripts.Turns;
 using UnityEngine;
 
 namespace Logic.Scripts.GameDomain.MVC.Echo {
-    public class EchoView : MonoBehaviour,IEchoAction {
+    public class EchoView : MonoBehaviour {
         //public AbilityView AbilityToCast { get; private set; }
         //[field: SerializeField] public Transform CastPosition { get; private set; }
 
@@ -14,7 +13,5 @@ namespace Logic.Scripts.GameDomain.MVC.Echo {
         /*public void SetAbilityToCast(AbilityView ability) {
             AbilityToCast = ability;
         }*/
-
-        public void Execute() { }
     }
 }

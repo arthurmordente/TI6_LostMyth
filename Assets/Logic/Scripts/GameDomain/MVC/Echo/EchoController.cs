@@ -1,5 +1,4 @@
 using Logic.Scripts.Services.CommandFactory;
-using Logic.Scripts.Turns;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -12,9 +11,9 @@ namespace Logic.Scripts.GameDomain.MVC.Echo {
         private const int ONE_INT = 1;
         private const int TWO_INT = 2;
 
-        public EchoController(ICommandFactory commandFactory, EchoView echoViewPrefab, IEchoService echoService) {
+        public EchoController(ICommandFactory commandFactory, EchoView echoViewPrefab) {
             _commandFactory = commandFactory;
-            _echoFactory = new EchoFactory(echoViewPrefab, echoService);
+            _echoFactory = new EchoFactory(echoViewPrefab);
             _echoViewList = new List<EchoView>();
         }
 

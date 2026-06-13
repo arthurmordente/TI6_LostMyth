@@ -7,6 +7,7 @@ using Logic.Scripts.GameDomain.MVC.Boss.Visuals;
 using Logic.Scripts.GameDomain.MVC.Environment;
 using Logic.Scripts.GameDomain.MVC.Boss.Laki;
 using Logic.Scripts.Services.AudioService;
+using Logic.Scripts.Core.Mvc.WorldCamera;
 using System;
 using System.Threading.Tasks;
 #if UNITY_EDITOR
@@ -56,9 +57,9 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 
 		[Header("Turn flow pacing (Laki)")]
 		[SerializeField, Min(0f), Tooltip("Pause after arena tile apply, before boss resolves the prepared attack.")]
-		private float _postApplyBeforeBossResolveSeconds = 2f;
+		private float _postApplyBeforeBossResolveSeconds = 1f;
 		[SerializeField, Min(0f), Tooltip("Pause after boss resolve, before arena reroll/sorteio.")]
-		private float _postBossBeforeRerollSeconds = 2f;
+		private float _postBossBeforeRerollSeconds = 1f;
 
 		[Header("Laki boss shield (prefab child)")]
 		[Tooltip("VFX root on the Laki boss prefab. While active: boss is immune and new skill system aim/fresnel on her is suppressed. Disabled on fight turns T and T+1 after the boss loses dice on turn T.")]
@@ -144,12 +145,16 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 			try { audioService = container.Resolve<IAudioService>(); }
 			catch { Debug.LogWarning("[LakiArenaBossBootstrap] IAudioService not bound — Laki_Turno arena shuffle will be silent."); }
 
+			ICameraFocusService cameraFocus = null;
+			try { cameraFocus = container.Resolve<ICameraFocusService>(); }
+			catch { Debug.LogWarning("[LakiArenaBossBootstrap] ICameraFocusService not bound — tile apply will not pan camera."); }
+
 			if (_phaseTileDisposition != null)
 				LakiArenaTileDispositionRuntime.Register(arenaService, _phaseTileDisposition);
 			else
 				arenaService.SetTileDisposition(LakiArenaTileDisposition.Default);
 
-			var actor = new LakiRouletteArenaActor(_turnStateService, _naraController, arenaService, _centerWorld, view, caster, bookEffectable, audioService);
+			var actor = new LakiRouletteArenaActor(_turnStateService, _naraController, arenaService, _centerWorld, view, caster, bookEffectable, audioService, cameraFocus);
 			LakiArenaTurnFlowBridge.Register(actor, _postApplyBeforeBossResolveSeconds, _postBossBeforeRerollSeconds);
 			var cmd = _commandFactory.CreateCommandVoid<Logic.Scripts.GameDomain.Commands.RegisterEnvironmentActorCommand>();
 			cmd.SetActor(actor);

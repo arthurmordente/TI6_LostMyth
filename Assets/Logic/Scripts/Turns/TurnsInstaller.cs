@@ -11,7 +11,6 @@ namespace Logic.Scripts.Turns
         {
             Container.BindInterfacesAndSelfTo<TurnStateService>().AsSingle();
             Container.BindInterfacesAndSelfTo<ActionPointsService>().AsSingle();
-            Container.BindInterfacesAndSelfTo<EchoService>().AsSingle();
 			Container.BindInterfacesAndSelfTo<Logic.Scripts.GameDomain.MVC.Echo.CloneUseLimiter>().AsSingle();
 
 			Container.BindInterfacesAndSelfTo<EnvironmentActorsRegistry>()
