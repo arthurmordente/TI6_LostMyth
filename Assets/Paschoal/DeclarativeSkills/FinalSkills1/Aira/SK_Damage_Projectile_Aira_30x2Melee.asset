@@ -45,11 +45,15 @@ MonoBehaviour:
   SkillName: Corte Sonoro
   Description: "Canaliza a f\xFAria de Aira em um \xFAnico ponto \xE0 uma curta dist\xE2ncia,
     causando X dano ao primeiro inimigo atingido. "
-  Lore: "Laki nunca almejou uma vitória fácil, ela sempre espera que cada visitante passe o maior tempo possível em sua companhia, fazendo-os gastar tempo enquanto absorve suas vitalidade (2)"
+  Lore: "Laki nunca almejou uma vit\xF3ria f\xE1cil, ela sempre espera que cada visitante
+    passe o maior tempo poss\xEDvel em sua companhia, fazendo-os gastar tempo enquanto
+    absorve suas vitalidade (2)"
   _descriptionHighlights:
   - Placeholder: X
+    Mode: 0
     Value: 0
-    Color: {r: 1, g: 0.45, b: 0.15, a: 1}
+    ManualText: 
+    Color: {r: 0.7264151, g: 0.051397286, b: 0.10659249, a: 1}
   _effects: []
   _passiveModifiers: []
   _passiveTurnBehavior: {fileID: 0}

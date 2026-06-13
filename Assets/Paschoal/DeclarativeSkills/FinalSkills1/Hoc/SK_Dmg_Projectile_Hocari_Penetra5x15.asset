@@ -15,11 +15,14 @@ MonoBehaviour:
   _divinity: 0
   _skillType: 0
   _castType: 0
+  _castAnimationStyle: 0
   _projectileRange: 25
   _projectileNumberOfTargets: 5
   _projectileTravelSpeed: 12
   _projectileAimPrefab: {fileID: 5171449077471736857, guid: 5a96a15201f481c488a06861525f72e4, type: 3}
-  _projectilePrefab: {fileID: 6161943782864635518, guid: 35553b0efdb2f28489184681866edfcf, type: 3}
+  _projectileCastPrefab: {fileID: 0}
+  _projectileEffectPrefab: {fileID: 6161943782864635518, guid: 35553b0efdb2f28489184681866edfcf, type: 3}
+  _projectileImpactPrefab: {fileID: 0}
   _moveCasterToProjectileHit: 0
   _projectilePullStandoffFromTargetMeters: 1.2
   _projectileDealsDamage: 1
@@ -31,9 +34,11 @@ MonoBehaviour:
   _areaMaxRange: 8
   _areaRadius: 2
   _areaAimPrefab: {fileID: 0}
-  _areaImpactPrefab: {fileID: 0}
+  _areaCastPrefab: {fileID: 0}
+  _areaEffectPrefab: {fileID: 0}
   _selfAimPrefab: {fileID: 0}
   _selfCastPrefab: {fileID: 0}
+  _selfEffectPrefab: {fileID: 0}
   Power: 15
   Cost: 1
   Icon: {fileID: 21300000, guid: 84fd325531c382e49a6e5ca447e45938, type: 3}
@@ -41,11 +46,15 @@ MonoBehaviour:
   Description: "Invoca uma l\xE2mina das asas de Hocari e arremessa para frente \xE0
     uma dist\xE2ncia mediana. A l\xE2mina \xE9 capaz de perfurar seus alvos, causando
     X dano \xE0 todos em sua trajet\xF3ria."
-  Lore: "Laki nunca almejou uma vitória fácil, ela sempre espera que cada visitante passe o maior tempo possível em sua companhia, fazendo-os gastar tempo enquanto absorve suas vitalidade (10)"
+  Lore: "Laki nunca almejou uma vit\xF3ria f\xE1cil, ela sempre espera que cada visitante
+    passe o maior tempo poss\xEDvel em sua companhia, fazendo-os gastar tempo enquanto
+    absorve suas vitalidade (10)"
   _descriptionHighlights:
   - Placeholder: X
+    Mode: 0
     Value: 0
-    Color: {r: 1, g: 0.45, b: 0.15, a: 1}
+    ManualText: 
+    Color: {r: 0.7254902, g: 0.050980393, b: 0.105882354, a: 1}
   _effects:
   - {fileID: 0}
   _passiveModifiers: []

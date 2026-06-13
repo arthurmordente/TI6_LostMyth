@@ -50,8 +50,10 @@ MonoBehaviour:
     absorve suas vitalidade (8)"
   _descriptionHighlights:
   - Placeholder: X
+    Mode: 0
     Value: 0
-    Color: {r: 1, g: 0.45, b: 0.15, a: 1}
+    ManualText: 
+    Color: {r: 0.7254902, g: 0.050980393, b: 0.105882354, a: 1}
   _effects: []
   _passiveModifiers: []
   _passiveTurnBehavior: {fileID: 0}

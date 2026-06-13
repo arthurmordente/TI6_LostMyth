@@ -45,11 +45,15 @@ MonoBehaviour:
   SkillName: "C\xE2ntico de Lava"
   Description: " A voz de Aira ressoa ao seu redor em uma \xE1rea mediana, causando
     X dano a todos os inimigos."
-  Lore: "Laki nunca almejou uma vitória fácil, ela sempre espera que cada visitante passe o maior tempo possível em sua companhia, fazendo-os gastar tempo enquanto absorve suas vitalidade (1)"
+  Lore: "Laki nunca almejou uma vit\xF3ria f\xE1cil, ela sempre espera que cada visitante
+    passe o maior tempo poss\xEDvel em sua companhia, fazendo-os gastar tempo enquanto
+    absorve suas vitalidade (1)"
   _descriptionHighlights:
   - Placeholder: X
+    Mode: 0
     Value: 0
-    Color: {r: 1, g: 0.45, b: 0.15, a: 1}
+    ManualText: 
+    Color: {r: 0.7254902, g: 0.050980393, b: 0.105882354, a: 1}
   _effects:
   - {fileID: 11400000, guid: a47ac10b58cc4372a5670e02b2c3d472, type: 2}
   _passiveModifiers: []

@@ -44,8 +44,8 @@ MonoBehaviour:
   Icon: {fileID: 21300000, guid: 04385632ecaf79f479ed377125261b7f, type: 3}
   SkillName: "F\xFAria da Serpente"
   Description: "Imbu\xEDdo com a magia de Boris, o usu\xE1rio fica mais forte quando
-    est\xE1 ferido. Ao ter sua vida reduzida a, pelo menos, Y% do valor total ele
-    recebe um b\xF4nus de Z% para todo seu dano causado."
+    est\xE1 ferido. Ao ter sua vida reduzida a, pelo menos, Y do valor total ele
+    recebe um b\xF4nus de Z para todo seu dano causado."
   Lore: "Laki nunca almejou uma vit\xF3ria f\xE1cil, ela sempre espera que cada visitante
     passe o maior tempo poss\xEDvel em sua companhia, fazendo-os gastar tempo enquanto
     absorve suas vitalidade (5)"
@@ -54,12 +54,12 @@ MonoBehaviour:
     Mode: 1
     Value: 0
     ManualText: 50%
-    Color: {r: 0.34901962, g: 0.8509804, b: 0.4509804, a: 1}
+    Color: {r: 0.105882354, g: 0.7254902, b: 0.050980393, a: 1}
   - Placeholder: Z
     Mode: 1
     Value: 0
     ManualText: 25%
-    Color: {r: 0.5450981, g: 0, b: 0.5450981, a: 1}
+    Color: {r: 0.47843137, g: 0.050980393, b: 0.7254902, a: 1}
   _effects: []
   _passiveModifiers: []
   _passiveTurnBehavior: {fileID: 0}

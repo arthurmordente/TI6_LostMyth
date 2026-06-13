@@ -43,9 +43,8 @@ MonoBehaviour:
   Cost: 1
   Icon: {fileID: 21300000, guid: 636254e507f1d2346a16a9436cf1aade, type: 3}
   SkillName: Dama da Sorte
-  Description: "Demonstra sua devo\xE7\xE3o a Laki, gastando Z PA. No in\xEDcio dos
-    pr\xF3ximos 2 turnos Laki demonstra seu apre\xE7o, concedendo um b\xF4nus de
-    Z+1 PA."
+  Description: "Demonstra sua devo\xE7\xE3o a Laki, que em retorno concede uma ben\xE7\xE3o,
+    que gera um b\xF4nus de Z PA extra no in\xEDcio dos pr\xF3ximos 2 turnos."
   Lore: "Laki nunca almejou uma vit\xF3ria f\xE1cil, ela sempre espera que cada visitante
     passe o maior tempo poss\xEDvel em sua companhia, fazendo-os gastar tempo enquanto
     absorve suas vitalidade (12)"
@@ -54,7 +53,7 @@ MonoBehaviour:
     Mode: 1
     Value: 0
     ManualText: 1
-    Color: {r: 0.5450981, g: 0, b: 0.5450981, a: 1}
+    Color: {r: 0.47843137, g: 0.050980393, b: 0.7254902, a: 1}
   _effects:
   - {fileID: 11400000, guid: a7b7f6e2e38a90e4d9f1d814975fc12c, type: 2}
   _passiveModifiers: []
