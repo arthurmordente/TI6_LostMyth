@@ -35,7 +35,7 @@ MonoBehaviour:
   _areaRadius: 15
   _areaAimPrefab: {fileID: 1607142820532151380, guid: 6feee9629db8db94f83b1e6771d787d1, type: 3}
   _areaCastPrefab: {fileID: 0}
-  _areaEffectPrefab: {fileID: 2224025274982176450, guid: caa4a69375bd38348901ddadba2f8953, type: 3}
+  _areaEffectPrefab: {fileID: 4068567103988076173, guid: dc07ecb47aeb40e43b5c9a86e099635f, type: 3}
   _selfAimPrefab: {fileID: 0}
   _selfCastPrefab: {fileID: 0}
   _selfEffectPrefab: {fileID: 0}
@@ -45,10 +45,14 @@ MonoBehaviour:
   SkillName: "C\xE2ntico de Lava"
   Description: " A voz de Aira ressoa ao seu redor em uma \xE1rea mediana, causando
     X dano a todos os inimigos."
-  Lore: "Laki nunca almejou uma vitória fácil, ela sempre espera que cada visitante passe o maior tempo possível em sua companhia, fazendo-os gastar tempo enquanto absorve suas vitalidade (1)"
+  Lore: "Laki nunca almejou uma vit\xF3ria f\xE1cil, ela sempre espera que cada visitante
+    passe o maior tempo poss\xEDvel em sua companhia, fazendo-os gastar tempo enquanto
+    absorve suas vitalidade (1)"
   _descriptionHighlights:
   - Placeholder: X
+    Mode: 0
     Value: 0
+    ManualText: 
     Color: {r: 1, g: 0.45, b: 0.15, a: 1}
   _effects:
   - {fileID: 11400000, guid: a47ac10b58cc4372a5670e02b2c3d472, type: 2}
