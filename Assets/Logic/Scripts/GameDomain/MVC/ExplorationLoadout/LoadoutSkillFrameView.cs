@@ -111,9 +111,8 @@ namespace Logic.Scripts.GameDomain.MVC.ExplorationLoadout
 
         public void PlayInvalidAssignShake()
         {
-            if (transform is not RectTransform rect) return;
-            DOTween.Kill(rect, true);
-            rect.DOShakeAnchorPos(0.35f, strength: 18f, vibrato: 16, randomness: 60f, fadeOut: true);
+            if (transform is RectTransform rect)
+                UiRectShake.PlayInvalidSlotShake(rect);
         }
 
         public void ApplySkillVisual(SkillDataSO skill, ISkillVisualCatalog catalog)

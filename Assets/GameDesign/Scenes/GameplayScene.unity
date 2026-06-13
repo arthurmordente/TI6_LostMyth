@@ -1589,6 +1589,7 @@ MonoBehaviour:
   _divideTargetingData: {fileID: 11400000, guid: cdf5ea619825b5c4abdff030ffc69def, type: 2}
   _telegraphMaterials: {fileID: 11400000, guid: f55d7723a1e531b479d9a3b4d9873ffd, type: 2}
   _combatAttackVisualCatalog: {fileID: 11400000, guid: 291e6c82c38f51a49971a77680bb8271, type: 2}
+  _floatingCombatNumberPrefab: {fileID: 7153587287992590508, guid: d6999ba3bfa1c1347b8cf1065f691d30, type: 3}
 --- !u!4 &2129559430
 Transform:
   m_ObjectHideFlags: 0

@@ -44,8 +44,10 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack
             private readonly List<int> _playerRolls = new List<int>(8);
             private readonly List<int> _bossRolls = new List<int>(8);
             private readonly List<GameObject> _spawnedDice = new List<GameObject>(8);
+            private readonly HashSet<int> _reservedSpawnTiles = new HashSet<int>();
 
             private GameObject _promptInstance;
+            private bool _waitingBossRollRelease;
 
             public ActiveSession(in DiceAttackSettings settings, DiContainer sceneContainer)
             {
@@ -71,7 +73,31 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack
                 DiceAttackRuntimeService.RegisterPlayerTurnGate(this);
                 DiceUiRuntime.Reset();
 
+                _waitingBossRollRelease = true;
+                LakiBossAnimationBridge.OnBossDiceReleaseReady += OnBossDiceReleaseReady;
+                _ = RunBossRollReleaseTimeoutAsync();
+            }
+
+            async Task RunBossRollReleaseTimeoutAsync()
+            {
+                await Task.Delay(3000);
+                if (!_waitingBossRollRelease) return;
+                Debug.LogWarning("[Laki][DiceAttack] Boss dice release animation event missing — spawning dice after timeout.");
+                OnBossDiceReleaseReady();
+            }
+
+            void OnBossDiceReleaseReady()
+            {
+                if (!_waitingBossRollRelease) return;
+                _waitingBossRollRelease = false;
+                LakiBossAnimationBridge.OnBossDiceReleaseReady -= OnBossDiceReleaseReady;
                 RunBossRollPhase();
+            }
+
+            void CancelBossRollReleaseWait()
+            {
+                _waitingBossRollRelease = false;
+                LakiBossAnimationBridge.OnBossDiceReleaseReady -= OnBossDiceReleaseReady;
             }
 
             public bool TryResolveAtBossTurn(out DiceAttackResult result)
@@ -88,6 +114,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack
 
             public void DestroyDiceAttackRoot(bool deferUiDismiss = false)
             {
+                CancelBossRollReleaseWait();
                 HidePlayerPrompt();
                 DestroyAllSpawnedDice();
                 DiceAttackRuntimeService.UnregisterPlayerTurnGate(this);
@@ -151,6 +178,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack
                 if (rollSlotIndex >= 0 && rollSlotIndex < list.Count)
                     list[rollSlotIndex] = value;
                 ReportUiProgress();
+                DiceAttackRuntimeService.NotifyDieLanded(isBoss, rollSlotIndex);
             }
 
             private static void SetRollAt(List<int> list, int slotIndex, int value)
@@ -166,6 +194,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack
 
             private void RunPlayerRollPhase()
             {
+                DiceAttackRuntimeService.NotifyPlayerRollPhaseStarted();
                 RollForSide(false, LakiDiceAttackState.PlayerDiceCount, LakiDiceAttackState.PlayerFaceMin, LakiDiceAttackState.PlayerFaceMax);
             }
 
@@ -185,7 +214,8 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack
             {
                 if (_arenaView == null) return;
                 Vector3 spawn = isBoss ? GetBossPosition() : GetPlayerPosition();
-                int tile = Random.Range(0, Mathf.Max(1, _arenaView.TileCount));
+                int tile = DiceActor.PickUnoccupiedSpawnTile(_arenaView, _reservedSpawnTiles);
+                _reservedSpawnTiles.Add(tile);
                 var prefab = isBoss ? _settings.BossDiePrefab : _settings.PlayerDiePrefab;
                 var go = prefab != null ? Object.Instantiate(prefab, spawn, Quaternion.identity) : new GameObject(isBoss ? "BossDie" : "PlayerDie");
                 if (prefab == null) go.transform.position = spawn;
@@ -195,6 +225,10 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack
                 actor.Init(this, isBoss, maxFace, hp, value, _arenaView, tile, spawn, rollSlotIndex, reportRollOnEnvironmentExecute: false);
                 _spawnedDice.Add(go);
                 _envReg?.Add(actor);
+                if (isBoss)
+                    DiceAttackRuntimeService.NotifyBossDieSpawned(actor);
+                else
+                    DiceAttackRuntimeService.NotifyPlayerDieSpawned(actor);
             }
 
             private bool AllRollsReported()
@@ -288,6 +322,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack
                     Object.Destroy(go);
                 }
                 _spawnedDice.Clear();
+                _reservedSpawnTiles.Clear();
             }
 
             private async Task WaitAnyInputAsync()

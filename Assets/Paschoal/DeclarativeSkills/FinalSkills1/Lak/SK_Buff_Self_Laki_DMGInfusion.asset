@@ -15,11 +15,14 @@ MonoBehaviour:
   _divinity: 1
   _skillType: 1
   _castType: 2
+  _castAnimationStyle: 0
   _projectileRange: 8
   _projectileNumberOfTargets: 1
   _projectileTravelSpeed: 12
   _projectileAimPrefab: {fileID: 0}
-  _projectilePrefab: {fileID: 0}
+  _projectileCastPrefab: {fileID: 0}
+  _projectileEffectPrefab: {fileID: 0}
+  _projectileImpactPrefab: {fileID: 0}
   _moveCasterToProjectileHit: 0
   _projectilePullStandoffFromTargetMeters: 1.2
   _projectileDealsDamage: 1
@@ -31,16 +34,27 @@ MonoBehaviour:
   _areaMaxRange: 8
   _areaRadius: 2
   _areaAimPrefab: {fileID: 0}
-  _areaImpactPrefab: {fileID: 0}
+  _areaCastPrefab: {fileID: 0}
+  _areaEffectPrefab: {fileID: 0}
   _selfAimPrefab: {fileID: 1607142820532151380, guid: 869e8460ad50e054b9b351e10c296c31, type: 3}
   _selfCastPrefab: {fileID: 3505108464399497771, guid: 5f0611deb795ac6498d79e53952101b7, type: 3}
+  _selfEffectPrefab: {fileID: 3505108464399497771, guid: 5f0611deb795ac6498d79e53952101b7, type: 3}
   Power: 0
-  Cost: 0
+  Cost: 1
   Icon: {fileID: 21300000, guid: 636254e507f1d2346a16a9436cf1aade, type: 3}
   SkillName: Dama da Sorte
-  Description: "Demonstra sua devo\xE7\xE3o a Laki, gastando X PA. No in\xEDcio dos
+  Description: "Demonstra sua devo\xE7\xE3o a Laki, gastando Z PA. No in\xEDcio dos
     pr\xF3ximos 2 turnos Laki demonstra seu apre\xE7o, concedendo um b\xF4nus de
-    X+1 PA."
+    Z+1 PA."
+  Lore: "Laki nunca almejou uma vit\xF3ria f\xE1cil, ela sempre espera que cada visitante
+    passe o maior tempo poss\xEDvel em sua companhia, fazendo-os gastar tempo enquanto
+    absorve suas vitalidade (12)"
+  _descriptionHighlights:
+  - Placeholder: Z
+    Mode: 1
+    Value: 0
+    ManualText: 1
+    Color: {r: 0.5450981, g: 0, b: 0.5450981, a: 1}
   _effects:
   - {fileID: 11400000, guid: a7b7f6e2e38a90e4d9f1d814975fc12c, type: 2}
   _passiveModifiers: []

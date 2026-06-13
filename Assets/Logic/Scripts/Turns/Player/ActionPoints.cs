@@ -1,4 +1,5 @@
 using Logic.Scripts.GameDomain.MVC.Ui;
+using Logic.Scripts.GameDomain.VisualFeedback;
 using Zenject;
 
 namespace Logic.Scripts.Turns
@@ -50,9 +51,11 @@ namespace Logic.Scripts.Turns
 
         public void GainTurnPoints()
         {
+            int before = _current;
             _current += _gainPerTurn;
             if (_current > _max) _current = _max;
             PublishChange();
+            ManaGainFloatingFeedback.TryShowOnPlayer(_current - before);
         }
 
         public void Refill()
@@ -70,17 +73,23 @@ namespace Logic.Scripts.Turns
 		public void Add(int amount)
 		{
 			if (amount <= 0) return;
+			int before = _current;
 			_current += amount;
 			if (_current > _max) _current = _max;
 			PublishChange();
+			ManaGainFloatingFeedback.TryShowOnPlayer(_current - before);
 		}
 
 		public void Subtract(int amount)
 		{
 			if (amount <= 0) return;
+			int before = _current;
 			_current -= amount;
 			if (_current < 0) _current = 0;
 			PublishChange();
+			int lost = before - _current;
+			if (lost > 0)
+				ManaLostFloatingFeedback.TryShowOnPlayer(lost);
 		}
 
         private void PublishChange()

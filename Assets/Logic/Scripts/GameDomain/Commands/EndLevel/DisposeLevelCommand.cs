@@ -6,7 +6,7 @@ using Logic.Scripts.Services.CommandFactory;
 public class DisposeLevelCommand : BaseCommand, ICommandVoid {
     private ILevelScenarioController _levelScenarioController;
     private INaraController _naraController;
-    private IWorldCameraController _iWorldCameraController;
+    private ICameraFocusService _cameraFocusService;
     private ILevelCancellationTokenService _levelCancellationTokenService;
 
     private bool _shouldReleaseFromMemory;
@@ -19,13 +19,13 @@ public class DisposeLevelCommand : BaseCommand, ICommandVoid {
     public override void ResolveDependencies() {
         _levelScenarioController = _diContainer.Resolve<ILevelScenarioController>();
         _naraController = _diContainer.Resolve<INaraController>();
-        _iWorldCameraController = _diContainer.Resolve<IWorldCameraController>();
+        _cameraFocusService = _diContainer.Resolve<ICameraFocusService>();
         _levelCancellationTokenService = _diContainer.Resolve<ILevelCancellationTokenService>();
     }
 
     public void Execute() {
         _levelCancellationTokenService.CancelCancellationToken();
-        _iWorldCameraController.StopFollowTarget();
+        _cameraFocusService.StopFollowing();
         _levelScenarioController.DestroyScenario(_shouldReleaseFromMemory);
         _naraController.ResetController();
     }

@@ -1,3 +1,4 @@
+using Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Dice;
 using Logic.Scripts.GameDomain.MVC.Environment.Laki;
 using UnityEngine;
 
@@ -37,12 +38,44 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack
         public static event System.Action OnDiceAttackBegan;
         /// <summary>Fired when the last active DiceAttack session ends.</summary>
         public static event System.Action OnDiceAttackEnded;
+        /// <summary>Fired when the boss die is spawned and begins moving (DiceAttack flow).</summary>
+        public static event System.Action<DiceActor> OnBossDieSpawned;
+        /// <summary>Fired when the player die is spawned and begins moving (DiceAttack flow).</summary>
+        public static event System.Action<DiceActor> OnPlayerDieSpawned;
+        /// <summary>Fired when a die finishes its landing animation (DiceAttack flow).</summary>
+        public static event System.Action<bool, int> OnDieLanded;
+        /// <summary>Fired at the start of the player dice-turn gate (before roll prompt).</summary>
+        public static event System.Action OnDicePlayerTurnOpening;
+        /// <summary>Fired when the player roll phase begins (dice spawn).</summary>
+        public static event System.Action OnPlayerRollPhaseStarted;
         public static bool IsActive => _activeCount > 0;
 
         /// <summary>Fired when a deferred scoreboard should hide (start of next Laki turn).</summary>
         public static event System.Action OnDeferredScoreboardDismiss;
 
         public static bool IsScoreboardDismissDeferred => _scoreboardDismissDeferred;
+
+        public static void NotifyBossDieSpawned(DiceActor actor)
+        {
+            if (actor == null) return;
+            try { OnBossDieSpawned?.Invoke(actor); } catch { }
+        }
+
+        public static void NotifyPlayerDieSpawned(DiceActor actor)
+        {
+            if (actor == null) return;
+            try { OnPlayerDieSpawned?.Invoke(actor); } catch { }
+        }
+
+        public static void NotifyDieLanded(bool isBoss, int rollSlotIndex)
+        {
+            try { OnDieLanded?.Invoke(isBoss, rollSlotIndex); } catch { }
+        }
+
+        public static void NotifyPlayerRollPhaseStarted()
+        {
+            try { OnPlayerRollPhaseStarted?.Invoke(); } catch { }
+        }
 
         public static void Begin()
         {
@@ -79,6 +112,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack
             if (!_scoreboardDismissDeferred) return false;
             _scoreboardDismissDeferred = false;
             try { OnDeferredScoreboardDismiss?.Invoke(); } catch { }
+            try { OnDiceAttackEnded?.Invoke(); } catch { }
             return true;
         }
 
@@ -140,6 +174,10 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack
         public static async System.Threading.Tasks.Task RunPlayerTurnGatesAsync()
         {
             if (_playerTurnGates.Count == 0) return;
+            if (IsActive)
+            {
+                try { OnDicePlayerTurnOpening?.Invoke(); } catch { }
+            }
             var snapshot = new System.Collections.Generic.List<IPlayerTurnGate>(_playerTurnGates);
             for (int i = 0; i < snapshot.Count; i++)
             {

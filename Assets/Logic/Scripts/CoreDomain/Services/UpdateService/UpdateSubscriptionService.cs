@@ -4,9 +4,6 @@ using UnityEngine;
 
 namespace Logic.Scripts.Services.UpdateService {
     public class UpdateSubscriptionService : MonoBehaviour, IUpdateSubscriptionService {
-        // Diagnostic only: set true in Editor when debugging observer register/unregister churn.
-        private const bool LogObserverChanges = false;
-
         private static readonly List<IUpdatable> _updateObservers = new List<IUpdatable>();
 
         private static readonly List<IFixedUpdatable> _fixedUpdateObservers = new List<IFixedUpdatable>();
@@ -65,8 +62,6 @@ namespace Logic.Scripts.Services.UpdateService {
             else {
                 _updateObservers.Add(observer);
             }
-            if (LogObserverChanges)
-                Debug.Log("Observer Updatable Register: " + observer);
         }
 
         public void UnregisterUpdatable(IUpdatable observer) {
@@ -83,32 +78,22 @@ namespace Logic.Scripts.Services.UpdateService {
             else {
                 _updateObservers.Remove(observer);
             }
-            if (LogObserverChanges)
-                Debug.Log("Observer Updatable Unregister: " + observer);
         }
 
         public void RegisterLateUpdatable(ILateUpdatable observer) {
             _pendingAddLateUpdateObservers.Add(observer);
-            if (LogObserverChanges)
-                Debug.Log("Observer LateUpdatable Register: " + observer);
         }
 
         public void UnregisterLateUpdatable(ILateUpdatable observer) {
             _pendingRemoveLateUpdateObservers.Add(observer);
-            if (LogObserverChanges)
-                Debug.Log("Observer LateUpdatable Unregister: " + observer);
         }
 
         public void RegisterFixedUpdatable(IFixedUpdatable updatable) {
             _pendingAddFixedUpdateObservers.Add(updatable);
-            if (LogObserverChanges)
-                Debug.Log("Observer FixedUpdatable Register: " + updatable);
         }
 
         public void UnregisterFixedUpdatable(IFixedUpdatable updatable) {
             _pendingRemoveFixedUpdateObservers.Add(updatable);
-            if (LogObserverChanges)
-                Debug.Log("Observer FixedUpdatable Unregister: " + updatable);
         }
     }
 }

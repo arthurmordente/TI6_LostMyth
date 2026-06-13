@@ -15,11 +15,14 @@ MonoBehaviour:
   _divinity: 2
   _skillType: 0
   _castType: 0
+  _castAnimationStyle: 0
   _projectileRange: 15
   _projectileNumberOfTargets: 1
   _projectileTravelSpeed: 12
   _projectileAimPrefab: {fileID: 5171449077471736857, guid: 5a96a15201f481c488a06861525f72e4, type: 3}
-  _projectilePrefab: {fileID: 4030026229297006641, guid: 91d1e965a2e14c14e93a209bb61f6d3c, type: 3}
+  _projectileCastPrefab: {fileID: 0}
+  _projectileEffectPrefab: {fileID: 4030026229297006641, guid: 91d1e965a2e14c14e93a209bb61f6d3c, type: 3}
+  _projectileImpactPrefab: {fileID: 0}
   _moveCasterToProjectileHit: 0
   _projectilePullStandoffFromTargetMeters: 1.2
   _projectileDealsDamage: 1
@@ -31,16 +34,32 @@ MonoBehaviour:
   _areaMaxRange: 8
   _areaRadius: 2
   _areaAimPrefab: {fileID: 0}
-  _areaImpactPrefab: {fileID: 0}
+  _areaCastPrefab: {fileID: 0}
+  _areaEffectPrefab: {fileID: 0}
   _selfAimPrefab: {fileID: 0}
   _selfCastPrefab: {fileID: 0}
+  _selfEffectPrefab: {fileID: 0}
   Power: 20
   Cost: 3
   Icon: {fileID: 21300000, guid: 8f9e4fb2e31ce5c41a5f5aec2d3b6838, type: 3}
   SkillName: Ciclo de Morte e Vida
   Description: "Conjura a pe\xE7onha de Boris, que aprisiona parte da vitalidade
     do alvo, causando X dano, e ent\xE3o retorna para o usu\xE1rio, curando-o em
-    Y de vida."
+    Y do dano causado."
+  Lore: "Laki nunca almejou uma vit\xF3ria f\xE1cil, ela sempre espera que cada visitante
+    passe o maior tempo poss\xEDvel em sua companhia, fazendo-os gastar tempo enquanto
+    absorve suas vitalidade (4)"
+  _descriptionHighlights:
+  - Placeholder: X
+    Mode: 0
+    Value: 0
+    ManualText: 
+    Color: {r: 1, g: 0.45, b: 0.15, a: 1}
+  - Placeholder: Y
+    Mode: 1
+    Value: 0
+    ManualText: 50%
+    Color: {r: 0.35, g: 0.85, b: 0.45, a: 1}
   _effects:
   - {fileID: 11400000, guid: b1ce42d1f87ea114f93d58402bb3939f, type: 2}
   _passiveModifiers: []

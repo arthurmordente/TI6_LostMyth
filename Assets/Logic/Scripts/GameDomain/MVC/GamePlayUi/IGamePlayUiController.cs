@@ -75,5 +75,10 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
 
         /// <inheritdoc cref="IGamePlayHudView.EndFirstTurnPassTurnHint"/>
         void EndFirstTurnPassTurnHint();
+
+        /// <summary>Escurece slots sem recurso; tremor no slot + frasco de mana ao cast bloqueado.</summary>
+        void RefreshSkillCastAffordability(int currentActionPoints, bool bookCloneAvailable);
+
+        void PlayInsufficientCastFeedback(int slotIndex, CombatSkillCastBlockReason reason);
     }
 }

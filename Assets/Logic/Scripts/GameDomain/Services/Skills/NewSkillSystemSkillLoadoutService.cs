@@ -71,6 +71,77 @@ namespace Logic.Scripts.GameDomain.Services.Skills
             return true;
         }
 
+        public bool TryFindEquippedSlotIndex(SkillLoadoutUnitType unitType, SkillDataSO skill, out int slotIndex)
+        {
+            slotIndex = -1;
+            if (skill == null) return false;
+
+            SkillDataSO[] selectedSlots = ResolveSlots(unitType);
+            for (int i = 0; i < selectedSlots.Length; i++)
+            {
+                if (selectedSlots[i] != skill) continue;
+                slotIndex = i;
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool CanDropSkillOnSlot(SkillLoadoutUnitType unitType, int slotIndex, SkillDataSO skill)
+        {
+            if (TryFindEquippedSlotIndex(unitType, skill, out int sourceSlotIndex))
+            {
+                if (sourceSlotIndex == slotIndex) return true;
+                return CanSwapSlots(unitType, sourceSlotIndex, slotIndex);
+            }
+
+            return CanAssignSkillToSlot(unitType, slotIndex, skill);
+        }
+
+        public bool TryAssignOrSwapSlotSkill(SkillLoadoutUnitType unitType, int targetSlotIndex, SkillDataSO skill)
+        {
+            SkillDataSO[] selectedSlots = ResolveSlots(unitType);
+            if (targetSlotIndex < 0 || targetSlotIndex >= selectedSlots.Length || skill == null)
+                return false;
+
+            if (TryFindEquippedSlotIndex(unitType, skill, out int sourceSlotIndex))
+            {
+                if (sourceSlotIndex == targetSlotIndex) return true;
+                return TrySwapSlots(unitType, sourceSlotIndex, targetSlotIndex);
+            }
+
+            return SetSlotSkill(unitType, targetSlotIndex, skill);
+        }
+
+        bool CanSwapSlots(SkillLoadoutUnitType unitType, int slotA, int slotB)
+        {
+            if (slotA == slotB) return true;
+
+            SkillDataSO[] selectedSlots = ResolveSlots(unitType);
+            if (slotA < 0 || slotB < 0 || slotA >= selectedSlots.Length || slotB >= selectedSlots.Length)
+                return false;
+
+            SkillDataSO skillA = selectedSlots[slotA];
+            SkillDataSO skillB = selectedSlots[slotB];
+
+            if (skillB != null && !CanAssignSkillToSlot(unitType, slotA, skillB)) return false;
+            if (skillA != null && !CanAssignSkillToSlot(unitType, slotB, skillA)) return false;
+            return true;
+        }
+
+        bool TrySwapSlots(SkillLoadoutUnitType unitType, int slotA, int slotB)
+        {
+            if (!CanSwapSlots(unitType, slotA, slotB)) return false;
+
+            SkillDataSO[] selectedSlots = ResolveSlots(unitType);
+            SkillDataSO skillA = selectedSlots[slotA];
+            selectedSlots[slotA] = selectedSlots[slotB];
+            selectedSlots[slotB] = skillA;
+            SaveToPlayerPrefs(unitType, selectedSlots);
+            OnLoadoutChanged?.Invoke(unitType);
+            return true;
+        }
+
         public bool CanAssignSkillToSlot(SkillLoadoutUnitType unitType, int slotIndex, SkillDataSO skill)
         {
             SkillDataSO[] selectedSlots = ResolveSlots(unitType);

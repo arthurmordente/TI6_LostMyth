@@ -648,8 +648,8 @@ MonoBehaviour:
       Radius: 2
       Height: 5
     Center:
-      Radius: 10
-      Height: 12.5
+      Radius: 11.5
+      Height: 14
     Bottom:
       Radius: 2.5
       Height: 0.1
@@ -748,6 +748,7 @@ MonoBehaviour:
   _minRadius: 2.5
   _maxRadius: 11.5
   _transitionDuration: 0.4
+  _panSensitivity: 0.02
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0

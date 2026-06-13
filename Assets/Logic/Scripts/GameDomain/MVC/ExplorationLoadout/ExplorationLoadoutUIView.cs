@@ -39,17 +39,27 @@ public class ExplorationLoadoutUIView : MonoBehaviour, IExplorationLoadoutView
     [Tooltip("Opcional. Dropdown TMP para filtrar por divindade.")]
     [SerializeField] private TMP_Dropdown _divinityCategoryDropdown;
 
-    [Header("Details")]
+    [Header("Details — panels")]
+    [Tooltip("Painel default com texto fixo sobre builds (visível ao abrir e ao desselecionar).")]
+    [SerializeField] private GameObject _detailDefaultPanel;
+    [Tooltip("Painel de detalhes da habilidade selecionada (nome, custo, descrição, etc.).")]
+    [SerializeField] private GameObject _detailSkillPanel;
+    [Tooltip("Qualquer clique que não acerte uma skill (incl. fora da UI) volta ao painel default.")]
+    [SerializeField] private bool _clearSelectionOnNonSkillClick = true;
+
+    [Header("Details — skill fields")]
     [SerializeField] private TMP_Text _detailNameText;
     [SerializeField] private TMP_Text _detailDivinityText;
     [SerializeField] private TMP_Text _detailSkillTypeText;
     [SerializeField] private TMP_Text _detailDescriptionText;
+    [SerializeField] private TMP_Text _detailLoreText;
     [SerializeField] private TMP_Text _detailPowerText;
     [Header("Details — custo")]
     [SerializeField] private TMP_Text _detailCostLabelText;
     [SerializeField] private Image _detailCostBadgeImage;
     [Tooltip("Sprites com custo já desenhado: índice 0 = mana 0, 1 = mana 1, 2 = mana 2, 3 = mana 3.")]
     [SerializeField] private Sprite[] _detailCostBadgeSprites = Array.Empty<Sprite>();
+    [SerializeField] private Image _detailBookCostBadgeImage;
     [SerializeField] private TMP_Text _detailRangeText;
     [SerializeField] private Image _detailBackgroundImage;
     [SerializeField] private Image _detailFrameImage;
@@ -64,6 +74,7 @@ public class ExplorationLoadoutUIView : MonoBehaviour, IExplorationLoadoutView
     private Action _onDragEnd;
     private Action<SkillLoadoutUnitType, int, SkillDataSO> _onSkillDropped;
     private Action<SkillLoadoutUnitType, int> _onEquippedSlotClicked;
+    private Action _onClearCatalogSelection;
     private readonly List<LoadoutSkillFrameView> _catalogItems = new List<LoadoutSkillFrameView>(16);
     private readonly List<LoadoutSkillFrameView> _playerSlotFrames = new List<LoadoutSkillFrameView>(4);
     private readonly List<LoadoutSkillFrameView> _bookSlotFrames = new List<LoadoutSkillFrameView>(4);
@@ -79,6 +90,7 @@ public class ExplorationLoadoutUIView : MonoBehaviour, IExplorationLoadoutView
             BuildDebugCanvasIfNeeded();
         EnsureHiddenOnSceneLoad();
         ResolveDetailCostReferences();
+        ResolveDetailLoreReference();
     }
 
     private void EnsureHiddenOnSceneLoad()
@@ -97,7 +109,8 @@ public class ExplorationLoadoutUIView : MonoBehaviour, IExplorationLoadoutView
 
     public void RegisterCallbacks(Action onClose,
         Action<ExplorationLoadoutSkillFilter> onCatalogFilterChanged = null,
-        Action<ExplorationLoadoutDivinityFilter> onDivinityFilterChanged = null)
+        Action<ExplorationLoadoutDivinityFilter> onDivinityFilterChanged = null,
+        Action onClearCatalogSelection = null)
     {
         if (_closeButton != null)
         {
@@ -107,8 +120,23 @@ public class ExplorationLoadoutUIView : MonoBehaviour, IExplorationLoadoutView
 
         _onCatalogFilterChanged = onCatalogFilterChanged;
         _onDivinityFilterChanged = onDivinityFilterChanged;
+        _onClearCatalogSelection = onClearCatalogSelection;
         WireSkillCategoryDropdown();
         WireDivinityCategoryDropdown();
+    }
+
+    void LateUpdate()
+    {
+        if (!_clearSelectionOnNonSkillClick || !IsVisible || _onClearCatalogSelection == null)
+            return;
+        if (!Input.GetMouseButtonDown(0))
+            return;
+        if (LoadoutDragContext.IsDragging)
+            return;
+        if (LoadoutPointerDeselectUtil.PointerHitsBoundSkill(Input.mousePosition))
+            return;
+
+        _onClearCatalogSelection.Invoke();
     }
 
     public void RegisterDragCallbacks(
@@ -236,6 +264,10 @@ public class ExplorationLoadoutUIView : MonoBehaviour, IExplorationLoadoutView
 
         var dropTarget = dropSurface.gameObject.AddComponent<LoadoutSlotDropTarget>();
         dropTarget.Configure(unitType, slotIndex, _onSkillDropped, _onEquippedSlotClicked);
+
+        var dragSource = dropSurface.GetComponent<LoadoutEquippedSlotDragSource>()
+            ?? dropSurface.gameObject.AddComponent<LoadoutEquippedSlotDragSource>();
+        dragSource.Configure(frame, _onCatalogPreview, _onDragBegin, _onDragMove, _onDragEnd);
     }
 
     static Transform FindDropSurfaceTransform(Transform frameRoot)
@@ -446,23 +478,48 @@ public class ExplorationLoadoutUIView : MonoBehaviour, IExplorationLoadoutView
         return groups[slotIndex];
     }
 
+    public void ShowDefaultDetailPanel()
+    {
+        SetDetailPanelMode(showSkillPanel: false);
+    }
+
     public void ShowSkillDetails(SkillDataSO skill)
     {
-        if (_detailNameText != null) _detailNameText.SetText(skill != null ? skill.SkillName : "-");
+        if (skill == null)
+        {
+            ShowDefaultDetailPanel();
+            return;
+        }
+
+        SetDetailPanelMode(showSkillPanel: true);
+        if (_detailNameText != null) _detailNameText.SetText(skill.SkillName ?? "-");
         if (_detailDivinityText != null)
-            _detailDivinityText.SetText(skill != null ? SkillDivinityUtil.DisplayLabel(skill.Divinity) : "-");
+            _detailDivinityText.SetText(SkillDivinityUtil.DisplayLabel(skill.Divinity));
         if (_detailSkillTypeText != null)
-            _detailSkillTypeText.SetText(skill != null ? ExplorationLoadoutSkillFilterUtil.DisplayLabel(skill.SkillType) : "-");
-        if (_detailDescriptionText != null) _detailDescriptionText.SetText(skill != null ? skill.Description : string.Empty);
-        if (_detailPowerText != null) _detailPowerText.SetText(skill != null ? skill.Power.ToString() : "-");
+            _detailSkillTypeText.SetText(ExplorationLoadoutSkillFilterUtil.DisplayLabel(skill.SkillType));
+        if (_detailDescriptionText != null)
+        {
+            _detailDescriptionText.richText = true;
+            _detailDescriptionText.SetText(SkillDescriptionRichTextFormatter.Format(skill));
+        }
+        ResolveDetailLoreReference();
+        if (_detailLoreText != null) _detailLoreText.SetText(skill.Lore ?? string.Empty);
+        if (_detailPowerText != null) _detailPowerText.SetText(skill.Power.ToString());
         ApplyDetailCost(skill);
         if (_detailRangeText != null)
         {
-            if (skill == null) _detailRangeText.SetText("-");
-            else if (skill.SkillType == SkillType.SelfBuff) _detailRangeText.SetText("-");
+            if (skill.SkillType == SkillType.SelfBuff) _detailRangeText.SetText("-");
             else _detailRangeText.SetText(skill.Range.ToString("0.##"));
         }
         ApplyDetailVisualLayers(skill);
+    }
+
+    void SetDetailPanelMode(bool showSkillPanel)
+    {
+        if (_detailSkillPanel != null)
+            _detailSkillPanel.SetActive(showSkillPanel);
+        if (_detailDefaultPanel != null)
+            _detailDefaultPanel.SetActive(!showSkillPanel);
     }
 
     void ApplyDetailCost(SkillDataSO skill)
@@ -472,7 +529,18 @@ public class ExplorationLoadoutUIView : MonoBehaviour, IExplorationLoadoutView
         if (skill == null)
         {
             SetDetailCostLabel(DetailCostLabelDefault);
-            SetDetailCostBadgeVisible(false);
+            SetManaCostBadgeVisible(false);
+            SetBookCostBadgeVisible(false);
+            return;
+        }
+
+        bool useBookCost = skill.SkillType == SkillType.SelfBuff;
+        SetManaCostBadgeVisible(!useBookCost);
+        SetBookCostBadgeVisible(useBookCost);
+
+        if (useBookCost)
+        {
+            SetDetailCostLabel(skill.Cost == 0 ? DetailCostLabelPassive : DetailCostLabelDefault);
             return;
         }
 
@@ -482,7 +550,6 @@ public class ExplorationLoadoutUIView : MonoBehaviour, IExplorationLoadoutView
         int cost = Mathf.Clamp(skill.Cost, 0, maxIndex);
 
         SetDetailCostLabel(cost == 0 ? DetailCostLabelPassive : DetailCostLabelDefault);
-        SetDetailCostBadgeVisible(true);
 
         if (_detailCostBadgeImage != null)
         {
@@ -497,10 +564,16 @@ public class ExplorationLoadoutUIView : MonoBehaviour, IExplorationLoadoutView
             _detailCostLabelText.SetText(text);
     }
 
-    void SetDetailCostBadgeVisible(bool visible)
+    void SetManaCostBadgeVisible(bool visible)
     {
         if (_detailCostBadgeImage == null) return;
         _detailCostBadgeImage.gameObject.SetActive(visible);
+    }
+
+    void SetBookCostBadgeVisible(bool visible)
+    {
+        if (_detailBookCostBadgeImage == null) return;
+        _detailBookCostBadgeImage.gameObject.SetActive(visible);
     }
 
     Sprite ResolveDetailCostBadgeSprite(int cost)
@@ -517,6 +590,15 @@ public class ExplorationLoadoutUIView : MonoBehaviour, IExplorationLoadoutView
 
         if (_detailCostBadgeImage == null)
             _detailCostBadgeImage = FindDetailChildImage("CostBadge", "img_Cost", "img_CostBadge", "CostIcon", "img_Mana");
+
+        if (_detailBookCostBadgeImage == null)
+            _detailBookCostBadgeImage = FindDetailChildImage("BookCost", "img_BookCost", "BookCostBadge", "img_BookCostBadge");
+    }
+
+    void ResolveDetailLoreReference()
+    {
+        if (_detailLoreText != null) return;
+        _detailLoreText = FindDetailChildTmpText("Lore", "txt_Lore", "LoreText", "txt_LoreText");
     }
 
     TMP_Text FindDetailChildTmpText(params string[] names)
@@ -542,7 +624,8 @@ public class ExplorationLoadoutUIView : MonoBehaviour, IExplorationLoadoutView
                 || image == _detailBackgroundImage
                 || image == _detailFrameImage
                 || image == _detailIconImage
-                || image == _detailCostBadgeImage)
+                || image == _detailCostBadgeImage
+                || image == _detailBookCostBadgeImage)
                 continue;
             foreach (string name in names)
             {
@@ -674,7 +757,7 @@ public class ExplorationLoadoutUIView : MonoBehaviour, IExplorationLoadoutView
         _detailDescriptionText = CreateText(parent, "Description", "", new Vector2(0.04f, 0.30f), new Vector2(0.96f, 0.53f), 16f);
         if (_detailDescriptionText != null)
         {
-            _detailDescriptionText.enableWordWrapping = true;
+            _detailDescriptionText.textWrappingMode = TextWrappingModes.Normal;
             _detailDescriptionText.overflowMode = TextOverflowModes.Ellipsis;
         }
 
@@ -745,7 +828,7 @@ public class ExplorationLoadoutUIView : MonoBehaviour, IExplorationLoadoutView
         txt.alignment = TextAlignmentOptions.Left;
         if (ellipsis)
         {
-            txt.enableWordWrapping = false;
+            txt.textWrappingMode = TextWrappingModes.NoWrap;
             txt.overflowMode = TextOverflowModes.Ellipsis;
         }
         StretchRect(go.GetComponent<RectTransform>(), min, max);
@@ -766,7 +849,7 @@ public class ExplorationLoadoutUIView : MonoBehaviour, IExplorationLoadoutView
 
     private static void EnsureEventSystemExists()
     {
-        if (FindObjectOfType<EventSystem>() != null) return;
+        if (UnityEngine.Object.FindFirstObjectByType<EventSystem>() != null) return;
         var eventSystem = new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
         DontDestroyOnLoad(eventSystem);
     }

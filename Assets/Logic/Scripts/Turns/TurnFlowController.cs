@@ -166,10 +166,6 @@ namespace Logic.Scripts.Turns {
 
         private async void StartPlayerPhase() {
             _actionPointsService.GainTurnPoints();
-            if (LakiArenaTileActionPointsBridge.ApplyPendingToPlayer(_actionPointsService))
-            {
-                // LogService.Log("[Laki] Tile AP modifier applied at PlayerAct start.");
-            }
             _phase = TurnPhase.PlayerAct;
             _turnMovement?.ResetMovementArea();
             _randomTurnPassiveService?.ApplyPlayerTurnStart(_actionPointsService, _turnMovement);

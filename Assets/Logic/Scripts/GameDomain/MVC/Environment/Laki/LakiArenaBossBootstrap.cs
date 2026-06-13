@@ -70,6 +70,7 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 
 		private void Awake()
 		{
+			LakiArenaRerollPresentation.ResetRerollPresentationCount();
 			LakiRouletteArenaFightIntro.EnsurePendingIntro();
 		}
 
@@ -209,8 +210,8 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 
 		private void OnDestroy()
 		{
+			LakiArenaRerollPresentation.ResetRerollPresentationCount();
 			LakiArenaTurnFlowBridge.Unregister();
-			LakiArenaTileActionPointsBridge.Reset();
 			CombatArenaBoundaryRuntime.Clear();
 			LakiArenaTileDispositionRuntime.Clear();
 			LakiRouletteArenaFightIntro.CancelWait();

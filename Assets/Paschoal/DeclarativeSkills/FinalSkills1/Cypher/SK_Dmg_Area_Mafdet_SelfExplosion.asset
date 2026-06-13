@@ -45,7 +45,21 @@ MonoBehaviour:
   SkillName: "Explos\xE3o Cibern\xE9tica"
   Description: "Uma explos\xE3o acontece ao redor de uma grande \xE1rea a partir
     do usu\xE1rio. Inimigos dentro do alcance recebem X dano, enquanto o usu\xE1rio
-    e seus aliados recebem apenas X dano."
+    e seus aliados recebem apenas Y dano."
+  Lore: "Laki nunca almejou uma vit\xF3ria f\xE1cil, ela sempre espera que cada visitante
+    passe o maior tempo poss\xEDvel em sua companhia, fazendo-os gastar tempo enquanto
+    absorve suas vitalidade (6)"
+  _descriptionHighlights:
+  - Placeholder: X
+    Mode: 0
+    Value: 0
+    ManualText: 
+    Color: {r: 1, g: 0.45, b: 0.15, a: 1}
+  - Placeholder: Y
+    Mode: 1
+    Value: 0
+    ManualText: 25
+    Color: {r: 1, g: 0.45, b: 0.15, a: 1}
   _effects:
   - {fileID: 11400000, guid: a47ac10b58cc4372a5670e02b2c3d472, type: 2}
   - {fileID: 11400000, guid: eb42f10539757554f99d828bcb5c266d, type: 2}

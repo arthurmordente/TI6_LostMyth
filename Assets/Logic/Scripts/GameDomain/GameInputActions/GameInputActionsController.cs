@@ -15,6 +15,8 @@ namespace Logic.Scripts.GameDomain.GameInputActions {
         // TAB key programmatic binding — added without modifying the Input Actions asset
         private InputAction _switchUnitTabAction;
         private InputAction _explorationInteractFAction;
+        private InputAction _gameplayPanCamAction;
+        private InputAction _explorationPanCamAction;
 
         public GameInputActionsController(global::GameInputActions gameInputActions, ICommandFactory commandFactory) {
             _gameInputActions = gameInputActions;
@@ -104,6 +106,11 @@ namespace Logic.Scripts.GameDomain.GameInputActions {
             _switchUnitTabAction = new InputAction(type: InputActionType.Button, binding: "<Keyboard>/tab");
             _switchUnitTabAction.started += OnSwitchUnitStarted;
             _switchUnitTabAction.Enable();
+
+            _gameplayPanCamAction = new InputAction(type: InputActionType.Button, binding: "<Mouse>/middleButton");
+            _gameplayPanCamAction.started += OnGameplayPanCamStarted;
+            _gameplayPanCamAction.canceled += OnGameplayPanCamCanceled;
+            _gameplayPanCamAction.Enable();
         }
 
         public void UnregisterGameplayInputListeners() {
@@ -134,6 +141,27 @@ namespace Logic.Scripts.GameDomain.GameInputActions {
                 _switchUnitTabAction.Dispose();
                 _switchUnitTabAction = null;
             }
+
+            DisposePanCamAction(ref _gameplayPanCamAction, OnGameplayPanCamStarted, OnGameplayPanCamCanceled);
+        }
+
+        static void DisposePanCamAction(ref InputAction action, Action<InputAction.CallbackContext> started, Action<InputAction.CallbackContext> canceled)
+        {
+            if (action == null) return;
+            action.started -= started;
+            action.canceled -= canceled;
+            action.Disable();
+            action.Dispose();
+            action = null;
+        }
+
+        private void OnGameplayPanCamStarted(InputAction.CallbackContext context) {
+            if (ExplorationModalInputGate.IsSuppressed) return;
+            _commandFactory.CreateCommandVoid<BeginCameraPanInputCommand>().Execute();
+        }
+
+        private void OnGameplayPanCamCanceled(InputAction.CallbackContext context) {
+            _commandFactory.CreateCommandVoid<EndCameraPanInputCommand>().Execute();
         }
 
         private void OnMouseClickStarted(InputAction.CallbackContext context) {
@@ -204,6 +232,11 @@ namespace Logic.Scripts.GameDomain.GameInputActions {
             _explorationInteractFAction = new InputAction(type: InputActionType.Button, binding: "<Keyboard>/f");
             _explorationInteractFAction.started += OnInteractStarted;
             _explorationInteractFAction.Enable();
+
+            _explorationPanCamAction = new InputAction(type: InputActionType.Button, binding: "<Mouse>/middleButton");
+            _explorationPanCamAction.started += OnExplorationPanCamStarted;
+            _explorationPanCamAction.canceled += OnExplorationPanCamCanceled;
+            _explorationPanCamAction.Enable();
         }
 
         public void UnregisterExplorationInputListeners() {
@@ -221,6 +254,17 @@ namespace Logic.Scripts.GameDomain.GameInputActions {
                 _explorationInteractFAction.Dispose();
                 _explorationInteractFAction = null;
             }
+
+            DisposePanCamAction(ref _explorationPanCamAction, OnExplorationPanCamStarted, OnExplorationPanCamCanceled);
+        }
+
+        private void OnExplorationPanCamStarted(InputAction.CallbackContext context) {
+            if (ExplorationModalInputGate.IsSuppressed) return;
+            _commandFactory.CreateCommandVoid<BeginCameraPanInputCommand>().Execute();
+        }
+
+        private void OnExplorationPanCamCanceled(InputAction.CallbackContext context) {
+            _commandFactory.CreateCommandVoid<EndCameraPanInputCommand>().Execute();
         }
 
         private void OnActivateCamStarted(InputAction.CallbackContext obj) {

@@ -425,7 +425,7 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
                 var tmp = cellGo.AddComponent<TextMeshProUGUI>();
                 ApplyTmpStyle(styleSource, tmp);
                 tmp.alignment = TextAlignmentOptions.Center;
-                tmp.enableWordWrapping = false;
+                tmp.textWrappingMode = TextWrappingModes.NoWrap;
                 tmp.text = "0";
                 var cellLe = cellGo.AddComponent<LayoutElement>();
                 cellLe.preferredHeight = 24f;

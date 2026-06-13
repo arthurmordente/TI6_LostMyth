@@ -40,11 +40,15 @@ MonoBehaviour:
   _selfCastPrefab: {fileID: 1607142820532151380, guid: 6190cf774033c09479d45e3c13b935d7, type: 3}
   _selfEffectPrefab: {fileID: 1607142820532151380, guid: 6190cf774033c09479d45e3c13b935d7, type: 3}
   Power: 0
-  Cost: 3
+  Cost: 1
   Icon: {fileID: 21300000, guid: 5dfeb5cffa3878f4c8ad37049ac10bd8, type: 3}
   SkillName: "Prote\xE7\xE3o Mel\xF3dica"
   Description: "Aira aben\xE7oa o usu\xE1rio com sua m\xFAsica, garantindo ao mesmo
     um escudo de Lava que impede a pr\xF3xima inst\xE2ncia de dano."
+  Lore: "Laki nunca almejou uma vit\xF3ria f\xE1cil, ela sempre espera que cada visitante
+    passe o maior tempo poss\xEDvel em sua companhia, fazendo-os gastar tempo enquanto
+    absorve suas vitalidade (0)"
+  _descriptionHighlights: []
   _effects:
   - {fileID: 11400000, guid: e86755636f8c10b4daca1d5bb208919c, type: 2}
   _passiveModifiers: []

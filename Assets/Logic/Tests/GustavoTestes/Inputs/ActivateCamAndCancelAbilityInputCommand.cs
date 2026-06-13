@@ -6,6 +6,7 @@ using Logic.Scripts.Services.CommandFactory;
 
 public class ActivateCamAndCancelAbilityInputCommand : BaseCommand, ICommandVoid {
     private IWorldCameraController _WorldCameraController;
+    private ICameraFocusService _cameraFocus;
     private ICastController _castController;
     private INaraController _naraController;
     private IActiveUnitService _activeUnitService;
@@ -13,6 +14,7 @@ public class ActivateCamAndCancelAbilityInputCommand : BaseCommand, ICommandVoid
 
     public override void ResolveDependencies() {
         _WorldCameraController = _diContainer.Resolve<IWorldCameraController>();
+        try { _cameraFocus = _diContainer.Resolve<ICameraFocusService>(); } catch { _cameraFocus = null; }
         _castController = _diContainer.Resolve<ICastController>();
         _naraController = _diContainer.Resolve<INaraController>();
         _activeUnitService = _diContainer.Resolve<IActiveUnitService>();
@@ -23,14 +25,14 @@ public class ActivateCamAndCancelAbilityInputCommand : BaseCommand, ICommandVoid
         _divideAbilityHandler?.CancelAim();
         _castController.CancelAbilityUse();
 
-        // Unfreeze whichever unit is currently active (Nara or Book).
-        // Previously only Nara was unfrozen, leaving the Book stuck after a cancelled cast.
         var active = _activeUnitService?.ActiveUnit;
         if (active != null)
             active.Unfreeeze();
         else
-            _naraController.Unfreeeze(); // fallback
+            _naraController.Unfreeeze();
 
+        if (_cameraFocus != null && (_cameraFocus.IsCinematicLockActive || _cameraFocus.IsPanActive))
+            return;
         _WorldCameraController.UnlockCameraRotate();
     }
 }

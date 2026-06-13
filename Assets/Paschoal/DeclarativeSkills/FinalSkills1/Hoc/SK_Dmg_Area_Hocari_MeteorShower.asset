@@ -15,11 +15,14 @@ MonoBehaviour:
   _divinity: 0
   _skillType: 0
   _castType: 1
+  _castAnimationStyle: 0
   _projectileRange: 8
   _projectileNumberOfTargets: 1
   _projectileTravelSpeed: 12
   _projectileAimPrefab: {fileID: 0}
-  _projectilePrefab: {fileID: 0}
+  _projectileCastPrefab: {fileID: 0}
+  _projectileEffectPrefab: {fileID: 0}
+  _projectileImpactPrefab: {fileID: 0}
   _moveCasterToProjectileHit: 0
   _projectilePullStandoffFromTargetMeters: 1.2
   _projectileDealsDamage: 1
@@ -31,15 +34,24 @@ MonoBehaviour:
   _areaMaxRange: 8
   _areaRadius: 4
   _areaAimPrefab: {fileID: 1607142820532151380, guid: 6feee9629db8db94f83b1e6771d787d1, type: 3}
-  _areaImpactPrefab: {fileID: 6108087016125792725, guid: 2ca6cdfe2d6cd5a4db4bb465cee7f47a, type: 3}
+  _areaCastPrefab: {fileID: 0}
+  _areaEffectPrefab: {fileID: 6108087016125792725, guid: 2ca6cdfe2d6cd5a4db4bb465cee7f47a, type: 3}
   _selfAimPrefab: {fileID: 0}
   _selfCastPrefab: {fileID: 0}
+  _selfEffectPrefab: {fileID: 0}
   Power: 30
   Cost: 2
   Icon: {fileID: 21300000, guid: a3059404bf2223c43b52b7b86d37bb18, type: 3}
   SkillName: "Chuva Mec\xE2nica"
   Description: "Marca uma pequena \xE1rea alvo que \xE9 atingida por in\xFAmeras
-    l\xE2minas de Hocari. Todo alvo dentro da \xE1rea sofre X dano duas vezes"
+    l\xE2minas de Hocari. Todo alvo dentro da \xE1rea sofre X de dano."
+  Lore: "Laki nunca almejou uma vit\xF3ria f\xE1cil, ela sempre espera que cada visitante
+    passe o maior tempo poss\xEDvel em sua companhia, fazendo-os gastar tempo enquanto
+    absorve suas vitalidade (9)"
+  _descriptionHighlights:
+  - Placeholder: X
+    Value: 0
+    Color: {r: 1, g: 0.45, b: 0.15, a: 1}
   _effects:
   - {fileID: 11400000, guid: a47ac10b58cc4372a5670e02b2c3d472, type: 2}
   _passiveModifiers: []

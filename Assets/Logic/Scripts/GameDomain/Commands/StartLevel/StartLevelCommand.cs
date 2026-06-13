@@ -11,7 +11,7 @@ namespace CoreDomain.GameDomain.GameStateDomain.GamePlayDomain.Scripts.Commands.
     public class StartLevelCommand : BaseCommand, ICommandAsync {
 
         private INaraController _naraController;
-        private IWorldCameraController _worldCameraController;
+        private ICameraFocusService _cameraFocusService;
         private IUpdateSubscriptionService _updateSubscriptionService;
         private ICommandFactory _commandFactory;
         private IBossController _bossController;
@@ -19,13 +19,13 @@ namespace CoreDomain.GameDomain.GameStateDomain.GamePlayDomain.Scripts.Commands.
 
         public override void ResolveDependencies() {
             _naraController = _diContainer.Resolve<INaraController>();
-            _worldCameraController = _diContainer.Resolve<IWorldCameraController>();
+            _cameraFocusService = _diContainer.Resolve<ICameraFocusService>();
             _updateSubscriptionService = _diContainer.Resolve<IUpdateSubscriptionService>();
             _commandFactory = _diContainer.Resolve<ICommandFactory>();
         }
 
         public async Awaitable Execute(CancellationTokenSource cancellationTokenSource) {
-            _worldCameraController.StartFollowTarget(_naraController.NaraViewGO.transform);
+            _cameraFocusService.SetDefaultFollow(_naraController.NaraViewGO.transform);
             await Awaitable.NextFrameAsync();
         }
 

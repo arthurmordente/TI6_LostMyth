@@ -79,6 +79,11 @@ public abstract class SkillDataSO : ScriptableObject
     public string SkillName;
     [TextArea(5, 18)]
     public string Description;
+    [TextArea(5, 18)]
+    public string Lore;
+
+    [Header("Description — highlighted values")]
+    [SerializeField] private SkillDescriptionHighlightEntry[] _descriptionHighlights = Array.Empty<SkillDescriptionHighlightEntry>();
 
     /// <summary>PlayerPrefs loadout identity: nome do ficheiro asset (<c>name</c> no Unity).</summary>
     public string LoadoutPersistenceKey => name;
@@ -112,6 +117,9 @@ public abstract class SkillDataSO : ScriptableObject
             ? SkillCastAnimationStyle.Fast
             : _castAnimationStyle;
     public SkillEffectSO[] Effects => _effects;
+
+    public SkillDescriptionHighlightEntry[] DescriptionHighlights =>
+        _descriptionHighlights ?? Array.Empty<SkillDescriptionHighlightEntry>();
 
     /// <summary>Entries for <see cref="SkillType.Passive"/>; ignored for other skill types at runtime.</summary>
     public PassiveStatModifierEntry[] PassiveModifiers => _passiveModifiers ?? Array.Empty<PassiveStatModifierEntry>();

@@ -7,12 +7,15 @@ using Logic.Scripts.Services.AudioService;
 using Logic.Scripts.Services.CommandFactory;
 using Logic.Scripts.Services.ResourcesLoaderService;
 using Logic.Scripts.Services.UpdateService;
+using Logic.Scripts.Turns;
 using UnityEngine;
 using Zenject;
-using Logic.Scripts.Turns;
 using Logic.Scripts.GameDomain.VisualFeedback;
 using Logic.Scripts.GameDomain.Services.Skills;
 using Logic.Scripts.GameDomain.MVC.Nara.Animation;
+using Logic.Scripts.GameDomain.MVC.Environment.Laki;
+using Logic.Scripts.GameDomain.VisualFeedback.FloatingCombatNumbers;
+using Logic.Scripts.GameDomain.VisualFeedback;
 
 namespace Logic.Scripts.GameDomain.MVC.Nara {
     // INaraController now extends IPlayableUnit, IEffectable and IEffectableAction,
@@ -55,6 +58,7 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
             IResourcesLoaderService resourcesLoaderService, NaraView naraViewPrefab,
             NaraConfigurationSO naraConfiguration, ICheatController cheatController,
             AbilityData[] abilities,
+            [InjectOptional] IActionPointsService actionPointsService = null,
             [InjectOptional] INewSkillSystemSkillLoadoutService newSkillSystemSkillLoadoutService = null,
             [InjectOptional] ErzahlerAnimatorControllersSO erzahlerAnimatorControllers = null,
             [InjectOptional] IDamageStackMovementPassiveService damageStackMovementPassiveService = null) {
@@ -66,6 +70,7 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
             _commandFactory = commandFactory;
             _cheatController = cheatController;
             _abilities = abilities ?? System.Array.Empty<AbilityData>();
+            _actionPointsService = actionPointsService;
             _newSkillSystemSkillLoadoutService = newSkillSystemSkillLoadoutService;
             _erzahlerAnimatorControllers = erzahlerAnimatorControllers;
             _damageStackMovementPassiveService = damageStackMovementPassiveService;
@@ -188,6 +193,7 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
             }
 
             if (actionPoints != null) {
+                _actionPointsService = actionPoints;
                 int max = _naraConfiguration.MaxActionPoints;
                 int gain = Mathf.Max(0, _naraConfiguration.ActionPointsTurnGain + apTurnBonus);
                 actionPoints.Configure(max, gain);
@@ -246,20 +252,29 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
             return _naraView.transform;
         }
 
-        public void ResetPreview() {
+        public void ResetPreview() => ResetSharedHealthPreview();
+
+        public void ResetSharedHealthPreview() {
             _naraData.ResetPreview();
             _gamePlayUiController?.OnPreviewPlayerHealthUpdate(_naraData.PreviewHealth, _naraConfiguration.MaxHealth);
         }
+
         public void PreviewDamage(int damageAmound) {
             if (damageAmound <= 0) return;
             bool immunePreview = _cheatController.Imortal;
             bool absorbed = !immunePreview && _hasNextHitShield;
             int effectiveOnPreview = (!immunePreview && !absorbed) ? damageAmound : 0;
-            _naraData.ApplyPreviewSubtractDamage(effectiveOnPreview);
+            ApplySharedHealthPreviewDamage(effectiveOnPreview);
+        }
+
+        public void ApplySharedHealthPreviewDamage(int amount) {
+            _naraData.ApplyPreviewSubtractDamage(amount);
             _gamePlayUiController?.OnPreviewPlayerHealthUpdate(_naraData.PreviewHealth, _naraConfiguration.MaxHealth);
         }
 
-        public void PreviewHeal(int healAmount) {
+        public void PreviewHeal(int healAmount) => ApplySharedHealthPreviewHeal(healAmount);
+
+        public void ApplySharedHealthPreviewHeal(int healAmount) {
             _naraData.ApplyPreviewHeal(healAmount);
             _gamePlayUiController?.OnPreviewPlayerHealthUpdate(_naraData.PreviewHealth, _naraConfiguration.MaxHealth);
         }
@@ -305,11 +320,17 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
                 return;
             }
 
+            ApplySharedHealthDamage(damageAmound, showNaraHitFeedback: true);
+        }
+
+        public void ApplySharedHealthDamage(int amount, bool showNaraHitFeedback) {
+            if (amount <= 0) return;
+
             bool damageApplied = _cheatController.Imortal == false;
             if (damageApplied)
-                _naraData.TakeDamage(damageAmound);
+                _naraData.TakeDamage(amount);
 
-            if (damageApplied) {
+            if (damageApplied && showNaraHitFeedback) {
                 _damageStackMovementPassiveService?.OnPlayerDamageTaken();
                 if (_naraView != null) {
                     var flash = _naraView.GetComponent<DamageFlashPresenter>();
@@ -318,17 +339,34 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
                 }
                 _audioService?.PlaySfx(SfxIds.Erza_Atingida, AudioChannelType.SfxCombat);
                 _naraView?.PlayHitReaction();
+                FloatingCombatNumberBridge.Show(_naraView != null ? _naraView.transform : null, amount, FloatingCombatNumberKind.Damage);
             }
 
+            PushSharedHealthToHud();
+            TryHandleSharedHealthDeath();
+        }
+
+        public void ApplySharedHealthHeal(int amount, bool showNaraHealFeedback) {
+            if (amount <= 0) return;
+            _naraData.Heal(amount);
+            _naraData.ResetPreview();
+            PushSharedHealthToHud();
+            if (showNaraHealFeedback)
+                FloatingCombatNumberBridge.Show(_naraView != null ? _naraView.transform : null, amount, FloatingCombatNumberKind.Heal);
+        }
+
+        void PushSharedHealthToHud() {
             _gamePlayUiController?.OnPlayerHealthUpdate(_naraData.ActualHealth, _naraConfiguration.MaxHealth);
             _gamePlayUiController?.OnPreviewPlayerHealthUpdate(_naraData.ActualHealth, _naraConfiguration.MaxHealth);
-            if (_naraData.IsAlive()) {
-                _audioService?.PlaySfx(SfxIds.Erza_Morte, AudioChannelType.SfxCombat);
-                _naraView?.PlayDeath();
-                _commandFactory.CreateCommandVoid<GameOverCommand>()
-                    .SetData(new GameOverCommandData(false, _naraView?.GetAnimator()))
-                    .Execute();
-            }
+        }
+
+        void TryHandleSharedHealthDeath() {
+            if (!_naraData.IsAlive()) return;
+            _audioService?.PlaySfx(SfxIds.Erza_Morte, AudioChannelType.SfxCombat);
+            _naraView?.PlayDeath();
+            _commandFactory.CreateCommandVoid<GameOverCommand>()
+                .SetData(new GameOverCommandData(false, _naraView?.GetAnimator()))
+                .Execute();
         }
 
         private void StartFootstepSfx() {
@@ -351,12 +389,7 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
             _naraView?.SetAttackType(1);
         }
 
-        public void Heal(int healAmount) {
-            _naraData.Heal(healAmount);
-            _naraData.ResetPreview();
-            _gamePlayUiController?.OnPlayerHealthUpdate(_naraData.ActualHealth, _naraConfiguration.MaxHealth);
-            _gamePlayUiController?.OnPreviewPlayerHealthUpdate(_naraData.ActualHealth, _naraConfiguration.MaxHealth);
-        }
+        public void Heal(int healAmount) => ApplySharedHealthHeal(healAmount, showNaraHealFeedback: true);
 
         public void TriggerExecute() {
             _naraView?.TriggerExecute();
@@ -388,7 +421,16 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
         }
 
         public void SubtractActionPoints(int value) {
-            EnsureApService()?.Subtract(value);
+            if (value <= 0) return;
+            var ap = EnsureApService();
+            if (ap == null)
+            {
+                LakiTileEffectApplyDebug.LogManaSkipped("Player", "SubtractActionPoints", "IActionPointsService não resolvido");
+                return;
+            }
+            int before = ap.Current;
+            ap.Subtract(value);
+            LakiTileEffectApplyDebug.LogManaDelta("Player", "SubtractActionPoints", before, ap.Current, -value);
         }
 
         public void SubtractAllActionPoints(int value) {
@@ -404,7 +446,16 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
         }
 
         public void AddActionPoints(int valueToIncrease) {
-            EnsureApService()?.Add(valueToIncrease);
+            if (valueToIncrease <= 0) return;
+            var ap = EnsureApService();
+            if (ap == null)
+            {
+                LakiTileEffectApplyDebug.LogManaSkipped("Player", "AddActionPoints", "IActionPointsService não resolvido");
+                return;
+            }
+            int before = ap.Current;
+            ap.Add(valueToIncrease);
+            LakiTileEffectApplyDebug.LogManaDelta("Player", "AddActionPoints", before, ap.Current, valueToIncrease);
         }
 
         public void ReduceMovementPerTurn(int valueToSubtract, int duration) {

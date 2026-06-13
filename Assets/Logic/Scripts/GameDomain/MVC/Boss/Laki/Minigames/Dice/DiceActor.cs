@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using Logic.Scripts.Turns;
 using Logic.Scripts.GameDomain.VisualFeedback;
+using Logic.Scripts.GameDomain.VisualFeedback.FloatingCombatNumbers;
 using Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack;
 using Logic.Scripts.GameDomain.MVC.Environment;
 using Logic.Scripts.Services.AudioService;
@@ -42,6 +43,36 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Dice
 		}
 		public bool RemoveAfterRun => true;
 		public bool IsBossDie => _isBoss;
+
+		public int OccupiedOrReservedTileIndex =>
+			_moveInProgress && _moveTargetTileIndex >= 0 ? _moveTargetTileIndex : _tileIndex;
+
+		/// <summary>Picks a tile not occupied or reserved by other dice on the same arena.</summary>
+		public static int PickUnoccupiedSpawnTile(
+			Logic.Scripts.GameDomain.MVC.Environment.Laki.LakiRouletteArenaView arena,
+			ICollection<int> alsoBlocked = null)
+		{
+			if (arena == null) return 0;
+			int tileCount = arena.TileCount;
+			if (tileCount <= 0) return 0;
+
+			var blocked = new HashSet<int>();
+			if (alsoBlocked != null)
+			{
+				foreach (int t in alsoBlocked)
+					if (t >= 0) blocked.Add(t);
+			}
+			CollectOccupiedTilesOnArena(arena, blocked, exclude: null);
+
+			var free = new List<int>(tileCount);
+			for (int i = 0; i < tileCount; i++)
+			{
+				if (!blocked.Contains(i)) free.Add(i);
+			}
+
+			if (free.Count == 0) return Random.Range(0, tileCount);
+			return free[Random.Range(0, free.Count)];
+		}
 
 		/// <param name="reportRollOnEnvironmentExecute">
 		/// When true (default), <see cref="OnDiceRolled"/> runs in <see cref="ExecuteAsync"/> (Environment phase).
@@ -99,16 +130,12 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Dice
 		public void ResetPreview() { }
 		public void TakeDamage(int damageAmount)
 		{
-			_hp -= Mathf.Max(0, damageAmount);
-			if (_incrementOnDamage)
-			{
-				int inc = Mathf.Max(1, damageAmount);
-				_value = (((_value - 1) + inc) % _maxValue) + 1;
-			}
-			else
-			{
-				_value = Random.Range(1, _maxValue + 1);
-			}
+			int applied = Mathf.Max(0, damageAmount);
+			_hp -= applied;
+			FloatingCombatNumberBridge.Show(transform, applied, FloatingCombatNumberKind.Damage);
+
+			int previousValue = _value;
+			RerollValueAfterDamage(applied, previousValue);
 			_callbacks?.OnDieValueChanged(_isBoss, _rollSlotIndex, _value);
 
 			if (_arena != null)
@@ -121,11 +148,41 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Dice
 			CreateOrUpdateFaceLabels();
 		}
 		public void TakeDamagePerTurn(int damageAmount, int duration) { }
-		public void Heal(int healAmount) { _hp += Mathf.Max(0, healAmount); }
+		public void Heal(int healAmount) {
+			int applied = Mathf.Max(0, healAmount);
+			_hp += applied;
+			FloatingCombatNumberBridge.Show(transform, applied, FloatingCombatNumberKind.Heal);
+		}
 		public void HealPerTurn(int healAmount, int duration) { }
 
 		public void SetSkillTargetingHighlight(bool active) {
 			SkillTargetingHighlightBridge.SetHighlighted(this, active);
+		}
+
+		void RerollValueAfterDamage(int damageAmount, int previousValue)
+		{
+			if (_maxValue <= 1)
+			{
+				_value = 1;
+				return;
+			}
+
+			if (_incrementOnDamage)
+			{
+				int inc = Mathf.Max(1, damageAmount);
+				_value = (((previousValue - 1) + inc) % _maxValue) + 1;
+				if (_value == previousValue)
+					_value = (previousValue % _maxValue) + 1;
+				return;
+			}
+
+			int roll;
+			do
+			{
+				roll = Random.Range(1, _maxValue + 1);
+			}
+			while (roll == previousValue);
+			_value = roll;
 		}
 
 		/// <summary>Kinematic dice + solid collider: blocks the player without being pushed.</summary>
@@ -262,21 +319,29 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Dice
 		private void CollectOccupiedTilesFromOtherDice(DiceActor self, HashSet<int> into)
 		{
 			into.Clear();
+			CollectOccupiedTilesOnArena(_arena, into, self);
+		}
+
+		private static void CollectOccupiedTilesOnArena(
+			Logic.Scripts.GameDomain.MVC.Environment.Laki.LakiRouletteArenaView arena,
+			HashSet<int> into,
+			DiceActor exclude)
+		{
 			var reg = EnvironmentActorsRegistryService.Instance;
 			if (reg != null)
 			{
 				foreach (var a in reg.Snapshot())
 				{
-					if (a is not DiceActor d || d == self || d._arena != _arena) continue;
-					int t = d._moveInProgress ? d._moveTargetTileIndex : d._tileIndex;
+					if (a is not DiceActor d || d == exclude || d._arena != arena) continue;
+					int t = d.OccupiedOrReservedTileIndex;
 					if (t >= 0) into.Add(t);
 				}
 				return;
 			}
 			foreach (var d in Object.FindObjectsByType<DiceActor>(FindObjectsSortMode.None))
 			{
-				if (d == self || d._arena != _arena) continue;
-				int t = d._moveInProgress ? d._moveTargetTileIndex : d._tileIndex;
+				if (d == exclude || d._arena != arena) continue;
+				int t = d.OccupiedOrReservedTileIndex;
 				if (t >= 0) into.Add(t);
 			}
 		}

@@ -8,6 +8,8 @@ using Logic.Scripts.Services.UpdateService;
 using Logic.Scripts.Turns;
 using UnityEngine;
 using Logic.Scripts.GameDomain.VisualFeedback;
+using Logic.Scripts.GameDomain.MVC.Environment.Laki;
+using Logic.Scripts.GameDomain.VisualFeedback.FloatingCombatNumbers;
 using Logic.Scripts.GameDomain.MVC.Nara.Animation;
 using Logic.Scripts.Services.AudioService;
 using Zenject;
@@ -25,6 +27,7 @@ namespace Logic.Scripts.GameDomain.MVC.Book
         private readonly INewSkillSystemSkillLoadoutService _newSkillSystemSkillLoadoutService;
         private readonly ErzahlerAnimatorControllersSO _erzahlerAnimatorControllers;
         private readonly IAudioService _audioService;
+        private readonly INaraController _naraController;
         // The Book's own ability set — configured separately in the inspector.
         // Initially points to the same abilities as Nara; swap to a dedicated array to diverge.
         private readonly AbilityData[] _abilities;
@@ -32,7 +35,6 @@ namespace Logic.Scripts.GameDomain.MVC.Book
 
         private BookView _bookView;
         private NaraTurnMovementController _movementController;
-        private BookData _bookData;
         private BookActionPoints _bookActionPoints;
         private bool _canMove;
         private bool _isDeployed;
@@ -58,6 +60,7 @@ namespace Logic.Scripts.GameDomain.MVC.Book
             IUpdateSubscriptionService updateSubscriptionService,
             ICommandFactory commandFactory,
             ICheatController cheatController,
+            INaraController naraController,
             [InjectOptional] INewSkillSystemSkillLoadoutService newSkillSystemSkillLoadoutService = null,
             [InjectOptional] ErzahlerAnimatorControllersSO erzahlerAnimatorControllers = null,
             [InjectOptional] IAudioService audioService = null)
@@ -69,6 +72,7 @@ namespace Logic.Scripts.GameDomain.MVC.Book
             _updateSubscriptionService = updateSubscriptionService;
             _commandFactory = commandFactory;
             _cheatController = cheatController;
+            _naraController = naraController;
             _newSkillSystemSkillLoadoutService = newSkillSystemSkillLoadoutService;
             _erzahlerAnimatorControllers = erzahlerAnimatorControllers;
             _audioService = audioService;
@@ -95,7 +99,6 @@ namespace Logic.Scripts.GameDomain.MVC.Book
                 rb.angularVelocity = Vector3.zero;
             }
 
-            _bookData = new BookData(_config);
             _bookActionPoints = new BookActionPoints(_config.MaxActionPoints, _config.ActionPointsTurnGain);
 
             // Ensure the Book's ability set is registered with the update/command systems.
@@ -156,7 +159,6 @@ namespace Logic.Scripts.GameDomain.MVC.Book
             _hasNextHitShield = false;
 
             _movementController = null;
-            _bookData = null;
             _bookActionPoints = null;
         }
 
@@ -167,7 +169,9 @@ namespace Logic.Scripts.GameDomain.MVC.Book
 
         public void GainTurnActionPoints()
         {
+            int before = _bookActionPoints?.Current ?? 0;
             _bookActionPoints?.GainTurnPoints();
+            ManaGainFloatingFeedback.TryShow(GetReferenceTransform(), (_bookActionPoints?.Current ?? 0) - before);
         }
 
         #region IPlayableUnit
@@ -323,32 +327,35 @@ namespace Logic.Scripts.GameDomain.MVC.Book
         public GameObject GetReferenceTargetPrefab() => _bookView != null ? _bookView.TargetPrefab : null;
         public LineRenderer GetPointLineRenderer() => _bookView != null ? _bookView.CastLineRenderer : null;
 
-        public void ResetPreview() => _bookData?.ResetPreview();
+        public void ResetPreview() => _naraController?.ResetSharedHealthPreview();
 
         public void PreviewDamage(int amount)
         {
-            if (amount <= 0 || _bookData == null) return;
+            if (amount <= 0 || !_isDeployed) return;
             bool absorbed = _hasNextHitShield;
             int effective = absorbed ? 0 : amount;
-            _bookData.ApplyPreviewSubtractDamage(effective);
+            _naraController?.ApplySharedHealthPreviewDamage(effective);
         }
 
         public void PreviewHeal(int amount)
         {
-            _bookData?.TakeDamage(-amount);
+            if (amount <= 0 || !_isDeployed) return;
+            _naraController?.ApplySharedHealthPreviewHeal(amount);
         }
 
         public void TakeDamage(int amount)
         {
-            if (_bookData == null) return;
-            if (amount > 0 && _hasNextHitShield)
+            if (!_isDeployed || amount <= 0) return;
+            if (_hasNextHitShield)
             {
                 _hasNextHitShield = false;
                 return;
             }
-            _bookData.TakeDamage(amount);
-            if (amount > 0)
-                _audioService?.PlaySfx(SfxIds.Livro_Atingido, AudioChannelType.SfxCombat);
+
+            _naraController?.ApplySharedHealthDamage(amount, showNaraHitFeedback: false);
+            FloatingCombatNumberBridge.Show(GetReferenceTransform(), amount, FloatingCombatNumberKind.Damage);
+
+            _audioService?.PlaySfx(SfxIds.Livro_Atingido, AudioChannelType.SfxCombat);
             if (_bookView != null)
             {
                 var flash = _bookView.GetComponent<DamageFlashPresenter>();
@@ -358,7 +365,12 @@ namespace Logic.Scripts.GameDomain.MVC.Book
         }
 
         public void TakeDamagePerTurn(int damageAmount, int duration) { }
-        public void Heal(int amount) { if (_bookData != null) _bookData.Heal(amount); }
+        public void Heal(int amount)
+        {
+            if (!_isDeployed || amount <= 0) return;
+            _naraController?.ApplySharedHealthHeal(amount, showNaraHealFeedback: false);
+            FloatingCombatNumberBridge.Show(GetReferenceTransform(), amount, FloatingCombatNumberKind.Heal);
+        }
         public void HealPerTurn(int healAmount, int duration) { }
 
         public void SetSkillTargetingHighlight(bool active) {
@@ -399,11 +411,27 @@ namespace Logic.Scripts.GameDomain.MVC.Book
         #region IEffectableAction
 
         public void Stun(int value) { }
-        public void SubtractActionPoints(int value) => _bookActionPoints?.Subtract(value);
+        public void SubtractActionPoints(int value)
+        {
+            if (value <= 0 || _bookActionPoints == null) return;
+            int before = _bookActionPoints.Current;
+            _bookActionPoints.Subtract(value);
+            int after = _bookActionPoints.Current;
+            LakiTileEffectApplyDebug.LogManaDelta("Clone", "SubtractActionPoints", before, after, -value);
+            ManaLostFloatingFeedback.TryShow(GetReferenceTransform(), before - after);
+        }
         public void SubtractAllActionPoints(int value) { }
         public void ReduceActionPointsGainPerTurn(int valueToSubtract, int duration) { }
         public void IncreaseActionPointsGainPerTurn(int valueToIncrease, int duration) { }
-        public void AddActionPoints(int valueToIncrease) => _bookActionPoints?.Add(valueToIncrease);
+        public void AddActionPoints(int valueToIncrease)
+        {
+            if (valueToIncrease <= 0) return;
+            int before = _bookActionPoints?.Current ?? 0;
+            _bookActionPoints?.Add(valueToIncrease);
+            int after = _bookActionPoints?.Current ?? 0;
+            LakiTileEffectApplyDebug.LogManaDelta("Clone", "AddActionPoints", before, after, valueToIncrease);
+            ManaGainFloatingFeedback.TryShow(GetReferenceTransform(), after - before);
+        }
         public void ReduceMovementPerTurn(int valueToSubtract, int duration) { }
         public void LimitActionPointUse(int value, int duration) { }
 

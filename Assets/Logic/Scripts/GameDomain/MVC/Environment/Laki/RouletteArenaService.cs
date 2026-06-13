@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 using Logic.Scripts.GameDomain.MVC.Nara;
 using Logic.Scripts.GameDomain.MVC.Abilitys;
@@ -9,6 +10,7 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 {
 	public sealed class RouletteArenaService
 	{
+		const int TileEffectStaggerMs = 500;
 		// ─── Effect pools ─────────────────────────────────────────────────────────
 		private readonly List<AbilityEffect> _largePositivePool = new List<AbilityEffect>(8);
 		private readonly List<AbilityEffect> _smallPositivePool = new List<AbilityEffect>(8);
@@ -224,62 +226,102 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 		// ─── Effect application ───────────────────────────────────────────────────
 
 		/// <summary>Applies all pre-assigned effects for this tile to the player.</summary>
-		public string ApplyEffectToPlayer(IEffectable caster, INaraController nara, int tileIndex, int turnNumber)
+		public Task<string> ApplyEffectToPlayerAsync(IEffectable caster, INaraController nara, int tileIndex, int turnNumber) =>
+			ApplyEffectToPlayerInternalAsync(caster, nara, tileIndex, turnNumber);
+
+		/// <summary>Applies all pre-assigned effects for this tile to any IEffectable (e.g. the Book).</summary>
+		public Task<string> ApplyEffectToEffectableAsync(IEffectable caster, IEffectable target, int tileIndex, int turnNumber) =>
+			ApplyEffectToEffectableInternalAsync(caster, target, tileIndex, turnNumber);
+
+		async Task<string> ApplyEffectToPlayerInternalAsync(IEffectable caster, INaraController nara, int tileIndex, int turnNumber)
 		{
 			if (nara == null || tileIndex < 0 || tileIndex >= TILE_COUNT)
 			{
-				UnityEngine.Debug.LogWarning(
-					$"[LakiRouletteArena][ApplyPlayer] Skip nara={(nara != null)} tileIndex={tileIndex}");
+				LakiTileEffectApplyDebug.LogManaSkipped("Player", "Apply", $"nara={(nara != null)} tileIndex={tileIndex}");
 				return null;
 			}
 
 			var tileType = _effectsCurrentTurn[tileIndex];
 			var effects = _assignedEffects[tileIndex];
-			// UnityEngine.Debug.Log(
-			// 	$"[LakiRouletteArena][ApplyPlayer] Turn={turnNumber} Tile={tileIndex} Type={tileType} " +
-			// 	$"assignedCount={(effects != null ? effects.Length : 0)}");
+			bool usingFallback = effects == null || effects.Length == 0;
+			LakiTileEffectApplyDebug.LogApplyStart("Player", turnNumber, tileIndex, tileType, effects?.Length ?? 0, usingFallback);
 
-			if (effects == null || effects.Length == 0)
+			if (usingFallback)
 			{
 				string fallback = ApplyFallbackToPlayer(caster, nara, tileIndex);
-				// UnityEngine.Debug.Log($"[LakiRouletteArena][ApplyPlayer] Used fallback -> {fallback ?? "None"}");
+				LakiTileEffectApplyDebug.LogApplyComplete("Player", turnNumber, tileIndex, fallback);
 				return fallback;
 			}
 
 			var names = new List<string>(effects.Length);
 			for (int i = 0; i < effects.Length; i++)
 			{
+				if (i > 0)
+					await Task.Delay(TileEffectStaggerMs);
+
 				var e = effects[i];
 				if (e == null)
 				{
-					UnityEngine.Debug.LogWarning($"[LakiRouletteArena][ApplyPlayer] Tile={tileIndex} effect[{i}] is null");
+					Debug.LogWarning($"[LakiTile][Player] casa={tileIndex} efeito[{i}] é null — ignorado");
 					continue;
 				}
-				// UnityEngine.Debug.Log(
-				// 	$"[LakiRouletteArena][ApplyPlayer] Tile={tileIndex} effect[{i}] {e.GetType().Name} name={e.Name}");
+
+				LakiTileEffectApplyDebug.LogEffectStep("Player", tileIndex, i, e.GetType().Name, e.Name ?? "");
 				if (TryApplyPlayerTileEffect(caster, nara, e, out string appliedLabel))
 					names.Add(appliedLabel);
 			}
-			return string.Join(", ", names);
+
+			string summary = string.Join(", ", names);
+			LakiTileEffectApplyDebug.LogApplyComplete("Player", turnNumber, tileIndex, summary);
+			return summary;
 		}
 
-		/// <summary>Applies all pre-assigned effects for this tile to any IEffectable (e.g. the Book).</summary>
-		public string ApplyEffectToEffectable(IEffectable caster, IEffectable target, int tileIndex, int turnNumber)
+		async Task<string> ApplyEffectToEffectableInternalAsync(IEffectable caster, IEffectable target, int tileIndex, int turnNumber)
 		{
 			if (target == null || tileIndex < 0 || tileIndex >= TILE_COUNT) return null;
 
+			const string unitLabel = "Clone";
+			var tileType = _effectsCurrentTurn[tileIndex];
 			var effects = _assignedEffects[tileIndex];
-			if (effects == null || effects.Length == 0)
-				return ApplyFallbackToEffectable(caster, target, tileIndex);
+			bool usingFallback = effects == null || effects.Length == 0;
+			LakiTileEffectApplyDebug.LogApplyStart(unitLabel, turnNumber, tileIndex, tileType, effects?.Length ?? 0, usingFallback);
+
+			if (usingFallback)
+			{
+				string fallback = ApplyFallbackToEffectable(caster, target, tileIndex);
+				LakiTileEffectApplyDebug.LogApplyComplete(unitLabel, turnNumber, tileIndex, fallback);
+				return fallback;
+			}
 
 			var names = new List<string>(effects.Length);
-			foreach (var e in effects)
+			for (int i = 0; i < effects.Length; i++)
 			{
+				if (i > 0)
+					await Task.Delay(TileEffectStaggerMs);
+
+				var e = effects[i];
 				if (e == null) continue;
+
+				LakiTileEffectApplyDebug.LogEffectStep(unitLabel, tileIndex, i, e.GetType().Name, e.Name ?? "");
 				e.Execute(caster, target);
-				names.Add(e.Name ?? "");
+				names.Add(e.Name ?? e.GetType().Name);
 			}
-			return string.Join(", ", names);
+
+			string summary = string.Join(", ", names);
+			LakiTileEffectApplyDebug.LogApplyComplete(unitLabel, turnNumber, tileIndex, summary);
+			return summary;
+		}
+
+		[Obsolete("Use ApplyEffectToPlayerAsync for staggered application.")]
+		public string ApplyEffectToPlayer(IEffectable caster, INaraController nara, int tileIndex, int turnNumber)
+		{
+			return ApplyEffectToPlayerAsync(caster, nara, tileIndex, turnNumber).GetAwaiter().GetResult();
+		}
+
+		[Obsolete("Use ApplyEffectToEffectableAsync for staggered application.")]
+		public string ApplyEffectToEffectable(IEffectable caster, IEffectable target, int tileIndex, int turnNumber)
+		{
+			return ApplyEffectToEffectableAsync(caster, target, tileIndex, turnNumber).GetAwaiter().GetResult();
 		}
 
 		// ─── Visual scramble ──────────────────────────────────────────────────────
@@ -375,20 +417,7 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 		static bool TryApplyPlayerTileEffect(IEffectable caster, INaraController nara, AbilityEffect e, out string appliedLabel)
 		{
 			appliedLabel = null;
-			if (e is AddActionPointsAbilityEffect addAp)
-			{
-				int amount = Mathf.Max(1, addAp.amount);
-				LakiArenaTileActionPointsBridge.EnqueuePlayerDelta(amount);
-				appliedLabel = $"{e.Name ?? "AP+"}{amount} (next turn)";
-				return true;
-			}
-			if (e is RemoveActionPointsAbilityEffect removeAp)
-			{
-				int amount = Mathf.Max(1, removeAp.amount);
-				LakiArenaTileActionPointsBridge.EnqueuePlayerDelta(-amount);
-				appliedLabel = $"{e.Name ?? "AP-"}{amount} (next turn)";
-				return true;
-			}
+			if (e == null) return false;
 
 			e.Execute(caster, nara);
 			appliedLabel = e.Name ?? e.GetType().Name;
@@ -402,12 +431,14 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 			{
 				case TileEffectType.Positive:
 					target?.Heal(5);
-					LakiArenaTileActionPointsBridge.EnqueuePlayerDelta(1);
-					return "Heal5_AP+1 (next turn)";
+					if (nara is IEffectableAction positiveAction)
+						positiveAction.AddActionPoints(1);
+					return "Heal5_AP+1";
 				case TileEffectType.Negative:
 					target?.TakeDamage(5);
-					LakiArenaTileActionPointsBridge.EnqueuePlayerDelta(-1);
-					return "Damage5_AP-1 (next turn)";
+					if (nara is IEffectableAction negativeAction)
+						negativeAction.SubtractActionPoints(1);
+					return "Damage5_AP-1";
 				default: return null;
 			}
 		}

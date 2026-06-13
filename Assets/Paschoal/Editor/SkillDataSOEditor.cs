@@ -124,6 +124,9 @@ public class SkillDataSOEditor : Editor
         EditorGUILayout.PropertyField(serializedObject.FindProperty("Icon"));
         EditorGUILayout.PropertyField(serializedObject.FindProperty("SkillName"));
         EditorGUILayout.PropertyField(serializedObject.FindProperty("Description"));
+        EditorGUILayout.PropertyField(serializedObject.FindProperty("Lore"));
+
+        DrawDescriptionHighlightsSection();
 
         EditorGUILayout.Space(6f);
         EditorGUILayout.PropertyField(serializedObject.FindProperty("_effects"), new GUIContent("Effects"), true);
@@ -135,5 +138,57 @@ public class SkillDataSOEditor : Editor
         }
 
         serializedObject.ApplyModifiedProperties();
+    }
+
+    void DrawDescriptionHighlightsSection()
+    {
+        EditorGUILayout.Space(4f);
+        EditorGUILayout.LabelField("Description highlights", EditorStyles.boldLabel);
+        EditorGUILayout.HelpBox(
+            "Na Description usa placeholders (ex.: X, Y). Cada entrada substitui o placeholder por um valor dinâmico da skill ou por texto manual, sempre com a cor escolhida.",
+            MessageType.None);
+
+        SerializedProperty highlights = serializedObject.FindProperty("_descriptionHighlights");
+        if (highlights == null) return;
+
+        int count = highlights.arraySize;
+        int newCount = EditorGUILayout.IntField("Editable value count", count);
+        if (newCount < 0) newCount = 0;
+        if (newCount > 8) newCount = 8;
+        if (newCount != count)
+            highlights.arraySize = newCount;
+
+        for (int i = 0; i < highlights.arraySize; i++)
+        {
+            SerializedProperty entry = highlights.GetArrayElementAtIndex(i);
+            EditorGUILayout.BeginVertical("box");
+            EditorGUILayout.LabelField($"Value {i + 1}", EditorStyles.miniBoldLabel);
+
+            SerializedProperty placeholder = entry.FindPropertyRelative("Placeholder");
+            if (string.IsNullOrEmpty(placeholder.stringValue))
+                placeholder.stringValue = DefaultPlaceholderForIndex(i);
+
+            EditorGUILayout.PropertyField(placeholder, new GUIContent("Placeholder"));
+
+            SerializedProperty modeProp = entry.FindPropertyRelative("Mode");
+            EditorGUILayout.PropertyField(modeProp, new GUIContent("Replacement"));
+
+            var mode = (SkillDescriptionHighlightMode)modeProp.enumValueIndex;
+            if (mode == SkillDescriptionHighlightMode.ManualText)
+                EditorGUILayout.PropertyField(entry.FindPropertyRelative("ManualText"), new GUIContent("Manual text"));
+            else
+                EditorGUILayout.PropertyField(entry.FindPropertyRelative("Value"), new GUIContent("Value source"));
+
+            EditorGUILayout.PropertyField(entry.FindPropertyRelative("Color"), new GUIContent("Color"));
+            EditorGUILayout.EndVertical();
+        }
+    }
+
+    static string DefaultPlaceholderForIndex(int index)
+    {
+        if (index == 0) return "X";
+        if (index == 1) return "Y";
+        if (index == 2) return "Z";
+        return "{" + index + "}";
     }
 }

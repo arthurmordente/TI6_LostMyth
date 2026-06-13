@@ -94,6 +94,17 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
         [SerializeField] private List<GameObject> _erzaSkillCostDisplayRoots = new List<GameObject>(4);
         [SerializeField] private List<GameObject> _bookSkillCostDisplayRoots = new List<GameObject>(4);
 
+        [Header("Skill keybind UI (optional)")]
+        [Tooltip("Por slot: icon_Keybind / img_Keybind. Oculto em passivas. Auto-resolve por nome se vazio.")]
+        [SerializeField] private List<GameObject> _erzaSkillKeybindDisplayRoots = new List<GameObject>(4);
+        [SerializeField] private List<GameObject> _bookSkillKeybindDisplayRoots = new List<GameObject>(4);
+
+        [Header("Cast feedback — tremor de mana")]
+        [Tooltip("Opcional. Ícone de mana do jogador (Nara) a tremer. Fallback: root ManaFlask (Nara).")]
+        [SerializeField] private RectTransform _naraPlayerManaShakeTarget;
+        [Tooltip("Opcional. Ícone de mana/cast do Livro a tremer. Fallback: root ManaFlask (Livro).")]
+        [SerializeField] private RectTransform _bookPlayerManaShakeTarget;
+
         [Header("Skill Icons (Optional — filhos dos botões)")]
         [Tooltip("Image de ícone por slot (ordem 0–3). Preenchido a partir de SkillDataSO.Icon ao refrescar o loadout.")]
         [SerializeField] private List<Image> _erzaSkillIconImages = new List<Image>(4);
@@ -101,6 +112,14 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
 
         readonly List<SkillSlotVisualView> _erzaSkillVisuals = new List<SkillSlotVisualView>(4);
         readonly List<SkillSlotVisualView> _bookSkillVisuals = new List<SkillSlotVisualView>(4);
+        readonly List<CanvasGroup> _erzaSkillCanvasGroups = new List<CanvasGroup>(4);
+        readonly List<CanvasGroup> _bookSkillCanvasGroups = new List<CanvasGroup>(4);
+        readonly SkillDataSO[] _erzaHudSkills = new SkillDataSO[4];
+        readonly SkillDataSO[] _bookHudSkills = new SkillDataSO[4];
+
+        [Header("Skills — cast affordance")]
+        [Tooltip("Alpha dos slots de skill quando não há mana (Erza) ou cast único (Livro). Igual ao loadout em drag inválido.")]
+        [SerializeField] private float _unaffordableSkillAlpha = 0.35f;
 
         [Header("Buttons")]
         [SerializeField] private Button _nextTurnButton;
@@ -147,6 +166,8 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
         private Action _onSkill3;
         private Action _onSkill4;
         private bool _showBookSkillsTheme;
+        private int _currentActionPoints;
+        private bool _bookCloneAvailable = true;
         private Sequence _turnAnnouncementSequence;
 
         private Coroutine _firstTurnPassTurnHintRoutine;
@@ -265,6 +286,31 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
         {
             if (_hudRoot == null) _hudRoot = GetComponent<RectTransform>();
             EnsureCombatSkillVisuals();
+            EnsureCombatSkillAffordanceGroups();
+        }
+
+        void EnsureCombatSkillAffordanceGroups()
+        {
+            EnsureThemeAffordanceGroups(_erzaSkillButtons, _erzaSkillsBackground, _erzaSkillCanvasGroups);
+            EnsureThemeAffordanceGroups(_bookSkillButtons, _bookSkillsBackground, _bookSkillCanvasGroups);
+        }
+
+        static void EnsureThemeAffordanceGroups(List<Button> configured, GameObject background, List<CanvasGroup> groups)
+        {
+            if (groups.Count > 0) return;
+            for (int i = 0; i < 4; i++)
+            {
+                Button button = ResolveSkillButton(i, configured, background);
+                groups.Add(button != null ? GetOrAddCanvasGroup(button.gameObject) : null);
+            }
+        }
+
+        static CanvasGroup GetOrAddCanvasGroup(GameObject go)
+        {
+            if (go == null) return null;
+            if (!go.TryGetComponent(out CanvasGroup group))
+                group = go.AddComponent<CanvasGroup>();
+            return group;
         }
 
         void EnsureCombatSkillVisuals()
@@ -476,10 +522,14 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
             if (_playerPreviewApFillImage != null)
                 _playerPreviewApFillImage.fillAmount = Mathf.Clamp01(current / maxF);
             SetIntText(_playerActionPointsText, current);
+            _currentActionPoints = current;
+            RefreshSkillAffordanceVisuals();
         }
 
         public void OnPlayerActionPointsChange(int current, int max)
         {
+            _currentActionPoints = current;
+            RefreshSkillAffordanceVisuals();
             float maxF = Mathf.Max(1, max);
             float start = _playerApDisplayFloat;
             DOTween.Kill(_playerApFillImage, true);
@@ -678,11 +728,13 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
                 _bookManaFlaskRoot.SetActive(showBookSkillsTheme);
             if (_erzaSkillsBackground != null) _erzaSkillsBackground.SetActive(!showBookSkillsTheme);
             if (_bookSkillsBackground != null) _bookSkillsBackground.SetActive(showBookSkillsTheme);
+            RefreshSkillAffordanceVisuals();
         }
 
         /// <inheritdoc />
         public void SetBookCloneActionAvailable(bool available)
         {
+            _bookCloneAvailable = available;
             SetIntText(_bookUniversalActionText, available ? 1 : 0);
 
             if (_bookUniversalActionFillImage == null) return;
@@ -696,6 +748,7 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
                 if (_bookUniversalActionFillImage != null)
                     _bookUniversalActionFillImage.fillAmount = Mathf.Clamp01(x);
             }, target, _tweenDuration).SetEase(_tweenEase).SetTarget(_bookUniversalActionFillImage);
+            RefreshSkillAffordanceVisuals();
         }
 
         public void SetSkillHudIcons(Sprite erza0, Sprite erza1, Sprite erza2, Sprite erza3, Sprite book0, Sprite book1, Sprite book2, Sprite book3)
@@ -710,8 +763,170 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
             ISkillVisualCatalog visualCatalog)
         {
             EnsureCombatSkillVisuals();
+            CacheHudSkills(_erzaHudSkills, erza0, erza1, erza2, erza3);
+            CacheHudSkills(_bookHudSkills, book0, book1, book2, book3);
             ApplySkillVisualToList(_erzaSkillVisuals, _erzaSkillIconImages, visualCatalog, erza0, erza1, erza2, erza3);
             ApplySkillVisualToList(_bookSkillVisuals, _bookSkillIconImages, visualCatalog, book0, book1, book2, book3);
+            RefreshSkillKeybindVisibility();
+            RefreshSkillAffordanceVisuals();
+        }
+
+        public void RefreshSkillCastAffordability(int currentActionPoints, bool bookCloneAvailable)
+        {
+            _currentActionPoints = currentActionPoints;
+            _bookCloneAvailable = bookCloneAvailable;
+            RefreshSkillAffordanceVisuals();
+        }
+
+        public void PlayInsufficientCastFeedback(int slotIndex, CombatSkillCastBlockReason reason)
+        {
+            if (slotIndex >= 0 && slotIndex < 4)
+            {
+                RectTransform skillMana = ResolveSkillManaShakeTarget(slotIndex, _showBookSkillsTheme);
+                if (skillMana != null)
+                    UiRectShake.PlayInvalidSlotShake(skillMana);
+            }
+
+            RectTransform playerMana = ResolvePlayerManaShakeTarget();
+            if (playerMana != null)
+                UiRectShake.PlayInvalidSlotShake(playerMana);
+        }
+
+        void RefreshSkillKeybindVisibility()
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                ApplyKeybindCell(i, _erzaHudSkills[i], _erzaSkillKeybindDisplayRoots, bookTheme: false);
+                ApplyKeybindCell(i, _bookHudSkills[i], _bookSkillKeybindDisplayRoots, bookTheme: true);
+            }
+        }
+
+        void ApplyKeybindCell(int slotIndex, SkillDataSO skill, List<GameObject> configuredRoots, bool bookTheme)
+        {
+            GameObject root = ResolveKeybindDisplayRoot(slotIndex, configuredRoots, bookTheme);
+            if (root == null) return;
+            root.SetActive(skill != null && skill.IsCastable);
+        }
+
+        RectTransform ResolvePlayerManaShakeTarget()
+        {
+            if (_showBookSkillsTheme)
+            {
+                if (_bookPlayerManaShakeTarget != null) return _bookPlayerManaShakeTarget;
+                return _bookManaFlaskRoot != null ? _bookManaFlaskRoot.transform as RectTransform : null;
+            }
+
+            if (_naraPlayerManaShakeTarget != null) return _naraPlayerManaShakeTarget;
+            return _naraManaFlaskRoot != null ? _naraManaFlaskRoot.transform as RectTransform : null;
+        }
+
+        RectTransform ResolveSkillManaShakeTarget(int slotIndex, bool bookTheme)
+        {
+            GameObject costRoot = ResolveSkillCostDisplayRoot(slotIndex, bookTheme);
+            return costRoot != null ? costRoot.transform as RectTransform : null;
+        }
+
+        GameObject ResolveKeybindDisplayRoot(int slotIndex, List<GameObject> configuredRoots, bool bookTheme)
+        {
+            GameObject root = At(configuredRoots, slotIndex);
+            if (root != null) return root;
+
+            Button button = bookTheme
+                ? ResolveSkillButton(slotIndex, _bookSkillButtons, _bookSkillsBackground)
+                : ResolveSkillButton(slotIndex, _erzaSkillButtons, _erzaSkillsBackground);
+            if (button == null) return null;
+
+            Transform keybind = FindNamedChild(button.transform, "img_Keybind")
+                ?? FindNamedChild(button.transform, "icon_Keybind");
+            return keybind != null ? keybind.gameObject : null;
+        }
+
+        static Transform FindNamedChild(Transform root, string childName)
+        {
+            if (root == null) return null;
+
+            Transform direct = root.Find(childName);
+            if (direct != null) return direct;
+
+            foreach (Transform child in root.GetComponentsInChildren<Transform>(true))
+            {
+                if (child.name.Equals(childName, StringComparison.OrdinalIgnoreCase))
+                    return child;
+            }
+
+            return null;
+        }
+
+        static void CacheHudSkills(SkillDataSO[] target, SkillDataSO s0, SkillDataSO s1, SkillDataSO s2, SkillDataSO s3)
+        {
+            target[0] = s0;
+            target[1] = s1;
+            target[2] = s2;
+            target[3] = s3;
+        }
+
+        void RefreshSkillAffordanceVisuals()
+        {
+            EnsureCombatSkillAffordanceGroups();
+            ApplySkillAffordanceToTheme(_erzaSkillCanvasGroups, _erzaHudSkills, bookTheme: false);
+            ApplySkillAffordanceToTheme(_bookSkillCanvasGroups, _bookHudSkills, bookTheme: true);
+        }
+
+        void ApplySkillAffordanceToTheme(List<CanvasGroup> groups, SkillDataSO[] skills, bool bookTheme)
+        {
+            if (groups == null || skills == null) return;
+            bool applyDimming = bookTheme ? _showBookSkillsTheme : !_showBookSkillsTheme;
+            for (int i = 0; i < 4; i++)
+            {
+                CanvasGroup group = At(groups, i);
+                if (group == null) continue;
+                if (!applyDimming)
+                {
+                    group.alpha = 1f;
+                    continue;
+                }
+
+                SkillDataSO skill = skills[i];
+                group.alpha = IsSkillCastAffordable(skill, bookTheme) ? 1f : _unaffordableSkillAlpha;
+            }
+        }
+
+        bool IsSkillCastAffordable(SkillDataSO skill, bool bookTheme)
+        {
+            if (skill == null || !skill.IsCastable) return true;
+
+            if (bookTheme)
+                return _bookCloneAvailable;
+
+            return _currentActionPoints >= Mathf.Max(0, skill.Cost);
+        }
+
+        Button GetActiveThemeSkillButton(int slotIndex)
+        {
+            if (_showBookSkillsTheme)
+                return ResolveSkillButton(slotIndex, _bookSkillButtons, _bookSkillsBackground)
+                    ?? LegacySkillButtonAt(slotIndex);
+            return ResolveSkillButton(slotIndex, _erzaSkillButtons, _erzaSkillsBackground)
+                ?? LegacySkillButtonAt(slotIndex);
+        }
+
+        Button LegacySkillButtonAt(int slotIndex) => slotIndex switch
+        {
+            0 => _skill1Button,
+            1 => _skill2Button,
+            2 => _skill3Button,
+            3 => _skill4Button,
+            _ => null
+        };
+
+        static Button ResolveSkillButton(int slotIndex, List<Button> configured, GameObject background)
+        {
+            Button button = At(configured, slotIndex);
+            if (button != null) return button;
+            if (background == null) return null;
+            Transform container = ResolveContainer(background.transform);
+            if (container == null || slotIndex < 0 || slotIndex >= container.childCount) return null;
+            return container.GetChild(slotIndex).GetComponent<Button>();
         }
 
         static void ApplySkillVisualToList(
@@ -965,10 +1180,20 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
             Bind(button, callback);
         }
 
-        private GameObject GetSkillCostDisplayRoot(int slotIndex)
+        private GameObject GetSkillCostDisplayRoot(int slotIndex) =>
+            ResolveSkillCostDisplayRoot(slotIndex, _showBookSkillsTheme);
+
+        GameObject ResolveSkillCostDisplayRoot(int slotIndex, bool bookTheme)
         {
-            var configuredList = _showBookSkillsTheme ? _bookSkillCostDisplayRoots : _erzaSkillCostDisplayRoots;
-            return At(configuredList, slotIndex);
+            List<GameObject> configuredList = bookTheme ? _bookSkillCostDisplayRoots : _erzaSkillCostDisplayRoots;
+            GameObject root = At(configuredList, slotIndex);
+            if (root != null) return root;
+
+            Button button = bookTheme
+                ? ResolveSkillButton(slotIndex, _bookSkillButtons, _bookSkillsBackground)
+                : ResolveSkillButton(slotIndex, _erzaSkillButtons, _erzaSkillsBackground);
+            Transform mana = FindNamedChild(button != null ? button.transform : null, "icon_Mana");
+            return mana != null ? mana.gameObject : null;
         }
 
         private void ApplySkillCostCell(int slotIndex, int cost, bool showCostDisplay)

@@ -16,7 +16,7 @@ namespace Logic.Scripts.GameDomain.Services.ActiveUnit
         private static bool SlotShowsManaCostUi(SkillDataSO skill) =>
             skill == null || skill.SkillType != SkillType.Passive;
         private readonly INaraController _naraController;
-        private readonly IWorldCameraController _worldCamera;
+        private readonly ICameraFocusService _cameraFocus;
         private readonly IGamePlayUiController _gamePlayUiController;
         private readonly INewSkillSystemSkillLoadoutService _newSkillSystemSkillLoadoutService;
         private readonly IAudioService _audioService;
@@ -25,12 +25,12 @@ namespace Logic.Scripts.GameDomain.Services.ActiveUnit
         public IPlayableUnit ActiveUnit { get; private set; }
         public bool IsBookDeployed => _bookUnit != null;
 
-        public ActiveUnitService(INaraController naraController, IWorldCameraController worldCameraController,
+        public ActiveUnitService(INaraController naraController, ICameraFocusService cameraFocusService,
             IGamePlayUiController gamePlayUiController, IAudioService audioService,
             [InjectOptional] INewSkillSystemSkillLoadoutService newSkillSystemSkillLoadoutService = null)
         {
             _naraController = naraController;
-            _worldCamera = worldCameraController;
+            _cameraFocus = cameraFocusService;
             _gamePlayUiController = gamePlayUiController;
             _audioService = audioService;
             _newSkillSystemSkillLoadoutService = newSkillSystemSkillLoadoutService;
@@ -197,13 +197,12 @@ namespace Logic.Scripts.GameDomain.Services.ActiveUnit
                 bookActive);
         }
 
-        // Redirects the camera to orbit the unit that just became active.
         private void FollowActiveUnit()
         {
-            if (_worldCamera == null || ActiveUnit == null) return;
+            if (_cameraFocus == null || ActiveUnit == null) return;
             var target = ActiveUnit.UnitViewGO?.transform;
             if (target != null)
-                _worldCamera.StartFollowTarget(target);
+                _cameraFocus.SetDefaultFollow(target);
         }
 
         private void ReloadNewSkillSystemLoadoutForUnit(IPlayableUnit unit)

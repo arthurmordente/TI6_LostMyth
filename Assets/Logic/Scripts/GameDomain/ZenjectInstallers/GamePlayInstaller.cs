@@ -12,10 +12,12 @@ using UnityEngine.Serialization;
 using Logic.Scripts.GameDomain.MVC.Cast.NewSkillSystem;
 using Logic.Scripts.GameDomain.MVC.Ui;
 using Logic.Scripts.GameDomain.MVC.Echo;
+using Logic.Scripts.GameDomain.MVC.Boss.Laki;
 using Logic.Scripts.GameDomain.MVC.Boss.Telegraph;
 using Logic.Scripts.GameDomain.MVC.Boss.Visuals;
 using Logic.Scripts.GameDomain.MVC.Nara.Animation;
 using Logic.Scripts.GameDomain.Services.Skills;
+using Logic.Scripts.GameDomain.VisualFeedback.FloatingCombatNumbers;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -55,6 +57,10 @@ public class GamePlayInstaller : MonoInstaller {
     [Tooltip("Telegraphs / Laki tiles catalog for Hokari. If empty in builds, assign here; in Editor, defaults to CombatAttackVisualCatalog.asset under Boss/Visuals.")]
     [SerializeField] private CombatAttackVisualCatalogSO _combatAttackVisualCatalog;
 
+    [Header("Combat feedback")]
+    [Tooltip("Prefab with FloatingCombatNumberView + world TextMeshPro. If empty, numbers spawn with a runtime fallback.")]
+    [SerializeField] private FloatingCombatNumberView _floatingCombatNumberPrefab;
+
     public override void InstallBindings() {
         BindServices();
         BindControllers();
@@ -68,6 +74,10 @@ public class GamePlayInstaller : MonoInstaller {
         Container.Bind<INewSkillSystemSkillTargetingPreviewService>().To<NewSkillSystemSkillTargetingPreviewService>().AsSingle();
         Container.Bind<NewSkillSystemDefaultSkillCastFlow>().AsSingle();
         Container.BindInterfacesTo<SkillCastBeneficiaryResolver>().AsSingle().NonLazy();
+
+        Container.BindInterfacesTo<FloatingCombatNumberService>().AsSingle()
+            .WithArguments(_floatingCombatNumberPrefab);
+        Container.BindInterfacesTo<FloatingCombatNumberBootstrap>().AsSingle().NonLazy();
 
         // Book system
         Container.Bind<IActiveUnitService>().To<ActiveUnitService>().AsSingle();
@@ -129,13 +139,15 @@ public class GamePlayInstaller : MonoInstaller {
         Container.BindInterfacesTo<InteractableObjectsController>().AsSingle().NonLazy();
 
         // Book controller — starts inactive (no view), activated by DivideAbilityHandler.
-        // _bookConfiguration allows setting separate HP/AP/Movement values for the book.
+        // _bookConfiguration still controls book AP/movement; HP is shared with Nara via INaraController.
         // Falls back to _naraConfiguration if _bookConfiguration is not assigned.
         var bookCfg = _bookConfiguration != null ? _bookConfiguration : _naraConfiguration;
         // If _bookSkills is empty/unassigned the Book mirrors Nara's ability set.
         var resolvedBookSkills = (_bookSkills != null && _bookSkills.Length > 0) ? _bookSkills : _skills;
         Container.BindInterfacesTo<BookController>().AsSingle()
             .WithArguments(_bookViewPrefab, bookCfg, resolvedBookSkills).NonLazy();
+
+        Container.BindInterfacesTo<LakiDiceCameraBridge>().AsSingle().NonLazy();
     }
 
     private IPauseMenuView ResolvePauseMenuView() {

@@ -13,7 +13,8 @@ public interface IExplorationLoadoutView
     void SetVisible(bool visible);
     void RegisterCallbacks(Action onClose,
         Action<ExplorationLoadoutSkillFilter> onCatalogFilterChanged = null,
-        Action<ExplorationLoadoutDivinityFilter> onDivinityFilterChanged = null);
+        Action<ExplorationLoadoutDivinityFilter> onDivinityFilterChanged = null,
+        Action onClearCatalogSelection = null);
     void RegisterDragCallbacks(
         Action<SkillDataSO> onCatalogPreview,
         Action<SkillDataSO> onDragBegin,
@@ -27,6 +28,7 @@ public interface IExplorationLoadoutView
     LoadoutSkillFrameView CreateCatalogItem(SkillDataSO skill, Action<SkillDataSO> onCatalogClicked);
     void FinalizeCatalogScroll();
     void ShowSkillDetails(SkillDataSO skill);
+    void ShowDefaultDetailPanel();
     void SetSelectedCatalogSkill(SkillDataSO skill);
     void ShowDragGhost(SkillDataSO skill);
     void UpdateDragGhostScreenPosition(Vector2 screenPosition);

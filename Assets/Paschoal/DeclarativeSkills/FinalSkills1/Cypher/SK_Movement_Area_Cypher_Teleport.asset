@@ -45,6 +45,7 @@ MonoBehaviour:
   SkillName: Pulo do Gato
   Description: "Escolhe um ponto, dentro de uma \xE1rea mediana, para se teleportar
     instantaneamente."
+  Lore: "Laki nunca almejou uma vitória fácil, ela sempre espera que cada visitante passe o maior tempo possível em sua companhia, fazendo-os gastar tempo enquanto absorve suas vitalidade (7)"
   _effects:
   - {fileID: 11400000, guid: 697ae35b4c5cfb0439a41ec694d04329, type: 2}
   _passiveModifiers: []

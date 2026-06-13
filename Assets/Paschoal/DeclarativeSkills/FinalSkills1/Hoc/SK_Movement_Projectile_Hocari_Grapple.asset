@@ -40,6 +40,7 @@ MonoBehaviour:
   SkillName: "Impulso Magn\xE9tico"
   Description: "Dispara energia magn\xE9tica para frente \xE0 uma grande dist\xE2ncia
     e, caso colida com algo, a energia puxa o usu\xE1rio at\xE9 o ponto de colis\xE3o."
+  Lore: "Laki nunca almejou uma vitória fácil, ela sempre espera que cada visitante passe o maior tempo possível em sua companhia, fazendo-os gastar tempo enquanto absorve suas vitalidade (11)"
   _effects: []
   _passiveModifiers: []
   _passiveTurnBehavior: {fileID: 0}

@@ -12,6 +12,7 @@ using Logic.Scripts.GameDomain.MVC.Ui;
 using Logic.Scripts.GameDomain.Services.ActiveUnit;
 using Assets.Logic.Scripts.GameDomain.Effects;
 using Logic.Scripts.GameDomain.VisualFeedback;
+using Logic.Scripts.GameDomain.VisualFeedback.FloatingCombatNumbers;
 using Logic.Scripts.GameDomain.MVC.Environment.Laki;
 using Logic.Scripts.Turns;
 
@@ -841,6 +842,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
                 LakiBossShieldRuntime.EngageShield();
 
             if (applied <= 0) return;
+            FloatingCombatNumberBridge.Show(_bossView != null ? _bossView.transform : null, applied, FloatingCombatNumberKind.Damage);
             PlayLakiBossSfx(SfxIds.Laki_Atingida);
             if (BossViewUsesLakiAnimator(_bossView))
                 ResolveLakiAnimatorView(_bossView)?.PlayHitReaction();
@@ -885,7 +887,9 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
         }
 
         public void Heal(int amount) {
+            if (amount <= 0) return;
             _bossData?.Heal(amount);
+            FloatingCombatNumberBridge.Show(_bossView != null ? _bossView.transform : null, amount, FloatingCombatNumberKind.Heal);
             int maxHp = _bossConfiguration != null ? _bossConfiguration.MaxHealth : Mathf.Max(1, _bossData.ActualHealth);
             // Debug.Log($"[Boss] Heal: +{amount} -> HP={_bossData.ActualHealth}/{maxHp}");
             int pct = maxHp > 0 ? Mathf.RoundToInt((float)_bossData.ActualHealth / maxHp * 100f) : 0;

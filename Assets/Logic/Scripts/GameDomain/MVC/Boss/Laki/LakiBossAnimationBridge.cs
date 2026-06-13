@@ -15,6 +15,9 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki
     /// </summary>
     public class LakiBossAnimationBridge : MonoBehaviour
     {
+        /// <summary>Fired from <see cref="OnDiceReleaseAnimationEvent"/> on the throw-die clip.</summary>
+        public static event System.Action OnBossDiceReleaseReady;
+
         [SerializeField] private LakiBossAnimatorView _view;
         [SerializeField] private int[] _turnPerformancePool = { 2, 3 };
         [SerializeField] private bool _includeIdle1InPool;
@@ -52,6 +55,12 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki
             _throwDieSequenceFinished = false;
             _view.BeginThrowDie();
             _view.SetThrowDieLoop(true);
+        }
+
+        /// <summary>Animation Event on Laki_ThrowDie — frame where the die is released.</summary>
+        public void OnDiceReleaseAnimationEvent()
+        {
+            try { OnBossDiceReleaseReady?.Invoke(); } catch { }
         }
 
         private async void OnDiceAttackEnded()

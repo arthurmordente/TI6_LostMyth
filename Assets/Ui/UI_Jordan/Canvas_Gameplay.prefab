@@ -755,6 +755,14 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
+  _erzaSkillKeybindDisplayRoots:
+  - {fileID: 8833037591509321330}
+  - {fileID: 1635600109306666110}
+  - {fileID: 1930394331868453431}
+  - {fileID: 911031967517903330}
+  _bookSkillKeybindDisplayRoots: []
+  _naraPlayerManaShakeTarget: {fileID: 0}
+  _bookPlayerManaShakeTarget: {fileID: 0}
   _erzaSkillIconImages:
   - {fileID: 4259036094002830014}
   - {fileID: 445081732885062917}
@@ -765,6 +773,7 @@ MonoBehaviour:
   - {fileID: 1708099758393576638}
   - {fileID: 7683431006273001046}
   - {fileID: 1632195087483947725}
+  _unaffordableSkillAlpha: 0.35
   _nextTurnButton: {fileID: 6504937704079459649}
   _openPauseMenuButton: {fileID: 6016730986814255712}
   _firstTurnPassTurnHintDelaySeconds: 5

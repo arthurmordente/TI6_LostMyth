@@ -43,8 +43,15 @@ MonoBehaviour:
   Cost: 0
   Icon: {fileID: 21300000, guid: 21538d184d5839c4caa964dbf7c64e0e, type: 3}
   SkillName: Fuga Felina
-  Description: "Ap\xF3s sofrer dano o usu\xE1rio recebe X PM extras, no in\xEDcio
+  Description: "Ap\xF3s sofrer dano o usu\xE1rio recebe movimento extra, no in\xEDcio
     do pr\xF3ximo turno."
+  Lore: "Laki nunca almejou uma vit\xF3ria f\xE1cil, ela sempre espera que cada visitante
+    passe o maior tempo poss\xEDvel em sua companhia, fazendo-os gastar tempo enquanto
+    absorve suas vitalidade (8)"
+  _descriptionHighlights:
+  - Placeholder: X
+    Value: 0
+    Color: {r: 1, g: 0.45, b: 0.15, a: 1}
   _effects: []
   _passiveModifiers: []
   _passiveTurnBehavior: {fileID: 0}

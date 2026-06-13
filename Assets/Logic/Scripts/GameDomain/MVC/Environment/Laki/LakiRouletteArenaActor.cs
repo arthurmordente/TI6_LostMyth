@@ -9,6 +9,8 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 {
 	public sealed class LakiRouletteArenaActor : IEnvironmentTurnActor, ILakiRouletteArenaTurnPhases
 	{
+		const int PostEffectsPauseMs = 500;
+
 		private readonly ITurnStateReader _turnState;
 		private readonly INaraController _nara;
 		private readonly RouletteArenaService _arena;
@@ -20,7 +22,15 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 
 		public bool RemoveAfterRun => false;
 
-		public LakiRouletteArenaActor(ITurnStateReader turnState, INaraController nara, RouletteArenaService arena, Vector3? centerWorld = null, IRouletteArenaVisual visual = null, IEffectable caster = null, IEffectable bookEffectable = null, IAudioService audioService = null)
+		public LakiRouletteArenaActor(
+			ITurnStateReader turnState,
+			INaraController nara,
+			RouletteArenaService arena,
+			Vector3? centerWorld = null,
+			IRouletteArenaVisual visual = null,
+			IEffectable caster = null,
+			IEffectable bookEffectable = null,
+			IAudioService audioService = null)
 		{
 			_turnState = turnState;
 			_nara = nara;
@@ -74,17 +84,33 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 
 			if (playerTile >= 0)
 			{
-				var type = _arena.GetTileEffect(playerTile);
-				string applied = _arena.ApplyEffectToPlayer(_caster, _nara, playerTile, turn);
-				// Debug.Log($"[LakiRouletteArena][Jogador] Turn={turn} Tile={playerTile} Type={type} Effect={(applied ?? "None")}");
+				LakiTileEffectApplyDebug.LogUnitOnTile(
+					"Player", turn, playerTile, _arena.GetTileEffect(playerTile), playerPos);
+				await _arena.ApplyEffectToPlayerAsync(_caster, _nara, playerTile, turn);
+			}
+			else
+			{
+				LakiTileEffectApplyDebug.LogUnitOnTile("Player", turn, playerTile, default, playerPos);
 			}
 
 			if (bookTile >= 0 && _bookEffectable != null)
 			{
-				var btype = _arena.GetTileEffect(bookTile);
-				string bapplied = _arena.ApplyEffectToEffectable(_caster, _bookEffectable, bookTile, turn);
-				// Debug.Log($"[LakiRouletteArena][Livro] Turn={turn} Tile={bookTile} Type={btype} Effect={(bapplied ?? "None")}");
+				Vector3 bookPos = _bookEffectable.GetReferenceTransform() != null
+					? _bookEffectable.GetReferenceTransform().position
+					: Vector3.zero;
+				LakiTileEffectApplyDebug.LogUnitOnTile(
+					"Clone", turn, bookTile, _arena.GetTileEffect(bookTile), bookPos);
+				await _arena.ApplyEffectToEffectableAsync(_caster, _bookEffectable, bookTile, turn);
 			}
+			else if (_bookEffectable != null)
+			{
+				Vector3 bookPos = _bookEffectable.GetReferenceTransform() != null
+					? _bookEffectable.GetReferenceTransform().position
+					: Vector3.zero;
+				LakiTileEffectApplyDebug.LogUnitOnTile("Clone", turn, bookTile, default, bookPos);
+			}
+
+			await Task.Delay(PostEffectsPauseMs);
 		}
 
 		public async Task ExecuteRerollPhaseAsync()

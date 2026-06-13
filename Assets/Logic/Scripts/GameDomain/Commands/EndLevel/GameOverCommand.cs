@@ -33,8 +33,10 @@ public class GameOverCommand : BaseCommand, ICommandVoid {
         if (_sequenceActive) return;
         _sequenceActive = true;
         _gameInputActionsController.UnregisterGameplayInputListeners();
-        RunEndSequence();
+        RunEndSequenceFireAndForget();
     }
+
+    async void RunEndSequenceFireAndForget() => await RunEndSequence();
 
     async Awaitable RunEndSequence() {
         try {

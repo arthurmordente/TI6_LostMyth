@@ -269,5 +269,11 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
 
         public void EndFirstTurnPassTurnHint() => _gamePlayHud.EndFirstTurnPassTurnHint();
 
+        public void RefreshSkillCastAffordability(int currentActionPoints, bool bookCloneAvailable) =>
+            _gamePlayHud.RefreshSkillCastAffordability(currentActionPoints, bookCloneAvailable);
+
+        public void PlayInsufficientCastFeedback(int slotIndex, CombatSkillCastBlockReason reason) =>
+            _gamePlayHud.PlayInsufficientCastFeedback(slotIndex, reason);
+
     }
 }

@@ -73,6 +73,10 @@ btn_Skill (Button — Image = frame)
 
 Repetir nos **8** botões (4 Erza + 4 Livro) em `Assets/Ui/UI_Jordan/Canvas_Gameplay.prefab`. Duplica a estrutura de `SkillFrame.prefab` (`img_Paint` atrás do frame) ou copia sprites do `SkillVisualCatalog`. Sem `img_Paint`, o HUD actualiza ícone + frame (Image do botão); a tinta fica omitida até existir a camada.
 
+**Affordance (mana / cast único):** em runtime cada `btn_Skill` recebe `CanvasGroup` se ainda não existir. Slots sem recurso ficam com alpha `0.35` (igual ao loadout em drag inválido). Erza: mana insuficiente; Livro: cast único já gasto. Ao tentar castar sem recurso (click ou atalho), tremem o **icon_Mana** do slot e o **ícone de mana do jogador** (`ManaFlask` / frasco do Livro) — não o fill líquido nem o botão de skill inteiro.
+
+**Passivas:** `icon_Keybind` / `img_Keybind` fica oculto (`IsCastable == false`). Opcionalmente preenche **Erza/Book Skill Keybind Display Roots** no `GamePlayUiCanvasView`; senão auto-resolve por nome dentro de cada `btn_Skill`.
+
 ## 5. GameScene
 
 - No `GameInstaller` (SceneContext): adicionar `UniversalUiSceneViews` no mesmo GameObject ou filho.

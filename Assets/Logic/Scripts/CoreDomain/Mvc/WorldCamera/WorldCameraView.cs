@@ -18,32 +18,37 @@ public class WorldCameraView : MonoBehaviour
     [Header("Target Transition")]
     [SerializeField] private float _transitionDuration = 0.4f;
 
-    // An invisible proxy that Cinemachine always follows.
-    // We interpolate this proxy's position between targets — unit transforms are never touched.
-    private Transform _followProxy;
-    private Vector3 _transitionFromPos;
-    private float _transitionElapsed = float.MaxValue;
+    [Header("Pan")]
+    [SerializeField] private float _panSensitivity = 0.02f;
 
-    private void Awake()
+    Transform _followProxy;
+    Vector3 _transitionFromPos;
+    float _transitionElapsed = float.MaxValue;
+    Vector3 _panOffsetWorld;
+    float _panTweenElapsed = float.MaxValue;
+    float _panTweenDuration;
+    Vector3 _panTweenFrom;
+
+    void Awake()
     {
-        // Create a root-level proxy so its world position is never affected by parent transforms.
         var proxyGO = new GameObject("CameraFollowProxy");
         _followProxy = proxyGO.transform;
 
         if (_cineCam != null)
         {
             if (_orbital == null) _orbital = _cineCam.GetComponent<CinemachineOrbitalFollow>();
-            // Initialise proxy at the Inspector-assigned follow target's position so there
-            // is no jump on the first frame.
             if (_cineCam.Follow != null)
             {
                 _followProxy.position = _cineCam.Follow.position;
                 if (_target == null) _target = _cineCam.Follow;
             }
-            // Point Cinemachine at the proxy; we never change this again.
+
             _cineCam.Follow = _followProxy;
         }
     }
+
+    public void SetFollowBlendDuration(float durationSeconds) =>
+        _transitionDuration = Mathf.Max(0f, durationSeconds);
 
     public void SetNewTarget(Transform target)
     {
@@ -52,13 +57,11 @@ public class WorldCameraView : MonoBehaviour
 
         if (target != _target)
         {
-            // Record where the proxy currently is so the lerp starts from here.
-            _transitionFromPos = _followProxy.position;
+            _transitionFromPos = _followProxy.position - _panOffsetWorld;
             _transitionElapsed = 0f;
         }
 
         _target = target;
-        // _cineCam.Follow stays pointed at _followProxy — do not reassign it here.
     }
 
     public void UpdateCameraRotation(float mouseDeltaX, float deltaTime)
@@ -69,25 +72,79 @@ public class WorldCameraView : MonoBehaviour
         _horizontalAngle += mouseDeltaX * _velocidade * deltaTime;
         _orbital.HorizontalAxis.Value = _horizontalAngle;
 
+        UpdatePanTween(deltaTime);
+
+        Vector3 basePos = _followProxy.position - _panOffsetWorld;
         if (_target != null)
         {
             if (_transitionElapsed < _transitionDuration)
             {
                 _transitionElapsed += deltaTime;
                 float t = Mathf.Clamp01(_transitionElapsed / _transitionDuration);
-                _followProxy.position = Vector3.Lerp(_transitionFromPos, _target.position, Mathf.SmoothStep(0f, 1f, t));
+                basePos = Vector3.Lerp(_transitionFromPos, _target.position, Mathf.SmoothStep(0f, 1f, t));
             }
             else
             {
-                _followProxy.position = _target.position;
+                basePos = _target.position;
             }
         }
+
+        _followProxy.position = basePos + _panOffsetWorld;
     }
 
-    public void SetTargetNull()
+    public void ApplyPanDelta(Vector2 screenDelta)
     {
-        _target = null;
+        _panTweenElapsed = float.MaxValue;
+
+        Camera cam = ResolveOutputCamera();
+        if (cam == null) return;
+
+        Vector3 right = cam.transform.right;
+        right.y = 0f;
+        if (right.sqrMagnitude > 0.0001f) right.Normalize();
+
+        Vector3 forward = cam.transform.forward;
+        forward.y = 0f;
+        if (forward.sqrMagnitude > 0.0001f) forward.Normalize();
+
+        _panOffsetWorld -= (right * screenDelta.x + forward * screenDelta.y) * _panSensitivity;
     }
+
+    public void TweenPanOffsetToZero(float durationSeconds)
+    {
+        if (durationSeconds <= 0f)
+        {
+            _panOffsetWorld = Vector3.zero;
+            _panTweenElapsed = float.MaxValue;
+            return;
+        }
+
+        _panTweenFrom = _panOffsetWorld;
+        _panTweenDuration = durationSeconds;
+        _panTweenElapsed = 0f;
+    }
+
+    void UpdatePanTween(float deltaTime)
+    {
+        if (_panTweenElapsed >= _panTweenDuration) return;
+
+        _panTweenElapsed += deltaTime;
+        float t = Mathf.Clamp01(_panTweenElapsed / _panTweenDuration);
+        _panOffsetWorld = Vector3.Lerp(_panTweenFrom, Vector3.zero, Mathf.SmoothStep(0f, 1f, t));
+    }
+
+    Camera ResolveOutputCamera()
+    {
+        if (_cineCam != null)
+        {
+            Camera cam = _cineCam.GetComponent<Camera>();
+            if (cam != null) return cam;
+        }
+
+        return Camera.main;
+    }
+
+    public void SetTargetNull() => _target = null;
 
     public void AdjustZoom(float delta)
     {
@@ -103,6 +160,6 @@ public class WorldCameraView : MonoBehaviour
         _orbital.Orbits = settings;
 
         if (_target != null && _followProxy != null)
-            _followProxy.position = _target.position;
+            _followProxy.position = _target.position + _panOffsetWorld;
     }
 }

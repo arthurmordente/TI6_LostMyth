@@ -15,11 +15,14 @@ MonoBehaviour:
   _divinity: 2
   _skillType: 3
   _castType: 2
+  _castAnimationStyle: 0
   _projectileRange: 12
   _projectileNumberOfTargets: 1
   _projectileTravelSpeed: 12
   _projectileAimPrefab: {fileID: 8272950397043843596, guid: 8058bca71956f704e915ec3e0b22aabd, type: 3}
-  _projectilePrefab: {fileID: 4470363709726842422, guid: 05ecf4c11bd35014797b40e47735e1c1, type: 3}
+  _projectileCastPrefab: {fileID: 0}
+  _projectileEffectPrefab: {fileID: 4470363709726842422, guid: 05ecf4c11bd35014797b40e47735e1c1, type: 3}
+  _projectileImpactPrefab: {fileID: 0}
   _moveCasterToProjectileHit: 0
   _projectilePullStandoffFromTargetMeters: 0.5
   _projectileDealsDamage: 1
@@ -31,16 +34,32 @@ MonoBehaviour:
   _areaMaxRange: 8
   _areaRadius: 2
   _areaAimPrefab: {fileID: 0}
-  _areaImpactPrefab: {fileID: 0}
+  _areaCastPrefab: {fileID: 0}
+  _areaEffectPrefab: {fileID: 0}
   _selfAimPrefab: {fileID: 0}
   _selfCastPrefab: {fileID: 0}
+  _selfEffectPrefab: {fileID: 0}
   Power: 0
   Cost: 0
   Icon: {fileID: 21300000, guid: 04385632ecaf79f479ed377125261b7f, type: 3}
   SkillName: "F\xFAria da Serpente"
   Description: "Imbu\xEDdo com a magia de Boris, o usu\xE1rio fica mais forte quando
-    est\xE1 ferido. Ao ter sua vida reduzida a, pelo menos, 50% do valor total ele
-    recebe um b\xF4nus de 25% para todo seu dano causado."
+    est\xE1 ferido. Ao ter sua vida reduzida a, pelo menos, Y% do valor total ele
+    recebe um b\xF4nus de Z% para todo seu dano causado."
+  Lore: "Laki nunca almejou uma vit\xF3ria f\xE1cil, ela sempre espera que cada visitante
+    passe o maior tempo poss\xEDvel em sua companhia, fazendo-os gastar tempo enquanto
+    absorve suas vitalidade (5)"
+  _descriptionHighlights:
+  - Placeholder: Y
+    Mode: 1
+    Value: 0
+    ManualText: 50%
+    Color: {r: 0.34901962, g: 0.8509804, b: 0.4509804, a: 1}
+  - Placeholder: Z
+    Mode: 1
+    Value: 0
+    ManualText: 25%
+    Color: {r: 0.5450981, g: 0, b: 0.5450981, a: 1}
   _effects: []
   _passiveModifiers: []
   _passiveTurnBehavior: {fileID: 0}

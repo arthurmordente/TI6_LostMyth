@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 261e7489ea372be44a2ce74058f5b4c1, type: 3}
   m_Name: GrantOutgoingLifestealEffect
   m_EditorClassIdentifier: Assembly-CSharp::GrantOutgoingLifestealSkillEffectSO
-  _healPercentOfDamageDealt: 0.6
+  _healPercentOfDamageDealt: 0.5

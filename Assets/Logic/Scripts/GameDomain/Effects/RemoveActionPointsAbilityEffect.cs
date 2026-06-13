@@ -12,28 +12,23 @@ namespace Logic.Scripts.GameDomain.Effects
 
 		public override void Execute(IEffectable caster, IEffectable target)
 		{
-			Debug.Log(
-				$"[LakiTileEffect][RemoveAP] Execute amount={amount} " +
-				$"target={(target != null ? target.GetType().Name : "null")} " +
-				$"caster={(caster != null ? caster.GetType().Name : "null")}");
+			int delta = Mathf.Max(1, amount);
 
 			if (target is IEffectableAction act)
 			{
-				Debug.Log($"[LakiTileEffect][RemoveAP] SubtractActionPoints({amount}) on {act.GetType().Name}");
-				act.SubtractActionPoints(amount);
+				act.SubtractActionPoints(delta);
 				return;
 			}
 
 			if (target is INaraController nara)
 			{
-				Debug.Log($"[LakiTileEffect][RemoveAP] Target is INaraController — routing SubtractActionPoints({amount})");
-				nara.SubtractActionPoints(amount);
+				nara.SubtractActionPoints(delta);
 				return;
 			}
 
 			Debug.LogWarning(
-				$"[LakiTileEffect][RemoveAP] Ignored — target does not implement IEffectableAction/INaraController " +
-				$"(type={(target != null ? target.GetType().Name : "null")}).");
+				$"[RemoveActionPointsAbilityEffect] Ignorado — alvo não implementa IEffectableAction/INaraController " +
+				$"(tipo={(target != null ? target.GetType().Name : "null")}).");
 		}
 	}
 }

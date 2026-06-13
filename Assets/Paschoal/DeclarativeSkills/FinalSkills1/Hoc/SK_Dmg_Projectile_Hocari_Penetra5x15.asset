@@ -41,6 +41,11 @@ MonoBehaviour:
   Description: "Invoca uma l\xE2mina das asas de Hocari e arremessa para frente \xE0
     uma dist\xE2ncia mediana. A l\xE2mina \xE9 capaz de perfurar seus alvos, causando
     X dano \xE0 todos em sua trajet\xF3ria."
+  Lore: "Laki nunca almejou uma vitória fácil, ela sempre espera que cada visitante passe o maior tempo possível em sua companhia, fazendo-os gastar tempo enquanto absorve suas vitalidade (10)"
+  _descriptionHighlights:
+  - Placeholder: X
+    Value: 0
+    Color: {r: 1, g: 0.45, b: 0.15, a: 1}
   _effects:
   - {fileID: 0}
   _passiveModifiers: []

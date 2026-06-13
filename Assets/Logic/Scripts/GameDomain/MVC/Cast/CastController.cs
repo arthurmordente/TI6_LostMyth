@@ -63,6 +63,7 @@ public class CastController : ICastController {
         bool isBook = caster is IBookController;
         if (isBook && !_cheatController.InfinityCast && _cloneUseLimiter != null && !_cloneUseLimiter.CanUse()) {
             Debug.LogWarning("[CastController] TryUseAbility — Book already used its one skill this player turn.");
+            _gamePlayUiController?.PlayInsufficientCastFeedback(index, CombatSkillCastBlockReason.BookCastAlreadyUsed);
             return false;
         }
 
@@ -88,6 +89,8 @@ public class CastController : ICastController {
         if (!canAfford) {
             Debug.LogWarning($"[CastController] TryUseAbility — cannot afford ability (cost {cost}, AP {ap?.Current}).");
             selectedFlow.CancelPreparedCast(caster);
+            if (!isBook)
+                _gamePlayUiController?.PlayInsufficientCastFeedback(index, CombatSkillCastBlockReason.InsufficientMana);
             return false;
         }
 

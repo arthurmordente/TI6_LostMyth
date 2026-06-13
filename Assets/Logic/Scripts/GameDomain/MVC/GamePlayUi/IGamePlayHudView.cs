@@ -84,5 +84,11 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
         void BeginFirstTurnPassTurnHint(int fightTurnNumber);
 
         void EndFirstTurnPassTurnHint();
+
+        /// <summary>Alpha dos slots activos conforme mana (Erza) ou cast único (Livro).</summary>
+        void RefreshSkillCastAffordability(int currentActionPoints, bool bookCloneAvailable);
+
+        /// <summary>Tremor no slot + frasco de mana quando o cast é rejeitado por falta de recurso.</summary>
+        void PlayInsufficientCastFeedback(int slotIndex, CombatSkillCastBlockReason reason);
     }
 }

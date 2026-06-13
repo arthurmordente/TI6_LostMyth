@@ -93,6 +93,8 @@ namespace Logic.Scripts.GameDomain.MVC.Nara.Animation
 
         private void ToggleIdle()
         {
+            if (!_alternateIdle) return;
+
             int current = _driver.GetIdleVariant();
             int next = current <= 1 ? 2 : 1;
             _driver.SetIdleVariant(next);

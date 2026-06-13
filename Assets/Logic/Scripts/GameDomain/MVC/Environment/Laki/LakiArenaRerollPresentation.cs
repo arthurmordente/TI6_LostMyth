@@ -11,6 +11,12 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
     {
         const int ShuffleSteps = 16;
         const float FallbackShuffleDurationSeconds = 0.45f;
+        const float ShortShuffleDurationSeconds = 1f;
+        const int FullDurationRerollCount = 2;
+
+        static int _rerollPresentationCount;
+
+        public static void ResetRerollPresentationCount() => _rerollPresentationCount = 0;
 
         public static async Task RunShuffleWithTurnoSfxAsync(
             RouletteArenaService arena,
@@ -23,9 +29,17 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
         {
             if (arena == null) return;
 
-            float duration = FallbackShuffleDurationSeconds;
-            if (audio != null && audio.TryGetSfxDuration(SfxIds.Laki_Turno, out float clipLength) && clipLength > 0f)
+            _rerollPresentationCount++;
+            bool useFullDuration = _rerollPresentationCount <= FullDurationRerollCount;
+
+            float duration = useFullDuration ? FallbackShuffleDurationSeconds : ShortShuffleDurationSeconds;
+            if (useFullDuration
+                && audio != null
+                && audio.TryGetSfxDuration(SfxIds.Laki_Turno, out float clipLength)
+                && clipLength > 0f)
+            {
                 duration = clipLength;
+            }
 
             audio?.PlaySfx(SfxIds.Laki_Turno, AudioChannelType.SfxBoss);
 

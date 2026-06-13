@@ -1,4 +1,5 @@
 using UnityEngine;
+
 namespace Logic.Scripts.Core.Mvc.WorldCamera
 {
     public interface IWorldCameraController
@@ -11,5 +12,10 @@ namespace Logic.Scripts.Core.Mvc.WorldCamera
         void LockCameraRotate();
         void SetMouseDelta(Vector2 delta);
         void AdjustZoom(float delta);
+
+        void SetFollowBlendDuration(float durationSeconds);
+        void ApplyPanDelta(Vector2 screenDelta);
+        void TweenPanOffsetToZero(float durationSeconds);
+        void SetExternalInputBlock(bool blocked);
     }
 }

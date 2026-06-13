@@ -15,11 +15,14 @@ MonoBehaviour:
   _divinity: 1
   _skillType: 3
   _castType: 2
+  _castAnimationStyle: 0
   _projectileRange: 8
   _projectileNumberOfTargets: 1
   _projectileTravelSpeed: 12
   _projectileAimPrefab: {fileID: 0}
-  _projectilePrefab: {fileID: 0}
+  _projectileCastPrefab: {fileID: 0}
+  _projectileEffectPrefab: {fileID: 0}
+  _projectileImpactPrefab: {fileID: 0}
   _moveCasterToProjectileHit: 0
   _projectilePullStandoffFromTargetMeters: 1.2
   _projectileDealsDamage: 1
@@ -31,16 +34,27 @@ MonoBehaviour:
   _areaMaxRange: 8
   _areaRadius: 2
   _areaAimPrefab: {fileID: 0}
-  _areaImpactPrefab: {fileID: 0}
+  _areaCastPrefab: {fileID: 0}
+  _areaEffectPrefab: {fileID: 0}
   _selfAimPrefab: {fileID: 0}
   _selfCastPrefab: {fileID: 0}
+  _selfEffectPrefab: {fileID: 0}
   Power: 0
   Cost: 0
   Icon: {fileID: 21300000, guid: d70afe988852bbc439d6538999761d9b, type: 3}
   SkillName: "Apostar At\xE9 a Loucura!"
   Description: "Com a ben\xE7\xE3o de Laki o usu\xE1rio resolve apostar no in\xEDcio
-    de cada turno. Ele pode receber ou perder, aleatoriamente, (5%/10%/25%) como
-    multiplicador para seu dano no restante do turno."
+    de cada turno. Ele pode receber ou perder, aleatoriamente, (Z) como multiplicador
+    para seu dano no restante do turno."
+  Lore: "Laki nunca almejou uma vit\xF3ria f\xE1cil, ela sempre espera que cada visitante
+    passe o maior tempo poss\xEDvel em sua companhia, fazendo-os gastar tempo enquanto
+    absorve suas vitalidade (14)"
+  _descriptionHighlights:
+  - Placeholder: Z
+    Mode: 1
+    Value: 0
+    ManualText: 5%/10%/25%
+    Color: {r: 0.5450981, g: 0, b: 0.5450981, a: 1}
   _effects: []
   _passiveModifiers: []
   _passiveTurnBehavior: {fileID: 11400000, guid: 0621b3c125a3a0a4d9012d1873093777, type: 2}

@@ -12,6 +12,9 @@ namespace Logic.Scripts.GameDomain.Services.Skills
         bool TryGetSelectedSkill(SkillLoadoutUnitType unitType, int slotIndex, out SkillDataSO skill);
         SkillDataSO[] BuildRuntimeSlotsArray(SkillLoadoutUnitType unitType);
         bool CanAssignSkillToSlot(SkillLoadoutUnitType unitType, int slotIndex, SkillDataSO skill);
+        bool CanDropSkillOnSlot(SkillLoadoutUnitType unitType, int slotIndex, SkillDataSO skill);
+        bool TryFindEquippedSlotIndex(SkillLoadoutUnitType unitType, SkillDataSO skill, out int slotIndex);
+        bool TryAssignOrSwapSlotSkill(SkillLoadoutUnitType unitType, int targetSlotIndex, SkillDataSO skill);
         bool TryGetRequiredSkillType(SkillLoadoutUnitType unitType, int slotIndex, out SkillType requiredSkillType);
         bool SetRequiredSkillType(SkillLoadoutUnitType unitType, int slotIndex, SkillType requiredSkillType);
         bool ClearRequiredSkillType(SkillLoadoutUnitType unitType, int slotIndex);

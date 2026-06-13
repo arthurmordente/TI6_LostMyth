@@ -39,7 +39,7 @@ public class ExplorationLoadoutUIController : IExplorationLoadoutUIController
     {
         if (_view == null) return;
         _view.Init(_visualCatalog);
-        _view.RegisterCallbacks(Hide, OnCatalogFilterChanged, OnDivinityFilterChanged);
+        _view.RegisterCallbacks(Hide, OnCatalogFilterChanged, OnDivinityFilterChanged, ClearCatalogSelection);
         _view.RegisterDragCallbacks(
             OnCatalogSkillPreview,
             OnCatalogDragBegin,
@@ -69,6 +69,7 @@ public class ExplorationLoadoutUIController : IExplorationLoadoutUIController
         _modalGateActive = true;
         RefreshSlots();
         RebuildCatalog();
+        ClearCatalogSelection();
         _view.SetVisible(true);
     }
 
@@ -87,6 +88,13 @@ public class ExplorationLoadoutUIController : IExplorationLoadoutUIController
             ExplorationModalInputGate.Pop();
             _modalGateActive = false;
         }
+    }
+
+    private void ClearCatalogSelection()
+    {
+        _selectedCatalogSkill = null;
+        _view?.SetSelectedCatalogSkill(null);
+        _view?.ShowDefaultDetailPanel();
     }
 
     private void OnCatalogFilterChanged(ExplorationLoadoutSkillFilter filter)
@@ -184,8 +192,8 @@ public class ExplorationLoadoutUIController : IExplorationLoadoutUIController
         int slotCount = _loadoutService.SlotCount;
         for (int i = 0; i < slotCount; i++)
         {
-            bool canDropPlayer = _loadoutService.CanAssignSkillToSlot(SkillLoadoutUnitType.Player, i, skill);
-            bool canDropBook = _loadoutService.CanAssignSkillToSlot(SkillLoadoutUnitType.Book, i, skill);
+            bool canDropPlayer = _loadoutService.CanDropSkillOnSlot(SkillLoadoutUnitType.Player, i, skill);
+            bool canDropBook = _loadoutService.CanDropSkillOnSlot(SkillLoadoutUnitType.Book, i, skill);
             _view.SetSlotDropHighlight(SkillLoadoutUnitType.Player, i, canDropPlayer);
             _view.SetSlotDropHighlight(SkillLoadoutUnitType.Book, i, canDropBook);
         }
@@ -204,14 +212,14 @@ public class ExplorationLoadoutUIController : IExplorationLoadoutUIController
             return;
         }
 
-        if (!_loadoutService.CanAssignSkillToSlot(unitType, slotIndex, skill))
+        if (!_loadoutService.CanDropSkillOnSlot(unitType, slotIndex, skill))
         {
             PlayInvalidAssignFeedback(unitType, slotIndex);
             OnCatalogDragEnd();
             return;
         }
 
-        if (_loadoutService.SetSlotSkill(unitType, slotIndex, skill))
+        if (_loadoutService.TryAssignOrSwapSlotSkill(unitType, slotIndex, skill))
         {
             GeneralSfxFeedback.PlayMenuClick(_audioService);
             _view?.ShowSkillDetails(skill);
@@ -224,11 +232,16 @@ public class ExplorationLoadoutUIController : IExplorationLoadoutUIController
     {
         if (_loadoutService == null) return;
 
-        _selectedCatalogSkill = null;
-        _view?.SetSelectedCatalogSkill(null);
+        if (!_loadoutService.TryGetSelectedSkill(unitType, slotIndex, out SkillDataSO skill) || skill == null)
+        {
+            ClearCatalogSelection();
+            return;
+        }
 
-        if (_loadoutService.TryGetSelectedSkill(unitType, slotIndex, out SkillDataSO skill))
-            _view?.ShowSkillDetails(skill);
+        _selectedCatalogSkill = skill;
+        _view?.SetSelectedCatalogSkill(skill);
+        GeneralSfxFeedback.PlayMenuClick(_audioService);
+        _view?.ShowSkillDetails(skill);
     }
 
     private void PlayInvalidAssignFeedback(SkillLoadoutUnitType unitType, int slotIndex)

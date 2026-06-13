@@ -35,5 +35,12 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {
 
         int CurrentHealth { get; }
         int MaxHealth { get; }
+
+        /// <summary>Book clone and Nara share one HP pool (NaraData). Book passes showNaraHitFeedback=false.</summary>
+        void ApplySharedHealthDamage(int amount, bool showNaraHitFeedback);
+        void ApplySharedHealthHeal(int amount, bool showNaraHealFeedback);
+        void ApplySharedHealthPreviewDamage(int amount);
+        void ApplySharedHealthPreviewHeal(int amount);
+        void ResetSharedHealthPreview();
     }
 }

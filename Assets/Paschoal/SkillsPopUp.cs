@@ -41,7 +41,8 @@ public class SkillsPopUp : MonoBehaviour
     {
         _loadout.TryGetSelectedSkill(_loadoutUnitType, _loadoutIndex, out SkillDataSO skill);
         nome.text = skill.SkillName;
-        descricao.text = skill.Description;
+        descricao.richText = true;
+        descricao.text = SkillDescriptionRichTextFormatter.Format(skill);
         custo.text = skill.Cost.ToString();
         icon.sprite = skill.Icon;
     }
