@@ -1,5 +1,6 @@
 using Logic.Scripts.GameDomain.MVC.Ui.Shared;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 public sealed class OptionsCanvasView : UguiCanvasViewBase, IOptionsView
@@ -109,6 +110,13 @@ public sealed class OptionsCanvasView : UguiCanvasViewBase, IOptionsView
         if (_closeButton != null) _closeButton.onClick.AddListener(Hide);
         if (_videoTabButton != null) _videoTabButton.onClick.AddListener(ShowVideoPanel);
         if (_soundTabButton != null) _soundTabButton.onClick.AddListener(ShowSoundPanel);
+    }
+
+    void Update()
+    {
+        if (!IsVisible) return;
+        if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
+            Hide();
     }
 
     private void ShowVideoPanel()
