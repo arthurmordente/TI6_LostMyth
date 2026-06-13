@@ -23,5 +23,5 @@ MonoBehaviour:
     PositiveCount: 2
   - Name: "Phase 3 \u2014 player swing (~38% green)"
     NegativeCount: 13
-    NeutralCount: 3
-    PositiveCount: 0
+    NeutralCount: 2
+    PositiveCount: 1
