@@ -46,9 +46,8 @@ MonoBehaviour:
   Description: "Conjura a pe\xE7onha de Boris, que aprisiona parte da vitalidade
     do alvo, causando X dano, e ent\xE3o retorna para o usu\xE1rio, curando-o em
     Y do dano causado."
-  Lore: "Laki nunca almejou uma vit\xF3ria f\xE1cil, ela sempre espera que cada visitante
-    passe o maior tempo poss\xEDvel em sua companhia, fazendo-os gastar tempo enquanto
-    absorve suas vitalidade (4)"
+  Lore: "\u201C Um fim \xE9 apenas um come\xE7o. Consuma e regenere a si mesmo. Destrua-se!
+    Purifique-se! Morte e vida s\xE3o apenas etapas de um ciclo eterno.\u201D"
   _descriptionHighlights:
   - Placeholder: X
     Mode: 0

@@ -46,9 +46,8 @@ MonoBehaviour:
   Description: "Com a ben\xE7\xE3o de Laki o usu\xE1rio resolve apostar no in\xEDcio
     de cada turno. Ele pode receber ou perder, aleatoriamente, (Z) como multiplicador
     para seu dano no restante do turno."
-  Lore: "Laki nunca almejou uma vit\xF3ria f\xE1cil, ela sempre espera que cada visitante
-    passe o maior tempo poss\xEDvel em sua companhia, fazendo-os gastar tempo enquanto
-    absorve suas vitalidade (14)"
+  Lore: "\u201C Sinto minha pr\xF3pria divindade ser corrompida. Meu templo profanado
+    por cassinos e jogos de azar. Minhas d\xE1divas tornaram-se maldi\xE7\xF5es.\u201D"
   _descriptionHighlights:
   - Placeholder: Z
     Mode: 1

@@ -45,9 +45,9 @@ MonoBehaviour:
   SkillName: Dama da Sorte
   Description: "Demonstra sua devo\xE7\xE3o a Laki, que em retorno concede uma ben\xE7\xE3o,
     que gera um b\xF4nus de Z PA extra no in\xEDcio dos pr\xF3ximos 2 turnos."
-  Lore: "Laki nunca almejou uma vit\xF3ria f\xE1cil, ela sempre espera que cada visitante
-    passe o maior tempo poss\xEDvel em sua companhia, fazendo-os gastar tempo enquanto
-    absorve suas vitalidade (12)"
+  Lore: "\u201C Meu templo sempre foi um dos locais mais procurados por aqueles que
+    precisam de ben\xE7\xE3os, boa sorte e fortuna. Desde que tenha um esp\xEDrito
+    puro, voc\xEA conseguir\xE1 minha d\xE1diva.\u201D"
   _descriptionHighlights:
   - Placeholder: Z
     Mode: 1

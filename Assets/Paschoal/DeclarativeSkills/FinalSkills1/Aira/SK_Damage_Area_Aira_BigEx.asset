@@ -45,9 +45,9 @@ MonoBehaviour:
   SkillName: "C\xE2ntico de Lava"
   Description: " A voz de Aira ressoa ao seu redor em uma \xE1rea mediana, causando
     X dano a todos os inimigos."
-  Lore: "Laki nunca almejou uma vit\xF3ria f\xE1cil, ela sempre espera que cada visitante
-    passe o maior tempo poss\xEDvel em sua companhia, fazendo-os gastar tempo enquanto
-    absorve suas vitalidade (1)"
+  Lore: "\u201C Destrui\xE7\xE3o e chamas tomaram conta de tudo que podia ser visto,
+    chamas t\xE3o fortes que n\xE3o havia mais \xE1gua, n\xE3o havia mais vida. Agora
+    restam apenas eu, minha voz e meu \xF3dio.\u201D"
   _descriptionHighlights:
   - Placeholder: X
     Mode: 0

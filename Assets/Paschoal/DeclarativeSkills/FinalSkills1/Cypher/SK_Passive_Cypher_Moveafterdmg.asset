@@ -45,9 +45,9 @@ MonoBehaviour:
   SkillName: Fuga Felina
   Description: "Ap\xF3s sofrer dano o usu\xE1rio recebe movimento extra, no in\xEDcio
     do pr\xF3ximo turno."
-  Lore: "Laki nunca almejou uma vit\xF3ria f\xE1cil, ela sempre espera que cada visitante
-    passe o maior tempo poss\xEDvel em sua companhia, fazendo-os gastar tempo enquanto
-    absorve suas vitalidade (8)"
+  Lore: "\u201C Eu fui aquela conhecida como Mafdet. Era um s\xEDmbolo de justi\xE7a
+    r\xE1pida e certeira, o rel\xE2mpago da vanguarda e a \xFAltima luz que meus
+    inimigos viam.\u201D"
   _descriptionHighlights:
   - Placeholder: X
     Mode: 0

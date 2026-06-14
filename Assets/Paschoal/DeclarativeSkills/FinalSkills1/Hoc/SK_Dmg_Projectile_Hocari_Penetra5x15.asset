@@ -39,16 +39,15 @@ MonoBehaviour:
   _selfAimPrefab: {fileID: 0}
   _selfCastPrefab: {fileID: 0}
   _selfEffectPrefab: {fileID: 0}
-  Power: 15
+  Power: 10
   Cost: 1
   Icon: {fileID: 21300000, guid: 84fd325531c382e49a6e5ca447e45938, type: 3}
   SkillName: Pena Afiada
   Description: "Invoca uma l\xE2mina das asas de Hocari e arremessa para frente \xE0
     uma dist\xE2ncia mediana. A l\xE2mina \xE9 capaz de perfurar seus alvos, causando
     X dano \xE0 todos em sua trajet\xF3ria."
-  Lore: "Laki nunca almejou uma vit\xF3ria f\xE1cil, ela sempre espera que cada visitante
-    passe o maior tempo poss\xEDvel em sua companhia, fazendo-os gastar tempo enquanto
-    absorve suas vitalidade (10)"
+  Lore: "\u201C N\xE3o foi suficiente me condenarem ao isolamento? Precisavam marcar
+    meu corpo com o calor da ira divina? Eu queria apenas voar... \u201C"
   _descriptionHighlights:
   - Placeholder: X
     Mode: 0

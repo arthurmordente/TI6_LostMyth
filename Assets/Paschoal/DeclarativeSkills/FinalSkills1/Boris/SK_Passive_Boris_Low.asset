@@ -46,9 +46,9 @@ MonoBehaviour:
   Description: "Imbu\xEDdo com a magia de Boris, o usu\xE1rio fica mais forte quando
     est\xE1 ferido. Ao ter sua vida reduzida a, pelo menos, Y do valor total ele
     recebe um b\xF4nus de Z para todo seu dano causado."
-  Lore: "Laki nunca almejou uma vit\xF3ria f\xE1cil, ela sempre espera que cada visitante
-    passe o maior tempo poss\xEDvel em sua companhia, fazendo-os gastar tempo enquanto
-    absorve suas vitalidade (5)"
+  Lore: "\u201C Venha at\xE9 mim ... em sangue ... em carne ... em magia. A busca
+    por poder sempre termina em morte, mas n\xE3o tema, pois estamos apenas no in\xEDcio
+    de um novo ciclo\u201D"
   _descriptionHighlights:
   - Placeholder: Y
     Mode: 1

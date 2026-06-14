@@ -15,11 +15,14 @@ MonoBehaviour:
   _divinity: 0
   _skillType: 2
   _castType: 0
+  _castAnimationStyle: 0
   _projectileRange: 18
   _projectileNumberOfTargets: 1
   _projectileTravelSpeed: 12
   _projectileAimPrefab: {fileID: 5171449077471736857, guid: 5a96a15201f481c488a06861525f72e4, type: 3}
-  _projectilePrefab: {fileID: 4387164337442403446, guid: ff7fc04b0ff3f974484921871be3a56c, type: 3}
+  _projectileCastPrefab: {fileID: 0}
+  _projectileEffectPrefab: {fileID: 4387164337442403446, guid: ff7fc04b0ff3f974484921871be3a56c, type: 3}
+  _projectileImpactPrefab: {fileID: 0}
   _moveCasterToProjectileHit: 1
   _projectilePullStandoffFromTargetMeters: 2
   _projectileDealsDamage: 1
@@ -31,16 +34,21 @@ MonoBehaviour:
   _areaMaxRange: 8
   _areaRadius: 2
   _areaAimPrefab: {fileID: 0}
-  _areaImpactPrefab: {fileID: 0}
+  _areaCastPrefab: {fileID: 0}
+  _areaEffectPrefab: {fileID: 0}
   _selfAimPrefab: {fileID: 1607142820532151380, guid: 869e8460ad50e054b9b351e10c296c31, type: 3}
   _selfCastPrefab: {fileID: 1607142820532151380, guid: 6190cf774033c09479d45e3c13b935d7, type: 3}
+  _selfEffectPrefab: {fileID: 1607142820532151380, guid: 6190cf774033c09479d45e3c13b935d7, type: 3}
   Power: 0
   Cost: 2
   Icon: {fileID: 21300000, guid: d40a558aa94823b49841218f31b64373, type: 3}
   SkillName: "Impulso Magn\xE9tico"
   Description: "Dispara energia magn\xE9tica para frente \xE0 uma grande dist\xE2ncia
     e, caso colida com algo, a energia puxa o usu\xE1rio at\xE9 o ponto de colis\xE3o."
-  Lore: "Laki nunca almejou uma vitória fácil, ela sempre espera que cada visitante passe o maior tempo possível em sua companhia, fazendo-os gastar tempo enquanto absorve suas vitalidade (11)"
+  Lore: "\u201C Julgada e condenada por mero capricho divino, querem destruir meu
+    espirito mas eu serei livre! Com estas asas poderei alcan\xE7ar os c\xE9us, talvez
+    at\xE9 mesmo o Sol...\u201D"
+  _descriptionHighlights: []
   _effects: []
   _passiveModifiers: []
   _passiveTurnBehavior: {fileID: 0}

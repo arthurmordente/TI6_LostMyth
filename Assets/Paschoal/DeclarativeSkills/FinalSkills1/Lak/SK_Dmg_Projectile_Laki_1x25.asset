@@ -45,9 +45,8 @@ MonoBehaviour:
   SkillName: Dado Viciado
   Description: Arremessa o dado da sorte de Laki, que explode ao contato com um alvo,
     causando X dano.
-  Lore: "Laki nunca almejou uma vit\xF3ria f\xE1cil, ela sempre espera que cada visitante
-    passe o maior tempo poss\xEDvel em sua companhia, fazendo-os gastar tempo enquanto
-    absorve suas vitalidade (13)"
+  Lore: "\u201C N\xE3o h\xE1 como fugir ap\xF3s iniciar sua aposta, voc\xEA conhece
+    a \xFAnica regra deste jogo: a casa SEMPRE vence.\u201D"
   _descriptionHighlights:
   - Placeholder: X
     Mode: 0
