@@ -159,7 +159,7 @@ MonoBehaviour:
   - {fileID: 114986932069951040}
   - {fileID: 114963171269329408}
   m_UIPosition: {x: 0, y: 0}
-  m_UICollapsed: 1
+  m_UICollapsed: 0
   m_UISuperCollapsed: 0
   m_MasterSlot: {fileID: 114307113894698210}
   m_MasterData:
@@ -168,7 +168,7 @@ MonoBehaviour:
       m_Type:
         m_SerializableType: UnityEditor.VFX.AABox, Unity.VisualEffectGraph.Editor,
           Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-      m_SerializableObject: '{"space":0,"center":{"x":0.0,"y":0.0,"z":0.0},"size":{"x":1.0,"y":1.0,"z":1.0}}'
+      m_SerializableObject: '{"center":{"x":0.0,"y":10.0,"z":0.0},"size":{"x":5.0,"y":20.0,"z":5.0}}'
     m_Space: 0
   m_Property:
     name: bounds
@@ -5699,8 +5699,6 @@ MonoBehaviour:
   m_Nodes:
   - m_Id: 0
     linkedSlots:
-    - outputSlot: {fileID: 8926484042661614692}
-      inputSlot: {fileID: 8926484042661614541}
     - outputSlot: {fileID: 8926484042661614692}
       inputSlot: {fileID: 8926484042661614693}
     position: {x: 459, y: -464}
