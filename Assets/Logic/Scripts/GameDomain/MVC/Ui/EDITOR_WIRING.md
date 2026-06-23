@@ -5,8 +5,43 @@ Scripts já migram para uGUI. Falta ligar prefabs nas cenas (sem alterar YAML au
 ## 1. CoreScene
 
 - Remover instâncias de `Canvas_MainMenu` e `Canvas_PauseMenu` (se existirem).
-- No `CoreLoadingScreen` (ou equivalente): substituir `LoadingScreenView` + `UIDocument` por `LoadingScreenCanvasView`.
-- Arrastar referência em `CoreInstaler` → `Loading Screen View`.
+- No `CoreLoadingScreen`: componente `LoadingScreenCanvasView` + filho `TipContainer`.
+- Arrastar referências em `CoreInstaler`:
+  - **Loading Screen View** → `CoreLoadingScreen`
+  - **Loading Tip Pool** → `Assets/GameDesign/GameData/Loading/LoadingTipPool.asset`
+
+### Loading screen com dicas (transições de cena)
+
+Assets gerados automaticamente na primeira abertura do Unity (ou via menu **TI6 → Loading Screen → Create Tip Template Assets**):
+
+| Asset | Caminho |
+|-------|---------|
+| Template de dica | `Assets/GameDesign/Prefabs/Ui/LoadingTips/LoadingTip_Template.prefab` |
+| Pool de dicas | `Assets/GameDesign/GameData/Loading/LoadingTipPool.asset` |
+| Host overlay | `Assets/GameDesign/Prefabs/Ui/CoreLoadingScreen.prefab` |
+
+**Estrutura obrigatória de cada prefab de dica** (duplicar o template):
+
+```
+LoadingTip_Template          ← LoadingTipCanvasView
+└── Panel
+    ├── txt_Tip              ← texto da dica
+    └── ContinuePrompt       ← INATIVO no prefab; ativado só quando a cena está pronta
+        └── txt_Continue     ← "Pressione qualquer tecla para continuar"
+```
+
+**Workflow do artista**
+
+1. Duplicar `LoadingTip_Template.prefab` (ex. `LoadingTip_Combos.prefab`).
+2. Editar `txt_Tip` e visual do `Panel`.
+3. Manter `ContinuePrompt` desativado e não remover `LoadingTipCanvasView`.
+4. Adicionar o novo prefab à lista em `LoadingTipPool.asset`.
+
+**Comportamento**
+
+- Boot inicial (`CoreInitiator`): carrega `GameScene` em background, sem loading screen.
+- Transições Lobby ↔ Exploration ↔ Gameplay: mostra dica aleatória do pool; carrega cena em background; quando pronta, ativa `ContinuePrompt`; input só é aceite depois do prompt visível.
+
 
 ## 2. LobbyScene
 

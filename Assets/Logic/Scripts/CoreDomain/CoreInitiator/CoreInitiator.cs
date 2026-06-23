@@ -13,14 +13,16 @@ namespace Logic.Scripts.Core.CoreInitiator {
         private ISceneLoaderService _sceneLoaderService;
         private IAudioService _audioService;
         private ILoadingScreenController _loadingScreenController;
+        private LoadingTipPoolSO _loadingTipPool;
 
         [Inject]
         private void Setup(GameInputActions gameInputActions, ISceneLoaderService sceneLoaderService, IAudioService audioService,
-            ILoadingScreenController loadingScreenController) {
+            ILoadingScreenController loadingScreenController, [InjectOptional] LoadingTipPoolSO loadingTipPool = null) {
             _gameInputActions = gameInputActions;
             _sceneLoaderService = sceneLoaderService;
             _audioService = audioService;
             _loadingScreenController = loadingScreenController;
+            _loadingTipPool = loadingTipPool;
         }
 
         private void Start() {
@@ -30,11 +32,9 @@ namespace Logic.Scripts.Core.CoreInitiator {
         private async Awaitable InitEntryPoint(CancellationTokenSource cancellationTokenSource) {
             try {
                 UpdateApplicationSettings();
-                _loadingScreenController.SetupLoadingView();
-                _loadingScreenController.Show();
+                _loadingScreenController.SetupLoadingView(_loadingTipPool);
                 InitializeServices();
                 await LoadGameScene(cancellationTokenSource);
-                await _loadingScreenController.SetLoadingSlider(1, cancellationTokenSource);
             }
             catch (OperationCanceledException) {
                 LogService.Log("Operation init core was cancelled");
@@ -43,8 +43,6 @@ namespace Logic.Scripts.Core.CoreInitiator {
                 LogService.LogError(e.Message);
                 throw;
             }
-
-            _loadingScreenController.Hide();
         }
 
         private void UpdateApplicationSettings() {

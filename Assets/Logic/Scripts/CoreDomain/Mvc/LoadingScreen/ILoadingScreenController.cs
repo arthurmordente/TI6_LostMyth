@@ -5,10 +5,10 @@ namespace Logic.Scripts.Core.Mvc.LoadingScreen
 {
     public interface ILoadingScreenController
     {
-        void SetupLoadingView();
-        void Show();
+        void SetupLoadingView(LoadingTipPoolSO tipPool);
+        void ShowTransitionTip();
+        void EnableContinuePrompt();
+        Awaitable WaitForPlayerContinue(CancellationTokenSource cancellationTokenSource);
         void Hide();
-        void ResetSlider();
-        Awaitable SetLoadingSlider(float valueBetween0To1, CancellationTokenSource cancellationTokenSource);
     }
 }
