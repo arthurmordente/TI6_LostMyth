@@ -97,12 +97,22 @@ namespace Logic.Scripts.Core.Mvc.LoadingScreen
             StretchToParent(panel.GetComponent<RectTransform>());
             panel.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.75f);
 
-            var tipText = CreateText("txt_Tip", panel.transform, "Dica: explore o lobby para começar a aventura.");
-            var tipRect = tipText.GetComponent<RectTransform>();
-            tipRect.anchorMin = new Vector2(0.1f, 0.35f);
-            tipRect.anchorMax = new Vector2(0.9f, 0.85f);
-            tipRect.offsetMin = Vector2.zero;
-            tipRect.offsetMax = Vector2.zero;
+            var tipContent = CreateUiObject("TipContent", panel.transform, typeof(VerticalLayoutGroup));
+            var tipContentRect = tipContent.GetComponent<RectTransform>();
+            tipContentRect.anchorMin = new Vector2(0.08f, 0.28f);
+            tipContentRect.anchorMax = new Vector2(0.92f, 0.88f);
+            tipContentRect.offsetMin = Vector2.zero;
+            tipContentRect.offsetMax = Vector2.zero;
+            var tipLayout = tipContent.GetComponent<VerticalLayoutGroup>();
+            tipLayout.childAlignment = TextAnchor.MiddleCenter;
+            tipLayout.spacing = 16f;
+            tipLayout.padding = new RectOffset(12, 12, 12, 12);
+            tipLayout.childControlWidth = true;
+            tipLayout.childControlHeight = true;
+            tipLayout.childForceExpandWidth = true;
+            tipLayout.childForceExpandHeight = false;
+
+            var tipText = CreateText("txt_Tip", tipContent.transform, "Dica: explore o lobby para começar a aventura.");
 
             var continuePrompt = CreateUiObject("ContinuePrompt", panel.transform);
             continuePrompt.SetActive(false);

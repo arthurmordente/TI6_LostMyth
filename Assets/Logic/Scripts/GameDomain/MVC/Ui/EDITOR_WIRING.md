@@ -24,18 +24,25 @@ Assets gerados automaticamente na primeira abertura do Unity (ou via menu **TI6 
 
 ```
 LoadingTip_Template          ← LoadingTipCanvasView
-└── Panel
-    ├── txt_Tip              ← texto da dica
+└── Panel                    ← fundo / moldura; pode ter Image e filhos decorativos
+    ├── TipContent           ← content root modular (texto, imagens, layout groups…)
+    │   ├── img_Icon         ← exemplo (opcional)
+    │   └── txt_Tip          ← exemplo
     └── ContinuePrompt       ← INATIVO no prefab; ativado só quando a cena está pronta
-        └── txt_Continue     ← "Pressione qualquer tecla para continuar"
+        └── ContinueContent  ← content root do prompt (texto, ícones…)
+            └── txt_Continue
 ```
+
+`Panel`, `TipContent` e `ContinuePrompt` são **GameObjects** — podes combinar à vontade `Image`, `TextMeshProUGUI`, `Horizontal/VerticalLayoutGroup`, etc. O runtime só ativa/desativa `ContinuePrompt`.
 
 **Workflow do artista**
 
 1. Duplicar `LoadingTip_Template.prefab` (ex. `LoadingTip_Combos.prefab`).
-2. Editar `txt_Tip` e visual do `Panel`.
+2. Editar `TipContent` e/ou `Panel` (adicionar/remover imagens, textos, layouts).
 3. Manter `ContinuePrompt` desativado e não remover `LoadingTipCanvasView`.
 4. Adicionar o novo prefab à lista em `LoadingTipPool.asset`.
+
+Para atualizar o template base após mudanças no gerador: **TI6 → Loading Screen → Regenerate Tip Template** (sobrescreve o template).
 
 **Comportamento**
 

@@ -13,6 +13,4 @@ MonoBehaviour:
   m_Name: LoadingTipPool
   m_EditorClassIdentifier: Assembly-CSharp::Logic.Scripts.Core.Mvc.LoadingScreen.LoadingTipPoolSO
   _tipPrefabs:
-  - {fileID: 7292167104324829711, guid: 8aee3d2d710b99c40a0617dfb33adfc6, type: 3}
-  - {fileID: 7292167104324829711, guid: 9c95fbd1848248943bd61860045b4880, type: 3}
-  - {fileID: 7292167104324829711, guid: 411e47225b44e0f46999de6077fca691, type: 3}
+  - {fileID: 1831411468146769792, guid: 8aee3d2d710b99c40a0617dfb33adfc6, type: 3}

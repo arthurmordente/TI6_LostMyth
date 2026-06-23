@@ -23,20 +23,36 @@ namespace Logic.Scripts.Core.Mvc.LoadingScreen.Editor
             EditorApplication.delayCall += () =>
             {
                 if (!File.Exists(TipPrefabPath) || !File.Exists(PoolAssetPath))
-                    CreateAllAssets(silent: true);
+                    CreateAllAssets(silent: true, regenerateTemplate: false);
             };
         }
 
         [MenuItem("TI6/Loading Screen/Create Tip Template Assets")]
-        public static void CreateAllAssetsMenu() => CreateAllAssets(silent: false);
+        public static void CreateAllAssetsMenu() => CreateAllAssets(silent: false, regenerateTemplate: false);
 
-        public static void CreateAllAssets(bool silent)
+        [MenuItem("TI6/Loading Screen/Regenerate Tip Template")]
+        public static void RegenerateTipTemplateMenu()
+        {
+            EnsureDirectory(Path.GetDirectoryName(TipPrefabPath));
+            var tipPrefab = CreateTipTemplatePrefab();
+            var pool = AssetDatabase.LoadAssetAtPath<LoadingTipPoolSO>(PoolAssetPath);
+            if (pool != null)
+                AssignTipToPool(pool, tipPrefab);
+
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            Selection.activeObject = tipPrefab;
+            EditorGUIUtility.PingObject(tipPrefab);
+            Debug.Log("[LoadingScreen] Tip template regenerated with modular TipContent layout.");
+        }
+
+        public static void CreateAllAssets(bool silent, bool regenerateTemplate)
         {
             EnsureDirectory(Path.GetDirectoryName(TipPrefabPath));
             EnsureDirectory(Path.GetDirectoryName(PoolAssetPath));
 
             var tipPrefab = AssetDatabase.LoadAssetAtPath<LoadingTipCanvasView>(TipPrefabPath);
-            if (tipPrefab == null)
+            if (tipPrefab == null || regenerateTemplate)
                 tipPrefab = CreateTipTemplatePrefab();
 
             var pool = AssetDatabase.LoadAssetAtPath<LoadingTipPoolSO>(PoolAssetPath);
@@ -64,19 +80,36 @@ namespace Logic.Scripts.Core.Mvc.LoadingScreen.Editor
         static LoadingTipCanvasView CreateTipTemplatePrefab()
         {
             var root = new GameObject("LoadingTip_Template", typeof(RectTransform));
-            var rootRect = root.GetComponent<RectTransform>();
-            StretchFull(rootRect);
+            StretchFull(root.GetComponent<RectTransform>());
 
             var panel = CreateUiObject("Panel", root.transform, typeof(Image));
             StretchFull(panel.GetComponent<RectTransform>());
             panel.GetComponent<Image>().color = new Color(0.05f, 0.05f, 0.1f, 0.85f);
 
-            var tipText = CreateTmpText("txt_Tip", panel.transform, "Dica: use as skills do Livro para combos.");
-            var tipRect = tipText.rectTransform;
-            tipRect.anchorMin = new Vector2(0.08f, 0.35f);
-            tipRect.anchorMax = new Vector2(0.92f, 0.88f);
-            tipRect.offsetMin = Vector2.zero;
-            tipRect.offsetMax = Vector2.zero;
+            var tipContent = CreateUiObject("TipContent", panel.transform, typeof(VerticalLayoutGroup));
+            var tipContentRect = tipContent.GetComponent<RectTransform>();
+            tipContentRect.anchorMin = new Vector2(0.08f, 0.28f);
+            tipContentRect.anchorMax = new Vector2(0.92f, 0.88f);
+            tipContentRect.offsetMin = Vector2.zero;
+            tipContentRect.offsetMax = Vector2.zero;
+            var tipLayout = tipContent.GetComponent<VerticalLayoutGroup>();
+            tipLayout.childAlignment = TextAnchor.MiddleCenter;
+            tipLayout.spacing = 20f;
+            tipLayout.padding = new RectOffset(16, 16, 16, 16);
+            tipLayout.childControlWidth = true;
+            tipLayout.childControlHeight = true;
+            tipLayout.childForceExpandWidth = true;
+            tipLayout.childForceExpandHeight = false;
+
+            var icon = CreateUiObject("img_Icon", tipContent.transform, typeof(Image));
+            var iconRect = icon.GetComponent<RectTransform>();
+            iconRect.sizeDelta = new Vector2(128f, 128f);
+            var iconImage = icon.GetComponent<Image>();
+            iconImage.color = new Color(1f, 1f, 1f, 0.35f);
+            iconImage.raycastTarget = false;
+
+            var tipText = CreateTmpText("txt_Tip", tipContent.transform,
+                "Dica: use as skills do Livro para combos.");
             tipText.fontSize = 32f;
             tipText.alignment = TextAlignmentOptions.Center;
 
@@ -88,17 +121,27 @@ namespace Logic.Scripts.Core.Mvc.LoadingScreen.Editor
             continueRect.offsetMin = Vector2.zero;
             continueRect.offsetMax = Vector2.zero;
 
-            var continueText = CreateTmpText("txt_Continue", continuePrompt.transform,
+            var continueContent = CreateUiObject("ContinueContent", continuePrompt.transform, typeof(HorizontalLayoutGroup));
+            StretchFull(continueContent.GetComponent<RectTransform>());
+            var continueLayout = continueContent.GetComponent<HorizontalLayoutGroup>();
+            continueLayout.childAlignment = TextAnchor.MiddleCenter;
+            continueLayout.spacing = 12f;
+            continueLayout.childControlWidth = true;
+            continueLayout.childControlHeight = true;
+            continueLayout.childForceExpandWidth = false;
+            continueLayout.childForceExpandHeight = true;
+
+            var continueText = CreateTmpText("txt_Continue", continueContent.transform,
                 "Pressione qualquer tecla para continuar");
-            StretchFull(continueText.rectTransform);
             continueText.fontSize = 24f;
             continueText.alignment = TextAlignmentOptions.Center;
             continueText.fontStyle = FontStyles.Italic;
 
             var tipView = root.AddComponent<LoadingTipCanvasView>();
             var serializedTip = new SerializedObject(tipView);
+            serializedTip.FindProperty("_panelRoot").objectReferenceValue = panel;
+            serializedTip.FindProperty("_tipContentRoot").objectReferenceValue = tipContent;
             serializedTip.FindProperty("_continuePrompt").objectReferenceValue = continuePrompt;
-            serializedTip.FindProperty("_tipText").objectReferenceValue = tipText;
             serializedTip.ApplyModifiedPropertiesWithoutUndo();
 
             var prefab = PrefabUtility.SaveAsPrefabAsset(root, TipPrefabPath);
