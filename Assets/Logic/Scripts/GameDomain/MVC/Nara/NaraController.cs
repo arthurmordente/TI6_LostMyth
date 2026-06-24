@@ -15,10 +15,8 @@ using Logic.Scripts.GameDomain.Services.Skills;
 using Logic.Scripts.GameDomain.MVC.Nara.Animation;
 using Logic.Scripts.GameDomain.MVC.Environment.Laki;
 using Logic.Scripts.GameDomain.VisualFeedback.FloatingCombatNumbers;
-using Logic.Scripts.GameDomain.VisualFeedback;
 
-namespace Logic.Scripts.GameDomain.MVC.Nara {
-    // INaraController now extends IPlayableUnit, IEffectable and IEffectableAction,
+namespace Logic.Scripts.GameDomain.MVC.Nara {    // INaraController now extends IPlayableUnit, IEffectable and IEffectableAction,
     // so we no longer need to list those separately here.
     public class NaraController : INaraController, IFixedUpdatable, INextHitDamageShield, IOutgoingDamageModifier, IOutgoingDamageLifesteal, ISkillCasterWorldTeleport {
         private readonly IUpdateSubscriptionService _updateSubscriptionService;

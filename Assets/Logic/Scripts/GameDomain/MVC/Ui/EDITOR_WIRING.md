@@ -5,8 +5,50 @@ Scripts já migram para uGUI. Falta ligar prefabs nas cenas (sem alterar YAML au
 ## 1. CoreScene
 
 - Remover instâncias de `Canvas_MainMenu` e `Canvas_PauseMenu` (se existirem).
-- No `CoreLoadingScreen` (ou equivalente): substituir `LoadingScreenView` + `UIDocument` por `LoadingScreenCanvasView`.
-- Arrastar referência em `CoreInstaler` → `Loading Screen View`.
+- No `CoreLoadingScreen`: componente `LoadingScreenCanvasView` + filho `TipContainer`.
+- Arrastar referências em `CoreInstaler`:
+  - **Loading Screen View** → `CoreLoadingScreen`
+  - **Loading Tip Pool** → `Assets/GameDesign/GameData/Loading/LoadingTipPool.asset`
+
+### Loading screen com dicas (transições de cena)
+
+Assets gerados automaticamente na primeira abertura do Unity (ou via menu **TI6 → Loading Screen → Create Tip Template Assets**):
+
+| Asset | Caminho |
+|-------|---------|
+| Template de dica | `Assets/GameDesign/Prefabs/Ui/LoadingTips/LoadingTip_Template.prefab` |
+| Pool de dicas | `Assets/GameDesign/GameData/Loading/LoadingTipPool.asset` |
+| Host overlay | `Assets/GameDesign/Prefabs/Ui/CoreLoadingScreen.prefab` |
+
+**Estrutura obrigatória de cada prefab de dica** (duplicar o template):
+
+```
+LoadingTip_Template          ← LoadingTipCanvasView
+└── Panel                    ← fundo / moldura; pode ter Image e filhos decorativos
+    ├── TipContent           ← content root modular (texto, imagens, layout groups…)
+    │   ├── img_Icon         ← exemplo (opcional)
+    │   └── txt_Tip          ← exemplo
+    └── ContinuePrompt       ← INATIVO no prefab; ativado só quando a cena está pronta
+        └── ContinueContent  ← content root do prompt (texto, ícones…)
+            └── txt_Continue
+```
+
+`Panel`, `TipContent` e `ContinuePrompt` são **GameObjects** — podes combinar à vontade `Image`, `TextMeshProUGUI`, `Horizontal/VerticalLayoutGroup`, etc. O runtime só ativa/desativa `ContinuePrompt`.
+
+**Workflow do artista**
+
+1. Duplicar `LoadingTip_Template.prefab` (ex. `LoadingTip_Combos.prefab`).
+2. Editar `TipContent` e/ou `Panel` (adicionar/remover imagens, textos, layouts).
+3. Manter `ContinuePrompt` desativado e não remover `LoadingTipCanvasView`.
+4. Adicionar o novo prefab à lista em `LoadingTipPool.asset`.
+
+Para atualizar o template base após mudanças no gerador: **TI6 → Loading Screen → Regenerate Tip Template** (sobrescreve o template).
+
+**Comportamento**
+
+- Boot inicial (`CoreInitiator`): carrega `GameScene` em background, sem loading screen.
+- Transições Lobby ↔ Exploration ↔ Gameplay: mostra dica aleatória do pool; carrega cena em background; quando pronta, ativa `ContinuePrompt`; input só é aceite depois do prompt visível.
+
 
 ## 2. LobbyScene
 

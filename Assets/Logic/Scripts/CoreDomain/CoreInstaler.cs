@@ -17,6 +17,7 @@ public class CoreInstaler : MonoInstaller
     [SerializeField] private UpdateSubscriptionService _updateSubscriptionService;
     [SerializeField] private AudioService _audioService;
     [SerializeField] private LoadingScreenCanvasView _loadingScreenView;
+    [SerializeField] private LoadingTipPoolSO _loadingTipPool;
     [SerializeField] private UICameraView _uiCameraView;
     [SerializeField] private WorldCameraView _worldCameraView;
     
@@ -31,6 +32,8 @@ public class CoreInstaler : MonoInstaller
         Container.BindInterfacesTo<SceneInitiatorsService>().AsSingle().NonLazy();
         Container.BindInterfacesTo<CommandFactory>().AsSingle().CopyIntoAllSubContainers().NonLazy();
         Container.BindInterfacesTo<LoadingScreenController>().AsSingle().WithArguments(_loadingScreenView).NonLazy();
+        if (_loadingTipPool != null)
+            Container.Bind<LoadingTipPoolSO>().FromInstance(_loadingTipPool).AsSingle();
         Container.BindInterfacesTo<UICameraController>().AsSingle().WithArguments(_uiCameraView).NonLazy();
         Container.BindInterfacesTo<WorldCameraController>().AsSingle().WithArguments(_worldCameraView).NonLazy();
         Container.BindInterfacesTo<CameraFocusService>().AsSingle().NonLazy();

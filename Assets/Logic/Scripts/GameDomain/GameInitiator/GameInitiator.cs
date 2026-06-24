@@ -1,6 +1,5 @@
 using Logic.Scripts.Core.CoreInitiator;
 using Logic.Scripts.Core.CoreInitiator.Base;
-using Logic.Scripts.Core.Mvc.LoadingScreen;
 using Logic.Scripts.GameDomain.States;
 using Logic.Scripts.Services.InitiatorInvokerService;
 using Logic.Scripts.Services.Logger.Base;
@@ -14,7 +13,6 @@ using Logic.Scripts.Services.AudioService;
 namespace Logic.Scripts.GameDomain.GameInitiator {
     public class GameInitiator : ISceneInitiator, IGameInitiator {
         private readonly IStateMachineService _stateMachine;
-        private readonly ILoadingScreenController _loadingScreenController;
         private readonly LobbyState.Factory _lobbyStateFactory;
         private readonly ILevelsDataService _levelsDataService;
         private readonly ISceneInitiatorsService _sceneInitiatorsService;
@@ -26,14 +24,13 @@ namespace Logic.Scripts.GameDomain.GameInitiator {
 
         public SceneType SceneType => SceneType.GameScene;
 
-        public GameInitiator(IStateMachineService stateMachine, LobbyState.Factory LobbyStateFactory, ILoadingScreenController loadingScreenController,
+        public GameInitiator(IStateMachineService stateMachine, LobbyState.Factory LobbyStateFactory,
             ILevelsDataService levelsDataService, ISceneInitiatorsService sceneInitiatorsService, IAudioService audio,
             IUniversalUIController universalUIController,
             [InjectOptional] MusicClipsScriptableObject gameplayMusicClips = null,
             [InjectOptional] SfxClipsScriptableObject gameplaySfxClips = null) {
             _stateMachine = stateMachine;
             _lobbyStateFactory = LobbyStateFactory;
-            _loadingScreenController = loadingScreenController;
             _levelsDataService = levelsDataService;
             _sceneInitiatorsService = sceneInitiatorsService;
             _audio = audio;
@@ -57,7 +54,6 @@ namespace Logic.Scripts.GameDomain.GameInitiator {
             else
                 _audio.AddSfxClips(_gameplaySfxClips);
 
-            _ = _loadingScreenController.SetLoadingSlider(0.5f, cancellationTokenSource);
             await _levelsDataService.LoadLevelsData(cancellationTokenSource);
             await _stateMachine.EnterInitialGameState(_lobbyStateFactory.Create(new LobbyInitiatorEnterData()), cancellationTokenSource);
         }

@@ -466,6 +466,7 @@ MonoBehaviour:
   _updateSubscriptionService: {fileID: 1936081449}
   _audioService: {fileID: 117752094}
   _loadingScreenView: {fileID: 6270316909704306621}
+  _loadingTipPool: {fileID: 11400000, guid: 814f076c559a6c44ea5d1bf5f1d84a85, type: 2}
   _uiCameraView: {fileID: 47809280}
   _worldCameraView: {fileID: 330585551}
 --- !u!1 &330585543
@@ -1084,9 +1085,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Logic.Scripts.Core.Mvc.LoadingScreen.LoadingScreenCanvasView
   _rootPanel: {fileID: 6270316909704306620}
   _canvasGroup: {fileID: 0}
-  _fillImage: {fileID: 0}
-  _animationDuration: 0.5
-  _animationEase: 6
+  _tipContainer: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

@@ -2,7 +2,9 @@ using System;
 using System.Threading;
 using Logic.Scripts.Core.Mvc.LoadingScreen;
 using Logic.Scripts.Services.Logger.Base;
+using Logic.Scripts.Services.SceneServices;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Logic.Scripts.Services.StateMachineService {
     public class StateMachineService : IStateMachineService {
@@ -36,12 +38,14 @@ namespace Logic.Scripts.Services.StateMachineService {
                     return;
                 }
 
-                _loadingScreenController.Show();
+                _loadingScreenController.ShowTransitionTip();
                 await _currentGameState.ExitState(cancellationTokenSource);
-                _ = _loadingScreenController.SetLoadingSlider(0.5f, cancellationTokenSource);
                 _currentGameState = newState;
                 await _currentGameState.LoadState(cancellationTokenSource);
-                await _loadingScreenController.SetLoadingSlider(1, cancellationTokenSource);
+                await SceneTransitionReadinessUtility.WaitUntilSceneReady(
+                    SceneManager.GetActiveScene(), cancellationTokenSource.Token);
+                _loadingScreenController.EnableContinuePrompt();
+                await _loadingScreenController.WaitForPlayerContinue(cancellationTokenSource);
                 _loadingScreenController.Hide();
                 await _currentGameState.StartState(cancellationTokenSource);
             }
