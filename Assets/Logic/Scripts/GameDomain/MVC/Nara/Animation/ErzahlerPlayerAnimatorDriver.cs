@@ -91,7 +91,7 @@ namespace Logic.Scripts.GameDomain.MVC.Nara.Animation
             if (_animator == null || !UsesErzahlerControllers) return;
             _animator.ResetTrigger(ErzahlerAnimatorParams.ConjuringFinish);
             _animator.ResetTrigger(ErzahlerAnimatorParams.ConjuringCancel);
-            _animator.SetBool(ErzahlerAnimatorParams.ConjuringLoop, false);
+            _animator.SetBool(ErzahlerAnimatorParams.ConjuringLoop, true);
             _animator.SetTrigger(ErzahlerAnimatorParams.ConjuringPrep);
         }
 
