@@ -4,6 +4,7 @@ using Logic.Scripts.Core.Mvc.WorldCamera;
 using Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack;
 using Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Dice;
 using Logic.Scripts.GameDomain.MVC.Nara;
+using Logic.Scripts.GameDomain.Services.Camera;
 using UnityEngine;
 using Zenject;
 using BossController = Logic.Scripts.GameDomain.MVC.Boss.BossController;
@@ -67,7 +68,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki
 
         void OnDiceAttackBegan()
         {
-            Transform laki = ResolveLakiTransform(_bossController);
+            Transform laki = CombatCameraFocusTargets.ResolveBoss(_bossController);
             if (laki == null) return;
 
             _sessionActive = true;
@@ -132,18 +133,15 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki
 
         void FocusOnPlayer(float blendSeconds)
         {
-            Transform player = ResolvePlayerTransform();
+            Transform player = CombatCameraFocusTargets.ResolvePlayer(_player);
             ReleaseHandle();
             if (player != null)
                 _handle = _focus.Follow(player, CameraFocusOptions.Cinematic(blendSeconds));
-            else
-                _focus.RestoreDefaultFollow();
         }
 
         void RestorePlayerFollow()
         {
             ReleaseHandle();
-            _focus.RestoreDefaultFollow();
         }
 
         void ScheduleRestorePlayerFollow(float delaySeconds)
@@ -166,41 +164,6 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki
             if (!_handle.IsValid) return;
             _focus.Release(_handle);
             _handle = CameraFocusHandle.Invalid;
-        }
-
-        Transform ResolvePlayerTransform()
-        {
-            if (_player != null)
-            {
-                try
-                {
-                    var go = _player.NaraViewGO;
-                    if (go != null) return go.transform;
-                }
-                catch { }
-            }
-
-            var naraView = UnityEngine.Object.FindFirstObjectByType<NaraView>();
-            return naraView != null ? naraView.transform : null;
-        }
-
-        static Transform ResolveLakiTransform(BossController bossController)
-        {
-            var bridge = UnityEngine.Object.FindFirstObjectByType<LakiBossAnimationBridge>();
-            if (bridge != null) return bridge.transform;
-
-            if (bossController != null)
-            {
-                try
-                {
-                    Transform reference = bossController.GetReferenceTransform();
-                    if (reference != null) return reference;
-                }
-                catch { }
-            }
-
-            var bossView = UnityEngine.Object.FindFirstObjectByType<BossView>();
-            return bossView != null ? bossView.transform : null;
         }
     }
 }

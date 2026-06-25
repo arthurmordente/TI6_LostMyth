@@ -25,6 +25,8 @@ namespace Logic.Scripts.Turns
 
     public class TurnStateService : ITurnStateReader, ITurnQuery
     {
+        public event Action<int, TurnPhase> OnPhaseChanged;
+
         public bool Active { get; private set; }
         public int TurnNumber { get; private set; }
         public TurnPhase Phase { get; private set; }
@@ -54,6 +56,7 @@ namespace Logic.Scripts.Turns
         {
             TurnNumber = turnNumber;
             Phase = phase;
+            try { OnPhaseChanged?.Invoke(turnNumber, phase); } catch { }
         }
 
         public void UpdateActionPoints(int current, int max)

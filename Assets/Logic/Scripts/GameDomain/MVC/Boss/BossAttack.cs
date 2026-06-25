@@ -11,6 +11,8 @@ using Logic.Scripts.Services.CommandFactory;
 using Logic.Scripts.Services.AudioService;
 using Logic.Scripts.GameDomain.MVC.Boss.Visuals;
 using Logic.Scripts.GameDomain.MVC.Environment;
+using Logic.Scripts.GameDomain.MVC.Boss.AttackGizmos;
+using Logic.Scripts.GameDomain.MVC.Boss.Attacks.Feather;
 using Zenject;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -780,6 +782,233 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
             var vid = ResolveCatalogVisualId();
             if (vid == HokariBossAttackVisualId.None) return null;
             return catalog.GetTelegraph(vid, hasGrapple, hasKnock);
+        }
+
+        /// <summary>Gameplay hit areas for debug gizmos (Scene view / Gizmos).</summary>
+        public void CollectDebugGizmoShapes(System.Collections.Generic.List<BossAttackDebugShape> sink, int turnsRemaining)
+        {
+            if (sink == null) return;
+
+            Color color = turnsRemaining <= 0
+                ? new Color(1f, 0.25f, 0.15f, 0.95f)
+                : new Color(1f, 0.85f, 0.15f, 0.9f);
+            string label = $"{GetAttackTypeName()} (T-{turnsRemaining})";
+
+            Transform bossTr = GetComponentInParent<BossView>()?.transform ?? transform;
+            Vector3 bossOrigin = bossTr.position;
+            Vector3 bossForward = bossTr.forward;
+
+            switch (_attackType)
+            {
+                case AttackType.ProteanCones:
+                    AddConeFan(sink, bossOrigin, bossForward, _protean.radius, _protean.angleDeg, _protean.sides,
+                        new float[] { 0f, 90f, 180f, 270f }, color, label);
+                    break;
+                case AttackType.WingSlash:
+                {
+                    float yaw = ResolveWingSlashYawDeg(bossTr);
+                    AddConeFan(sink, bossOrigin, bossForward, _wingSlash.radius, Mathf.Abs(_wingSlash.angleDeg),
+                        _wingSlash.sides, new float[] { yaw }, color, label);
+                    break;
+                }
+                case AttackType.Circle:
+                    sink.Add(new BossAttackDebugShape
+                    {
+                        Kind = BossAttackDebugShapeKind.Disc,
+                        Origin = bossOrigin,
+                        Radius = _circle.radius,
+                        Color = color,
+                        Label = label,
+                    });
+                    break;
+                case AttackType.SkySwords:
+                {
+                    Vector3 center = ResolvePlayerWorldForDebug();
+                    sink.Add(new BossAttackDebugShape
+                    {
+                        Kind = BossAttackDebugShapeKind.Disc,
+                        Origin = center,
+                        Radius = _skySwords.radius,
+                        Color = color,
+                        Label = label,
+                    });
+                    break;
+                }
+                case AttackType.Orb:
+                    sink.Add(new BossAttackDebugShape
+                    {
+                        Kind = BossAttackDebugShapeKind.Disc,
+                        Origin = bossOrigin,
+                        Radius = _orb.initialRadius,
+                        Color = color,
+                        Label = label,
+                    });
+                    break;
+                case AttackType.FeatherLines:
+                    CollectFeatherStripShapes(sink, color, label);
+                    break;
+            }
+        }
+
+        void AddConeFan(
+            System.Collections.Generic.List<BossAttackDebugShape> sink,
+            Vector3 origin,
+            Vector3 baseForward,
+            float radius,
+            float angleDeg,
+            int sides,
+            float[] yaws,
+            Color color,
+            string label)
+        {
+            if (yaws == null || yaws.Length == 0) return;
+            Vector3 planarBase = Vector3.ProjectOnPlane(baseForward, Vector3.up);
+            if (planarBase.sqrMagnitude < 1e-8f) planarBase = Vector3.forward;
+
+            for (int i = 0; i < yaws.Length; i++)
+            {
+                Vector3 forward = Quaternion.Euler(0f, yaws[i], 0f) * planarBase;
+                sink.Add(new BossAttackDebugShape
+                {
+                    Kind = BossAttackDebugShapeKind.Cone,
+                    Origin = origin,
+                    Forward = forward,
+                    Radius = radius,
+                    AngleDeg = angleDeg,
+                    ConeSides = sides,
+                    Color = color,
+                    Label = label,
+                });
+            }
+        }
+
+        float ResolveWingSlashYawDeg(Transform bossTr)
+        {
+            float yawBase = -90f;
+            try
+            {
+                Vector3 player = ResolvePlayerWorldForDebug();
+                Vector3 toPlayer = player - bossTr.position;
+                toPlayer.y = 0f;
+                Vector3 fwd = bossTr.forward;
+                fwd.y = 0f;
+                if (toPlayer.sqrMagnitude > 1e-6f && fwd.sqrMagnitude > 1e-6f)
+                {
+                    toPlayer.Normalize();
+                    fwd.Normalize();
+                    float crossY = Vector3.Cross(fwd, toPlayer).y;
+                    yawBase = crossY >= 0f ? -90f : 90f;
+                }
+            }
+            catch { }
+
+            return yawBase;
+        }
+
+        Vector3 ResolvePlayerWorldForDebug()
+        {
+            if (_arena != null)
+                return _arena.RelativeArenaPositionToRealPosition(_arena.GetPlayerArenaPosition());
+
+            var naraView = Object.FindFirstObjectByType<Logic.Scripts.GameDomain.MVC.Nara.NaraView>(FindObjectsInactive.Exclude);
+            return naraView != null ? naraView.transform.position : transform.position;
+        }
+
+        void CollectFeatherStripShapes(System.Collections.Generic.List<BossAttackDebugShape> sink, Color color, string label)
+        {
+            Vector3 center = _arena != null ? _arena.transform.position : transform.position;
+            var p = _feather;
+            if (p.stripHalfExtent <= 0f)
+                p.stripHalfExtent = _hokariArenaTelegraphHalfExtent;
+
+            int n = Mathf.Max(1, p.featherCount);
+            float halfWidth = Mathf.Max(0.05f, p.width * 0.5f);
+            float h = Mathf.Max(0.1f, p.stripHalfExtent > 1e-4f ? p.stripHalfExtent : 10f);
+            float spreadH = h * 1.4f;
+
+            for (int i = 0; i < n; i++)
+            {
+                GetFeatherStripEndpoints(i, n, center, p.axisMode, h, spreadH, out Vector3 start, out Vector3 end);
+                sink.Add(new BossAttackDebugShape
+                {
+                    Kind = BossAttackDebugShapeKind.Strip,
+                    Origin = start,
+                    StripEnd = end,
+                    StripHalfWidth = halfWidth,
+                    Color = color,
+                    Label = label,
+                });
+            }
+        }
+
+        static void GetFeatherStripEndpoints(
+            int index,
+            int count,
+            Vector3 center,
+            FeatherAxisMode axisMode,
+            float halfExtent,
+            float spreadHalfExtent,
+            out Vector3 start,
+            out Vector3 end)
+        {
+            float y = center.y;
+            switch (axisMode)
+            {
+                case FeatherAxisMode.X:
+                {
+                    float xCenter = center.x;
+                    float z = center.z + FeatherStripSpreadCoordinate(index, count, spreadHalfExtent);
+                    start = new Vector3(xCenter - halfExtent, y, z);
+                    end = new Vector3(xCenter + halfExtent, y, z);
+                    break;
+                }
+                case FeatherAxisMode.Z:
+                {
+                    float zCenter = center.z;
+                    float x = center.x + FeatherStripSpreadCoordinate(index, count, spreadHalfExtent);
+                    start = new Vector3(x, y, zCenter - halfExtent);
+                    end = new Vector3(x, y, zCenter + halfExtent);
+                    break;
+                }
+                case FeatherAxisMode.XZ:
+                {
+                    int nAlongX = (count + 1) / 2;
+                    int nAlongZ = count / 2;
+                    if ((index % 2) == 0)
+                    {
+                        int k = index / 2;
+                        float xCenter = center.x;
+                        float z = center.z + FeatherStripSpreadCoordinate(k, nAlongX, spreadHalfExtent);
+                        start = new Vector3(xCenter - halfExtent, y, z);
+                        end = new Vector3(xCenter + halfExtent, y, z);
+                    }
+                    else
+                    {
+                        int k = (index - 1) / 2;
+                        float zCenter = center.z;
+                        float x = center.x + FeatherStripSpreadCoordinate(k, nAlongZ, spreadHalfExtent);
+                        start = new Vector3(x, y, zCenter - halfExtent);
+                        end = new Vector3(x, y, zCenter + halfExtent);
+                    }
+                    break;
+                }
+                default:
+                {
+                    Vector3 d = new Vector3(1f, 0f, 1f).normalized;
+                    float along = FeatherStripSpreadCoordinate(index, count, spreadHalfExtent);
+                    Vector3 mid = new Vector3(center.x, y, center.z) + d * along;
+                    start = mid - d * halfExtent;
+                    end = mid + d * halfExtent;
+                    break;
+                }
+            }
+        }
+
+        static float FeatherStripSpreadCoordinate(int index, int count, float halfExtent)
+        {
+            if (count <= 1) return 0f;
+            float t = index / (float)(count - 1);
+            return Mathf.Lerp(-halfExtent, halfExtent, t);
         }
     }
 }

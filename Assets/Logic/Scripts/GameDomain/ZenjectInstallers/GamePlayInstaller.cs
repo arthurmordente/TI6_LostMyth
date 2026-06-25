@@ -13,11 +13,13 @@ using Logic.Scripts.GameDomain.MVC.Cast.NewSkillSystem;
 using Logic.Scripts.GameDomain.MVC.Ui;
 using Logic.Scripts.GameDomain.MVC.Echo;
 using Logic.Scripts.GameDomain.MVC.Boss.Laki;
+using Logic.Scripts.GameDomain.Services.Camera;
 using Logic.Scripts.GameDomain.MVC.Boss.Telegraph;
 using Logic.Scripts.GameDomain.MVC.Boss.Visuals;
 using Logic.Scripts.GameDomain.MVC.Nara.Animation;
 using Logic.Scripts.GameDomain.Services.Skills;
 using Logic.Scripts.GameDomain.Services.Skills.Debug;
+using Logic.Scripts.GameDomain.MVC.Boss.AttackGizmos;
 using Logic.Scripts.GameDomain.VisualFeedback.FloatingCombatNumbers;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -81,6 +83,8 @@ public class GamePlayInstaller : MonoInstaller {
         Container.BindInterfacesTo<FloatingCombatNumberBootstrap>().AsSingle().NonLazy();
         Container.BindInterfacesTo<SkillAttackHitboxDebugService>().AsSingle().NonLazy();
         Container.BindInterfacesTo<SkillAttackHitboxDebugBootstrap>().AsSingle().NonLazy();
+        Container.BindInterfacesTo<BossAttackDebugGizmoService>().AsSingle().NonLazy();
+        Container.BindInterfacesTo<BossAttackDebugGizmoBootstrap>().AsSingle().NonLazy();
 
         // Book system
         Container.Bind<IActiveUnitService>().To<ActiveUnitService>().AsSingle();
@@ -151,6 +155,7 @@ public class GamePlayInstaller : MonoInstaller {
             .WithArguments(_bookViewPrefab, bookCfg, resolvedBookSkills).NonLazy();
 
         Container.BindInterfacesTo<LakiDiceCameraBridge>().AsSingle().NonLazy();
+        Container.BindInterfacesTo<CombatTurnCameraFocusBridge>().AsSingle().NonLazy();
     }
 
     private IPauseMenuView ResolvePauseMenuView() {

@@ -193,5 +193,14 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Hokari
             Object.Destroy(_activeTelegraph);
             _activeTelegraph = null;
         }
+
+        /// <summary>Read-only preview for debug gizmos (committed hazard not yet consumed).</summary>
+        public static bool TryGetActiveCommit(out int executionTurn, out Vector3 pullAnchorWorld, out float telegraphDiscRadius)
+        {
+            executionTurn = _committedExecutionTurn;
+            pullAnchorWorld = _committedPullAnchor;
+            telegraphDiscRadius = _committedDefinition != null ? _committedDefinition.TelegraphDiscRadius : 0f;
+            return _committedDefinition != null && _committedExecutionTurn >= 1;
+        }
     }
 }

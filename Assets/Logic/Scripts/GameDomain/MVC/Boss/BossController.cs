@@ -14,6 +14,8 @@ using Assets.Logic.Scripts.GameDomain.Effects;
 using Logic.Scripts.GameDomain.VisualFeedback;
 using Logic.Scripts.GameDomain.VisualFeedback.FloatingCombatNumbers;
 using Logic.Scripts.GameDomain.MVC.Environment.Laki;
+using Logic.Scripts.GameDomain.MVC.Boss.AttackGizmos;
+using Logic.Scripts.GameDomain.Services.Camera;
 using Logic.Scripts.Turns;
 
 namespace Logic.Scripts.GameDomain.MVC.Boss {
@@ -64,6 +66,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
         private bool _hasPlannedMoveDirection = false;
         private struct PendingCast { public BossAttack Attack; public int TurnsRemaining; }
         private System.Collections.Generic.List<PendingCast> _pendingCasts;
+        private readonly IBossAttackDebugGizmoService _attackDebugGizmos;
         private bool _registeredFixed;
 
         public bool IsCasting => _isCasting;
@@ -76,7 +79,8 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
             IBossAbilityController bossAbilityController, IGamePlayUiController gamePlayUiController,
             string fightBossHudDisplayName,
             [InjectOptional] TurnStateService turnStateService = null,
-            [InjectOptional] IActiveUnitService activeUnitService = null) {
+            [InjectOptional] IActiveUnitService activeUnitService = null,
+            [InjectOptional] IBossAttackDebugGizmoService attackDebugGizmos = null) {
             _updateSubscriptionService = updateSubscriptionService;
             _audioService = audioService;
             _commandFactory = commandFactory;
@@ -88,6 +92,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
             _gamePlayUiController = gamePlayUiController;
             _turnStateService = turnStateService;
             _activeUnitService = activeUnitService;
+            _attackDebugGizmos = attackDebugGizmos;
             _fightBossHudDisplayName = fightBossHudDisplayName ?? string.Empty;
             _bossData = new BossData(_bossConfiguration);
         }
@@ -326,6 +331,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
                 // Debug.Log("[Laki] Boss prepare skipped — dice just resolved (shield window opened).");
                 return;
             }
+            CombatBossTurnCameraRuntime.NotifyBossPrepareStarted();
             await TryNotifyLakiBossPrepareTurnAsync();
             await PrepareNextActionAsync();
         }
@@ -384,6 +390,8 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
 		private async Task ExecutePreparedActionAsync() {
 			if (_pendingCasts == null || _pendingCasts.Count == 0) return;
 
+            SyncAttackDebugGizmos();
+
             // Fechar loop do ataque anterior e tocar finish no início do novo turno
             if (_loopingAttackAnimId >= 0 && _bossView != null) {
                 _bossView.SetAttackLoop(false);
@@ -402,7 +410,12 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
 					}
 				}
 			}
-			if (toExecute.Count == 0) return;
+			if (toExecute.Count == 0) {
+                SyncAttackDebugGizmos();
+                return;
+            }
+
+            CombatBossTurnCameraRuntime.NotifyBossAttackResolveStarted();
 
             var lakiBridge = _bossView != null
                 ? _bossView.GetComponentInChildren<Laki.LakiBossAnimationBridge>(true)
@@ -447,7 +460,11 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
             else if (_bossView != null) {
                 await _bossView.WaitUntilIdleAsync(2f);
             }
-		}
+
+            CombatBossTurnCameraRuntime.NotifyBossAttackResolveCompleted();
+
+            SyncAttackDebugGizmos();
+        }
 
         static bool HasNonDiceAttack(System.Collections.Generic.List<BossAttack> attacks) {
             for (int i = 0; i < attacks.Count; i++) {
@@ -653,6 +670,8 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
                 Debug.LogWarning($"[Laki] TurnPattern[{indexInPattern}] produced no attacks (dice skipped or invalid indices).");
             }
 
+            SyncAttackDebugGizmos();
+
             // Escolhe o PRIMEIRO da lista como primário para animar (independente do winner)
             if (created.Count > 0 && _bossView != null) {
                 BossAttack primary = created[0].atk;
@@ -807,7 +826,26 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
                 pc.TurnsRemaining -= 1;
                 _pendingCasts[i] = pc;
             }
+            SyncAttackDebugGizmos();
             // Do not execute here; execution happens in ExecutePreparedActionAsync
+        }
+
+        void SyncAttackDebugGizmos()
+        {
+            if (_attackDebugGizmos == null) return;
+
+            var shapes = new System.Collections.Generic.List<BossAttackDebugShape>(8);
+            if (_pendingCasts != null)
+            {
+                for (int i = 0; i < _pendingCasts.Count; i++)
+                {
+                    PendingCast pc = _pendingCasts[i];
+                    if (pc.Attack == null || pc.TurnsRemaining > 1) continue;
+                    pc.Attack.CollectDebugGizmoShapes(shapes, pc.TurnsRemaining);
+                }
+            }
+
+            _attackDebugGizmos.SetActiveShapes(shapes);
         }
 
         private GameObject FindPlayerTarget() {
