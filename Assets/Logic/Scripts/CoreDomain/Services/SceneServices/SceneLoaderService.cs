@@ -1,4 +1,5 @@
 using Logic.Scripts.Core.CoreInitiator.Base;
+using Logic.Scripts.Services.AudioService;
 using Logic.Scripts.Services.InitiatorInvokerService;
 using Logic.Scripts.Services.Logger.Base;
 using Logic.Scripts.Services.SceneServices;
@@ -10,12 +11,14 @@ using Zenject;
 
 public class SceneLoaderService : ISceneLoaderService {
     private readonly ISceneInitiatorsService _sceneInitiatorsService;
+    private readonly IAudioService _audioService;
     private readonly HashSet<string> _loadedScenes = new();
     private readonly HashSet<string> _loadingScenes = new();
 
     [Inject]
-    public SceneLoaderService(ISceneInitiatorsService sceneInitiatorsService) {
+    public SceneLoaderService(ISceneInitiatorsService sceneInitiatorsService, IAudioService audioService) {
         _sceneInitiatorsService = sceneInitiatorsService;
+        _audioService = audioService;
     }
 
     public void InitEntryPoint() {
@@ -88,6 +91,7 @@ public class SceneLoaderService : ISceneLoaderService {
     private async Awaitable LoadScene(string sceneName, CancellationTokenSource cancellationTokenSource) {
         _loadingScenes.Add(sceneName);
         cancellationTokenSource.Token.ThrowIfCancellationRequested();
+        _audioService?.StopAllAudio();
         await SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
         cancellationTokenSource.Token.ThrowIfCancellationRequested();
         _loadingScenes.Remove(sceneName);
@@ -96,6 +100,7 @@ public class SceneLoaderService : ISceneLoaderService {
     }
 
     private async Awaitable UnloadScene(SceneType sceneType, CancellationTokenSource cancellationTokenSource) {
+        _audioService?.StopAllAudio();
         await _sceneInitiatorsService.InvokeInitiatorExitPoint(sceneType, cancellationTokenSource);
         string sceneName = sceneType.ToString();
         await SceneManager.UnloadSceneAsync(sceneName);

@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Logic.Scripts.GameDomain.MVC.Cast.NewSkillSystem {
     internal static class NewSkillSystemSkillAimWorld {
-        /// <summary>World point on the arena floor under the cursor (Ground layer only).</summary>
+        /// <summary>World point on Ground or LakiAimGround under the cursor.</summary>
         public static bool TryMouseHitPoint(out Vector3 worldPoint) =>
             NewSkillSystemGroundAreaPhysics.TryRaycastMouseToGround(out worldPoint);
 

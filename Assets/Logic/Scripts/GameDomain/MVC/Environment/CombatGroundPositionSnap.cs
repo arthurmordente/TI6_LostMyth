@@ -1,9 +1,10 @@
+using Logic.Scripts.GameDomain.MVC.Environment.Laki;
 using UnityEngine;
 
 namespace Logic.Scripts.GameDomain.MVC.Environment
 {
     /// <summary>
-    /// Snaps world XZ to the combat floor (Ground layer) so turn-mode gravity freeze does not leave units floating.
+    /// Snaps world XZ to the combat floor (Ground / LakiAimGround) so turn-mode gravity freeze does not leave units floating.
     /// </summary>
     public static class CombatGroundPositionSnap
     {
@@ -13,6 +14,9 @@ namespace Logic.Scripts.GameDomain.MVC.Environment
 
         static int? _groundLayer;
         static LayerMask? _groundMask;
+        static int? _lakiAimGroundLayer;
+        static LayerMask? _lakiAimGroundMask;
+        static LayerMask? _aimGroundMask;
 
         static LayerMask GroundMask
         {
@@ -25,7 +29,30 @@ namespace Logic.Scripts.GameDomain.MVC.Environment
             }
         }
 
-        public static bool HasGroundLayer => GroundMask.value != 0;
+        static LayerMask LakiAimGroundMask
+        {
+            get
+            {
+                if (_lakiAimGroundMask.HasValue) return _lakiAimGroundMask.Value;
+                _lakiAimGroundLayer ??= LayerMask.NameToLayer(LakiArenaAimGroundRuntime.LayerName);
+                _lakiAimGroundMask = _lakiAimGroundLayer >= 0
+                    ? (LayerMask)(1 << _lakiAimGroundLayer.Value)
+                    : default;
+                return _lakiAimGroundMask.Value;
+            }
+        }
+
+        static LayerMask AimGroundMask
+        {
+            get
+            {
+                if (_aimGroundMask.HasValue) return _aimGroundMask.Value;
+                _aimGroundMask = GroundMask | LakiAimGroundMask;
+                return _aimGroundMask.Value;
+            }
+        }
+
+        public static bool HasGroundLayer => AimGroundMask.value != 0;
 
         /// <summary>Raycasts down at <paramref name="worldPosition"/> XZ and returns a point on the floor.</summary>
         public static Vector3 SnapWorldPosition(Vector3 worldPosition, float footYOffset = 0f)
@@ -41,7 +68,7 @@ namespace Logic.Scripts.GameDomain.MVC.Environment
             Vector3 origin = worldPosition + Vector3.up * RaycastOriginLift;
 
             if (HasGroundLayer
-                && Physics.Raycast(origin, Vector3.down, out RaycastHit groundHit, RaycastMaxDistance, GroundMask,
+                && Physics.Raycast(origin, Vector3.down, out RaycastHit groundHit, RaycastMaxDistance, AimGroundMask,
                     QueryTriggerInteraction.Ignore))
             {
                 snapped = groundHit.point;
