@@ -10,8 +10,6 @@ public sealed class CreditsCanvasView : UguiCanvasViewBase, ICreditsView
 
     [SerializeField] private Button _closeButton;
     [SerializeField] private TMP_Text _bodyText;
-    [TextArea(8, 24)]
-    [SerializeField] private string _bodyOverride;
 
     protected override void Awake()
     {
@@ -19,15 +17,7 @@ public sealed class CreditsCanvasView : UguiCanvasViewBase, ICreditsView
         base.Awake();
     }
 
-    public void InitEntryPoint()
-    {
-        if (_bodyText != null)
-        {
-            var text = string.IsNullOrWhiteSpace(_bodyOverride) ? CreditsContent.Body : _bodyOverride;
-            _bodyText.text = text;
-        }
-        HideUntilOpened();
-    }
+    public void InitEntryPoint() => HideUntilOpened();
 
     private void EnsureRuntimeUiIfNeeded()
     {

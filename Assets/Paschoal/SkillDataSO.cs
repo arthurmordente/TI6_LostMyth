@@ -54,13 +54,14 @@ public abstract class SkillDataSO : ScriptableObject
     [Header("Area (when Cast Type is Area)")]
     [SerializeField] private float _areaMinRange;
     [SerializeField] private float _areaMaxRange = 8f;
+    [Tooltip("Hitbox radius in meters (OverlapSphere). Visual size is calibrated on each area VFX prefab via SkillAreaVfxBinding.")]
     [SerializeField] private float _areaRadius = 2f;
-    [Tooltip("Mira: AoE aim ring/sphere at cast point.")]
+    [Tooltip("Mira: AoE aim ring at cast point; prefab scale 1; add SkillAreaVfxBinding on the prefab for visual calibration.")]
     [SerializeField, FormerlySerializedAs("AoEPrefab")]
     private GameObject _areaAimPrefab;
     [Tooltip("Cast: one-shot VFX on the caster when the skill is confirmed.")]
     [SerializeField] private GameObject _areaCastPrefab;
-    [Tooltip("Effect: AoE burst at the committed target point.")]
+    [Tooltip("Effect: AoE burst at the committed target point; prefab scale 1; add SkillAreaVfxBinding on the prefab for visual calibration.")]
     [SerializeField, FormerlySerializedAs("_areaImpactPrefab")]
     private GameObject _areaEffectPrefab;
 

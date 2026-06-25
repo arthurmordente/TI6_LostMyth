@@ -172,6 +172,7 @@ MonoBehaviour:
   nome: {fileID: 5721225960999960990}
   descricao: {fileID: 3264349049524897670}
   custo: {fileID: 6004495943315092936}
+  tipo: {fileID: 6789064749382217519}
 --- !u!1 &1652920280062609997
 GameObject:
   m_ObjectHideFlags: 0

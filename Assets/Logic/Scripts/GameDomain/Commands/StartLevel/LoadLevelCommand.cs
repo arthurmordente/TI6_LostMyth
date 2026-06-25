@@ -50,10 +50,12 @@ public class LoadLevelCommand : BaseCommand, ICommandAsync {
         NaraMovementController movementController = _naraMovementControllerFactory.Create(_levelsDataService.GetLevelData(levelNumber).ControllerType, _levelsDataService.GetLevelData(levelNumber).NaraLevelConfiguration);
         _naraController.CreateNara(movementController);
         _naraController.Freeeze();
-        // Set initial player position from LevelTurnData -> BossConfiguration (before InitEntryPointGamePlay runs)
-        var levelTurnData = _levelsDataService.GetLevelData(levelNumber) as LevelTurnData;
-        if (levelTurnData != null && levelTurnData.BossConfiguration != null) {
+        // Set initial player position before movement init (turn fights vs exploration lobby).
+        var levelData = _levelsDataService.GetLevelData(levelNumber);
+        if (levelData is LevelTurnData levelTurnData && levelTurnData.BossConfiguration != null) {
             _naraController.SetPosition(levelTurnData.BossConfiguration.InitialPlayerPosition);
+        } else if (levelData is LevelExplorationData explorationData) {
+            _naraController.SetPosition(explorationData.InitialPlayerPosition);
         }
     }
     private async Awaitable CreateLevelScenario(int levelNumber, CancellationTokenSource cancellationTokenSource) {

@@ -17,6 +17,7 @@ using Logic.Scripts.GameDomain.MVC.Boss.Telegraph;
 using Logic.Scripts.GameDomain.MVC.Boss.Visuals;
 using Logic.Scripts.GameDomain.MVC.Nara.Animation;
 using Logic.Scripts.GameDomain.Services.Skills;
+using Logic.Scripts.GameDomain.Services.Skills.Debug;
 using Logic.Scripts.GameDomain.VisualFeedback.FloatingCombatNumbers;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -78,6 +79,8 @@ public class GamePlayInstaller : MonoInstaller {
         Container.BindInterfacesTo<FloatingCombatNumberService>().AsSingle()
             .WithArguments(_floatingCombatNumberPrefab);
         Container.BindInterfacesTo<FloatingCombatNumberBootstrap>().AsSingle().NonLazy();
+        Container.BindInterfacesTo<SkillAttackHitboxDebugService>().AsSingle().NonLazy();
+        Container.BindInterfacesTo<SkillAttackHitboxDebugBootstrap>().AsSingle().NonLazy();
 
         // Book system
         Container.Bind<IActiveUnitService>().To<ActiveUnitService>().AsSingle();

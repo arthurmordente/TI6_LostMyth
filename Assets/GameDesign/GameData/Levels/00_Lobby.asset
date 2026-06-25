@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6104e1cf1596384bbf046e4752cf101, type: 3}
   m_Name: 00_Lobby
   m_EditorClassIdentifier: 
+  <InitialPlayerPosition>k__BackingField: {x: -10, y: 0, z: 0}
   levelAddress: LobbyLibrary
   naraLevelConfiguration: {fileID: 11400000, guid: 142620ce9bd96e047b9ce17a72cbfe7a, type: 2}
   controller:

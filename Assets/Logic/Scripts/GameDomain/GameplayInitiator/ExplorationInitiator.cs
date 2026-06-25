@@ -1,7 +1,6 @@
 using Logic.Scripts.Core.CoreInitiator.Base;
 using Logic.Scripts.Services.CommandFactory;
 using Logic.Scripts.Services.InitiatorInvokerService;
-using Logic.Scripts.Utils;
 using System.Threading;
 using UnityEngine;
 
@@ -27,9 +26,9 @@ public class ExplorationInitiator : ISceneInitiator, IExplorationInitiator {
         await _commandFactory.CreateCommandAsync<StartExplorationStateCommand>().SetEnterData(enterData).Execute(cancellationTokenSource);
     }
 
-    public Awaitable InitExitPoint(CancellationTokenSource cancellationTokenSource) {
+    public async Awaitable InitExitPoint(CancellationTokenSource cancellationTokenSource) {
+        await Awaitable.NextFrameAsync(cancellationTokenSource.Token);
         _sceneInitiatorsService.UnregisterInitiator(this);
         _commandFactory.CreateCommandVoid<ExitExplorationStateCommand>().Execute();
-        return AwaitableUtils.CompletedTask;
     }
 }

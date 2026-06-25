@@ -61,6 +61,7 @@ namespace Logic.Scripts.GameDomain.Services.Skills
                 ImpactPrefab = skill.ProjectileImpactPrefab
             };
             motor.Initialize(args);
+            SkillAttackHitboxColliderGizmoFollower.Attach(instance, skill.Divinity);
         }
     }
 
