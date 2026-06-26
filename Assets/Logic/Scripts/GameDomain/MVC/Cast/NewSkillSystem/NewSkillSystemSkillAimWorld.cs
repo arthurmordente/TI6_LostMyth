@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Logic.Scripts.GameDomain.MVC.Cast.NewSkillSystem {
     internal static class NewSkillSystemSkillAimWorld {
-        /// <summary>World point on the arena floor under the cursor (Ground layer only).</summary>
+        /// <summary>World point on Ground or LakiAimGround under the cursor.</summary>
         public static bool TryMouseHitPoint(out Vector3 worldPoint) =>
             NewSkillSystemGroundAreaPhysics.TryRaycastMouseToGround(out worldPoint);
 
@@ -136,6 +136,17 @@ namespace Logic.Scripts.GameDomain.MVC.Cast.NewSkillSystem {
 
             float yScale = Mathf.Max(0.01f, rangeMeters) / Mathf.Max(0.01f, ProjectileAimPrefabBaseLengthAlongLocalY);
             aimRoot.localScale = new Vector3(1f, yScale, 1f);
+        }
+
+        /// <summary>Area aim VFX anchor on the ground; prefab authored flat on XZ at scale 1.</summary>
+        public static void ApplyAreaGroundDiscAimTransform(
+            Transform aimRoot,
+            Vector3 worldCenter,
+            Quaternion worldRotation)
+        {
+            if (aimRoot == null) return;
+            aimRoot.position = worldCenter;
+            aimRoot.rotation = worldRotation;
         }
     }
 }

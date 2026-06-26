@@ -1,13 +1,17 @@
+using System;
 using System.Collections.Generic;
 using Logic.Scripts.GameDomain.MVC.Environment.Laki;
 using Logic.Scripts.GameDomain.MVC.Shared;
 using Logic.Scripts.GameDomain.Services.Skills;
+using Logic.Scripts.GameDomain.Services.Skills.Debug;
 using Logic.Scripts.Services.UpdateService;
 using UnityEngine;
+using Zenject;
 
 namespace Logic.Scripts.GameDomain.MVC.Cast.NewSkillSystem {
-    public class NewSkillSystemSkillTargetingPreviewService : INewSkillSystemSkillTargetingPreviewService, IUpdatable {
+    public class NewSkillSystemSkillTargetingPreviewService : INewSkillSystemSkillTargetingPreviewService, IUpdatable, IDisposable {
         private readonly IUpdateSubscriptionService _subscriptionService;
+        private readonly ISkillAttackHitboxDebugService _hitboxDebug;
 
         private bool _registered;
         private SkillDataSO _skill;
@@ -17,8 +21,11 @@ namespace Logic.Scripts.GameDomain.MVC.Cast.NewSkillSystem {
 
         private readonly HashSet<IEffectable> _highlighted = new HashSet<IEffectable>();
 
-        public NewSkillSystemSkillTargetingPreviewService(IUpdateSubscriptionService subscriptionService) {
+        public NewSkillSystemSkillTargetingPreviewService(
+            IUpdateSubscriptionService subscriptionService,
+            [InjectOptional] ISkillAttackHitboxDebugService hitboxDebug = null) {
             _subscriptionService = subscriptionService;
+            _hitboxDebug = hitboxDebug;
         }
 
         public void Begin(SkillDataSO skill, IPlayableUnit playableCaster, Transform aimVisualRoot = null) {
@@ -37,6 +44,7 @@ namespace Logic.Scripts.GameDomain.MVC.Cast.NewSkillSystem {
         public void End() {
             if (!_registered) return;
             ClearAllHighlights();
+            _hitboxDebug?.ClearPreview();
             _subscriptionService.UnregisterUpdatable(this);
             _registered = false;
             _skill = null;
@@ -45,8 +53,14 @@ namespace Logic.Scripts.GameDomain.MVC.Cast.NewSkillSystem {
             _aimVisualRoot = null;
         }
 
+        public void Dispose() => End();
+
         public void ManagedUpdate() {
             if (!_registered || _skill == null || _playable == null) return;
+            if (!HasValidCasterViews()) {
+                End();
+                return;
+            }
 
             var next = new HashSet<IEffectable>();
             switch (NewSkillSystemSkillTargetingRules.GetHighlightKind(_skill)) {
@@ -69,19 +83,17 @@ namespace Logic.Scripts.GameDomain.MVC.Cast.NewSkillSystem {
                     break;
             }
             ApplyHighlightDiff(next);
+            _hitboxDebug?.SetPreview(_skill, _playable, _caster);
         }
 
         private void SyncAoeVisualRoot() {
             if (_aimVisualRoot == null || _skill == null || _playable == null) return;
             Vector3 aim = NewSkillSystemSkillAimWorld.GetAreaClampedAimPoint(_playable, _caster, _skill);
-            Vector3 origin = NewSkillSystemSkillAimWorld.GetSkillOrigin(_playable, _caster);
-            Vector3 direction = aim - origin;
-            _aimVisualRoot.position = aim;
-            if (direction.sqrMagnitude > 0.0001f)
-                _aimVisualRoot.rotation = Quaternion.LookRotation(direction.normalized, Vector3.up);
-            float baseR = 1f;
-            float uniform = _skill.GetAreaRadius() / Mathf.Max(0.01f, baseR);
-            _aimVisualRoot.localScale = new Vector3(uniform, uniform, uniform);
+            NewSkillSystemSkillAimWorld.ApplyAreaGroundDiscAimTransform(
+                _aimVisualRoot,
+                aim,
+                Quaternion.identity);
+            SkillAreaVfxUtility.ApplyGameplayRadius(_aimVisualRoot.gameObject, _skill.GetAreaRadius());
         }
 
         private void SyncDirectedAimVisualRoot() {
@@ -172,6 +184,12 @@ namespace Logic.Scripts.GameDomain.MVC.Cast.NewSkillSystem {
             foreach (var e in _highlighted)
                 e?.SetSkillTargetingHighlight(false);
             _highlighted.Clear();
+        }
+
+        private bool HasValidCasterViews() {
+            if (_playable != null && _playable.UnitViewGO == null) return false;
+            if (_caster is MonoBehaviour casterBehaviour && casterBehaviour == null) return false;
+            return true;
         }
     }
 }

@@ -4,12 +4,15 @@ using Logic.Scripts.GameDomain.MVC.Environment;
 using Logic.Scripts.GameDomain.MVC.Nara;
 using Logic.Scripts.GameDomain.MVC.Shared;
 using Logic.Scripts.GameDomain.Services.Skills;
+using Logic.Scripts.GameDomain.Services.Skills.Debug;
 using UnityEngine;
+using Zenject;
 
 public class NewSkillSystemDefaultSkillCastFlow : ISkillCastFlow
 {
     private readonly INewSkillSystemSkillTargetingPreviewService _targetingPreview;
     private readonly INaraController _nara;
+    private readonly ISkillAttackHitboxDebugService _hitboxDebug;
 
     private SkillDataSO _currentSkill;
     private GameObject _currentPreview;
@@ -17,10 +20,12 @@ public class NewSkillSystemDefaultSkillCastFlow : ISkillCastFlow
 
     public NewSkillSystemDefaultSkillCastFlow(
         INewSkillSystemSkillTargetingPreviewService targetingPreview,
-        INaraController nara)
+        INaraController nara,
+        [InjectOptional] ISkillAttackHitboxDebugService hitboxDebug = null)
     {
         _targetingPreview = targetingPreview;
         _nara = nara;
+        _hitboxDebug = hitboxDebug;
     }
 
     public bool CanHandleCaster(IPlayableUnit caster)
@@ -55,7 +60,11 @@ public class NewSkillSystemDefaultSkillCastFlow : ISkillCastFlow
         _currentSkill = skill;
         Transform spawn = caster.UnitSkillSpotTransform != null ? caster.UnitSkillSpotTransform : caster.UnitViewGO.transform;
         if (_currentSkill.CastType == SkillCastType.Area && _currentSkill.AreaAimPrefab != null)
-            _currentPreview = Object.Instantiate(_currentSkill.AreaAimPrefab, spawn.position, spawn.rotation);
+        {
+            Vector3 aim = NewSkillSystemSkillAimWorld.GetAreaClampedAimPoint(caster, caster, _currentSkill);
+            _currentPreview = Object.Instantiate(_currentSkill.AreaAimPrefab, aim, Quaternion.identity);
+            SkillAreaVfxUtility.ApplyGameplayRadius(_currentPreview, _currentSkill.GetAreaRadius());
+        }
         else if (_currentSkill.CastType == SkillCastType.Projectile && _currentSkill.ProjectileAimPrefab != null)
         {
             Vector3 castOrigin = NewSkillSystemSkillAimWorld.GetSkillOrigin(caster, caster);
@@ -100,7 +109,11 @@ public class NewSkillSystemDefaultSkillCastFlow : ISkillCastFlow
         SpawnCastVfx(caster);
 
         if (_currentSkill.CastType == SkillCastType.Area && _fallbackTarget != null)
-            SkillCastVfxUtility.TrySpawnTransiient(_currentSkill.AreaEffectPrefab, _fallbackTarget.position, Quaternion.identity);
+            SkillCastVfxUtility.TrySpawnTransiient(
+                _currentSkill.AreaEffectPrefab,
+                _fallbackTarget.position,
+                _fallbackTarget.rotation,
+                _currentSkill.GetAreaRadius());
         else if (_currentSkill.CastType == SkillCastType.Self)
         {
             Vector3 p = SkillCastPresentationTarget.GetSelfCastFootWorld(caster, _currentSkill);
@@ -110,6 +123,7 @@ public class NewSkillSystemDefaultSkillCastFlow : ISkillCastFlow
         }
 
         Transform castTarget = _fallbackTarget != null ? _fallbackTarget : _currentPreview != null ? _currentPreview.transform : caster.UnitViewGO.transform;
+        _hitboxDebug?.RecordCommitted(_currentSkill, caster, caster, castTarget);
         _currentSkill.OnCast(caster, castTarget);
         CleanupPreviewAndTarget();
         _currentSkill = null;
@@ -192,6 +206,12 @@ public class NewSkillSystemDefaultSkillCastFlow : ISkillCastFlow
             CombatArenaBoundaryRuntime.TryClampVoluntaryWorldPosition(ref point);
 
         _fallbackTarget.position = point;
+        if (_currentSkill != null && _currentSkill.CastType == SkillCastType.Area)
+        {
+            _fallbackTarget.rotation = Quaternion.identity;
+            return;
+        }
+
         Vector3 direction = point - origin;
         direction.y = 0f;
         if (direction.sqrMagnitude < 1e-6f) {

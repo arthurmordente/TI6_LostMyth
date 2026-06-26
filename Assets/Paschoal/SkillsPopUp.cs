@@ -1,6 +1,7 @@
 using UnityEngine;
 using Zenject;
 using Logic.Scripts.GameDomain.Services.Skills;
+using Logic.Scripts.GameDomain.MVC.ExplorationLoadout;
 using TMPro;
 using UnityEngine.UI;
 
@@ -8,7 +9,7 @@ public class SkillsPopUp : MonoBehaviour
 {
     public INewSkillSystemSkillLoadoutService _loadout;
     public Image icon;
-    public TextMeshProUGUI nome,descricao,custo;
+    public TextMeshProUGUI nome, descricao, custo, tipo;
     SkillLoadoutUnitType _loadoutUnitType;
     int _loadoutIndex;
 
@@ -39,11 +40,15 @@ public class SkillsPopUp : MonoBehaviour
     }
     public void MudaTexto()
     {
-        _loadout.TryGetSelectedSkill(_loadoutUnitType, _loadoutIndex, out SkillDataSO skill);
+        if (!_loadout.TryGetSelectedSkill(_loadoutUnitType, _loadoutIndex, out SkillDataSO skill) || skill == null)
+            return;
+
         nome.text = skill.SkillName;
         descricao.richText = true;
         descricao.text = SkillDescriptionRichTextFormatter.Format(skill);
         custo.text = skill.Cost.ToString();
         icon.sprite = skill.Icon;
+        if (tipo != null)
+            tipo.text = ExplorationLoadoutSkillFilterUtil.DisplayLabel(skill.SkillType);
     }
 }

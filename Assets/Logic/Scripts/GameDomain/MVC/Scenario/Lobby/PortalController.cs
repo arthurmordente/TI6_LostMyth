@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class PortalController : IPortalController {
     private readonly ICommandFactory _commandFactory;
+    private bool _portalTransitionInProgress;
 
     public PortalController(ICommandFactory commandFactory) {
         _commandFactory = commandFactory;
@@ -19,7 +20,14 @@ public class PortalController : IPortalController {
         }
     }
     private async void OnTriggerEnterAction(PortalView portal, int levelToEnter) {
-        CancellationTokenSource cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(Application.exitCancellationToken);
-        await _commandFactory.CreateCommandAsync<PortalEnterCommand>().SetData(new PortalEnterCommandData(levelToEnter)).Execute(cancellationTokenSource);
+        if (_portalTransitionInProgress) return;
+        _portalTransitionInProgress = true;
+        try {
+            CancellationTokenSource cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(Application.exitCancellationToken);
+            await _commandFactory.CreateCommandAsync<PortalEnterCommand>().SetData(new PortalEnterCommandData(levelToEnter)).Execute(cancellationTokenSource);
+        }
+        finally {
+            _portalTransitionInProgress = false;
+        }
     }
 }

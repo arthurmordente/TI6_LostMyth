@@ -15,6 +15,14 @@ namespace Logic.Scripts.GameDomain.Services.Skills
             ConfigureSpawnedInstance(instance, persistInScene: false, destroyAfterSeconds: 0f);
         }
 
+        public static void TrySpawnTransiient(GameObject prefab, Vector3 position, Quaternion rotation, float areaRadiusMeters)
+        {
+            if (prefab == null) return;
+            var instance = Object.Instantiate(prefab, position, rotation);
+            SkillAreaVfxUtility.ApplyGameplayRadius(instance, areaRadiusMeters);
+            ConfigureSpawnedInstance(instance, persistInScene: false, destroyAfterSeconds: 0f);
+        }
+
         public static void ConfigureSpawnedInstance(GameObject instance, bool persistInScene, float destroyAfterSeconds)
         {
             if (instance == null || persistInScene) return;

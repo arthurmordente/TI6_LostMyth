@@ -2,7 +2,6 @@ using Logic.Scripts.Core.CoreInitiator.Base;
 using Logic.Scripts.GameDomain.Commands;
 using Logic.Scripts.Services.CommandFactory;
 using Logic.Scripts.Services.InitiatorInvokerService;
-using Logic.Scripts.Utils;
 using System.Threading;
 using UnityEngine;
 
@@ -29,10 +28,10 @@ namespace Logic.Scripts.GameDomain.GameplayInitiator {
             await _commandFactory.CreateCommandAsync<StartGamePlayStateCommand>().SetEnterData(enterData).Execute(cancellationTokenSource);
         }
 
-        public Awaitable InitExitPoint(CancellationTokenSource cancellationTokenSource) {
+        public async Awaitable InitExitPoint(CancellationTokenSource cancellationTokenSource) {
+            await Awaitable.NextFrameAsync(cancellationTokenSource.Token);
             _sceneInitiatorsService.UnregisterInitiator(this);
             _commandFactory.CreateCommandVoid<ExitGamePlayStateCommand>().Execute();
-            return AwaitableUtils.CompletedTask;
         }
     }
 }

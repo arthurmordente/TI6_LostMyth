@@ -490,9 +490,19 @@ namespace Logic.Scripts.Services.AudioService {
 
             _segmentLoopChannel = null;
 
-            foreach (var pair in _audioSourceByChannel)
+            foreach (var pair in _audioSourceByChannel) {
 
-                pair.Value.Stop();
+                var source = pair.Value;
+
+                if (source == null) continue;
+
+                source.Stop();
+
+                source.loop = false;
+
+                source.clip = null;
+
+            }
 
         }
 

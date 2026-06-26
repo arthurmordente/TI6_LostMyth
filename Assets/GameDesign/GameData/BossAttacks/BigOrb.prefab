@@ -58,6 +58,8 @@ MonoBehaviour:
   _feather:
     featherCount: 8
     axisMode: 1
+    stripHalfExtent: 0
+    telegraphStripUniformScale: 1
     width: 2
     margin: 5
     forceBase: 2
@@ -65,7 +67,7 @@ MonoBehaviour:
     forcePerDebuff: 0.5
   _featherIsPull: 0
   _orb:
-    prefab: {fileID: 7907701672196164393, guid: b324b43eefa456c489d7c248777254b6, type: 3}
+    prefab: {fileID: 9177232086461464903, guid: 019cfd77006b8534eb62e5ab3c1c4b37, type: 3}
     moveStepMeters: 9
     growStepMeters: 6
     initialRadius: 6
@@ -76,6 +78,26 @@ MonoBehaviour:
     radius: 4.5
     ringWidth: 0.3
   _skySwordsIsPull: 0
+  _circle:
+    radius: 3.5
+    ringWidth: 0.25
+  _hokariAttackVisualId: 0
+  _hokariArenaTelegraphHalfExtent: 10
+  _minigameRoundPrefab: {fileID: 0}
+  _diceAttackDisplayName: DiceAttack
+  _diceAttackPlayerDiePrefab: {fileID: 0}
+  _diceAttackBossDiePrefab: {fileID: 0}
+  _diceAttackDieHp: 99
+  _diceAttackPlayerRollInputConsumeDelay: 0.1
+  _diceAttackPlayerRollPromptPrefab: {fileID: 0}
+  _lakiArenaTileTelegraph:
+    AreaCount: 2
+    PlayerTileChance: 0.35
+    TelegraphDiscRadius: 1
+    HitRadiusMetersAtUnitDisc: 3
+    HitRadiusPadding: 0
+    TelegraphSpawnInterval: 0.35
+    StrikeResolveInterval: 0.25
   references:
     version: 2
     RefIds: []

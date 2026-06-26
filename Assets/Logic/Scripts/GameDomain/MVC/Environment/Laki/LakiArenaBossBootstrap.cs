@@ -106,6 +106,8 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 				ArcDeg = _arcDeg,
 			});
 
+			LakiArenaAimGroundRuntime.Ensure(_centerWorld, _innerRadius, _centerWorld.y);
+
 			var arenaService = new RouletteArenaService(_innerRadius, _outerRadius, _radialSplit01, _arcStartDeg, _arcDeg);
 			arenaService.SetLayoutConfigs(
 				_positiveTileConfig, _neutralTileConfig, _negativeTileConfig,
@@ -218,6 +220,7 @@ namespace Logic.Scripts.GameDomain.MVC.Environment.Laki
 			LakiArenaRerollPresentation.ResetRerollPresentationCount();
 			LakiArenaTurnFlowBridge.Unregister();
 			CombatArenaBoundaryRuntime.Clear();
+			LakiArenaAimGroundRuntime.Clear();
 			LakiArenaTileDispositionRuntime.Clear();
 			LakiRouletteArenaFightIntro.CancelWait();
 			LakiBossShieldRuntime.Reset();

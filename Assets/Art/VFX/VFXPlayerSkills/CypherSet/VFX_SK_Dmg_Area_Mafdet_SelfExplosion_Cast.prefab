@@ -50,7 +50,10 @@ VisualEffect:
   m_ResourceVersion: 1
   m_PropertySheet:
     m_Float:
-      m_Array: []
+      m_Array:
+      - m_Value: 10
+        m_Name: Area
+        m_Overridden: 1
     m_Vector2f:
       m_Array: []
     m_Vector3f:
@@ -116,7 +119,7 @@ VFXRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 5001
   m_MaskInteraction: 0
 --- !u!1 &5397782417188293735
 GameObject:
@@ -127,8 +130,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2407501092842972851}
+  - component: {fileID: 8481138924855814098}
   m_Layer: 0
-  m_Name: VFX_SK_Dmg_Area_Mafdet_SelfExplosion_CAST
+  m_Name: VFX_SK_Dmg_Area_Mafdet_SelfExplosion_Cast
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -150,3 +154,18 @@ Transform:
   - {fileID: 5495612638653481238}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8481138924855814098
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5397782417188293735}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 92059175a818dc541a26cf808f132fde, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Logic.Scripts.GameDomain.Services.Skills.SkillAreaVfxBinding
+  _propertyName: Area
+  _metersPerPropertyUnit: 0.4
+  _includeChildren: 1

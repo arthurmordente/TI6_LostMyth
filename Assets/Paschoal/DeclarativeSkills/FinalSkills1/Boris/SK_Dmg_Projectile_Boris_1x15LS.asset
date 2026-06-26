@@ -22,7 +22,7 @@ MonoBehaviour:
   _projectileAimPrefab: {fileID: 5171449077471736857, guid: 5a96a15201f481c488a06861525f72e4, type: 3}
   _projectileCastPrefab: {fileID: 0}
   _projectileEffectPrefab: {fileID: 4030026229297006641, guid: 91d1e965a2e14c14e93a209bb61f6d3c, type: 3}
-  _projectileImpactPrefab: {fileID: 0}
+  _projectileImpactPrefab: {fileID: 1228892389544122655, guid: 39f473531c9393e4e9335595049e1eba, type: 3}
   _moveCasterToProjectileHit: 0
   _projectilePullStandoffFromTargetMeters: 1.2
   _projectileDealsDamage: 1

@@ -1,4 +1,5 @@
 using Logic.Scripts.GameDomain.GameInputActions;
+using Logic.Scripts.GameDomain.MVC.Cast.NewSkillSystem;
 using Logic.Scripts.Services.CommandFactory;
 
 public class ExitGamePlayStateCommand : BaseCommand, ICommandVoid {
@@ -12,6 +13,8 @@ public class ExitGamePlayStateCommand : BaseCommand, ICommandVoid {
     }
 
     public void Execute() {
+        _diContainer.TryResolve<ICastController>()?.CancelAbilityUse();
+        _diContainer.TryResolve<INewSkillSystemSkillTargetingPreviewService>()?.End();
         _commandFactory.CreateCommandVoid<DisposeLevelCommand>().SetShouldReleaseAssetsFromMemory(true).Execute();
         _gameInputActionsController.UnregisterGameplayInputListeners();
         _gameInputActionsController.DisableGameplayInputs();

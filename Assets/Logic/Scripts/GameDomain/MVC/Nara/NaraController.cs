@@ -247,6 +247,7 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {    // INaraController now extends 
         #region IEffectable Methods
 
         public Transform GetReferenceTransform() {
+            if (_naraView == null) return null;
             return _naraView.transform;
         }
 

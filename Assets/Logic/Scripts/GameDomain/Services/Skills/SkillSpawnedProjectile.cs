@@ -167,8 +167,22 @@ namespace Logic.Scripts.GameDomain.Services.Skills
 
             Transform reference = hit.GetReferenceTransform();
             Vector3 position = reference != null ? reference.position : transform.position;
-            Quaternion rotation = reference != null ? reference.rotation : Quaternion.identity;
+            Quaternion rotation = ComputeImpactRotationFacingCaster(position);
             SkillCastVfxUtility.TrySpawnTransiient(_impactPrefab, position, rotation);
+        }
+
+        Quaternion ComputeImpactRotationFacingCaster(Vector3 impactPosition)
+        {
+            Vector3 towardCaster = -transform.forward;
+            towardCaster.y = 0f;
+            if (towardCaster.sqrMagnitude < 1e-6f && _caster != null && _caster.GetReferenceTransform() != null)
+            {
+                towardCaster = _caster.GetReferenceTransform().position - impactPosition;
+                towardCaster.y = 0f;
+            }
+            if (towardCaster.sqrMagnitude < 1e-6f)
+                towardCaster = Vector3.forward;
+            return Quaternion.LookRotation(towardCaster.normalized, Vector3.up) * Quaternion.Euler(0f, 180f, 0f);
         }
 
         void RegisterHitDestroy()
