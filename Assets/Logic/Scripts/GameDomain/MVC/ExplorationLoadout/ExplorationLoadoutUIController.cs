@@ -260,6 +260,8 @@ public class ExplorationLoadoutUIController : IExplorationLoadoutUIController
 
         _view?.SetLeftCatalogTab(_leftTab);
 
+        _rightTab = LoadoutRightDetailTab.Overview;
+
         ApplyRightPanelForCurrentTabs();
 
         GeneralSfxFeedback.PlayMenuClick(_audioService);
@@ -285,6 +287,8 @@ public class ExplorationLoadoutUIController : IExplorationLoadoutUIController
         _view?.ClearAllSlotDropHighlights();
 
         _view?.SetLeftCatalogTab(_leftTab);
+
+        _rightTab = LoadoutRightDetailTab.Overview;
 
         ApplyRightPanelForCurrentTabs();
 
