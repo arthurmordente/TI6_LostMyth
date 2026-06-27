@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 75a07b88fb4b4714c9ad18880b1bb44f, type: 3}
   m_Name: InfiniteMana
   m_EditorClassIdentifier: Assembly-CSharp::Logic.Scripts.GameDomain.Services.Cheats.CheatDataSO
-  CheatId: 1
+  CheatId: infinite_mana
   DisplayName: Mana Infinita!
   Icon: {fileID: 21300000, guid: 0feb04ab30c1c364d9e9c8fd32fc8213, type: 3}
   Description: "<color=#7A0DB9><b>Concede 10 de mana</b></color> ao usar uma habilidade.

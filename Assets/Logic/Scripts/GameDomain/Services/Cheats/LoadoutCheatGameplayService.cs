@@ -22,44 +22,70 @@ namespace Logic.Scripts.GameDomain.Services.Cheats
         {
             if (_cheatService == null) return;
 
-            if (_cheatService.IsEnabled(InfiniteManaId))
-                actionPoints?.Add(GetEffectAmount(InfiniteManaId, LoadoutCheatEffectType.ManaRegen, 10));
+            if (IsManaCheatEnabled())
+                actionPoints?.Add(GetManaRegenAmount());
 
-            if (_cheatService.IsEnabled(InfiniteHealthId))
-                naraController?.ApplySharedHealthHeal(GetEffectAmount(InfiniteHealthId, LoadoutCheatEffectType.HealthRegen, 100), showNaraHealFeedback: true);
+            if (IsHealthCheatEnabled())
+                naraController?.ApplySharedHealthHeal(GetHealthRegenAmount(), showNaraHealFeedback: true);
         }
 
         public void ApplyBookTurnStart(IBookController bookController)
         {
-            if (_cheatService == null || !_cheatService.IsEnabled(InfiniteManaId) || bookController == null) return;
-            bookController.GetActionPoints()?.Add(GetEffectAmount(InfiniteManaId, LoadoutCheatEffectType.ManaRegen, 10));
+            if (_cheatService == null || !IsManaCheatEnabled() || bookController == null) return;
+            bookController.GetActionPoints()?.Add(GetManaRegenAmount());
         }
 
         public void ApplyAfterCast(IPlayableUnit caster)
         {
-            if (_cheatService == null || !_cheatService.IsEnabled(InfiniteManaId) || caster == null) return;
-
-            int amount = GetEffectAmount(InfiniteManaId, LoadoutCheatEffectType.ManaRegen, 10);
-            caster.GetActionPoints()?.Add(amount);
+            if (_cheatService == null || !IsManaCheatEnabled() || caster == null) return;
+            caster.GetActionPoints()?.Add(GetManaRegenAmount());
         }
 
         public void ApplyAfterDamage(INaraController naraController)
         {
-            if (_cheatService == null || !_cheatService.IsEnabled(InfiniteHealthId)) return;
-            naraController?.ApplySharedHealthHeal(
-                GetEffectAmount(InfiniteHealthId, LoadoutCheatEffectType.HealthRegen, 100),
-                showNaraHealFeedback: true);
+            if (_cheatService == null || !IsHealthCheatEnabled()) return;
+            naraController?.ApplySharedHealthHeal(GetHealthRegenAmount(), showNaraHealFeedback: true);
         }
 
-        int GetEffectAmount(string cheatId, LoadoutCheatEffectType expectedType, int fallback)
+        bool IsManaCheatEnabled() => IsCheatEnabledForEffect(LoadoutCheatEffectType.ManaRegen, InfiniteManaId);
+
+        bool IsHealthCheatEnabled() => IsCheatEnabledForEffect(LoadoutCheatEffectType.HealthRegen, InfiniteHealthId);
+
+        bool IsCheatEnabledForEffect(LoadoutCheatEffectType effectType, string legacyId)
+        {
+            if (_cheatService == null) return false;
+
+            if (_cheatService.IsEnabled(legacyId))
+                return true;
+
+            if (_cheatService.AllCheats == null) return false;
+
+            for (int i = 0; i < _cheatService.AllCheats.Count; i++)
+            {
+                CheatDataSO cheat = _cheatService.AllCheats[i];
+                if (cheat == null || cheat.EffectType != effectType) continue;
+                if (_cheatService.IsEnabled(cheat))
+                    return true;
+            }
+
+            return false;
+        }
+
+        int GetManaRegenAmount() => GetEffectAmount(InfiniteManaId, LoadoutCheatEffectType.ManaRegen, 10);
+
+        int GetHealthRegenAmount() => GetEffectAmount(InfiniteHealthId, LoadoutCheatEffectType.HealthRegen, 100);
+
+        int GetEffectAmount(string legacyId, LoadoutCheatEffectType expectedType, int fallback)
         {
             if (_cheatService?.AllCheats == null) return fallback;
 
             for (int i = 0; i < _cheatService.AllCheats.Count; i++)
             {
                 CheatDataSO cheat = _cheatService.AllCheats[i];
-                if (cheat == null || !string.Equals(cheat.CheatId, cheatId, System.StringComparison.OrdinalIgnoreCase))
-                    continue;
+                if (cheat == null) continue;
+
+                bool idMatch = string.Equals(cheat.CheatId, legacyId, System.StringComparison.OrdinalIgnoreCase);
+                if (!idMatch && cheat.EffectType != expectedType) continue;
                 if (cheat.EffectType != expectedType) return fallback;
                 return Mathf.Max(0, cheat.EffectAmount);
             }

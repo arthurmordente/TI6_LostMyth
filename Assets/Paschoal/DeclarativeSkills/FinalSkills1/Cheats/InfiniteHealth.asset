@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 75a07b88fb4b4714c9ad18880b1bb44f, type: 3}
   m_Name: InfiniteHealth
   m_EditorClassIdentifier: Assembly-CSharp::Logic.Scripts.GameDomain.Services.Cheats.CheatDataSO
-  CheatId: 0
+  CheatId: infinite_health
   DisplayName: Vida Infinita!
   Icon: {fileID: 21300000, guid: f18e00465fefb7b4db6702a67ed18621, type: 3}
   Description: <color=#1BB90D><b>Cura 100 de vida</b></color> ao receber dano. IMORTAL
