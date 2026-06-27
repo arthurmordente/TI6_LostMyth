@@ -294,7 +294,7 @@ namespace Logic.Scripts.GameDomain.MVC.Book.Divide
 
             _audioService?.PlaySfx(SfxIds.Ezra_Clone, AudioChannelType.SfxCombat);
 
-            _bookController.GainTurnActionPoints();
+            _bookController.GainTurnActionPoints(showFloatingFeedback: false);
 
             _activeUnitService.RegisterBook(_bookController);
 

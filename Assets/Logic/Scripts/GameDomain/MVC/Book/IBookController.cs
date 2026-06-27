@@ -17,6 +17,6 @@ namespace Logic.Scripts.GameDomain.MVC.Book
         void ResetMovementArea();
 
         /// <summary>Gain AP for a new player turn.</summary>
-        void GainTurnActionPoints();
+        void GainTurnActionPoints(bool showFloatingFeedback = true);
     }
 }

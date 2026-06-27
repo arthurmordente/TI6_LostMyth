@@ -167,11 +167,12 @@ namespace Logic.Scripts.GameDomain.MVC.Book
             _movementController?.ResetMovementArea();
         }
 
-        public void GainTurnActionPoints()
+        public void GainTurnActionPoints(bool showFloatingFeedback = true)
         {
             int before = _bookActionPoints?.Current ?? 0;
             _bookActionPoints?.GainTurnPoints();
-            ManaGainFloatingFeedback.TryShow(GetReferenceTransform(), (_bookActionPoints?.Current ?? 0) - before);
+            if (showFloatingFeedback)
+                ManaGainFloatingFeedback.TryShow(GetReferenceTransform(), (_bookActionPoints?.Current ?? 0) - before);
         }
 
         #region IPlayableUnit
