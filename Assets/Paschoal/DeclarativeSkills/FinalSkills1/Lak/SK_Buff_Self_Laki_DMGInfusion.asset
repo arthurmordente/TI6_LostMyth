@@ -43,8 +43,9 @@ MonoBehaviour:
   Cost: 1
   Icon: {fileID: 21300000, guid: 636254e507f1d2346a16a9436cf1aade, type: 3}
   SkillName: Dama da Sorte
-  Description: "Demonstra sua devo\xE7\xE3o a Laki, que em retorno concede uma ben\xE7\xE3o,
-    que gera um b\xF4nus de Z PA extra no in\xEDcio dos pr\xF3ximos 2 turnos."
+  Description: "Demonstra sua devo\xE7\xE3o a Laki e recebe uma ben\xE7\xE3o que
+    concede <color=#7A0DB9><b>Z de Mana extra</b></color> no in\xEDcio dos pr\xF3ximos
+    2 turnos."
   Lore: "\u201C Meu templo sempre foi um dos locais mais procurados por aqueles que
     precisam de ben\xE7\xE3os, boa sorte e fortuna. Desde que tenha um esp\xEDrito
     puro, voc\xEA conseguir\xE1 minha d\xE1diva.\u201D"

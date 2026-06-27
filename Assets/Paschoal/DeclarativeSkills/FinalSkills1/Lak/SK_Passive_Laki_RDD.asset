@@ -44,8 +44,9 @@ MonoBehaviour:
   Icon: {fileID: 21300000, guid: d70afe988852bbc439d6538999761d9b, type: 3}
   SkillName: "Apostar At\xE9 a Loucura!"
   Description: "Com a ben\xE7\xE3o de Laki o usu\xE1rio resolve apostar no in\xEDcio
-    de cada turno. Ele pode receber ou perder, aleatoriamente, (Z) como multiplicador
-    para seu dano no restante do turno."
+    de cada turno. Ele pode <color=#7A0DB9><b>receber ou perder</b></color>, aleatoriamente,  
+    <color=#7A0DB9><b>(Z) como multiplicador para seu dano</b></color> no restante
+    do turno."
   Lore: "\u201C Sinto minha pr\xF3pria divindade ser corrompida. Meu templo profanado
     por cassinos e jogos de azar. Minhas d\xE1divas tornaram-se maldi\xE7\xF5es.\u201D"
   _descriptionHighlights:
