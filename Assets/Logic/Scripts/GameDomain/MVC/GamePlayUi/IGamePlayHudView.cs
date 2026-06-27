@@ -62,6 +62,9 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
         /// <summary>Livro: custo universal (um uso/turno) — fill 0–1 animado + texto opcional 0/1.</summary>
         void SetBookCloneActionAvailable(bool available);
 
+        /// <summary>Keybind C: Divide quando sem clone; Join+Switch quando clone ativo. Ofusca Divide/Join se C já usado no turno.</summary>
+        void SetDivideKeybindState(bool cloneDeployed, bool divideCommandAvailable);
+
         /// <summary>Ícones dos 4 slots no HUD (sprites vindos de <c>SkillDataSO.Icon</c>). Null limpa o slot.</summary>
         void SetSkillHudIcons(Sprite erza0, Sprite erza1, Sprite erza2, Sprite erza3, Sprite book0, Sprite book1, Sprite book2, Sprite book3);
 

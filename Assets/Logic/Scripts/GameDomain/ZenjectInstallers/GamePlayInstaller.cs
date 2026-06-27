@@ -51,6 +51,9 @@ public class GamePlayInstaller : MonoInstaller {
              "Controla o cursor de posicionamento do Livro ao usar Dividir.")]
     [SerializeField] private AbilityData _divideTargetingData;
 
+    [Tooltip("VFX one-shot ao confirmar/cancelar o spawn do clone. O preview de mira fica em BookAOE → AoePrefab.")]
+    [SerializeField] private DivideAbilityVfxConfigSO _divideAbilityVfxConfig;
+
     [Header("Telegraph Materials")]
     [SerializeField] private TelegraphMaterialConfig _telegraphMaterials;
 
@@ -85,7 +88,7 @@ public class GamePlayInstaller : MonoInstaller {
         // Book system
         Container.Bind<IActiveUnitService>().To<ActiveUnitService>().AsSingle();
         Container.Bind<IDivideAbilityHandler>().To<DivideAbilityHandler>().AsSingle()
-            .WithArguments(_divideTargetingData);
+            .WithArguments(_divideTargetingData, _divideAbilityVfxConfig);
 
         if (_telegraphMaterials != null) {
             // Debug.Log($"[GamePlayInstaller] Binding TelegraphMaterialConfig: {_telegraphMaterials.name}");

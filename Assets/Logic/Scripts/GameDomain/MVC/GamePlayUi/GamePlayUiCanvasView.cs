@@ -99,6 +99,16 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
         [SerializeField] private List<GameObject> _erzaSkillKeybindDisplayRoots = new List<GameObject>(4);
         [SerializeField] private List<GameObject> _bookSkillKeybindDisplayRoots = new List<GameObject>(4);
 
+        [Header("Divide / Clone keybinds (C / TAB)")]
+        [Tooltip("Visível enquanto o clone não existe. Ofuscado se C já foi usado neste turno.")]
+        [SerializeField] private GameObject _keybindDivideRoot;
+        [Tooltip("Pai visível enquanto o clone está ativo (contém Join + Switch).")]
+        [SerializeField] private GameObject _keybindJoinAndSwitchRoot;
+        [Tooltip("Filho Join — ofuscado se C já foi usado neste turno.")]
+        [SerializeField] private GameObject _keybindJoinRoot;
+        [Tooltip("Filho Switch (TAB) — referência apenas; permanece opaco.")]
+        [SerializeField] private GameObject _keybindSwitchRoot;
+
         [Header("Cast feedback — tremor de mana")]
         [Tooltip("Opcional. Ícone de mana do jogador (Nara) a tremer. Fallback: root ManaFlask (Nara).")]
         [SerializeField] private RectTransform _naraPlayerManaShakeTarget;
@@ -751,6 +761,26 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
             RefreshSkillAffordanceVisuals();
         }
 
+        public void SetDivideKeybindState(bool cloneDeployed, bool divideCommandAvailable)
+        {
+            EnsureDivideKeybindReferences();
+
+            if (_keybindDivideRoot != null)
+            {
+                _keybindDivideRoot.SetActive(!cloneDeployed);
+                ApplyKeybindAffordance(_keybindDivideRoot, divideCommandAvailable);
+            }
+
+            if (_keybindJoinAndSwitchRoot != null)
+                _keybindJoinAndSwitchRoot.SetActive(cloneDeployed);
+
+            if (_keybindJoinRoot != null)
+                ApplyKeybindAffordance(_keybindJoinRoot, divideCommandAvailable);
+
+            if (_keybindSwitchRoot != null)
+                ApplyKeybindAffordance(_keybindSwitchRoot, available: true);
+        }
+
         public void SetSkillHudIcons(Sprite erza0, Sprite erza1, Sprite erza2, Sprite erza3, Sprite book0, Sprite book1, Sprite book2, Sprite book3)
         {
             ApplySkillIconsToList(_erzaSkillIconImages, erza0, erza1, erza2, erza3);
@@ -806,6 +836,33 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
             GameObject root = ResolveKeybindDisplayRoot(slotIndex, configuredRoots, bookTheme);
             if (root == null) return;
             root.SetActive(skill != null && skill.IsCastable);
+        }
+
+        void EnsureDivideKeybindReferences()
+        {
+            if (_keybindDivideRoot == null)
+                _keybindDivideRoot = FindNamedChild(transform, "Keybind_Divide")?.gameObject;
+
+            if (_keybindJoinAndSwitchRoot == null)
+                _keybindJoinAndSwitchRoot = FindNamedChild(transform, "Keybinds_JoinAndSwitch")?.gameObject;
+
+            if (_keybindJoinRoot == null)
+                _keybindJoinRoot = FindNamedChild(transform, "Keybind_Join")?.gameObject;
+
+            if (_keybindSwitchRoot == null)
+                _keybindSwitchRoot = FindNamedChild(transform, "Keybind_Switch")?.gameObject;
+        }
+
+        void ApplyKeybindAffordance(GameObject root, bool available)
+        {
+            if (root == null)
+                return;
+
+            var canvasGroup = root.GetComponent<CanvasGroup>();
+            if (canvasGroup == null)
+                canvasGroup = root.AddComponent<CanvasGroup>();
+
+            canvasGroup.alpha = available ? 1f : _unaffordableSkillAlpha;
         }
 
         RectTransform ResolvePlayerManaShakeTarget()

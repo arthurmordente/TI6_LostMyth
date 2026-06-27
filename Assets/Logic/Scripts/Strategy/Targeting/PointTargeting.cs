@@ -42,6 +42,19 @@ public class PointTargeting : TargetingStrategy {
 
     public override void Cancel() {
         base.Cancel();
-        UnityEngine.Object.Destroy(_previewTransform.gameObject);
+        if (_previewTransform != null) {
+            UnityEngine.Object.Destroy(_previewTransform.gameObject);
+            _previewTransform = null;
+        }
+    }
+
+    public override bool TryGetAimPreviewPosition(out Vector3 position) {
+        if (_previewTransform != null) {
+            position = _previewTransform.position;
+            return true;
+        }
+
+        position = default;
+        return false;
     }
 }

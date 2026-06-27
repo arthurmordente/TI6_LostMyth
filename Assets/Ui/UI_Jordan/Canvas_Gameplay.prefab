@@ -548,6 +548,10 @@ MonoBehaviour:
   - {fileID: 1930394331868453431}
   - {fileID: 911031967517903330}
   _bookSkillKeybindDisplayRoots: []
+  _keybindDivideRoot: {fileID: 3748792829960699569}
+  _keybindJoinAndSwitchRoot: {fileID: 5346897681497482796}
+  _keybindJoinRoot: {fileID: 6310496830069017018}
+  _keybindSwitchRoot: {fileID: 2639933439145214295}
   _naraPlayerManaShakeTarget: {fileID: 7760751406769986609}
   _bookPlayerManaShakeTarget: {fileID: 5994510701689848851}
   _erzaSkillIconImages:

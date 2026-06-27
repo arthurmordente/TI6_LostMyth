@@ -64,6 +64,9 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
         /// <summary>Sincroniza o frasco 0/1 do clone com <see cref="Logic.Scripts.GameDomain.MVC.Echo.ICloneUseLimiter"/>.</summary>
         void SyncBookCloneActionHud();
 
+        /// <summary>Sincroniza keybinds Divide / Join+Switch com estado do clone e uso do comando C no turno.</summary>
+        void SyncDivideKeybindHud(bool cloneDeployed, bool divideCommandAvailable);
+
         /// <inheritdoc cref="IGamePlayHudView.SetSkillsSlidableExpanded"/>
         void SetSkillsSlidableExpanded(bool expanded, bool instant = false);
 

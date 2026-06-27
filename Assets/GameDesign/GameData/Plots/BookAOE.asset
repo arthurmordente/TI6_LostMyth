@@ -15,7 +15,7 @@ MonoBehaviour:
   Name: 
   Description: 
   Icon: {fileID: 0}
-  AoePrefab: {fileID: 3019752333304840796, guid: 777f38fa60fceda46a417947e9b962cd, type: 3}
+  AoePrefab: {fileID: 2823925544558249998, guid: 1105c7183c01c194a9c547453f2021c5, type: 3}
   _effects: []
   references:
     version: 2

@@ -1619,6 +1619,7 @@ MonoBehaviour:
   _bookViewPrefab: {fileID: -7066848488704670114, guid: 872fe8a64482a804a89c3db0e8ad462e, type: 3}
   _bookConfiguration: {fileID: 11400000, guid: 734bbf1d31b4223428d6ede70dd08435, type: 2}
   _divideTargetingData: {fileID: 11400000, guid: cdf5ea619825b5c4abdff030ffc69def, type: 2}
+  _divideAbilityVfxConfig: {fileID: 11400000, guid: ac726d0eea6f66145aa1095014d81da5, type: 2}
   _telegraphMaterials: {fileID: 11400000, guid: f55d7723a1e531b479d9a3b4d9873ffd, type: 2}
   _combatAttackVisualCatalog: {fileID: 11400000, guid: 291e6c82c38f51a49971a77680bb8271, type: 2}
   _floatingCombatNumberPrefab: {fileID: 7153587287992590508, guid: d6999ba3bfa1c1347b8cf1065f691d30, type: 3}

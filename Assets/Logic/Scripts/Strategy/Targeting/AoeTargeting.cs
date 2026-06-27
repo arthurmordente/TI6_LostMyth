@@ -70,8 +70,19 @@ public class AoeTargeting : TargetingStrategy {
     public override void Cancel() {
         if (previewInstance != null) {
             UnityEngine.Object.Destroy(previewInstance);
+            previewInstance = null;
         }
         base.Cancel();
+    }
+
+    public override bool TryGetAimPreviewPosition(out Vector3 position) {
+        if (previewInstance != null) {
+            position = previewInstance.transform.position;
+            return true;
+        }
+
+        position = default;
+        return false;
     }
 
     public override Vector3 LockAim(out IEffectable[] targets) {

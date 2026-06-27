@@ -64,6 +64,7 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
             SyncBossHudNameFromCurrentLevel();
             _gameOverView.InitEntryPoint();
             _gameOverView.RegisterCallbacks(OnClickPlayAgainWithSfx, OnBackToLobbyFromGameOver, OnQuitGameFromGameOver);
+            SyncDivideKeybindHud(cloneDeployed: false, divideCommandAvailable: true);
         }
 
         /// <summary>
@@ -255,6 +256,9 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
             if (_cloneUseLimiter == null) return;
             _gamePlayHud.SetBookCloneActionAvailable(_cloneUseLimiter.CanUse());
         }
+
+        public void SyncDivideKeybindHud(bool cloneDeployed, bool divideCommandAvailable) =>
+            _gamePlayHud.SetDivideKeybindState(cloneDeployed, divideCommandAvailable);
 
         public void SetSkillsSlidableExpanded(bool expanded, bool instant = false) =>
             _gamePlayHud.SetSkillsSlidableExpanded(expanded, instant);

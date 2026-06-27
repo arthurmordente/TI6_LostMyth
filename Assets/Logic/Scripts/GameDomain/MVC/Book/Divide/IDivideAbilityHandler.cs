@@ -4,13 +4,13 @@ namespace Logic.Scripts.GameDomain.MVC.Book.Divide
     {
         bool IsBookDeployed { get; }
         bool IsAiming { get; }
-        int CooldownTurnsRemaining { get; }
+        bool CanUseDivideCommandThisTurn { get; }
 
         /// <summary>
-        /// Called when the player presses the Dividir button.
-        /// - If book not deployed and cooldown is 0: starts aiming mode.
-        /// - If book deployed and cooldown is 0: recalls the book immediately.
-        /// - If on cooldown: no-op.
+        /// Called when the player presses the Dividir button (C).
+        /// - If book not deployed and command available: starts aiming mode.
+        /// - If book deployed and command available: recalls the book immediately.
+        /// - If already used this turn: no-op.
         /// </summary>
         void Activate();
 

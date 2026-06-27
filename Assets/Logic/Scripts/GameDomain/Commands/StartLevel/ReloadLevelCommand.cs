@@ -69,5 +69,6 @@ public class ReloadLevelCommand : BaseCommand, ICommandAsync {
         _activeUnitService.RefreshHudAbilityCosts();
         _gamePlayUiController.SetSkillsSlidableExpanded(false, instant: true);
         _gamePlayUiController.SyncBookCloneActionHud();
+        _gamePlayUiController.SyncDivideKeybindHud(cloneDeployed: false, divideCommandAvailable: true);
     }
 }

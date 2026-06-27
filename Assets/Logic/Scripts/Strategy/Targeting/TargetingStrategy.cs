@@ -25,6 +25,12 @@ public abstract class TargetingStrategy : IUpdatable {
         targets = null;
         return Vector3.zero;
     }
+
+    public virtual bool TryGetAimPreviewPosition(out Vector3 position) {
+        position = default;
+        return false;
+    }
+
     public virtual void Cancel() {
         Ability = null;
         SubscriptionService.UnregisterUpdatable(this);
