@@ -43,7 +43,7 @@ MonoBehaviour:
   Cost: 1
   Icon: {fileID: 21300000, guid: 186772cbcc71e324eabaf923201504d0, type: 3}
   SkillName: Cura Serpentina
-  Description: Canaliza a magia de Boris para recuperar instantaneamente X de vida.
+  Description: Canaliza a magia de Boris para <color=#1BB90D><b>curar X de vida</b></color>.
   Lore: "\u201C O que lhe espera no fim sen\xE3o o come\xE7o? A Grande Obra est\xE1
     longe de completa. Preciso de mais! Consuma tudo, deixe que te consumam, comece
     um novo ciclo e tome para si o que lhe espera no fim\u201D"

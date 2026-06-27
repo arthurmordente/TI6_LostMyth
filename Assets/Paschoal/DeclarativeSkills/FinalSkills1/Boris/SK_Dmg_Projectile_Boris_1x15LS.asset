@@ -44,8 +44,8 @@ MonoBehaviour:
   Icon: {fileID: 21300000, guid: 8f9e4fb2e31ce5c41a5f5aec2d3b6838, type: 3}
   SkillName: Ciclo de Morte e Vida
   Description: "Conjura a pe\xE7onha de Boris, que aprisiona parte da vitalidade
-    do alvo, causando X dano, e ent\xE3o retorna para o usu\xE1rio, curando-o em
-    Y do dano causado."
+    do alvo, <color=#B90D1B><b>causando X de dano</b></color>, e ent\xE3o retorna
+    para o usu\xE1rio, <color=#1BB90D><b>curando-o em Y do dano causado</b></color>."
   Lore: "\u201C Um fim \xE9 apenas um come\xE7o. Consuma e regenere a si mesmo. Destrua-se!
     Purifique-se! Morte e vida s\xE3o apenas etapas de um ciclo eterno.\u201D"
   _descriptionHighlights:

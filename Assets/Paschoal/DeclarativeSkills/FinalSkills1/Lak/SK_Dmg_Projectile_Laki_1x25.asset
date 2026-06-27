@@ -44,7 +44,7 @@ MonoBehaviour:
   Icon: {fileID: 21300000, guid: 432210c08292a1942935ebc8fcad4608, type: 3}
   SkillName: Dado Viciado
   Description: Arremessa o dado da sorte de Laki, que explode ao contato com um alvo,
-    causando X dano.
+    <color=#B90D1B><b>causando X de dano</b></color>.
   Lore: "\u201C N\xE3o h\xE1 como fugir ap\xF3s iniciar sua aposta, voc\xEA conhece
     a \xFAnica regra deste jogo: a casa SEMPRE vence.\u201D"
   _descriptionHighlights:

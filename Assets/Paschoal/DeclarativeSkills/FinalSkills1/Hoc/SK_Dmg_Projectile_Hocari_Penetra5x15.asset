@@ -44,8 +44,8 @@ MonoBehaviour:
   Icon: {fileID: 21300000, guid: 84fd325531c382e49a6e5ca447e45938, type: 3}
   SkillName: Pena Afiada
   Description: "Invoca uma l\xE2mina das asas de Hocari e arremessa para frente \xE0
-    uma dist\xE2ncia mediana. A l\xE2mina \xE9 capaz de perfurar seus alvos, causando
-    X dano \xE0 todos em sua trajet\xF3ria."
+    uma dist\xE2ncia mediana. A l\xE2mina \xE9 capaz de perfurar seus alvos, <color=#B90D1B><b>causando
+    X de dano</b></color> \xE0 todos em sua trajet\xF3ria."
   Lore: "\u201C N\xE3o foi suficiente me condenarem ao isolamento? Precisavam marcar
     meu corpo com o calor da ira divina? Eu queria apenas voar... \u201C"
   _descriptionHighlights:

@@ -1854,8 +1854,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: -32, y: -32}
+  m_AnchoredPosition: {x: 0, y: -2}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1390246695121161324
 CanvasRenderer:
@@ -1888,11 +1888,13 @@ MonoBehaviour:
   m_text: "<size=72>Equipe</size>\n\nArthur Diniz Mordente  / <size=36>Programador</size>\nJordan
     Lyon R. R. Duarte  / <size=36>Gerente de Projeto, UI Designer</size>\nLuana Gon\xE7alves
     Viana  / <size=36>Artista 2D e 3D</size>\nLucas Medeiros Dias  / <size=36>Animador
-    3D</size>\nPedro Henrique G. Paschoal  / <size=36>Programador</size>\nS\xE1vio
-    de Faria Lino  / <size=36>Artista 2D e 3D</size>\n\n<size=72>Agradecimentos</size>\n\nDaniel
+    3D</size>\nPedro Henrique G. Paschoal  / <size=36>Tester</size>\nS\xE1vio de
+    Faria Lino  / <size=36>Artista 2D, 3D e de VFX</size>\n\n<size=72>Agradecimentos</size>\n\nDaniel
     Pinheiro Lima  / <size=36>Professor Orientador</size>\nRoque Anderson S. Teixeira 
     / <size=36>Professor</size>\nLuis Felipe M. de Aruanda R. Garrocho  / <size=36>Professor</size>\nLibny
-    Kelvin - Compositor das BGMs"
+    Kelvin / <size=36> Compositor das BGMs </size>\nPedro Henrique S. Pelisson  /
+    <size=36> Artista 3D </size>\nMira Andrade Azevedo  / <size=36> Artista 2D </size>\nVictor
+    Lucas S. de Lima / <size=36> Programador </size>\n"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: d580464378edd044581dd2d85f8a2838, type: 2}
   m_sharedMaterial: {fileID: -8906674652059005393, guid: d580464378edd044581dd2d85f8a2838, type: 2}
@@ -2639,7 +2641,6 @@ MonoBehaviour:
   _canvasGroup: {fileID: 0}
   _closeButton: {fileID: 1187190218934432963}
   _bodyText: {fileID: 7208334593626899997}
-  _bodyOverride: 
 --- !u!1 &8506370677079676316
 GameObject:
   m_ObjectHideFlags: 0
@@ -3298,8 +3299,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 1200}
+  m_AnchoredPosition: {x: 0, y: -59.26243}
+  m_SizeDelta: {x: 0, y: 1346.5894}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!1 &9210836051147669448
 GameObject:
