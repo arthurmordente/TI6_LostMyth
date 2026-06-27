@@ -5,11 +5,13 @@ public class ResumeExplorationInputCommand : BaseCommand, ICommandVoid
 {
     private IExplorationPauseController _pauseController;
     private IExplorationLoadoutUIController _loadoutUIController;
+    private ILobbyTipsUIController _lobbyTipsUIController;
 
     public override void ResolveDependencies()
     {
         _pauseController = _diContainer.Resolve<IExplorationPauseController>();
         _loadoutUIController = _diContainer.TryResolve<IExplorationLoadoutUIController>();
+        _lobbyTipsUIController = _diContainer.TryResolve<ILobbyTipsUIController>();
     }
 
     public void Execute()
@@ -17,6 +19,12 @@ public class ResumeExplorationInputCommand : BaseCommand, ICommandVoid
         if (_loadoutUIController != null && _loadoutUIController.IsVisible)
         {
             _loadoutUIController.Hide();
+            return;
+        }
+
+        if (_lobbyTipsUIController != null && _lobbyTipsUIController.IsVisible)
+        {
+            _lobbyTipsUIController.Hide();
             return;
         }
 

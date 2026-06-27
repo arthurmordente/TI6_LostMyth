@@ -16,6 +16,7 @@ public class LoadLevelCommand : BaseCommand, ICommandAsync {
     private IGamePlayDataService _gamePlayDataService;
     private IPortalController _portalController;
     private IInteractableObjectsController _interactableObjectsController;
+    private ILobbyInteractionZoneController _lobbyInteractionZoneController;
     private IGameInputActionsController _inputActionsController;
 
     //To-Do adicionar efeitos do cenario
@@ -36,6 +37,7 @@ public class LoadLevelCommand : BaseCommand, ICommandAsync {
         _naraMovementControllerFactory = _diContainer.Resolve<INaraMovementControllerFactory>();
         _portalController = _diContainer.Resolve<IPortalController>();
         _interactableObjectsController = _diContainer.Resolve<IInteractableObjectsController>();
+        _lobbyInteractionZoneController = _diContainer.TryResolve<ILobbyInteractionZoneController>();
         _inputActionsController = _diContainer.Resolve<IGameInputActionsController>();
     }
 
@@ -60,8 +62,17 @@ public class LoadLevelCommand : BaseCommand, ICommandAsync {
     }
     private async Awaitable CreateLevelScenario(int levelNumber, CancellationTokenSource cancellationTokenSource) {
         await _levelScenarioController.CreateLevelScenario(levelNumber, cancellationTokenSource);
-        _portalController.SetUpPortals(_levelScenarioController.CurrentLevelScenarioView.PortalViews);
-        _interactableObjectsController.SetUpInteractables(_levelScenarioController.CurrentLevelScenarioView.Interactableviews);
+        var scenarioView = _levelScenarioController.CurrentLevelScenarioView;
+        _portalController.SetUpPortals(scenarioView.PortalViews);
+        _interactableObjectsController.SetUpInteractables(scenarioView.Interactableviews);
+        _lobbyInteractionZoneController?.Clear();
+        if (levelNumber == 0)
+        {
+            var zones = LobbyInteractionZoneBootstrap.EnsureZones(
+                scenarioView.transform,
+                scenarioView.LobbyInteractionZones);
+            _lobbyInteractionZoneController?.Setup(zones);
+        }
         //To-Do adicionar efeitos do cenario
     }
 

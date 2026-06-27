@@ -20,6 +20,9 @@ public class ExplorationInstaller : MonoInstaller {
     [Tooltip("Canvas de pause. Componente PauseMenuCanvasView no root do canvas.")]
     [SerializeField] private PauseMenuCanvasView _pauseMenuView;
 
+    [Tooltip("Canvas do painel de dicas do lobby. Componente LobbyTipsPanelCanvasView no root do canvas.")]
+    [SerializeField] private LobbyTipsPanelCanvasView _lobbyTipsPanelView;
+
     [SerializeField] private ErzahlerAnimatorControllersSO _erzahlerAnimatorControllers;
 
     public override void InstallBindings() {
@@ -50,6 +53,7 @@ public class ExplorationInstaller : MonoInstaller {
         Container.BindInterfacesTo<NaraController>().AsSingle().WithArguments(_naraViewPrefab, _naraConfiguration).NonLazy();
         Container.BindInterfacesTo<PortalController>().AsSingle().NonLazy();
         Container.BindInterfacesTo<InteractableObjectsController>().AsSingle().NonLazy();
+        Container.BindInterfacesTo<LobbyInteractionZoneController>().AsSingle().NonLazy();
 
         var loadoutView = ResolveLoadoutView();
         if (loadoutView == null) {
@@ -63,6 +67,16 @@ public class ExplorationInstaller : MonoInstaller {
 
         Container.Bind<IPauseMenuView>().FromInstance(ResolvePauseMenuView()).AsSingle();
         Container.BindInterfacesTo<ExplorationPauseController>().AsSingle();
+
+        var lobbyTipsView = ResolveLobbyTipsView();
+        if (lobbyTipsView != null) {
+            Container.Bind<ILobbyTipsView>().FromInstance(lobbyTipsView).AsSingle();
+            Container.BindInterfacesTo<LobbyTipsUIController>().AsSingle();
+        } else {
+            Debug.LogWarning(
+                "[ExplorationInstaller] Lobby tips panel view not found. F tips interaction will be unavailable until LobbyTipsPanelCanvasView is assigned.",
+                this);
+        }
     }
 
     private IExplorationLoadoutView ResolveLoadoutView() {
@@ -86,6 +100,23 @@ public class ExplorationInstaller : MonoInstaller {
             return existing;
 
         return CreateOverlayRoot<PauseMenuCanvasView>(nameof(PauseMenuCanvasView), sortingOrder: 100);
+    }
+
+    private ILobbyTipsView ResolveLobbyTipsView() {
+        LobbyTipsPanelCanvasView view = null;
+
+        if (_lobbyTipsPanelView != null)
+            view = _lobbyTipsPanelView;
+        else
+            view = GetComponentInChildren<LobbyTipsPanelCanvasView>(true);
+
+        if (view == null)
+            return CreateOverlayRoot<LobbyTipsPanelCanvasView>(nameof(LobbyTipsPanelCanvasView), sortingOrder: 120);
+
+        if (!view.gameObject.scene.IsValid())
+            view = Instantiate(view, transform);
+
+        return view;
     }
 
     private T CreateOverlayRoot<T>(string objectName, int sortingOrder) where T : Component {
