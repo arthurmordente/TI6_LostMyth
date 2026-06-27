@@ -44,8 +44,9 @@ MonoBehaviour:
   Icon: {fileID: 21300000, guid: b0768ea0bf18ef6498c0e701fcafd354, type: 3}
   SkillName: "Explos\xE3o Cibern\xE9tica"
   Description: "Uma explos\xE3o acontece ao redor de uma grande \xE1rea a partir
-    do usu\xE1rio. Inimigos dentro do alcance recebem X dano, enquanto o usu\xE1rio
-    e seus aliados recebem apenas Y dano."
+    do usu\xE1rio, <color=#B90D1B><b> causando X de dano em inimigos</b></color>
+    dentro do alcance. \n<color=#B90DA1><b>O usu\xE1rio e seus aliados sofrem Y de
+    dano</b></color>."
   Lore: "\u201C Prisioneira em meu pr\xF3prio corpo. O que poderia ser mais injusto?
     Do que adianta tamanha velocidade sen\xE3o posso escolher para onde ir? N\xE3o
     posso fugir da corrup\xE7\xE3o, n\xE3o posso mais correr.\u201D"
@@ -59,7 +60,7 @@ MonoBehaviour:
     Mode: 1
     Value: 0
     ManualText: 25
-    Color: {r: 0.7254902, g: 0.050980393, b: 0.105882354, a: 1}
+    Color: {r: 0.7254902, g: 0.05098037, b: 0.6332251, a: 1}
   _effects:
   - {fileID: 11400000, guid: a47ac10b58cc4372a5670e02b2c3d472, type: 2}
   - {fileID: 11400000, guid: eb42f10539757554f99d828bcb5c266d, type: 2}

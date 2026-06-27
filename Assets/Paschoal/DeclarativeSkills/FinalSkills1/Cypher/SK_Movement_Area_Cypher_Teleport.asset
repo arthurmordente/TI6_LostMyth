@@ -43,8 +43,8 @@ MonoBehaviour:
   Cost: 2
   Icon: {fileID: 21300000, guid: 5fe6deaf353008c409d8f7e30a0ebeca, type: 3}
   SkillName: Pulo do Gato
-  Description: "Escolhe um ponto, dentro de uma \xE1rea mediana, para se teleportar
-    instantaneamente."
+  Description: "Escolhe um ponto, dentro de uma \xE1rea mediana e <color=#B90DA1><b>teleporta-se
+    instantaneamente</b></color>."
   Lore: "\u201C Sinto a corrup\xE7\xE3o se alastrando em mim como insetos devorando
     uma folha. Meus nervos se tornando cabos, meu sangue, eletricidade. Meu consciente
     ainda \xE9 meu e de mais ningu\xE9m, mas meu corpo j\xE1 n\xE3o \xE9 meu para

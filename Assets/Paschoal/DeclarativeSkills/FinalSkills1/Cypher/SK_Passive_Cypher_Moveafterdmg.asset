@@ -43,8 +43,8 @@ MonoBehaviour:
   Cost: 0
   Icon: {fileID: 21300000, guid: 21538d184d5839c4caa964dbf7c64e0e, type: 3}
   SkillName: Fuga Felina
-  Description: "Ap\xF3s sofrer dano o usu\xE1rio recebe movimento extra, no in\xEDcio
-    do pr\xF3ximo turno."
+  Description: "Ap\xF3s sofrer dano o usu\xE1rio <color=#B90DA1><b>recebe movimento
+    extra</b></color> no in\xEDcio do pr\xF3ximo turno."
   Lore: "\u201C Eu fui aquela conhecida como Mafdet. Era um s\xEDmbolo de justi\xE7a
     r\xE1pida e certeira, o rel\xE2mpago da vanguarda e a \xFAltima luz que meus
     inimigos viam.\u201D"

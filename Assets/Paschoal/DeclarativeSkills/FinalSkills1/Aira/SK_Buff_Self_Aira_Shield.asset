@@ -44,7 +44,7 @@ MonoBehaviour:
   Icon: {fileID: 21300000, guid: 5dfeb5cffa3878f4c8ad37049ac10bd8, type: 3}
   SkillName: "Prote\xE7\xE3o Mel\xF3dica"
   Description: "Aira aben\xE7oa o usu\xE1rio com sua m\xFAsica, garantindo ao mesmo
-    um escudo de Lava que impede a pr\xF3xima inst\xE2ncia de dano."
+    um escudo de Lava que <color=#B90DA1><b>impede a pr\xF3xima inst\xE2ncia de dano</b></color>."
   Lore: "\u201C O c\xE9u parecia uma cortina tentando esconder o brilho da lua cheia,
     as estrelas reluziam tanto que a superf\xEDcie da \xE1gua tornou-se um palco
     iluminado. Naquela noite meu canto foi ouvido por todos.\u201D"

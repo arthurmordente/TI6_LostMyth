@@ -44,8 +44,8 @@ MonoBehaviour:
   Icon: {fileID: 21300000, guid: 04385632ecaf79f479ed377125261b7f, type: 3}
   SkillName: "F\xFAria da Serpente"
   Description: "Imbu\xEDdo com a magia de Boris, o usu\xE1rio fica mais forte quando
-    est\xE1 ferido. Ao ter sua vida reduzida a, pelo menos, Y do valor total ele
-    recebe um b\xF4nus de Z para todo seu dano causado."
+    est\xE1 ferido. Ao ter no m\xE1ximo <color=#1BB90D><b>Y de sua vida total</b></color>
+    ele recebe <color=#7A0DB9><b>+Z para todo dano causado</b></color>."
   Lore: "\u201C Venha at\xE9 mim ... em sangue ... em carne ... em magia. A busca
     por poder sempre termina em morte, mas n\xE3o tema, pois estamos apenas no in\xEDcio
     de um novo ciclo\u201D"

@@ -44,7 +44,8 @@ MonoBehaviour:
   Icon: {fileID: 21300000, guid: d40a558aa94823b49841218f31b64373, type: 3}
   SkillName: "Impulso Magn\xE9tico"
   Description: "Dispara energia magn\xE9tica para frente \xE0 uma grande dist\xE2ncia
-    e, caso colida com algo, a energia puxa o usu\xE1rio at\xE9 o ponto de colis\xE3o."
+    e, caso colida com algo, a energia <color=#B90DA1><b>leva o usu\xE1rio at\xE9
+    o ponto de colis\xE3o</b></color>."
   Lore: "\u201C Julgada e condenada por mero capricho divino, querem destruir meu
     espirito mas eu serei livre! Com estas asas poderei alcan\xE7ar os c\xE9us, talvez
     at\xE9 mesmo o Sol...\u201D"

@@ -44,7 +44,7 @@ MonoBehaviour:
   Icon: {fileID: 21300000, guid: e32f9a864995dac4aa70678723ced89f, type: 3}
   SkillName: Corte Sonoro
   Description: "Canaliza a f\xFAria de Aira em um \xFAnico ponto \xE0 uma curta dist\xE2ncia,
-    causando X dano ao primeiro inimigo atingido. "
+    <color=#B90D1B><b>causando X de dano</b></color>. ao primeiro inimigo atingido. "
   Lore: "\u201C Descobri que meu canto consegue controlar at\xE9 mesmo o fogo. E
     agora, eles descobrir\xE3o como a m\xFAsica pode ser letal.\u201D"
   _descriptionHighlights:
