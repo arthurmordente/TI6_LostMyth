@@ -13,6 +13,7 @@ public class StartExplorationStateCommand : BaseCommand, ICommandAsync {
     private ICommandFactory _commandFactory;
     private IGameInputActionsController _gameInputActionsController;
     private IExplorationLoadoutUIController _explorationLoadoutUIController;
+    private ILobbyTipsUIController _lobbyTipsUIController;
     private IExplorationPauseController _explorationPauseController;
     private IAudioService _audioService;
 
@@ -28,6 +29,7 @@ public class StartExplorationStateCommand : BaseCommand, ICommandAsync {
         _commandFactory = _diContainer.Resolve<ICommandFactory>();
         _gameInputActionsController = _diContainer.Resolve<IGameInputActionsController>();
         _explorationLoadoutUIController = _diContainer.Resolve<IExplorationLoadoutUIController>();
+        _lobbyTipsUIController = _diContainer.TryResolve<ILobbyTipsUIController>();
         _explorationPauseController = _diContainer.Resolve<IExplorationPauseController>();
         _audioService = _diContainer.Resolve<IAudioService>();
     }
@@ -38,6 +40,7 @@ public class StartExplorationStateCommand : BaseCommand, ICommandAsync {
         _audioService.PlayMusic(MusicIds.Menu);
         _naraController.InitEntryPointExploration();
         _explorationLoadoutUIController.InitEntryPoint();
+        _lobbyTipsUIController?.InitEntryPoint();
         _explorationPauseController.InitEntryPoint();
     }
 }

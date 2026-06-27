@@ -6,12 +6,14 @@ public class PauseExplorationInputCommand : BaseCommand, ICommandVoid
     private IExplorationPauseController _pauseController;
     private IUniversalUIController _universalUIController;
     private IExplorationLoadoutUIController _loadoutUIController;
+    private ILobbyTipsUIController _lobbyTipsUIController;
 
     public override void ResolveDependencies()
     {
         _pauseController = _diContainer.Resolve<IExplorationPauseController>();
         _universalUIController = _diContainer.Resolve<IUniversalUIController>();
         _loadoutUIController = _diContainer.TryResolve<IExplorationLoadoutUIController>();
+        _lobbyTipsUIController = _diContainer.TryResolve<ILobbyTipsUIController>();
     }
 
     public void Execute()
@@ -19,6 +21,12 @@ public class PauseExplorationInputCommand : BaseCommand, ICommandVoid
         if (_loadoutUIController != null && _loadoutUIController.IsVisible)
         {
             _loadoutUIController.Hide();
+            return;
+        }
+
+        if (_lobbyTipsUIController != null && _lobbyTipsUIController.IsVisible)
+        {
+            _lobbyTipsUIController.Hide();
             return;
         }
 
