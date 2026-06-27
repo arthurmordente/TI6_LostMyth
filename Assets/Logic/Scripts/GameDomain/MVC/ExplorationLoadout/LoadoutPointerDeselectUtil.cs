@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Logic.Scripts.GameDomain.Services.Cheats;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -13,6 +14,11 @@ namespace Logic.Scripts.GameDomain.MVC.ExplorationLoadout
 
         public static bool PointerHitsBoundSkill(Vector2 screenPosition)
         {
+            return PointerHitsLoadoutInteractive(screenPosition);
+        }
+
+        public static bool PointerHitsLoadoutInteractive(Vector2 screenPosition)
+        {
             EventSystem eventSystem = EventSystem.current;
             if (eventSystem == null) return false;
 
@@ -25,8 +31,18 @@ namespace Logic.Scripts.GameDomain.MVC.ExplorationLoadout
                 GameObject hit = Hits[i].gameObject;
                 if (hit == null) continue;
 
-                LoadoutSkillFrameView frame = hit.GetComponentInParent<LoadoutSkillFrameView>();
-                if (frame != null && frame.BoundSkill != null)
+                if (hit.GetComponentInParent<LoadoutBookmarkHitTarget>() != null)
+                    return true;
+
+                if (hit.GetComponentInParent<LoadoutDetailPanelHitTarget>() != null)
+                    return true;
+
+                LoadoutSkillFrameView skillFrame = hit.GetComponentInParent<LoadoutSkillFrameView>();
+                if (skillFrame != null && skillFrame.BoundSkill != null)
+                    return true;
+
+                LoadoutCheatFrameView cheatFrame = hit.GetComponentInParent<LoadoutCheatFrameView>();
+                if (cheatFrame != null && cheatFrame.BoundCheat != null)
                     return true;
             }
 

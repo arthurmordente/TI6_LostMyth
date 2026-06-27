@@ -11,6 +11,7 @@ using Logic.Scripts.Turns;
 using UnityEngine;
 using Zenject;
 using Logic.Scripts.GameDomain.VisualFeedback;
+using Logic.Scripts.GameDomain.Services.Cheats;
 using Logic.Scripts.GameDomain.Services.Skills;
 using Logic.Scripts.GameDomain.MVC.Nara.Animation;
 using Logic.Scripts.GameDomain.MVC.Environment.Laki;
@@ -29,6 +30,7 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {    // INaraController now extends 
         private readonly INewSkillSystemSkillLoadoutService _newSkillSystemSkillLoadoutService;
         private readonly ErzahlerAnimatorControllersSO _erzahlerAnimatorControllers;
         private readonly IDamageStackMovementPassiveService _damageStackMovementPassiveService;
+        private readonly LoadoutCheatGameplayService _loadoutCheatGameplayService;
         public GameObject NaraViewGO => _naraView.gameObject;
         public Transform NaraSkillSpotTransform => _naraView.transform;
         public NaraMovementController NaraMove => _naraMovementController;
@@ -59,7 +61,8 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {    // INaraController now extends 
             [InjectOptional] IActionPointsService actionPointsService = null,
             [InjectOptional] INewSkillSystemSkillLoadoutService newSkillSystemSkillLoadoutService = null,
             [InjectOptional] ErzahlerAnimatorControllersSO erzahlerAnimatorControllers = null,
-            [InjectOptional] IDamageStackMovementPassiveService damageStackMovementPassiveService = null) {
+            [InjectOptional] IDamageStackMovementPassiveService damageStackMovementPassiveService = null,
+            [InjectOptional] LoadoutCheatGameplayService loadoutCheatGameplayService = null) {
             _naraData = new NaraData(naraConfiguration);
             _naraConfiguration = naraConfiguration;
             _updateSubscriptionService = updateSubscriptionService;
@@ -72,6 +75,7 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {    // INaraController now extends 
             _newSkillSystemSkillLoadoutService = newSkillSystemSkillLoadoutService;
             _erzahlerAnimatorControllers = erzahlerAnimatorControllers;
             _damageStackMovementPassiveService = damageStackMovementPassiveService;
+            _loadoutCheatGameplayService = loadoutCheatGameplayService;
         }
 
         public void RegisterListeners() {
@@ -342,6 +346,8 @@ namespace Logic.Scripts.GameDomain.MVC.Nara {    // INaraController now extends 
             }
 
             PushSharedHealthToHud();
+            if (damageApplied)
+                _loadoutCheatGameplayService?.ApplyAfterDamage(this);
             TryHandleSharedHealthDeath();
         }
 

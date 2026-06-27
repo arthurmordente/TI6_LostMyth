@@ -4,6 +4,7 @@ using Logic.Scripts.GameDomain.MVC.Nara;
 using Logic.Scripts.GameDomain.MVC.Shared;
 using Logic.Scripts.GameDomain.MVC.Ui;
 using Logic.Scripts.GameDomain.Services.Skills;
+using Logic.Scripts.GameDomain.Services.Cheats;
 using Logic.Scripts.Services.AudioService;
 using Logic.Scripts.Services.CommandFactory;
 using Logic.Scripts.Services.UpdateService;
@@ -36,12 +37,14 @@ public class CastController : ICastController {
     private IAudioService _audio;
     private readonly LegacySkillCastFlow _legacyFlow;
     private readonly NewSkillSystemDefaultSkillCastFlow _newSkillSystemCastFlow;
+    private readonly LoadoutCheatGameplayService _loadoutCheatGameplayService;
 
     public CastController(IUpdateSubscriptionService updateSubscriptionService, ICommandFactory commandFactory,
         IActionPointsService actionPointsService, ICheatController cheatController,
         NewSkillSystemDefaultSkillCastFlow newSkillSystemSkillCastFlow,
         [InjectOptional] ICloneUseLimiter cloneUseLimiter = null,
-        [InjectOptional] IGamePlayUiController gamePlayUiController = null) {
+        [InjectOptional] IGamePlayUiController gamePlayUiController = null,
+        [InjectOptional] LoadoutCheatGameplayService loadoutCheatGameplayService = null) {
         _subscriptionService = updateSubscriptionService;
         _commandFactory = commandFactory;
         _naraActionPointsService = actionPointsService;
@@ -50,6 +53,7 @@ public class CastController : ICastController {
         _gamePlayUiController = gamePlayUiController;
         _legacyFlow = new LegacySkillCastFlow(_subscriptionService, _commandFactory);
         _newSkillSystemCastFlow = newSkillSystemSkillCastFlow;
+        _loadoutCheatGameplayService = loadoutCheatGameplayService;
         try { _audio = ProjectContext.Instance.Container.Resolve<IAudioService>(); } catch { _audio = null; }
     }
 
@@ -160,6 +164,7 @@ public class CastController : ICastController {
         }
 
         _activeFlow.ExecutePreparedCast(caster);
+        _loadoutCheatGameplayService?.ApplyAfterCast(caster);
         CancelAbilityUse();
     }
 

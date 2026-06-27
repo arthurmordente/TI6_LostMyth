@@ -5,6 +5,7 @@ using Logic.Scripts.GameDomain.MVC.Shared;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Logic.Scripts.GameDomain.Services.Cheats;
 using Logic.Scripts.GameDomain.Services.Skills;
 using Logic.Scripts.GameDomain.MVC.ExplorationLoadout;
 using UnityEngine.EventSystems;
@@ -38,6 +39,34 @@ public class ExplorationLoadoutUIView : MonoBehaviour, IExplorationLoadoutView
     [SerializeField] private TMP_Dropdown _skillCategoryDropdown;
     [Tooltip("Opcional. Dropdown TMP para filtrar por divindade.")]
     [SerializeField] private TMP_Dropdown _divinityCategoryDropdown;
+
+    [Header("List panels")]
+    [SerializeField] private GameObject _listPanel;
+    [SerializeField] private GameObject _skillCatalogPanel;
+    [SerializeField] private GameObject _cheatCatalogPanel;
+    [SerializeField] private Transform _cheatCatalogContainer;
+    [SerializeField] private LoadoutCheatFrameView _cheatFramePrefab;
+
+    [Header("Bookmarks — assign in Inspector (no color convention)")]
+    [SerializeField] private Button _skillBookmark;
+    [SerializeField] private Button _cheatBookmark;
+    [SerializeField] private Button _defaultBookmark;
+    [SerializeField] private Button _detailBookmark;
+    [SerializeField] private float _inactiveBookmarkAlpha = 0.55f;
+
+    [Header("Cheat detail")]
+    [SerializeField] private GameObject _cheatDetailPanel;
+    [SerializeField] private TMP_Text _cheatDetailNameText;
+    [SerializeField] private Image _cheatDetailIconImage;
+    [SerializeField] private TMP_Text _cheatDetailDescriptionText;
+    [SerializeField] private TMP_Text _cheatDetailLoreText;
+    [SerializeField] private Toggle _cheatEnableToggle;
+    [Tooltip("Opcional. Imagem do toggle; se vazio usa targetGraphic do Toggle.")]
+    [SerializeField] private Image _cheatToggleStateImage;
+    [Tooltip("Sprite quando o cheat está desactivado. Se vazio, usa o sprite inicial da imagem.")]
+    [SerializeField] private Sprite _cheatToggleDisabledSprite;
+    [Tooltip("Sprite quando o cheat está activo.")]
+    [SerializeField] private Sprite _cheatToggleEnabledSprite;
 
     [Header("Details — panels")]
     [Tooltip("Painel default com texto fixo sobre builds (visível ao abrir e ao desselecionar).")]
@@ -75,7 +104,11 @@ public class ExplorationLoadoutUIView : MonoBehaviour, IExplorationLoadoutView
     private Action<SkillLoadoutUnitType, int, SkillDataSO> _onSkillDropped;
     private Action<SkillLoadoutUnitType, int> _onEquippedSlotClicked;
     private Action _onClearCatalogSelection;
+    private Action<CheatDataSO, bool> _onCheatToggleChanged;
     private readonly List<LoadoutSkillFrameView> _catalogItems = new List<LoadoutSkillFrameView>(16);
+    private readonly List<LoadoutCheatFrameView> _cheatCatalogItems = new List<LoadoutCheatFrameView>(4);
+    private LoadoutLeftCatalogTab _leftCatalogTab = LoadoutLeftCatalogTab.Skills;
+    private LoadoutRightDetailTab _rightDetailTab = LoadoutRightDetailTab.Overview;
     private readonly List<LoadoutSkillFrameView> _playerSlotFrames = new List<LoadoutSkillFrameView>(4);
     private readonly List<LoadoutSkillFrameView> _bookSlotFrames = new List<LoadoutSkillFrameView>(4);
     private readonly List<CanvasGroup> _playerSlotCanvasGroups = new List<CanvasGroup>(4);
@@ -123,7 +156,93 @@ public class ExplorationLoadoutUIView : MonoBehaviour, IExplorationLoadoutView
         _onClearCatalogSelection = onClearCatalogSelection;
         WireSkillCategoryDropdown();
         WireDivinityCategoryDropdown();
+        EnsureBookmarkHitTargets();
     }
+
+    public void RegisterBookmarkCallbacks(
+        Action onSkillBookmark,
+        Action onCheatBookmark,
+        Action onDefaultBookmark)
+    {
+        WireBookmarkButton(_skillBookmark, onSkillBookmark);
+        WireBookmarkButton(_cheatBookmark, onCheatBookmark);
+        WireBookmarkButton(_defaultBookmark, onDefaultBookmark);
+        ConfigureDetailBookmarkNonInteractive();
+    }
+
+    public void RegisterCheatToggleCallback(Action<CheatDataSO, bool> onCheatToggleChanged)
+    {
+        _onCheatToggleChanged = onCheatToggleChanged;
+        EnsureDetailPanelHitTargets();
+        ConfigureCheatEnableToggle();
+        if (_cheatEnableToggle == null) return;
+        _cheatEnableToggle.onValueChanged.RemoveListener(OnCheatEnableToggleChanged);
+        _cheatEnableToggle.onValueChanged.AddListener(OnCheatEnableToggleChanged);
+    }
+
+    void ConfigureCheatEnableToggle()
+    {
+        if (_cheatEnableToggle == null) return;
+        _cheatEnableToggle.toggleTransition = Toggle.ToggleTransition.None;
+        CaptureCheatToggleDisabledSpriteIfNeeded(ResolveCheatToggleImage());
+    }
+
+    void EnsureDetailPanelHitTargets()
+    {
+        EnsureDetailPanelHitTarget(_cheatDetailPanel);
+        EnsureDetailPanelHitTarget(_detailSkillPanel);
+    }
+
+    static void EnsureDetailPanelHitTarget(GameObject panel)
+    {
+        if (panel == null) return;
+        if (panel.GetComponent<LoadoutDetailPanelHitTarget>() == null)
+            panel.AddComponent<LoadoutDetailPanelHitTarget>();
+    }
+
+    void WireBookmarkButton(Button button, Action callback)
+    {
+        if (button == null) return;
+        button.onClick.RemoveAllListeners();
+        button.onClick.AddListener(() => callback?.Invoke());
+    }
+
+    void ConfigureDetailBookmarkNonInteractive()
+    {
+        if (_detailBookmark == null) return;
+
+        _detailBookmark.onClick.RemoveAllListeners();
+        // Manter interactable para o Unity não aplicar o tint "disabled" (fosco permanente).
+        _detailBookmark.interactable = true;
+
+        Graphic[] graphics = _detailBookmark.GetComponentsInChildren<Graphic>(true);
+        for (int i = 0; i < graphics.Length; i++)
+            graphics[i].raycastTarget = false;
+    }
+
+    void EnsureBookmarkHitTargets()
+    {
+        EnsureBookmarkHitTarget(_skillBookmark);
+        EnsureBookmarkHitTarget(_cheatBookmark);
+        EnsureBookmarkHitTarget(_defaultBookmark);
+    }
+
+    static void EnsureBookmarkHitTarget(Button bookmark)
+    {
+        if (bookmark == null) return;
+        if (bookmark.GetComponent<LoadoutBookmarkHitTarget>() == null)
+            bookmark.gameObject.AddComponent<LoadoutBookmarkHitTarget>();
+    }
+
+    void OnCheatEnableToggleChanged(bool enabled)
+    {
+        ApplyCheatToggleVisual(enabled);
+        if (_selectedCheatForToggle != null)
+            _onCheatToggleChanged?.Invoke(_selectedCheatForToggle, enabled);
+    }
+
+    CheatDataSO _selectedCheatForToggle;
+    bool _cheatToggleDisabledSpriteCaptured;
 
     void LateUpdate()
     {
@@ -478,9 +597,172 @@ public class ExplorationLoadoutUIView : MonoBehaviour, IExplorationLoadoutView
         return groups[slotIndex];
     }
 
+    public void ResetToDefaultPanelLayout()
+    {
+        SetLeftCatalogTab(LoadoutLeftCatalogTab.Skills);
+        SetRightDetailTab(LoadoutRightDetailTab.Overview);
+    }
+
+    public void SetLeftCatalogTab(LoadoutLeftCatalogTab tab)
+    {
+        _leftCatalogTab = tab;
+        if (_listPanel != null) _listPanel.SetActive(true);
+        if (_skillCatalogPanel != null) _skillCatalogPanel.SetActive(tab == LoadoutLeftCatalogTab.Skills);
+        if (_cheatCatalogPanel != null) _cheatCatalogPanel.SetActive(tab == LoadoutLeftCatalogTab.Cheats);
+        SyncBookmarkVisuals();
+    }
+
+    public void SetRightDetailTab(LoadoutRightDetailTab tab)
+    {
+        _rightDetailTab = tab;
+        ApplyRightDetailPanels();
+        SyncBookmarkVisuals();
+    }
+
+    void ApplyRightDetailPanels()
+    {
+        bool overview = _rightDetailTab == LoadoutRightDetailTab.Overview;
+        if (_detailDefaultPanel != null) _detailDefaultPanel.SetActive(overview);
+        if (_detailSkillPanel != null)
+            _detailSkillPanel.SetActive(!overview && _leftCatalogTab == LoadoutLeftCatalogTab.Skills);
+        if (_cheatDetailPanel != null)
+            _cheatDetailPanel.SetActive(!overview && _leftCatalogTab == LoadoutLeftCatalogTab.Cheats);
+    }
+
+    void SyncBookmarkVisuals()
+    {
+        bool skillsSelected = _leftCatalogTab == LoadoutLeftCatalogTab.Skills;
+        LoadoutBookmarkPairVisual.ApplyPair(
+            skillsSelected ? _skillBookmark : _cheatBookmark,
+            skillsSelected ? _cheatBookmark : _skillBookmark,
+            _inactiveBookmarkAlpha);
+
+        bool overviewSelected = _rightDetailTab == LoadoutRightDetailTab.Overview;
+        LoadoutBookmarkPairVisual.ApplyPair(
+            overviewSelected ? _defaultBookmark : _detailBookmark,
+            overviewSelected ? _detailBookmark : _defaultBookmark,
+            _inactiveBookmarkAlpha);
+    }
+
+    public void ClearCheatCatalog()
+    {
+        _cheatCatalogItems.Clear();
+        _selectedCheatForToggle = null;
+        Transform container = ResolveCheatCatalogContainer();
+        if (container == null) return;
+        for (int i = container.childCount - 1; i >= 0; i--)
+            Destroy(container.GetChild(i).gameObject);
+    }
+
+    public LoadoutCheatFrameView CreateCheatCatalogItem(CheatDataSO cheat, Action<CheatDataSO> onCheatClicked)
+    {
+        Transform container = ResolveCheatCatalogContainer();
+        if (container == null || _cheatFramePrefab == null || cheat == null) return null;
+
+        LoadoutCheatFrameView frame = Instantiate(_cheatFramePrefab, container);
+        if (frame.transform is RectTransform cheatRect)
+            cheatRect.localScale = Vector3.one;
+        _cheatCatalogItems.Add(frame);
+        frame.Bind(cheat, onCheatClicked);
+        return frame;
+    }
+
+    public void FinalizeCheatCatalogScroll()
+    {
+        Transform container = ResolveCheatCatalogContainer();
+        if (container is not RectTransform rt) return;
+        LayoutRebuilder.ForceRebuildLayoutImmediate(rt);
+        Canvas.ForceUpdateCanvases();
+    }
+
+    public void SetSelectedCheat(CheatDataSO cheat)
+    {
+        _selectedCheatForToggle = cheat;
+        for (int i = 0; i < _cheatCatalogItems.Count; i++)
+        {
+            LoadoutCheatFrameView frame = _cheatCatalogItems[i];
+            if (frame == null) continue;
+            frame.SetSelected(frame.BoundCheat == cheat);
+        }
+    }
+
+    public void ShowCheatDetails(CheatDataSO cheat, bool isEnabled)
+    {
+        if (cheat == null) return;
+
+        _selectedCheatForToggle = cheat;
+        if (_cheatDetailNameText != null) _cheatDetailNameText.SetText(cheat.DisplayName ?? cheat.name);
+        if (_cheatDetailIconImage != null)
+        {
+            _cheatDetailIconImage.sprite = cheat.Icon;
+            _cheatDetailIconImage.enabled = cheat.Icon != null;
+        }
+        if (_cheatDetailDescriptionText != null)
+        {
+            _cheatDetailDescriptionText.richText = true;
+            _cheatDetailDescriptionText.SetText(CheatDescriptionRichTextFormatter.Format(cheat));
+        }
+        if (_cheatDetailLoreText != null) _cheatDetailLoreText.SetText(cheat.Lore ?? string.Empty);
+        SetCheatToggleWithoutNotify(isEnabled);
+    }
+
+    public void SetCheatToggleWithoutNotify(bool enabled)
+    {
+        if (_cheatEnableToggle == null) return;
+        _cheatEnableToggle.SetIsOnWithoutNotify(enabled);
+        ApplyCheatToggleVisual(enabled);
+    }
+
+    public void SyncCheatCatalogEnabledStates(Func<CheatDataSO, bool> isEnabled)
+    {
+        if (isEnabled == null) return;
+        for (int i = 0; i < _cheatCatalogItems.Count; i++)
+        {
+            LoadoutCheatFrameView frame = _cheatCatalogItems[i];
+            if (frame == null || frame.BoundCheat == null) continue;
+            frame.SetEnabledState(isEnabled(frame.BoundCheat));
+        }
+    }
+
+    Image ResolveCheatToggleImage()
+    {
+        if (_cheatToggleStateImage != null) return _cheatToggleStateImage;
+        if (_cheatEnableToggle != null && _cheatEnableToggle.targetGraphic is Image img)
+            return img;
+        return null;
+    }
+
+    void CaptureCheatToggleDisabledSpriteIfNeeded(Image image)
+    {
+        if (_cheatToggleDisabledSprite != null || _cheatToggleDisabledSpriteCaptured || image == null)
+            return;
+        if (image.sprite == null) return;
+        _cheatToggleDisabledSprite = image.sprite;
+        _cheatToggleDisabledSpriteCaptured = true;
+    }
+
+    void ApplyCheatToggleVisual(bool enabled)
+    {
+        Image image = ResolveCheatToggleImage();
+        if (image == null) return;
+
+        CaptureCheatToggleDisabledSpriteIfNeeded(image);
+
+        Sprite sprite = enabled ? _cheatToggleEnabledSprite : _cheatToggleDisabledSprite;
+        if (sprite != null)
+            image.sprite = sprite;
+    }
+
+    Transform ResolveCheatCatalogContainer()
+    {
+        if (_cheatCatalogContainer != null) return _cheatCatalogContainer;
+        if (_cheatCatalogPanel != null) return _cheatCatalogPanel.transform;
+        return null;
+    }
+
     public void ShowDefaultDetailPanel()
     {
-        SetDetailPanelMode(showSkillPanel: false);
+        SetRightDetailTab(LoadoutRightDetailTab.Overview);
     }
 
     public void ShowSkillDetails(SkillDataSO skill)
@@ -491,7 +773,7 @@ public class ExplorationLoadoutUIView : MonoBehaviour, IExplorationLoadoutView
             return;
         }
 
-        SetDetailPanelMode(showSkillPanel: true);
+        SetRightDetailTab(LoadoutRightDetailTab.Detail);
         if (_detailNameText != null) _detailNameText.SetText(skill.SkillName ?? "-");
         if (_detailDivinityText != null)
             _detailDivinityText.SetText(SkillDivinityUtil.DisplayLabel(skill.Divinity));
@@ -512,14 +794,6 @@ public class ExplorationLoadoutUIView : MonoBehaviour, IExplorationLoadoutView
             else _detailRangeText.SetText(skill.Range.ToString("0.##"));
         }
         ApplyDetailVisualLayers(skill);
-    }
-
-    void SetDetailPanelMode(bool showSkillPanel)
-    {
-        if (_detailSkillPanel != null)
-            _detailSkillPanel.SetActive(showSkillPanel);
-        if (_detailDefaultPanel != null)
-            _detailDefaultPanel.SetActive(!showSkillPanel);
     }
 
     void ApplyDetailCost(SkillDataSO skill)

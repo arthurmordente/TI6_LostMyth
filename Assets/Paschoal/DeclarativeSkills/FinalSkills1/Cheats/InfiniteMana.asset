@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 75a07b88fb4b4714c9ad18880b1bb44f, type: 3}
+  m_Name: InfiniteMana
+  m_EditorClassIdentifier: Assembly-CSharp::Logic.Scripts.GameDomain.Services.Cheats.CheatDataSO
+  CheatId: 1
+  DisplayName: Mana Infinita!
+  Icon: {fileID: 21300000, guid: 0feb04ab30c1c364d9e9c8fd32fc8213, type: 3}
+  Description: "<color=#7A0DB9><b>Concede 10 de mana</b></color> ao usar uma habilidade.
+    IMPAR\xC1VEL MALUCO!"
+  Lore: "\"Nenhum boss gosta disso, s\xF3 os masoquistas\""
+  EffectType: 0
+  EffectAmount: 10
+  _descriptionHighlights: []

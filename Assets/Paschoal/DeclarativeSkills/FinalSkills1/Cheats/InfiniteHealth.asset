@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 75a07b88fb4b4714c9ad18880b1bb44f, type: 3}
+  m_Name: InfiniteHealth
+  m_EditorClassIdentifier: Assembly-CSharp::Logic.Scripts.GameDomain.Services.Cheats.CheatDataSO
+  CheatId: 0
+  DisplayName: Vida Infinita!
+  Icon: {fileID: 21300000, guid: f18e00465fefb7b4db6702a67ed18621, type: 3}
+  Description: <color=#1BB90D><b>Cura 100 de vida</b></color> ao receber dano. IMORTAL
+    MALUCO!
+  Lore: "\"B\xF3ris odeia esse efeito.\""
+  EffectType: 1
+  EffectAmount: 100
+  _descriptionHighlights: []

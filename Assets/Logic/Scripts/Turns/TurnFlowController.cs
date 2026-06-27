@@ -8,6 +8,7 @@ using Logic.Scripts.GameDomain.MVC.Ui;
 using Logic.Scripts.GameDomain.MVC.Environment;
 using Logic.Scripts.GameDomain.MVC.Environment.Hokari;
 using Logic.Scripts.GameDomain.MVC.Environment.Laki;
+using Logic.Scripts.GameDomain.Services.Cheats;
 using Logic.Scripts.GameDomain.Services.Skills;
 
 namespace Logic.Scripts.Turns {
@@ -21,6 +22,7 @@ namespace Logic.Scripts.Turns {
         private readonly IGamePlayUiController _gamePlayUiController;
         private readonly IRandomTurnPassiveService _randomTurnPassiveService;
         private readonly IDamageStackMovementPassiveService _damageStackMovementPassiveService;
+        private readonly LoadoutCheatGameplayService _loadoutCheatGameplayService;
 
         private IBossActionService _bossActionService;
         private IEnviromentActionService _enviromentActionService;
@@ -46,7 +48,8 @@ namespace Logic.Scripts.Turns {
             IDivideAbilityHandler divideAbilityHandler,
             [InjectOptional] IGamePlayUiController gamePlayUiController,
             [InjectOptional] IRandomTurnPassiveService randomTurnPassiveService,
-            [InjectOptional] IDamageStackMovementPassiveService damageStackMovementPassiveService) {
+            [InjectOptional] IDamageStackMovementPassiveService damageStackMovementPassiveService,
+            [InjectOptional] LoadoutCheatGameplayService loadoutCheatGameplayService = null) {
             _actionPointsService = actionPointsService;
             _turnStateService = turnStateService;
             _commandFactory = commandFactory;
@@ -56,6 +59,7 @@ namespace Logic.Scripts.Turns {
             _gamePlayUiController = gamePlayUiController;
             _randomTurnPassiveService = randomTurnPassiveService;
             _damageStackMovementPassiveService = damageStackMovementPassiveService;
+            _loadoutCheatGameplayService = loadoutCheatGameplayService;
         }
 
         public void Initialize(IBossActionService bossActionService,
@@ -163,6 +167,7 @@ namespace Logic.Scripts.Turns {
 
         private async void StartPlayerPhase() {
             _actionPointsService.GainTurnPoints();
+            _loadoutCheatGameplayService?.ApplyPlayerTurnStart(_actionPointsService, _naraController);
             _phase = TurnPhase.PlayerAct;
             _turnMovement?.ResetMovementArea();
             _randomTurnPassiveService?.ApplyPlayerTurnStart(_actionPointsService, _turnMovement);

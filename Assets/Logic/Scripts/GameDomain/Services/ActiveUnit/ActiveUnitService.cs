@@ -47,19 +47,7 @@ namespace Logic.Scripts.GameDomain.Services.ActiveUnit
 
             if (ActiveUnit is IBookController)
             {
-                var bookView = ActiveUnit.UnitViewGO;
-                var bookLoadout = bookView != null ? bookView.GetComponent<NewSkillSystemSkillLoadout>() : null;
-                SkillDataSO skillAtSlot(int i)
-                {
-                    if (bookLoadout == null || !bookLoadout.TryGetSkill(i, out SkillDataSO s)) return null;
-                    return s;
-                }
-
-                _gamePlayUiController.SetAbilityManaCosts(0, 0, 0, 0,
-                    SlotShowsManaCostUi(skillAtSlot(0)),
-                    SlotShowsManaCostUi(skillAtSlot(1)),
-                    SlotShowsManaCostUi(skillAtSlot(2)),
-                    SlotShowsManaCostUi(skillAtSlot(3)));
+                _gamePlayUiController.SetAbilityManaCosts(0, 0, 0, 0, false, false, false, false);
                 return;
             }
 

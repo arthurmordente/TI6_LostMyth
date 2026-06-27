@@ -1,10 +1,12 @@
 using Logic.Scripts.GameDomain.MVC.Abilitys;
 using Logic.Scripts.GameDomain.MVC.Nara;
 using Logic.Scripts.GameDomain.Services.ActiveUnit;
+using Logic.Scripts.GameDomain.Services.Cheats;
 using Logic.Scripts.Services.AudioService;
 using Logic.Scripts.Services.CommandFactory;
 using Logic.Scripts.Services.UpdateService;
 using UnityEngine;
+using Zenject;
 
 namespace Logic.Scripts.GameDomain.MVC.Book.Divide
 {
@@ -17,6 +19,7 @@ namespace Logic.Scripts.GameDomain.MVC.Book.Divide
         private readonly IUpdateSubscriptionService _updateSubscriptionService;
         private readonly ICommandFactory _commandFactory;
         private readonly IAudioService _audioService;
+        private readonly LoadoutCheatGameplayService _loadoutCheatGameplayService;
 
         private const int COOLDOWN_TURNS = 1;
 
@@ -35,7 +38,8 @@ namespace Logic.Scripts.GameDomain.MVC.Book.Divide
             IUpdateSubscriptionService updateSubscriptionService,
             ICommandFactory commandFactory,
             AbilityData divideTargetingData,
-            IAudioService audioService)
+            IAudioService audioService,
+            [InjectOptional] LoadoutCheatGameplayService loadoutCheatGameplayService = null)
         {
             _bookController = bookController;
             _naraController = naraController;
@@ -44,6 +48,7 @@ namespace Logic.Scripts.GameDomain.MVC.Book.Divide
             _commandFactory = commandFactory;
             _divideTargetingData = divideTargetingData;
             _audioService = audioService;
+            _loadoutCheatGameplayService = loadoutCheatGameplayService;
         }
 
         public void Activate()
@@ -95,6 +100,7 @@ namespace Logic.Scripts.GameDomain.MVC.Book.Divide
             if (IsBookDeployed)
             {
                 _bookController.GainTurnActionPoints();
+                _loadoutCheatGameplayService?.ApplyBookTurnStart(_bookController);
                 _bookController.ResetMovementArea();
             }
         }

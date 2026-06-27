@@ -1186,54 +1186,27 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
         GameObject ResolveSkillCostDisplayRoot(int slotIndex, bool bookTheme)
         {
             List<GameObject> configuredList = bookTheme ? _bookSkillCostDisplayRoots : _erzaSkillCostDisplayRoots;
-            GameObject root = At(configuredList, slotIndex);
-            if (root != null) return root;
-
-            Button button = bookTheme
-                ? ResolveSkillButton(slotIndex, _bookSkillButtons, _bookSkillsBackground)
-                : ResolveSkillButton(slotIndex, _erzaSkillButtons, _erzaSkillsBackground);
-            Transform mana = FindNamedChild(button != null ? button.transform : null, "icon_Mana");
-            return mana != null ? mana.gameObject : null;
+            return At(configuredList, slotIndex);
         }
 
         private void ApplySkillCostCell(int slotIndex, int cost, bool showCostDisplay)
         {
             GameObject root = GetSkillCostDisplayRoot(slotIndex);
             if (root != null)
-            {
                 root.SetActive(showCostDisplay);
-                if (showCostDisplay)
-                {
-                    var t = root.GetComponentInChildren<TMP_Text>(true);
-                    SetIntText(t, cost);
-                }
-
-                return;
-            }
 
             TMP_Text text = GetActiveCostText(slotIndex);
-            if (text != null)
-            {
-                text.gameObject.SetActive(showCostDisplay);
-                if (showCostDisplay)
-                    SetIntText(text, cost);
-            }
+            if (text == null) return;
+
+            text.gameObject.SetActive(showCostDisplay);
+            if (showCostDisplay)
+                SetIntText(text, cost);
         }
 
         private TMP_Text GetActiveCostText(int slotIndex)
         {
             var configuredList = _showBookSkillsTheme ? _bookSkillCostTexts : _erzaSkillCostTexts;
-            var configured = At(configuredList, slotIndex);
-            if (configured != null) return configured;
-
-            GameObject activeBg = _showBookSkillsTheme ? _bookSkillsBackground : _erzaSkillsBackground;
-            if (activeBg == null) return null;
-
-            Transform container = ResolveContainer(activeBg.transform);
-            if (container == null) return null;
-            if (slotIndex < 0 || slotIndex >= container.childCount) return null;
-
-            return container.GetChild(slotIndex).GetComponentInChildren<TMP_Text>(true);
+            return At(configuredList, slotIndex);
         }
 
         private static Transform ResolveContainer(Transform backgroundTransform)

@@ -17,7 +17,8 @@ MonoBehaviour:
   <MaxActionPoints>k__BackingField: 10
   <ActionPointsTurnGain>k__BackingField: 2
   <Defense>k__BackingField: 30
-  <MoveSpeed>k__BackingField: 15
+  <MoveSpeed>k__BackingField: 8
+  <JogSpeedThreshold>k__BackingField: 5.5
   <RotationSpeed>k__BackingField: 10
   <MaxMovementRadius>k__BackingField: 30
   <NaraAreaLineHandlerView>k__BackingField: {fileID: 4812206158285913741, guid: 3c5919a7ff77b9046b7fab15f495f863, type: 3}

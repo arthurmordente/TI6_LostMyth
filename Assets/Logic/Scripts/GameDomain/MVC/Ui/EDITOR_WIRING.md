@@ -88,6 +88,67 @@ O menu **inicia oculto** (`Awake` + `Init`). Só abre quando o jogador interage 
 
 Custo **0** (passivas incluídas — no `SkillDataSO` passivas têm sempre custo 0): rótulo **Sem Custo** + sprite `[0]`. Custo **1–3**: rótulo **Custo:** + sprite correspondente. Sem skill seleccionada: badge oculto.
 
+### Canvas de loadout — cheats e bookmarks (`Canvas_Build`)
+
+Hierarquia esperada:
+
+```
+Canvas_Build
+├── Close
+├── Bookmark_* (4 — assign por função, não por cor)
+├── PagesPanel (Horizontal Layout Group)
+│   ├── ListPanel (sempre activo)
+│   │   ├── SkillList
+│   │   └── CheatList
+│   └── Description
+│       ├── PanelErzaLivro
+│       ├── PanelSkillDescription
+│       └── PanelCheatDescription
+```
+
+**Bookmarks** (secção *Bookmarks* no `ExplorationLoadoutCanvasView`):
+
+| Campo | Função |
+|-------|--------|
+| `_skillBookmark` | Tab catálogo skills |
+| `_cheatBookmark` | Tab catálogo cheats |
+| `_defaultBookmark` | Tab painel Erza/Livro |
+| `_detailBookmark` | Tab detalhe (skill ou cheat) |
+
+Adiciona componente **`LoadoutBookmarkHitTarget`** em cada bookmark (automático em runtime se faltar). Podes permutar Red/Green/Yellow/Pink livremente.
+
+**List panels:**
+
+| Campo | GameObject |
+|-------|------------|
+| `_listPanel` | `ListPanel` |
+| `_skillCatalogPanel` | `SkillList` |
+| `_cheatCatalogPanel` | `CheatList` |
+| `_catalogContainer` | grid dentro de `SkillList` |
+| `_cheatCatalogContainer` | filho vazio em `CheatList` |
+
+**Painéis direita:**
+
+| Campo | GameObject |
+|-------|------------|
+| `_detailDefaultPanel` | `PanelErzaLivro` |
+| `_detailSkillPanel` | `PanelSkillDescription` |
+| `_cheatDetailPanel` | `PanelCheatDescription` |
+
+**Cheat detail** (`PanelCheatDescription`): `Image` ícone, TMP descrição (rich text), TMP lore, `Toggle` activar. Ligar em *Cheat detail* no Inspector.
+
+**Prefab cheat frame:** duplicar `SkillFrame` simplificado ou criar prefab com `LoadoutCheatFrameView` + `Button` + `img_Icon`. Assignar em `_cheatFramePrefab`.
+
+### Loadout cheats — assets e GameInstaller
+
+1. **Create → TI6 → Loadout Cheat** — dois assets:
+   - `CheatId` = `infinite_mana`, `EffectType` = ManaRegen, `EffectAmount` = 10
+   - `CheatId` = `infinite_health`, `EffectType` = HealthRegen, `EffectAmount` = 100
+2. Preencher `DisplayName`, `Icon`, `Description`, `Lore`, `DescriptionHighlights` (placeholder `X` → valor colorido).
+3. No **`GameInstaller`** (CoreScene): secção **Loadout cheats** → arrastar os 2 assets para `_loadoutCheatCatalog`.
+
+Toggles persistem em **PlayerPrefs** (`LoadoutCheat_{cheatId}`). Efeitos aplicam-se em combate (mana no turn start + após cast; vida no turn start + após dano). Livro mantém 1 skill/turno.
+
 ### Canvas de pause
 
 - Instanciar `Canvas_PauseMenu.prefab`, `PauseMenuCanvasView` no root, ligar em **Pause Menu View**.
@@ -122,6 +183,7 @@ Repetir nos **8** botões (4 Erza + 4 Livro) em `Assets/Ui/UI_Jordan/Canvas_Game
 ## 5. GameScene
 
 - No `GameInstaller` (SceneContext): adicionar `UniversalUiSceneViews` no mesmo GameObject ou filho.
+- Secção **Loadout cheats**: assignar `CheatDataSO[]` (ver secção loadout cheats acima).
 - Overlays Options/Credits/Load/Guide/Cheats são criados em runtime se não houver refs; **iniciam sempre ocultos** até `ShowOptionsScreen`, `ShowCreditsScreen`, etc.
 - Se usares canvases na cena, atribui em `UniversalUiSceneViews` e define **Root Panel** no Inspector de cada `*CanvasView` (filho `Panel`, não o root do canvas).
 

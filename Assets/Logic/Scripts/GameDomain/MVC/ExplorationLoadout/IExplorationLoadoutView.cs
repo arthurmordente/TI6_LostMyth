@@ -1,5 +1,5 @@
 using System;
-using Logic.Scripts.GameDomain.MVC.ExplorationLoadout;
+using Logic.Scripts.GameDomain.MVC.ExplorationLoadout;using Logic.Scripts.GameDomain.Services.Cheats;
 using Logic.Scripts.GameDomain.Services.Skills;
 using UnityEngine;
 
@@ -22,6 +22,21 @@ public interface IExplorationLoadoutView
         Action onDragEnd,
         Action<SkillLoadoutUnitType, int, SkillDataSO> onSkillDropped,
         Action<SkillLoadoutUnitType, int> onEquippedSlotClicked);
+    void RegisterBookmarkCallbacks(
+        Action onSkillBookmark,
+        Action onCheatBookmark,
+        Action onDefaultBookmark);
+    void RegisterCheatToggleCallback(Action<CheatDataSO, bool> onCheatToggleChanged);
+    void ResetToDefaultPanelLayout();
+    void SetLeftCatalogTab(LoadoutLeftCatalogTab tab);
+    void SetRightDetailTab(LoadoutRightDetailTab tab);
+    void ClearCheatCatalog();
+    LoadoutCheatFrameView CreateCheatCatalogItem(CheatDataSO cheat, Action<CheatDataSO> onCheatClicked);
+    void FinalizeCheatCatalogScroll();
+    void SetSelectedCheat(CheatDataSO cheat);
+    void ShowCheatDetails(CheatDataSO cheat, bool isEnabled);
+    void SetCheatToggleWithoutNotify(bool enabled);
+    void SyncCheatCatalogEnabledStates(Func<CheatDataSO, bool> isEnabled);
     void RebuildLoadoutSlots(int slotCount, Func<SkillLoadoutUnitType, int, SkillDataSO> getSkillForSlot);
     void PlayInvalidAssignFeedback(SkillLoadoutUnitType unitType, int slotIndex);
     void ClearCatalog();

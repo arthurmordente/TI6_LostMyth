@@ -70,26 +70,12 @@ namespace Logic.Scripts.GameDomain.Services.Skills
         {
             if (skill == null) return string.Empty;
 
-            string text = skill.Description ?? string.Empty;
-            SkillDescriptionHighlightEntry[] entries = skill.DescriptionHighlights;
-            if (entries == null || entries.Length == 0 || string.IsNullOrEmpty(text))
-                return text;
-
-            for (int i = 0; i < entries.Length; i++)
-            {
-                SkillDescriptionHighlightEntry entry = entries[i];
-                if (string.IsNullOrEmpty(entry.Placeholder)) continue;
-
-                string value = entry.Mode == SkillDescriptionHighlightMode.ManualText
+            return RichTextHighlightFormatter.Format(
+                skill.Description ?? string.Empty,
+                skill.DescriptionHighlights,
+                entry => entry.Mode == SkillDescriptionHighlightMode.ManualText
                     ? entry.ManualText ?? string.Empty
-                    : SkillDescriptionValueResolver.Resolve(skill, entry.Value);
-                string hex = ColorUtility.ToHtmlStringRGBA(entry.Color);
-                text = text.Replace(
-                    entry.Placeholder,
-                    $"<color=#{hex}>{value}</color>");
-            }
-
-            return text;
+                    : SkillDescriptionValueResolver.Resolve(skill, entry.Value));
         }
     }
 }

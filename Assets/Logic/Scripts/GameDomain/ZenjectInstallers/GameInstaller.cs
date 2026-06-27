@@ -1,5 +1,6 @@
 using Logic.Scripts.GameDomain.GameInitiator;
 using Logic.Scripts.GameDomain.MVC.Abilitys;
+using Logic.Scripts.GameDomain.Services.Cheats;
 using Logic.Scripts.GameDomain.Services.Skills;
 using Logic.Scripts.GameDomain.States;
 using System.Collections.Generic;
@@ -25,6 +26,9 @@ namespace Logic.Scripts.GameDomain.ZenjectInstallers {
         [Header("Skill visuals — divindade × tipo")]
         [SerializeField] private SkillVisualCatalogSO _skillVisualCatalog;
 
+        [Header("Loadout cheats")]
+        [SerializeField] private CheatDataSO[] _loadoutCheatCatalog;
+
         public override void InstallBindings() {
             Container.Bind<IGameInitiator>().To<GameInitiator.GameInitiator>().AsSingle().NonLazy();
             Container.BindInterfacesTo<CheatController>().AsSingle().NonLazy();
@@ -38,6 +42,10 @@ namespace Logic.Scripts.GameDomain.ZenjectInstallers {
 
             Container.Bind<INewSkillSystemSkillLoadoutService>().To<NewSkillSystemSkillLoadoutService>().AsSingle()
                 .WithArguments(_newSkillSystemSkillCatalog, 4).NonLazy();
+
+            Container.Bind<ILoadoutCheatService>().To<LoadoutCheatService>().AsSingle()
+                .WithArguments(_loadoutCheatCatalog ?? System.Array.Empty<CheatDataSO>()).NonLazy();
+            Container.Bind<LoadoutCheatGameplayService>().AsSingle().NonLazy();
 
             if (_skillVisualCatalog != null)
                 Container.Bind<ISkillVisualCatalog>().To<SkillVisualCatalogService>().AsSingle()
