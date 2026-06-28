@@ -456,8 +456,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Obrigado por ajudar a testar nosso projeto e sinta-se livre para desafiar
-    os chefes utilizando habilidades diferentes!
+  m_text: Sinta-se livre para desafiar os chefes utilizando habilidades diferentes!
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: d580464378edd044581dd2d85f8a2838, type: 2}
   m_sharedMaterial: {fileID: -8906674652059005393, guid: d580464378edd044581dd2d85f8a2838, type: 2}
