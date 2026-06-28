@@ -17,5 +17,8 @@ namespace Logic.Scripts.Core.Mvc.WorldCamera
         void BeginPan();
         void EndPan();
         void ApplyPanDelta(Vector2 screenDelta);
+
+        void ApplySceneEntry(Transform followTarget, SceneCameraEntrySettings settings);
+        Awaitable WaitUntilSceneEntryComplete(System.Threading.CancellationToken cancellationToken);
     }
 }

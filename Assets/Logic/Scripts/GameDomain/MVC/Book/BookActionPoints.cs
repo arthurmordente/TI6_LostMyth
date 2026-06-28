@@ -15,6 +15,7 @@ namespace Logic.Scripts.GameDomain.MVC.Book
         public int Current => _current;
         public int Max => _max;
         public int GainPerTurn => _gainPerTurn;
+        public int TemporaryGainPerTurnBonus => 0;
 
         public BookActionPoints(int max, int gainPerTurn)
         {
@@ -73,5 +74,9 @@ namespace Logic.Scripts.GameDomain.MVC.Book
             _current -= amount;
             if (_current < 0) _current = 0;
         }
+
+        public void GrantTemporaryGainPerTurnBonus(int bonus, int playerTurnsRemaining) { }
+
+        public void ConsumeTemporaryGainTurn() { }
     }
 }

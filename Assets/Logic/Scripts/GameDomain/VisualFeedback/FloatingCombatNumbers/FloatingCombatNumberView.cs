@@ -1,14 +1,19 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Serialization;
 
 namespace Logic.Scripts.GameDomain.VisualFeedback.FloatingCombatNumbers
 {
     /// <summary>
-    /// World-space floating combat number. Assign a prefab with TMP + this component in GamePlayInstaller.
+    /// World-space floating combat number. Render priority is raised so numbers draw above meshes and VFX.
     /// </summary>
     public class FloatingCombatNumberView : MonoBehaviour
     {
-        [SerializeField] private TextMeshPro _text;
+        const int RenderSortingOrder = 32767;
+        const int RenderQueueOverlay = 4000;
+
+        [SerializeField, FormerlySerializedAs("_text")] private TextMeshPro _text;
         [SerializeField] private FloatingCombatNumberStyleEntry[] _styles =
         {
             new FloatingCombatNumberStyleEntry
@@ -61,6 +66,7 @@ namespace Logic.Scripts.GameDomain.VisualFeedback.FloatingCombatNumbers
         float _elapsed;
         Color _baseColor;
         Camera _camera;
+        bool _renderOnTopApplied;
 
         void Awake()
         {
@@ -73,6 +79,8 @@ namespace Logic.Scripts.GameDomain.VisualFeedback.FloatingCombatNumbers
             _anchor = anchor;
             _camera = Camera.main;
             _elapsed = 0f;
+
+            ApplyRenderOnTop();
 
             FloatingCombatNumberStyleEntry style = ResolveStyle(kind);
             float fontSize = ResolveFontSize(Mathf.Abs(amount), style);
@@ -126,10 +134,30 @@ namespace Logic.Scripts.GameDomain.VisualFeedback.FloatingCombatNumbers
                 Destroy(gameObject);
         }
 
-        /// <summary>Slow fade early, rapid fade near the end of the lifetime.</summary>
+        void ApplyRenderOnTop()
+        {
+            if (_renderOnTopApplied || _text == null) return;
+            _renderOnTopApplied = true;
+
+            Renderer renderer = _text.renderer;
+            if (renderer != null)
+                renderer.sortingOrder = RenderSortingOrder;
+
+            Material material = _text.fontMaterial;
+            if (material == null) return;
+
+            material.renderQueue = RenderQueueOverlay;
+            if (material.HasProperty("_ZTest"))
+                material.SetInt("_ZTest", (int)CompareFunction.Always);
+        }
+
+        /// <summary>Full opacity for the first half; cubic fade during the second half.</summary>
         static float EvaluateAlpha(float normalizedTime)
         {
-            float remaining = 1f - normalizedTime;
+            if (normalizedTime <= 0.5f) return 1f;
+
+            float fadeT = (normalizedTime - 0.5f) / 0.5f;
+            float remaining = 1f - fadeT;
             return remaining * remaining * remaining;
         }
 

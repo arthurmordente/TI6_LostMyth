@@ -89,8 +89,10 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
                     EditorGUILayout.PropertyField(lakiArenaTileTelegraph, true);
                     EditorGUILayout.HelpBox(
                         "Telegraph prefab: Combat Attack Visual Catalog → Laki Strike.\n" +
-                        "Telegraph Disc Radius = VFX root scale. Hit Radius Meters At Unit Disc = world hit radius when disc radius is 1 (e.g. 3 to match your VFX).\n" +
-                        "Hit = player within (Disc × MetersAtUnitDisc + padding) from each telegraph center. Tiles never repeat.",
+                        "Disc Radius Min/Max: each telegraph rolls its own root scale (X/Z). Equal min/max = fixed size.\n" +
+                        "Hit Radius Meters At Unit Disc = world hit radius when disc radius is 1 (e.g. 3 to match your VFX).\n" +
+                        "Hit = player within (discRadius × MetersAtUnitDisc + padding) from each center. Tiles never repeat.\n" +
+                        "On resolve, each disc is destroyed one-by-one as its strike is processed.",
                         MessageType.None);
                     break;
                 default:

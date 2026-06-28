@@ -14,11 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _availableAttacks:
   - {fileID: -5180875672858182064, guid: eb81ffb3bedbec648ac3a0132d348fd1, type: 3}
-  - {fileID: -5180875672858182064, guid: 3a0d475b101028240b029cdbcf3d794d, type: 3}
-  - {fileID: -5180875672858182064, guid: 03f2bf3d6989d7e40a9da9fb3e2d56f4, type: 3}
-  - {fileID: -5180875672858182064, guid: d6a9437bcda74ec4ebc2d8721de77c37, type: 3}
-  - {fileID: -5180875672858182064, guid: 38e62b0ac0174ed4b9b1c9d010d05e25, type: 3}
-  - {fileID: -5180875672858182064, guid: dd916d236eca06641937e8241d5dbaa0, type: 3}
+  - {fileID: -5180875672858182064, guid: 68a09054bd921c144a28f96468252a44, type: 3}
+  - {fileID: -5180875672858182064, guid: 1e30f357ec668404fab37e704bb196b8, type: 3}
+  - {fileID: -5180875672858182064, guid: 4d3f88498cf1a434fad913090280ef2a, type: 3}
+  - {fileID: -5180875672858182064, guid: ffd90e1c25a381248834b447f4406906, type: 3}
+  - {fileID: -5180875672858182064, guid: 9def9c5367a203b44a092b7ce68bc9ce, type: 3}
+  - {fileID: -5180875672858182064, guid: 1e30f357ec668404fab37e704bb196b8, type: 3}
   _fallbackStepDistance: 1
   _stepDistance: 2
   _randomChangeDirectionSeconds: 1.5
@@ -26,7 +27,7 @@ MonoBehaviour:
   _turnPattern:
   - Mode: 3
     DistanceMultiplier: 0
-    AttackIndices: 0500000000000000
+    AttackIndices: 05000000000000000600000001000000
   - Mode: 3
     DistanceMultiplier: 0
     AttackIndices: 040000000400000004000000

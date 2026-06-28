@@ -1,3 +1,5 @@
+using UnityEngine;
+
 namespace Logic.Scripts.GameDomain.Services.Skills
 {
     /// <summary>Read-only snapshot of the roulette passive for UI / gameplay queries.</summary>
@@ -14,5 +16,11 @@ namespace Logic.Scripts.GameDomain.Services.Skills
 
         /// <summary>Outgoing damage multiplier from the turn passive this turn (1 when another effect is active).</summary>
         float TurnOutgoingDamageMultiplier { get; }
+
+        /// <summary>Display text for the entry rolled this turn; empty before the first roll or when disabled.</summary>
+        string ActiveRollDisplayText { get; }
+
+        /// <summary>Passive skill asset driving the roulette; null when disabled.</summary>
+        SkillDataSO ActivePassiveSkill { get; }
     }
 }

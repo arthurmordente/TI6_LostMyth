@@ -13,5 +13,8 @@ namespace Logic.Scripts.Turns
         void Configure(int max, int gainPerTurn);
 			void Add(int amount);
 			void Subtract(int amount);
+        void GrantTemporaryGainPerTurnBonus(int bonus, int playerTurnsRemaining);
+        void ConsumeTemporaryGainTurn();
+        int TemporaryGainPerTurnBonus { get; }
     }
 }

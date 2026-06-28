@@ -284,7 +284,9 @@ namespace Logic.Scripts.GameDomain.MVC.Boss {
                 out Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.IResolver diceResolver))
             {
                 int fightTurn = _turnStateService != null ? _turnStateService.TurnNumber : 0;
-                Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.NotifyPlayerWonDiceOpensShieldWindow(diceResult, fightTurn);
+                int maxHp = _bossConfiguration != null ? _bossConfiguration.MaxHealth : Mathf.Max(1, _bossData.ActualHealth);
+                Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack.DiceAttackRuntimeService.NotifyPlayerWonDiceOpensShieldWindow(
+                    diceResult, fightTurn, _bossPhases, _currentPhaseIndex, maxHp);
                 try
                 {
                     await Laki.LakiBetResolutionPresentation.PlayDiceAttackAsync(diceResult, _bossView, _audioService);

@@ -83,9 +83,15 @@ namespace Logic.Scripts.GameDomain.MVC.Ui
         /// <summary>Anúncio “Turno N” no centro: abre (alpha 0→1 + escala), mantém, fecha (alpha 1→0 + escala).</summary>
         void PlayPlayerTurnAnnouncement(int turnNumber);
 
-        /// <summary>Só <paramref name="fightTurnNumber"/> == 1: após delay, anima o botão passar turno (mesma lógica que DicePromptUI) até <see cref="EndFirstTurnPassTurnHint"/>.</summary>
+        /// <summary>Monitoriza mana/cast do Livro durante o turno do jogador; após 3s com ambos esgotados, anima o botão passar turno.</summary>
+        void BeginPassTurnHintMonitoring();
+
+        void EndPassTurnHint();
+
+        /// <summary>Compatibilidade: encaminha para <see cref="BeginPassTurnHintMonitoring"/>.</summary>
         void BeginFirstTurnPassTurnHint(int fightTurnNumber);
 
+        /// <summary>Compatibilidade: encaminha para <see cref="EndPassTurnHint"/>.</summary>
         void EndFirstTurnPassTurnHint();
 
         /// <summary>Alpha dos slots activos conforme mana (Erza) ou cast único (Livro).</summary>

@@ -86,6 +86,10 @@ public abstract class SkillDataSO : ScriptableObject
     [Header("Description — highlighted values")]
     [SerializeField] private SkillDescriptionHighlightEntry[] _descriptionHighlights = Array.Empty<SkillDescriptionHighlightEntry>();
 
+    [Header("Combat popup — Skill Effect line")]
+    [Tooltip("When not None, combat SkillsPopUp shows an extra Skill Effect line with live combat data.")]
+    [SerializeField] private SkillCombatPopupEffectSource _combatPopupSkillEffectSource;
+
     /// <summary>PlayerPrefs loadout identity: nome do ficheiro asset (<c>name</c> no Unity).</summary>
     public string LoadoutPersistenceKey => name;
 
@@ -121,6 +125,8 @@ public abstract class SkillDataSO : ScriptableObject
 
     public SkillDescriptionHighlightEntry[] DescriptionHighlights =>
         _descriptionHighlights ?? Array.Empty<SkillDescriptionHighlightEntry>();
+
+    public SkillCombatPopupEffectSource CombatPopupSkillEffectSource => _combatPopupSkillEffectSource;
 
     /// <summary>Entries for <see cref="SkillType.Passive"/>; ignored for other skill types at runtime.</summary>
     public PassiveStatModifierEntry[] PassiveModifiers => _passiveModifiers ?? Array.Empty<PassiveStatModifierEntry>();

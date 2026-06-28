@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 4830519003573105392}
   - component: {fileID: -5180875672858182064}
   m_Layer: 0
-  m_Name: 12Strike20 1
+  m_Name: fs5Strike0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -92,8 +92,8 @@ MonoBehaviour:
   _diceAttackPlayerRollInputConsumeDelay: 0.1
   _diceAttackPlayerRollPromptPrefab: {fileID: 367992611274707876, guid: bf0d1dd493df01949aae7425583e91be, type: 3}
   _lakiArenaTileTelegraph:
-    AreaCount: 12
-    PlayerTileChance: 0.2
+    AreaCount: 5
+    PlayerTileChance: 0
     TelegraphDiscRadius: 1
     HitRadiusMetersAtUnitDisc: 3
     HitRadiusPadding: 0.15

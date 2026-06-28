@@ -90,5 +90,13 @@ namespace Logic.Scripts.Core.Mvc.WorldCamera
             _worldCameraView.TweenPanOffsetToZero(durationSeconds);
 
         public void SetExternalInputBlock(bool blocked) => _externalInputBlock = blocked;
+
+        public void ApplyOrbitPreset(SceneCameraEntrySettings settings) =>
+            _worldCameraView.ApplyOrbitPreset(settings);
+
+        public void CompleteFollowTransitionImmediate() =>
+            _worldCameraView.CompleteFollowTransitionImmediate();
+
+        public bool IsFollowTransitionComplete => _worldCameraView.IsFollowTransitionComplete;
     }
 }

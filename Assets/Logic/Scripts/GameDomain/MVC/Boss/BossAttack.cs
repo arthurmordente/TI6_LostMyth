@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Serialization;
+using UnityEngine.Serialization;
 using System.Collections.Generic;
 using Logic.Scripts.GameDomain.MVC.Abilitys;
 using Logic.Scripts.GameDomain.MVC.Boss.Attacks.Core;
@@ -123,8 +124,11 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
             public int AreaCount;
             [Range(0f, 1f), Tooltip("Per-area chance to target the tile the player is standing on.")]
             public float PlayerTileChance;
-            [Min(0.1f), Tooltip("Scales the telegraph prefab root (X/Z). VFX children keep local scale (e.g. 0.15 on the VFX child).")]
-            public float TelegraphDiscRadius;
+            [FormerlySerializedAs("TelegraphDiscRadius")]
+            [Min(0.1f), Tooltip("Minimum telegraph disc root scale (X/Z). Each disc rolls independently between Min and Max.")]
+            public float TelegraphDiscRadiusMin;
+            [Min(0.1f), Tooltip("Maximum telegraph disc root scale (X/Z). Set equal to Min for a fixed size.")]
+            public float TelegraphDiscRadiusMax;
             [Min(0.01f), Tooltip("World hit radius in meters when Telegraph Disc Radius = 1. Match what you see in play (e.g. 6 for a ~6m disc at radius 1).")]
             public float HitRadiusMetersAtUnitDisc;
             [Min(0f), Tooltip("Extra meters added to the computed hit radius.")]
@@ -140,7 +144,8 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
         {
             AreaCount = 2,
             PlayerTileChance = 0.35f,
-            TelegraphDiscRadius = 1f,
+            TelegraphDiscRadiusMin = 1f,
+            TelegraphDiscRadiusMax = 1f,
             HitRadiusMetersAtUnitDisc = 3f,
             HitRadiusPadding = 0f,
             TelegraphSpawnInterval = 0.35f,
@@ -148,13 +153,13 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
         };
 
         public float GetLakiArenaTileTelegraphDiscRadius() =>
-            Mathf.Max(0.1f, _lakiArenaTileTelegraph.TelegraphDiscRadius);
+            Mathf.Max(0.1f, _lakiArenaTileTelegraph.TelegraphDiscRadiusMin);
 
-        public float GetLakiArenaTileTelegraphHitRadiusMeters()
+        public float GetLakiArenaTileTelegraphHitRadiusMeters(float discRadius)
         {
             var p = _lakiArenaTileTelegraph;
             float perUnit = p.HitRadiusMetersAtUnitDisc > 0.01f ? p.HitRadiusMetersAtUnitDisc : 3f;
-            return GetLakiArenaTileTelegraphDiscRadius() * perUnit + Mathf.Max(0f, p.HitRadiusPadding);
+            return Mathf.Max(0.1f, discRadius) * perUnit + Mathf.Max(0f, p.HitRadiusPadding);
         }
 
         public int GetDisplacementPriority() { return _displacementPriority; }
@@ -526,7 +531,8 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
                     _handler = new Logic.Scripts.GameDomain.MVC.Boss.Attacks.Laki.LakiArenaTileTelegraphAttackHandler(
                         _lakiArenaTileTelegraph.AreaCount,
                         _lakiArenaTileTelegraph.PlayerTileChance,
-                        _lakiArenaTileTelegraph.TelegraphDiscRadius,
+                        _lakiArenaTileTelegraph.TelegraphDiscRadiusMin,
+                        _lakiArenaTileTelegraph.TelegraphDiscRadiusMax,
                         _lakiArenaTileTelegraph.HitRadiusMetersAtUnitDisc,
                         _lakiArenaTileTelegraph.HitRadiusPadding,
                         _lakiArenaTileTelegraph.TelegraphSpawnInterval,

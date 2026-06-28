@@ -17,5 +17,9 @@ namespace Logic.Scripts.Core.Mvc.WorldCamera
         void ApplyPanDelta(Vector2 screenDelta);
         void TweenPanOffsetToZero(float durationSeconds);
         void SetExternalInputBlock(bool blocked);
+
+        void ApplyOrbitPreset(SceneCameraEntrySettings settings);
+        void CompleteFollowTransitionImmediate();
+        bool IsFollowTransitionComplete { get; }
     }
 }

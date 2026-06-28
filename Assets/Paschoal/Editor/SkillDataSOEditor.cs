@@ -128,6 +128,11 @@ public class SkillDataSOEditor : Editor
 
         DrawDescriptionHighlightsSection();
 
+        EditorGUILayout.Space(4f);
+        EditorGUILayout.PropertyField(
+            serializedObject.FindProperty("_combatPopupSkillEffectSource"),
+            new GUIContent("Combat popup skill effect"));
+
         EditorGUILayout.Space(6f);
         EditorGUILayout.PropertyField(serializedObject.FindProperty("_effects"), new GUIContent("Effects"), true);
 

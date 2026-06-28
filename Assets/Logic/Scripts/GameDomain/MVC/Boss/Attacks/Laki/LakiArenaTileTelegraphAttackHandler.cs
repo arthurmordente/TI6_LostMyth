@@ -23,13 +23,15 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Laki
             public int TileIndex;
             public Vector3 Center;
             public GameObject Telegraph;
+            public float DiscRadius;
             /// <summary>World XZ hit radius in meters (visual size at spawn time).</summary>
             public float HitRadius;
         }
 
         readonly int _areaCount;
         readonly float _playerTileChance;
-        readonly float _telegraphDiscRadius;
+        readonly float _telegraphDiscRadiusMin;
+        readonly float _telegraphDiscRadiusMax;
         readonly float _hitRadiusMetersAtUnitDisc;
         readonly float _hitRadiusPadding;
         readonly float _telegraphSpawnInterval;
@@ -37,7 +39,6 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Laki
         readonly CombatAttackVisualCatalogSO _catalog;
         readonly GameObject _telegraphPrefabFallback;
         readonly MonoBehaviour _coroutineHost;
-        readonly BossAttack _bossAttack;
         readonly int _tileSelectionSeed;
 
         readonly List<StrikeSlot> _strikes = new List<StrikeSlot>(8);
@@ -47,7 +48,8 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Laki
         public LakiArenaTileTelegraphAttackHandler(
             int areaCount,
             float playerTileChance,
-            float telegraphDiscRadius,
+            float telegraphDiscRadiusMin,
+            float telegraphDiscRadiusMax,
             float hitRadiusMetersAtUnitDisc,
             float hitRadiusPadding,
             float telegraphSpawnInterval,
@@ -59,7 +61,8 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Laki
         {
             _areaCount = Mathf.Max(1, areaCount);
             _playerTileChance = Mathf.Clamp01(playerTileChance);
-            _telegraphDiscRadius = Mathf.Max(0.1f, telegraphDiscRadius);
+            _telegraphDiscRadiusMin = Mathf.Max(0.1f, telegraphDiscRadiusMin);
+            _telegraphDiscRadiusMax = Mathf.Max(_telegraphDiscRadiusMin, telegraphDiscRadiusMax);
             _hitRadiusMetersAtUnitDisc = hitRadiusMetersAtUnitDisc > 0.01f ? hitRadiusMetersAtUnitDisc : 3f;
             _hitRadiusPadding = Mathf.Max(0f, hitRadiusPadding);
             _telegraphSpawnInterval = Mathf.Max(0f, telegraphSpawnInterval);
@@ -67,7 +70,6 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Laki
             _catalog = catalog;
             _telegraphPrefabFallback = telegraphPrefabFallback;
             _coroutineHost = coroutineHost;
-            _bossAttack = coroutineHost as BossAttack;
             _tileSelectionSeed = tileSelectionSeed;
         }
 
@@ -88,10 +90,6 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Laki
             Transform originTransform,
             IEffectable caster)
         {
-            // Debug.Log(
-            //     $"[LakiTileTelegraph] ExecuteEffects begin strikes={_strikes.Count} " +
-            //     $"effects={(effects != null ? effects.Count : 0)} caster={(caster != null ? caster.GetType().Name : "null")}");
-
             if (effects == null || effects.Count == 0)
             {
                 Debug.LogWarning("[LakiTileTelegraph] No effects configured on BossAttack prefab.");
@@ -114,33 +112,22 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Laki
             {
                 StrikeSlot strike = _strikes[s];
                 float hitRadius = GetLiveStrikeHitRadius(strike);
-                if (!DoesStrikeHitPlayer(arenaReference, strike, hitRadius, out string hitReason))
+                if (DoesStrikeHitPlayer(arenaReference, strike, hitRadius, out _))
                 {
-                    // Debug.Log(
-                    //     $"[LakiTileTelegraph] Area {s + 1}/{_strikes.Count} MISS tile={strike.TileIndex} ({hitReason})");
-                    if (_strikeResolveInterval > 0f)
-                        yield return new WaitForSeconds(_strikeResolveInterval);
-                    continue;
+                    for (int i = 0; i < effects.Count; i++)
+                    {
+                        var fx = effects[i];
+                        if (fx == null) continue;
+                        if (fx is IAsyncEffect asyncFx) yield return asyncFx.ExecuteRoutine(caster, target);
+                        else fx.Execute(caster, target);
+                    }
                 }
 
-                // Debug.Log(
-                //     $"[LakiTileTelegraph] Area {s + 1}/{_strikes.Count} HIT tile={strike.TileIndex} ({hitReason}) " +
-                //     $"target={target.GetType().Name}");
-
-                for (int i = 0; i < effects.Count; i++)
-                {
-                    var fx = effects[i];
-                    if (fx == null) continue;
-                    // Debug.Log($"[LakiTileTelegraph] Applying effect[{i}] {fx.GetType().Name} amount/name={fx.Name}");
-                    if (fx is IAsyncEffect asyncFx) yield return asyncFx.ExecuteRoutine(caster, target);
-                    else fx.Execute(caster, target);
-                }
+                DismissStrikeTelegraph(s);
 
                 if (_strikeResolveInterval > 0f && s < _strikes.Count - 1)
                     yield return new WaitForSeconds(_strikeResolveInterval);
             }
-
-            // Debug.Log("[LakiTileTelegraph] ExecuteEffects end");
         }
 
         public void Cleanup()
@@ -196,7 +183,6 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Laki
             int tileCount = Mathf.Max(1, arenaView.TileCount);
             int areasToPlace = Mathf.Min(_areaCount, tileCount);
             yield return SpawnStrikeTilesRoutine(arenaView, telegraphPrefab, areasToPlace, _telegraphSpawnInterval);
-            // Debug.Log($"[LakiTileTelegraph] Spawn complete count={_strikes.Count} seed={_tileSelectionSeed}");
             _spawnRoutine = null;
         }
 
@@ -223,7 +209,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Laki
 
             for (int i = 0; i < areasToPlace; i++)
             {
-                if (!TryPickAndAddStrike(arenaView, telegraphPrefab, tileCount, usedTiles, rng, i + 1, areasToPlace))
+                if (!TryPickAndAddStrike(arenaView, telegraphPrefab, tileCount, usedTiles, rng))
                     break;
                 if (delayBetweenSpawns > 0f && i < areasToPlace - 1)
                     yield return new WaitForSeconds(delayBetweenSpawns);
@@ -238,7 +224,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Laki
 
             for (int i = 0; i < areasToPlace; i++)
             {
-                if (!TryPickAndAddStrike(arenaView, telegraphPrefab, tileCount, usedTiles, rng, i + 1, areasToPlace))
+                if (!TryPickAndAddStrike(arenaView, telegraphPrefab, tileCount, usedTiles, rng))
                     break;
             }
         }
@@ -248,9 +234,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Laki
             GameObject telegraphPrefab,
             int tileCount,
             HashSet<int> usedTiles,
-            System.Random rng,
-            int areaIndex,
-            int areasToPlace)
+            System.Random rng)
         {
             int playerTile = arenaView.ComputeTileIndex(ResolvePlayerWorldPosition());
             bool rollPlayer = playerTile >= 0 && rng.NextDouble() < _playerTileChance;
@@ -262,37 +246,54 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Attacks.Laki
 
             Vector3 center = arenaView.GetTileWorldCenter(tile);
             center.y = ResolveGroundY(center.y);
-            float hitRadius = ResolveHitRadiusMeters();
+            float discRadius = RollDiscRadius(rng);
+            float hitRadius = ResolveHitRadiusMeters(discRadius);
             _strikes.Add(new StrikeSlot
             {
                 TileIndex = tile,
                 Center = center,
-                Telegraph = SpawnTelegraphInstance(telegraphPrefab, tile, center),
+                Telegraph = SpawnTelegraphInstance(telegraphPrefab, tile, center, discRadius),
+                DiscRadius = discRadius,
                 HitRadius = hitRadius,
             });
-            // Debug.Log(
-            //     $"[LakiTileTelegraph] Spawned area {areaIndex}/{areasToPlace} tile={tile} seed={_tileSelectionSeed} " +
-            //     $"playerTile={playerTile} aimPlayer={rollPlayer} hitRadius={hitRadius:F2}m");
             return true;
         }
 
-        float ResolveHitRadiusMeters() =>
-            _telegraphDiscRadius * _hitRadiusMetersAtUnitDisc + _hitRadiusPadding;
+        float RollDiscRadius(System.Random rng)
+        {
+            if (_telegraphDiscRadiusMax <= _telegraphDiscRadiusMin + 0.001f)
+                return _telegraphDiscRadiusMin;
+            float t = (float)rng.NextDouble();
+            return Mathf.Lerp(_telegraphDiscRadiusMin, _telegraphDiscRadiusMax, t);
+        }
 
-        float GetLiveStrikeHitRadius(StrikeSlot strike) =>
-            _bossAttack != null ? _bossAttack.GetLakiArenaTileTelegraphHitRadiusMeters() : strike.HitRadius;
+        float ResolveHitRadiusMeters(float discRadius) =>
+            discRadius * _hitRadiusMetersAtUnitDisc + _hitRadiusPadding;
 
-        GameObject SpawnTelegraphInstance(GameObject prefab, int tileIndex, Vector3 center)
+        float GetLiveStrikeHitRadius(StrikeSlot strike) => strike.HitRadius;
+
+        GameObject SpawnTelegraphInstance(GameObject prefab, int tileIndex, Vector3 center, float discRadius)
         {
             var instance = Object.Instantiate(prefab, center, Quaternion.identity);
             instance.name = $"LakiTileTelegraph_{tileIndex}";
-            float rootScale = _telegraphDiscRadius;
-            instance.transform.localScale = new Vector3(rootScale, 1f, rootScale);
+            instance.transform.localScale = new Vector3(discRadius, 1f, discRadius);
             ApplyTelegraphLayering(instance);
             StripTransientAutoDestroy(instance);
             SkillCastVfxUtility.ConfigureSpawnedInstance(instance, persistInScene: true, destroyAfterSeconds: 0f);
             instance.SetActive(_visible);
             return instance;
+        }
+
+        void DismissStrikeTelegraph(int strikeIndex)
+        {
+            if (strikeIndex < 0 || strikeIndex >= _strikes.Count) return;
+            StrikeSlot slot = _strikes[strikeIndex];
+            if (slot.Telegraph != null)
+            {
+                Object.Destroy(slot.Telegraph);
+                slot.Telegraph = null;
+                _strikes[strikeIndex] = slot;
+            }
         }
 
         void StopSpawnRoutine()

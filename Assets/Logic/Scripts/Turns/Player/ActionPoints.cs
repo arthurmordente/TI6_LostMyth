@@ -12,10 +12,14 @@ namespace Logic.Scripts.Turns
         private int _current;
         private int _max;
         private int _gainPerTurn;
+        private int _tempBonus;
+        private int _tempTurnsRemaining;
+        private bool _skipConsumeThisTurnEnd;
 
         public int Current => _current;
         public int Max => _max;
         public int GainPerTurn => _gainPerTurn;
+        public int TemporaryGainPerTurnBonus => _tempTurnsRemaining > 0 ? _tempBonus : 0;
 
         public ActionPointsService(TurnStateService turnStateService)
         {
@@ -52,10 +56,31 @@ namespace Logic.Scripts.Turns
         public void GainTurnPoints()
         {
             int before = _current;
-            _current += _gainPerTurn;
+            int effectiveGain = _gainPerTurn + (_tempTurnsRemaining > 0 ? _tempBonus : 0);
+            _current += effectiveGain;
             if (_current > _max) _current = _max;
-            PublishChange();
+            PublishChange(effectiveGain);
             ManaGainFloatingFeedback.TryShowOnPlayer(_current - before);
+        }
+
+        public void GrantTemporaryGainPerTurnBonus(int bonus, int playerTurnsRemaining)
+        {
+            if (bonus <= 0 || playerTurnsRemaining <= 0) return;
+            _tempBonus = bonus;
+            _tempTurnsRemaining = playerTurnsRemaining;
+            _skipConsumeThisTurnEnd = true;
+        }
+
+        public void ConsumeTemporaryGainTurn()
+        {
+            if (_skipConsumeThisTurnEnd)
+            {
+                _skipConsumeThisTurnEnd = false;
+                return;
+            }
+
+            if (_tempTurnsRemaining > 0)
+                _tempTurnsRemaining--;
         }
 
         public void Refill()
@@ -92,9 +117,10 @@ namespace Logic.Scripts.Turns
 				ManaLostFloatingFeedback.TryShowOnPlayer(lost);
 		}
 
-        private void PublishChange()
+        private void PublishChange(int effectiveGainPerTurn = -1)
         {
-			UnityEngine.Debug.Log($"[AP] {_current}/{_max} (gain/turn={_gainPerTurn})");
+            int loggedGain = effectiveGainPerTurn >= 0 ? effectiveGainPerTurn : _gainPerTurn;
+			UnityEngine.Debug.Log($"[AP] {_current}/{_max} (gain/turn={loggedGain})");
             _turnStateService.UpdateActionPoints(_current, _max);
             EnsureGamePlayUiController()?.OnPlayerActionPointsChange(_current, _max);
         }

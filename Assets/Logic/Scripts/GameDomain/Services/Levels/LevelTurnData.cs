@@ -1,8 +1,14 @@
+using Logic.Scripts.Core.Mvc.WorldCamera;
 using Logic.Scripts.GameDomain.MVC.Boss;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "LevelTurnData", menuName = "Scriptable Objects/Levels/LevelTurnData")]
-public class LevelTurnData : LevelData {
+public class LevelTurnData : LevelData, ISceneCameraEntryProvider {
+    [SerializeField] private SceneCameraEntrySettings sceneCameraEntry;
+
+    public SceneCameraEntrySettings GetEffectiveSceneCameraEntry() =>
+        sceneCameraEntry.OverrideDefaults ? sceneCameraEntry : SceneCameraEntrySettings.GameplayFightDefaults();
+
     [SerializeField] private BossConfigurationSO bossConfiguration;
     public BossConfigurationSO BossConfiguration => bossConfiguration;
 

@@ -268,6 +268,11 @@ namespace Logic.Scripts.GameDomain.MVC.Ui {
             _gamePlayHud.PlayPlayerTurnAnnouncement(turnNumber);
         }
 
+        public void BeginPassTurnHintMonitoring() =>
+            _gamePlayHud.BeginPassTurnHintMonitoring();
+
+        public void EndPassTurnHint() => _gamePlayHud.EndPassTurnHint();
+
         public void BeginFirstTurnPassTurnHint(int fightTurnNumber) =>
             _gamePlayHud.BeginFirstTurnPassTurnHint(fightTurnNumber);
 
