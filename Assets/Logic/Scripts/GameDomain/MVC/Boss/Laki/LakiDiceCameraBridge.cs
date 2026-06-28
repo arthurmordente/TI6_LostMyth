@@ -92,6 +92,8 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki
         {
             if (!_sessionActive) return;
             CancelPendingRestore();
+            // Boss dice restore already returned to default player follow — skip redundant cinematic re-focus.
+            if (!_handle.IsValid) return;
             FocusOnPlayer(0.45f);
         }
 

@@ -56,13 +56,23 @@ public class WorldCameraView : MonoBehaviour
         if (_cineCam == null || _followProxy == null) return;
         if (_orbital == null) _orbital = _cineCam.GetComponent<CinemachineOrbitalFollow>();
 
-        if (target != _target)
+        bool targetChanged = target != _target;
+        _target = target;
+        if (_target == null) return;
+
+        Vector3 currentBase = _followProxy.position - _panOffsetWorld;
+        const float snapDistance = 0.75f;
+        if ((_target.position - currentBase).sqrMagnitude <= snapDistance * snapDistance)
         {
-            _transitionFromPos = _followProxy.position - _panOffsetWorld;
-            _transitionElapsed = 0f;
+            CompleteFollowTransitionImmediate();
+            return;
         }
 
-        _target = target;
+        if (targetChanged)
+        {
+            _transitionFromPos = currentBase;
+            _transitionElapsed = 0f;
+        }
     }
 
     public void UpdateCameraRotation(float mouseDeltaX, float deltaTime)
