@@ -134,8 +134,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 30
-  m_fontSizeBase: 30
+  m_fontSize: 20
+  m_fontSizeBase: 20
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 12
@@ -201,21 +201,21 @@ MonoBehaviour:
     MinValue: 10
     MaxValue: 50
     MinFontSize: 20
-    MaxFontSize: 30
+    MaxFontSize: 20
     ShowPlusSignForHeal: 0
   - Kind: 1
     TextColor: {r: 0.105882354, g: 0.7254902, b: 0.050980393, a: 1}
     MinValue: 10
     MaxValue: 30
     MinFontSize: 20
-    MaxFontSize: 30
+    MaxFontSize: 20
     ShowPlusSignForHeal: 1
   - Kind: 2
     TextColor: {r: 0.47843137, g: 0.050980393, b: 0.7254902, a: 1}
     MinValue: 1
     MaxValue: 3
-    MinFontSize: 15
-    MaxFontSize: 25
+    MinFontSize: 16
+    MaxFontSize: 16
     ShowPlusSignForHeal: 0
   - Kind: 3
     TextColor: {r: 0.483346, g: 0, b: 1, a: 1}
