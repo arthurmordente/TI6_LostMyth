@@ -15,9 +15,8 @@ MonoBehaviour:
   CheatId: infinite_mana
   DisplayName: Mana Infinita!
   Icon: {fileID: 21300000, guid: b9f37f72d0b4af145bb50eec30da6bc9, type: 3}
-  Description: "<color=#7A0DB9><b>Concede 10 de mana</b></color> ao usar uma habilidade.
-    IMPAR\xC1VEL MALUCO!"
-  Lore: "\"Nenhum boss gosta disso, s\xF3 os masoquistas\""
+  Description: <color=#7A0DB9><b>Concede 10 de mana</b></color> ao usar uma habilidade.
+  Lore: "\"Ent\xE3o voc\xEA gosta de spammar skills??\""
   EffectType: 0
   EffectAmount: 10
   _descriptionHighlights: []

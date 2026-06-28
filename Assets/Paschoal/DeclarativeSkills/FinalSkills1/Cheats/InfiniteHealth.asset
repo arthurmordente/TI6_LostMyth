@@ -15,9 +15,8 @@ MonoBehaviour:
   CheatId: infinite_health
   DisplayName: Vida Infinita!
   Icon: {fileID: 21300000, guid: 44436d0dc1631d94c945a1be389811df, type: 3}
-  Description: <color=#1BB90D><b>Cura 100 de vida</b></color> ao receber dano. IMORTAL
-    MALUCO!
-  Lore: "\"B\xF3ris odeia esse efeito.\""
+  Description: '<color=#1BB90D><b>Cura 100 de vida</b></color> ao receber dano. '
+  Lore: "\"S\xF3 morre se quiser... ou cair da arena!\""
   EffectType: 1
   EffectAmount: 100
   _descriptionHighlights: []
