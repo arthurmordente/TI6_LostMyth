@@ -17,6 +17,15 @@ MonoBehaviour:
   controller:
     _typeName: NaraTurnMovementController, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
       PublicKeyToken=null
+  sceneCameraEntry:
+    OverrideDefaults: 1
+    HorizontalAngle: 0
+    VerticalAngle: 20
+    OrbitHeight: 12
+    OrbitRadius: 9.5
+    PanOffset: {x: 0, y: 0, z: 0}
+    BlendDuration: 0
   bossConfiguration: {fileID: 11400000, guid: 42d784a237d02bd469c6dd2b5dc8f998, type: 2}
   bossPrefab: {fileID: 6143116250716774284, guid: ac27dec7d9c42a441a810c3f4a549619, type: 3}
   bossPhases: {fileID: 11400000, guid: bc36ee94f7e75904db90fdc4d4eab46f, type: 2}
+  bossHudDisplayName: 

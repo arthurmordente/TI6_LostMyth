@@ -1,3 +1,4 @@
+using Logic.Scripts.GameDomain.MVC.Boss;
 using Logic.Scripts.GameDomain.MVC.Boss.Laki.Minigames.Dice;
 using Logic.Scripts.GameDomain.MVC.Environment.Laki;
 using UnityEngine;
@@ -6,11 +7,16 @@ namespace Logic.Scripts.GameDomain.MVC.Boss.Laki.DiceAttack
 {
     public static class DiceAttackRuntimeService
     {
-        /// <summary>Opens the Laki shield vulnerability window (resolving fight turn + next fight turn) — no direct HP loss from dice.</summary>
-        public static void NotifyPlayerWonDiceOpensShieldWindow(in DiceAttackResult result, int fightTurnNumber)
+        /// <summary>Opens the Laki shield vulnerability window — no direct HP loss from dice.</summary>
+        public static void NotifyPlayerWonDiceOpensShieldWindow(
+            in DiceAttackResult result,
+            int fightTurnNumber,
+            BossPhasesSO phases = null,
+            int currentPhaseIndex = 0,
+            int bossMaxHealth = 0)
         {
             if (!result.Completed || !result.PlayerWon) return;
-            LakiBossShieldRuntime.RegisterDicePlayerWin(fightTurnNumber);
+            LakiBossShieldRuntime.RegisterDicePlayerWin(fightTurnNumber, phases, currentPhaseIndex, bossMaxHealth);
         }
 
         public interface IStatusProvider { string GetStatus(); }

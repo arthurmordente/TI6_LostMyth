@@ -33,9 +33,9 @@ MonoBehaviour:
   _areaMinRange: 0
   _areaMaxRange: 5
   _areaRadius: 2
-  _areaAimPrefab: {fileID: 1607142820532151380, guid: 6feee9629db8db94f83b1e6771d787d1, type: 3}
+  _areaAimPrefab: {fileID: 2823925544558249998, guid: 440c43f3526bfc244ba29c72532426d0, type: 3}
   _areaCastPrefab: {fileID: 0}
-  _areaEffectPrefab: {fileID: 1607142820532151380, guid: 6feee9629db8db94f83b1e6771d787d1, type: 3}
+  _areaEffectPrefab: {fileID: 0}
   _selfAimPrefab: {fileID: 1607142820532151380, guid: 869e8460ad50e054b9b351e10c296c31, type: 3}
   _selfCastPrefab: {fileID: 1607142820532151380, guid: 6190cf774033c09479d45e3c13b935d7, type: 3}
   _selfEffectPrefab: {fileID: 1607142820532151380, guid: 6190cf774033c09479d45e3c13b935d7, type: 3}

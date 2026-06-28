@@ -18,6 +18,8 @@ MonoBehaviour:
   - {fileID: -5180875672858182064, guid: 03f2bf3d6989d7e40a9da9fb3e2d56f4, type: 3}
   - {fileID: -5180875672858182064, guid: d6a9437bcda74ec4ebc2d8721de77c37, type: 3}
   - {fileID: -5180875672858182064, guid: 38e62b0ac0174ed4b9b1c9d010d05e25, type: 3}
+  - {fileID: -5180875672858182064, guid: 38e62b0ac0174ed4b9b1c9d010d05e25, type: 3}
+  - {fileID: -5180875672858182064, guid: d25330037bb99f14ca9c89a73cae22e6, type: 3}
   _fallbackStepDistance: 1
   _stepDistance: 2
   _randomChangeDirectionSeconds: 1.5
@@ -25,7 +27,7 @@ MonoBehaviour:
   _turnPattern:
   - Mode: 3
     DistanceMultiplier: 0
-    AttackIndices: 0000000001000000
+    AttackIndices: 0000000004000000
   - Mode: 3
     DistanceMultiplier: 0
     AttackIndices: 04000000
@@ -37,7 +39,10 @@ MonoBehaviour:
     AttackIndices: 0000000004000000
   - Mode: 3
     DistanceMultiplier: 0
-    AttackIndices: 0000000004000000
+    AttackIndices: 0000000006000000
   - Mode: 3
     DistanceMultiplier: 0
     AttackIndices: 0000000002000000
+  - Mode: 3
+    DistanceMultiplier: 0
+    AttackIndices: 0600000006000000

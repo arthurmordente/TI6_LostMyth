@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using Logic.Scripts.Core.Mvc.LoadingScreen;
+using Logic.Scripts.Core.Mvc.WorldCamera;
 using Logic.Scripts.Services.Logger.Base;
 using Logic.Scripts.Services.SceneServices;
 using UnityEngine;
@@ -9,10 +10,14 @@ using UnityEngine.SceneManagement;
 namespace Logic.Scripts.Services.StateMachineService {
     public class StateMachineService : IStateMachineService {
         private readonly ILoadingScreenController _loadingScreenController;
+        private readonly ICameraFocusService _cameraFocusService;
         private IGameState _currentGameState;
 
-        public StateMachineService(ILoadingScreenController loadingScreenController) {
+        public StateMachineService(
+            ILoadingScreenController loadingScreenController,
+            ICameraFocusService cameraFocusService) {
             _loadingScreenController = loadingScreenController;
+            _cameraFocusService = cameraFocusService;
         }
 
         public IGameState CurrentState() {
@@ -44,6 +49,7 @@ namespace Logic.Scripts.Services.StateMachineService {
                 await _currentGameState.LoadState(cancellationTokenSource);
                 await SceneTransitionReadinessUtility.WaitUntilSceneReady(
                     SceneManager.GetActiveScene(), cancellationTokenSource.Token);
+                await _cameraFocusService.WaitUntilSceneEntryComplete(cancellationTokenSource.Token);
                 _loadingScreenController.EnableContinuePrompt();
                 await _loadingScreenController.WaitForPlayerContinue(cancellationTokenSource);
                 _loadingScreenController.Hide();

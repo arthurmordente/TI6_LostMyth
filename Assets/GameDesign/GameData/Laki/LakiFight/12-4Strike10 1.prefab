@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 4830519003573105392}
   - component: {fileID: -5180875672858182064}
   m_Layer: 0
-  m_Name: 4Strike10
+  m_Name: 12-4Strike10 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -94,7 +94,8 @@ MonoBehaviour:
   _lakiArenaTileTelegraph:
     AreaCount: 4
     PlayerTileChance: 0.1
-    TelegraphDiscRadius: 1
+    TelegraphDiscRadiusMin: 1
+    TelegraphDiscRadiusMax: 2
     HitRadiusMetersAtUnitDisc: 3
     HitRadiusPadding: 0.15
     TelegraphSpawnInterval: 0.35

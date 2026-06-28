@@ -17,9 +17,18 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
         {
             serializedObject.Update();
 
+            EditorGUILayout.LabelField("Laki — dice vulnerability window", EditorStyles.boldLabel);
+            EditorGUILayout.PropertyField(
+                serializedObject.FindProperty("_vulnerabilityFightTurnCount"),
+                new GUIContent(
+                    "Vulnerability Fight Turn Count",
+                    "Fight turns with shield off after the player wins the dice minigame.\n" +
+                    "1 = only turn T (dice resolves). 2 = T and T+1. 3 = T, T+1, T+2."));
             EditorGUILayout.PropertyField(
                 serializedObject.FindProperty("_maxHpFractionLossPerFightTurn"),
-                new GUIContent("Default HP Loss Cap / Fight Turn", "Fraction of max HP Laki can lose in one fight turn when damage is allowed."));
+                new GUIContent(
+                    "Default HP Loss Cap / Dice Window",
+                    "Total fraction of max HP Laki may lose across the entire dice vulnerability window (e.g. 0.33 = one third of max HP)."));
             EditorGUILayout.Space(4f);
 
             if (_phasesProp != null)
@@ -47,7 +56,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
                     {
                         EditorGUILayout.PropertyField(
                             elem.FindPropertyRelative("HealthPercentThreshold"),
-                            new GUIContent("HP % Floor (0-1)", "Laki: boss stops taking damage once HP reaches this %. Also selects phase Behavior."));
+                            new GUIContent("HP % Threshold (0-1)", "Selects phase Behavior when HP falls at or below this %. Does not clip damage during a dice window."));
                     }
                     else
                     {
@@ -56,7 +65,7 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
                     EditorGUILayout.PropertyField(elem.FindPropertyRelative("Behavior"));
                     EditorGUILayout.PropertyField(
                         elem.FindPropertyRelative("MaxHpFractionLossPerFightTurnOverride"),
-                        new GUIContent("HP Loss Cap / Turn Override", "0 = use BossPhases default (e.g. 1/3 max HP per fight turn)."));
+                        new GUIContent("HP Loss Cap / Dice Window Override", "0 = use BossPhases default. Max HP fraction losable in one dice vulnerability window while in this phase."));
                     EditorGUILayout.EndVertical();
                 }
             }
@@ -85,4 +94,3 @@ namespace Logic.Scripts.GameDomain.MVC.Boss
         }
     }
 }
-

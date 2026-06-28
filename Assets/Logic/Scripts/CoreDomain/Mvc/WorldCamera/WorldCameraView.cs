@@ -1,3 +1,4 @@
+using Logic.Scripts.Core.Mvc.WorldCamera;
 using UnityEngine;
 using Unity.Cinemachine;
 
@@ -55,13 +56,23 @@ public class WorldCameraView : MonoBehaviour
         if (_cineCam == null || _followProxy == null) return;
         if (_orbital == null) _orbital = _cineCam.GetComponent<CinemachineOrbitalFollow>();
 
-        if (target != _target)
+        bool targetChanged = target != _target;
+        _target = target;
+        if (_target == null) return;
+
+        Vector3 currentBase = _followProxy.position - _panOffsetWorld;
+        const float snapDistance = 0.75f;
+        if ((_target.position - currentBase).sqrMagnitude <= snapDistance * snapDistance)
         {
-            _transitionFromPos = _followProxy.position - _panOffsetWorld;
-            _transitionElapsed = 0f;
+            CompleteFollowTransitionImmediate();
+            return;
         }
 
-        _target = target;
+        if (targetChanged)
+        {
+            _transitionFromPos = currentBase;
+            _transitionElapsed = 0f;
+        }
     }
 
     public void UpdateCameraRotation(float mouseDeltaX, float deltaTime)
@@ -145,6 +156,78 @@ public class WorldCameraView : MonoBehaviour
     }
 
     public void SetTargetNull() => _target = null;
+
+    public bool IsFollowTransitionComplete =>
+        _transitionDuration <= 0f || _transitionElapsed >= _transitionDuration;
+
+    public void ApplyOrbitPreset(SceneCameraEntrySettings settings)
+    {
+        if (_cineCam == null) return;
+        if (_orbital == null) _orbital = _cineCam.GetComponent<CinemachineOrbitalFollow>();
+        if (_orbital == null) return;
+
+        _horizontalAngle = settings.HorizontalAngle;
+        _orbital.HorizontalAxis.Value = settings.HorizontalAngle;
+        _orbital.VerticalAxis.Value = settings.VerticalAngle;
+
+        _orbital.OrbitStyle = CinemachineOrbitalFollow.OrbitStyles.ThreeRing;
+        var orbits = _orbital.Orbits;
+        orbits.Center.Height = Mathf.Clamp(settings.OrbitHeight, _minHeight, _maxHeight);
+        orbits.Center.Radius = Mathf.Clamp(settings.OrbitRadius, _minRadius, _maxRadius);
+        _orbital.Orbits = orbits;
+
+        _panOffsetWorld = settings.PanOffset;
+        _panTweenElapsed = float.MaxValue;
+    }
+
+    public void CompleteFollowTransitionImmediate()
+    {
+        if (_target == null || _followProxy == null) return;
+
+        _transitionElapsed = _transitionDuration;
+        _followProxy.position = _target.position + _panOffsetWorld;
+    }
+
+    public void ForceFollowUpdate(float deltaTime) => UpdateCameraRotation(0f, deltaTime);
+
+    public SceneCameraEntrySettings CaptureSceneEntrySettings(float blendDuration = 0f)
+    {
+        if (_cineCam != null && _orbital == null)
+            _orbital = _cineCam.GetComponent<CinemachineOrbitalFollow>();
+
+        var settings = SceneCameraEntrySettings.FromCurrentDefaults();
+        settings.OverrideDefaults = true;
+        settings.BlendDuration = blendDuration;
+
+        if (_orbital != null)
+        {
+            settings.HorizontalAngle = _orbital.HorizontalAxis.Value;
+            settings.VerticalAngle = _orbital.VerticalAxis.Value;
+            var orbits = _orbital.Orbits;
+            settings.OrbitHeight = orbits.Center.Height;
+            settings.OrbitRadius = orbits.Center.Radius;
+        }
+        else
+        {
+            settings.HorizontalAngle = _horizontalAngle;
+        }
+
+        settings.PanOffset = _panOffsetWorld;
+        return settings;
+    }
+
+    public static bool TryCaptureFromActiveCamera(out SceneCameraEntrySettings settings, float blendDuration = 0f)
+    {
+        var view = FindAnyObjectByType<WorldCameraView>();
+        if (view == null)
+        {
+            settings = default;
+            return false;
+        }
+
+        settings = view.CaptureSceneEntrySettings(blendDuration);
+        return true;
+    }
 
     public void AdjustZoom(float delta)
     {

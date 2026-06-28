@@ -1,3 +1,4 @@
+using Logic.Scripts.Core.Mvc.WorldCamera;
 using Logic.Scripts.GameDomain.GameInputActions;
 using Logic.Scripts.GameDomain.MVC.Boss;
 using Logic.Scripts.GameDomain.MVC.Nara;
@@ -18,6 +19,7 @@ public class LoadLevelCommand : BaseCommand, ICommandAsync {
     private IInteractableObjectsController _interactableObjectsController;
     private ILobbyInteractionZoneController _lobbyInteractionZoneController;
     private IGameInputActionsController _inputActionsController;
+    private ICameraFocusService _cameraFocusService;
 
     //To-Do adicionar efeitos do cenario
 
@@ -39,6 +41,7 @@ public class LoadLevelCommand : BaseCommand, ICommandAsync {
         _interactableObjectsController = _diContainer.Resolve<IInteractableObjectsController>();
         _lobbyInteractionZoneController = _diContainer.TryResolve<ILobbyInteractionZoneController>();
         _inputActionsController = _diContainer.Resolve<IGameInputActionsController>();
+        _cameraFocusService = _diContainer.Resolve<ICameraFocusService>();
     }
 
     public async Awaitable Execute(CancellationTokenSource cancellationTokenSource) {
@@ -59,7 +62,17 @@ public class LoadLevelCommand : BaseCommand, ICommandAsync {
         } else if (levelData is LevelExplorationData explorationData) {
             _naraController.SetPosition(explorationData.InitialPlayerPosition);
         }
+
+        var entry = ResolveSceneCameraEntry(levelData);
+        _cameraFocusService.ApplySceneEntry(_naraController.NaraViewGO.transform, entry);
     }
+
+    static SceneCameraEntrySettings ResolveSceneCameraEntry(LevelData levelData) => levelData switch
+    {
+        LevelExplorationData exploration => exploration.GetEffectiveSceneCameraEntry(),
+        LevelTurnData turn => turn.GetEffectiveSceneCameraEntry(),
+        _ => SceneCameraEntrySettings.FromCurrentDefaults()
+    };
     private async Awaitable CreateLevelScenario(int levelNumber, CancellationTokenSource cancellationTokenSource) {
         await _levelScenarioController.CreateLevelScenario(levelNumber, cancellationTokenSource);
         var scenarioView = _levelScenarioController.CurrentLevelScenarioView;

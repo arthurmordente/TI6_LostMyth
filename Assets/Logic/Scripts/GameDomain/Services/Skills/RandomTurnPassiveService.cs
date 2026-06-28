@@ -1,3 +1,4 @@
+using System;
 using Logic.Scripts.Turns;
 using UnityEngine;
 using Zenject;
@@ -6,6 +7,8 @@ namespace Logic.Scripts.GameDomain.Services.Skills
 {
     public interface IRandomTurnPassiveService : IRandomTurnPassiveState
     {
+        event Action OnTurnEffectRolled;
+
         void RefreshFromLoadout();
         void ApplyPlayerTurnStart(IActionPointsService actionPoints, NaraTurnMovementController movement);
     }
@@ -15,11 +18,16 @@ namespace Logic.Scripts.GameDomain.Services.Skills
         readonly INewSkillSystemSkillLoadoutService _loadoutService;
 
         PassiveTurnBehaviorSO _behavior;
+        SkillDataSO _activePassiveSkill;
         bool _enabled;
+
+        public event Action OnTurnEffectRolled;
 
         public bool IsEnabled => _enabled;
         public RandomTurnPassiveEffectKind ActiveEffect { get; private set; } = RandomTurnPassiveEffectKind.None;
         public float ActiveEffectValue { get; private set; }
+        public string ActiveRollDisplayText { get; private set; } = string.Empty;
+        public SkillDataSO ActivePassiveSkill => _activePassiveSkill;
         public float TurnOutgoingDamageMultiplier =>
             ActiveEffect == RandomTurnPassiveEffectKind.OutgoingDamageMultiplier
                 ? Mathf.Max(0f, ActiveEffectValue)
@@ -35,8 +43,10 @@ namespace Logic.Scripts.GameDomain.Services.Skills
         {
             _enabled = false;
             _behavior = null;
+            _activePassiveSkill = null;
             ActiveEffect = RandomTurnPassiveEffectKind.None;
             ActiveEffectValue = 0f;
+            ActiveRollDisplayText = string.Empty;
 
             if (_loadoutService == null) return;
 
@@ -52,6 +62,7 @@ namespace Logic.Scripts.GameDomain.Services.Skills
 
                 _enabled = true;
                 _behavior = behavior;
+                _activePassiveSkill = skill;
                 return;
             }
         }
@@ -60,12 +71,16 @@ namespace Logic.Scripts.GameDomain.Services.Skills
         {
             ActiveEffect = RandomTurnPassiveEffectKind.None;
             ActiveEffectValue = 0f;
+            ActiveRollDisplayText = string.Empty;
 
             if (!_enabled || _behavior == null) return;
-            if (!_behavior.TryRollTurnEffect(out RandomTurnPassiveEffectKind kind, out float value)) return;
+            if (!_behavior.TryRollTurnEffect(out RandomTurnPassiveEffectKind kind, out float value, out string displayText))
+                return;
 
             ActiveEffect = kind;
             ActiveEffectValue = value;
+            ActiveRollDisplayText = displayText ?? string.Empty;
+            OnTurnEffectRolled?.Invoke();
 
             switch (kind)
             {

@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7e23b7d52cfbbd24d81ad7ba44869bd0, type: 3}
   m_Name: Laki BossPhases
   m_EditorClassIdentifier: 
-  _maxHpFractionLossPerFightTurn: 0.35
+  _vulnerabilityFightTurnCount: 3
+  _maxHpFractionLossPerFightTurn: 0.5
   _phases:
   - Name: InitialPhase
     TriggerType: 0

@@ -106,7 +106,7 @@ namespace Logic.Scripts.Turns {
             _phase = TurnPhase.None;
             _actionPointsService.Reset();
             _turnStateService.ExitTurnMode();
-            _gamePlayUiController?.EndFirstTurnPassTurnHint();
+            _gamePlayUiController?.EndPassTurnHint();
             _gamePlayUiController?.SetSkillsSlidableExpanded(false);
         }
 
@@ -189,14 +189,13 @@ namespace Logic.Scripts.Turns {
             _waitingPlayer = true;
             _turnStateService.RequestPlayerAction();
 
-            if (_turnNumber == 1)
-                _gamePlayUiController?.BeginFirstTurnPassTurnHint(_turnNumber);
+            _gamePlayUiController?.BeginPassTurnHintMonitoring();
         }
 
         public void SkipTurn() {
             if (!_active || !_waitingPlayer) return;
             _waitingPlayer = false;
-            _gamePlayUiController?.EndFirstTurnPassTurnHint();
+            _gamePlayUiController?.EndPassTurnHint();
             _gamePlayUiController?.SetSkillsSlidableExpanded(false);
             _divideAbilityHandler?.OnPlayerTurnEnd();
             if (UsesHokariArenaHazardTurnOrder)
@@ -208,7 +207,7 @@ namespace Logic.Scripts.Turns {
         public void CompletePlayerAction() {
             if (!_active || !_waitingPlayer) return;
             _waitingPlayer = false;
-            _gamePlayUiController?.EndFirstTurnPassTurnHint();
+            _gamePlayUiController?.EndPassTurnHint();
             _gamePlayUiController?.SetSkillsSlidableExpanded(false);
             _divideAbilityHandler?.OnPlayerTurnEnd();
             _turnMovement?.ActivateNaraGravity();
@@ -231,6 +230,7 @@ namespace Logic.Scripts.Turns {
         }
 
         private void ContinueAfterPlayerTurn() {
+            _actionPointsService.ConsumeTemporaryGainTurn();
             _gamePlayUiController?.SetSkillsSlidableExpanded(false);
             _naraController?.FreezeInputs();
             _naraController?.Freeeze();

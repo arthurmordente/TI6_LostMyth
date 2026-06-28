@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading;
 using Logic.Scripts.Services.UpdateService;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -21,6 +22,7 @@ namespace Logic.Scripts.Core.Mvc.WorldCamera
         int _nextHandleId = 1;
         bool _panActive;
         bool _updateRegistered;
+        bool _sceneEntryPending;
 
         public bool IsCinematicLockActive =>
             _leases.Count > 0 && _leases[_leases.Count - 1].Options.SuppressPan;
@@ -104,6 +106,7 @@ namespace Logic.Scripts.Core.Mvc.WorldCamera
             _leases.Clear();
             _defaultFollow = null;
             _panActive = false;
+            _sceneEntryPending = false;
             _camera.SetExternalInputBlock(false);
             _camera.StopFollowTarget();
             MaybeUnregisterUpdate();
@@ -131,6 +134,46 @@ namespace Logic.Scripts.Core.Mvc.WorldCamera
         {
             if (!_panActive || IsCinematicLockActive) return;
             _camera.ApplyPanDelta(screenDelta);
+        }
+
+        public void ApplySceneEntry(Transform followTarget, SceneCameraEntrySettings settings)
+        {
+            if (followTarget == null) return;
+
+            _leases.Clear();
+            _panActive = false;
+            _defaultFollow = followTarget;
+            _camera.SetExternalInputBlock(false);
+            _camera.LockCameraRotate();
+            _camera.ApplyOrbitPreset(settings);
+            _camera.SetFollowBlendDuration(settings.BlendDuration);
+            _camera.StartFollowTarget(followTarget);
+
+            if (settings.BlendDuration <= 0f)
+                _camera.CompleteFollowTransitionImmediate();
+
+            _sceneEntryPending = true;
+            EnsureUpdateRegistered();
+            _camera.UpdateAngles();
+        }
+
+        public async Awaitable WaitUntilSceneEntryComplete(CancellationToken cancellationToken)
+        {
+            if (!_sceneEntryPending)
+                return;
+
+            while (!_camera.IsFollowTransitionComplete)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                _camera.UpdateAngles();
+                await Awaitable.NextFrameAsync();
+            }
+
+            cancellationToken.ThrowIfCancellationRequested();
+            _camera.UpdateAngles();
+            await Awaitable.NextFrameAsync();
+
+            _sceneEntryPending = false;
         }
 
         public void ManagedUpdate()

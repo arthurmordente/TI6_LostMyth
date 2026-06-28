@@ -13,9 +13,27 @@ MonoBehaviour:
   m_Name: RandomTurnPassiveBehavior
   m_EditorClassIdentifier: Assembly-CSharp::RandomTurnPassiveBehaviorSO
   _pool:
-  - Kind: 1
-    Value: 1
-  - Kind: 2
-    Value: 1.2
   - Kind: 3
-    Value: 1.2
+    Value: 0.75
+    Weight: 1
+    DisplayText: <color=#7A0DB9><b>-25% dano neste turno</b></color>
+  - Kind: 3
+    Value: 0.9
+    Weight: 2
+    DisplayText: <color=#7A0DB9><b>-10% dano neste turno</b></color>
+  - Kind: 3
+    Value: 0.95
+    Weight: 3
+    DisplayText: <color=#7A0DB9><b>-5% dano neste turno</b></color>
+  - Kind: 3
+    Value: 1.05
+    Weight: 4
+    DisplayText: <color=#7A0DB9><b>+5% dano neste turno</b></color>
+  - Kind: 3
+    Value: 1.1
+    Weight: 3
+    DisplayText: <color=#7A0DB9><b>+10% dano neste turno</b></color>
+  - Kind: 3
+    Value: 1.25
+    Weight: 3
+    DisplayText: <color=#7A0DB9><b>+25% dano neste turno</b></color>
