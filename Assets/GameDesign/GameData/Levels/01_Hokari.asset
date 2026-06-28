@@ -19,7 +19,7 @@ MonoBehaviour:
       PublicKeyToken=null
   sceneCameraEntry:
     OverrideDefaults: 1
-    HorizontalAngle: 0
+    HorizontalAngle: 90
     VerticalAngle: 20
     OrbitHeight: 12
     OrbitRadius: 9.5
